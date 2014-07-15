@@ -17,7 +17,7 @@ from Cura.gui import simpleMode
 from Cura.gui import sceneView
 from Cura.gui import aboutWindow
 from Cura.gui.util import dropTarget
-#from Cura.gui.tools import batchRun
+from Cura.gui.tools import batchRun
 from Cura.gui.tools import pidDebugger
 from Cura.gui.tools import minecraftImport
 from Cura.util import profile
@@ -122,9 +122,9 @@ class mainWindow(wx.Frame):
 		self.menubar.Append(self.fileMenu, '&' + _("File"))
 
 		toolsMenu = wx.Menu()
-		#i = toolsMenu.Append(-1, 'Batch run...')
-		#self.Bind(wx.EVT_MENU, self.OnBatchRun, i)
-		#self.normalModeOnlyItems.append(i)
+		i = toolsMenu.Append(-1, _("Batch run..."))
+		self.Bind(wx.EVT_MENU, self.OnBatchRun, i)
+		self.normalModeOnlyItems.append(i)
 
 		if minecraftImport.hasMinecraft():
 			i = toolsMenu.Append(-1, _("Minecraft map import..."))
@@ -531,6 +531,11 @@ class mainWindow(wx.Frame):
 
 	def OnHeadOffsetWizard(self, e):
 		configWizard.headOffsetWizard()
+	
+	def OnBatchRun(self, e):
+		br = batchRun.batchRunWindow(self)
+		br.Centre()
+		br.Show(True)
 
 	def OnExpertOpen(self, e):
 		ecw = expertConfig.expertConfigWindow(lambda : self.scene.sceneUpdated())
