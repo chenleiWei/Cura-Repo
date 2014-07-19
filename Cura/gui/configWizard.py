@@ -293,6 +293,51 @@ class PrintrbotPage(InfoPage):
 				profile.putMachineSetting('extruder_head_size_max_y', '0')
 				profile.putMachineSetting('extruder_head_size_height', '0')
 
+class SelectVersion(InfoPage):
+	def __init__(self, parent): 
+		super(SelectVersion, self).__init__(parent, _("Select which machine version you have"))
+		self.AddText(_("Please choose a machine version.\n"))
+		self.AddSeperator()
+		self.Series1_2014 = self.AddRadioButton("2014 Series 1")
+		self.Series1_2014.Bind(wx.EVT_RADIOBUTTON, self.StoreData)
+		self.Series1_2013 = self.AddRadioButton("2013 Series 1")
+		self.Series1_2013.Bind(wx.EVT_RADIOBUTTON, self.StoreData)
+
+	def StoreData(self):
+		if self.Series1_2014.GetValue():
+			profile.putMachineSetting('machine_name', 'Type A Machines 2014 Series 1')
+			profile.putMachineSetting('machine_type', 'Series 1 2014')
+			profile.putMachineSetting('machine_width', '305')
+			profile.putMachineSetting('machine_depth', '305')
+			profile.putMachineSetting('machine_height', '305')
+			profile.putMachineSetting('machine_center_is_zero', 'False')
+			profile.putMachineSetting('has_heated_bed', 'False')
+			profile.putMachineSetting('gcode_flavor', 'RepRap (Marlin/Sprinter')
+			profile.putMachineSetting('extruder_amount', '1')
+			profile.putProfileSetting('filament_diameter', '1.7')
+			profile.putProfileSetting('nozzle_size', '0.4')
+			profile.putProfileSetting('layer_height','0.15')
+			profile.putProfileSetting('print_speed', '90')
+			profile.putProfileSetting('print_temperature', '180')
+			profile.putProfileSetting('travel_speed', '150')
+		elif self.Series1_2013.GetValue():
+			profile.putMachineSetting('machine_name', 'Type A Machines 2013 Series 1')
+			profile.putMachineSetting('machine_type', 'Series 1 2013')
+			profile.putMachineSetting('machine_width', '260')
+			profile.putMachineSetting('machine_depth', '240')
+			profile.putMachineSetting('machine_height', '230')
+			profile.putMachineSetting('machine_center_is_zero', 'False')
+			profile.putMachineSetting('has_heated_bed', 'False')
+			profile.putMachineSetting('gcode_flavor', 'RepRap (Marlin/Sprinter')
+			profile.putMachineSetting('extruder_amount', '1')
+			profile.putProfileSetting('filament_diameter', '1.7')
+			profile.putProfileSetting('nozzle_size', '0.4')
+			profile.putProfileSetting('layer_height','0.15')
+			profile.putProfileSetting('print_speed', '60')
+			profile.putProfileSetting('print_temperature', '180')
+			profile.putProfileSetting('travel_speed', '150')
+		profile.checkAndUpdateMachineName()
+
 class OtherMachineSelectPage(InfoPage):
 	def __init__(self, parent):
 		super(OtherMachineSelectPage, self).__init__(parent, "Other machine information")
@@ -367,8 +412,10 @@ class MachineSelectPage(InfoPage):
 		super(MachineSelectPage, self).__init__(parent, _("Select your machine"))
 		self.AddText(_("What kind of machine do you have:"))
 
+		self.TypeARadio = self.AddRadioButton("Type A Machines Series 1")
+		self.TypeARadio.Bind(wx.EVT_RADIOBUTTON, self.OnTypeASelect)
+		self.TypeARadio.SetValue(True)
 		self.Ultimaker2Radio = self.AddRadioButton("Ultimaker2", style=wx.RB_GROUP)
-		self.Ultimaker2Radio.SetValue(True)
 		self.Ultimaker2Radio.Bind(wx.EVT_RADIOBUTTON, self.OnUltimaker2Select)
 		self.UltimakerRadio = self.AddRadioButton("Ultimaker Original")
 		self.UltimakerRadio.Bind(wx.EVT_RADIOBUTTON, self.OnUltimakerSelect)
@@ -383,6 +430,9 @@ class MachineSelectPage(InfoPage):
 		self.AddText(_("For full details see: http://wiki.ultimaker.com/Cura:stats"))
 		self.SubmitUserStats.SetValue(True)
 
+	def OnTypeASelect(self, e):
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TypeASelectVersion)
+
 	def OnUltimaker2Select(self, e):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ultimaker2ReadyPage)
 
@@ -396,7 +446,7 @@ class MachineSelectPage(InfoPage):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().otherMachineSelectPage)
 
 	def AllowNext(self):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ultimaker2ReadyPage)
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TypeASelectVersion)
 		return True
 
 	def StoreData(self):
@@ -419,7 +469,8 @@ class MachineSelectPage(InfoPage):
 			profile.putProfileSetting('fan_full_height', '5.0')
 			profile.putMachineSetting('extruder_offset_x1', '18.0')
 			profile.putMachineSetting('extruder_offset_y1', '0.0')
-		elif self.UltimakerRadio.GetValue():
+			profile.checkAndUpdateMachineName()
+		if self.UltimakerRadio.GetValue():
 			profile.putMachineSetting('machine_width', '205')
 			profile.putMachineSetting('machine_depth', '205')
 			profile.putMachineSetting('machine_height', '200')
@@ -433,17 +484,7 @@ class MachineSelectPage(InfoPage):
 			profile.putMachineSetting('extruder_head_size_max_x', '18.0')
 			profile.putMachineSetting('extruder_head_size_max_y', '35.0')
 			profile.putMachineSetting('extruder_head_size_height', '55.0')
-		else:
-			profile.putMachineSetting('machine_width', '80')
-			profile.putMachineSetting('machine_depth', '80')
-			profile.putMachineSetting('machine_height', '60')
-			profile.putMachineSetting('machine_name', 'reprap')
-			profile.putMachineSetting('machine_type', 'reprap')
-			profile.putMachineSetting('gcode_flavor', 'RepRap (Marlin/Sprinter)')
-			profile.putPreference('startMode', 'Normal')
-			profile.putProfileSetting('nozzle_size', '0.5')
-		profile.checkAndUpdateMachineName()
-		profile.putProfileSetting('wall_thickness', float(profile.getProfileSetting('nozzle_size')) * 2)
+			profile.checkAndUpdateMachineName()
 		if self.SubmitUserStats.GetValue():
 			profile.putPreference('submit_slice_information', 'True')
 		else:
@@ -877,6 +918,13 @@ class UltimakerCalibrateStepsPerEPage(InfoPage):
 	def StoreData(self):
 		profile.putPreference('steps_per_e', self.stepsPerEInput.GetValue())
 
+class TypeAMachinesReadyPage(InfoPage):
+	def __init__(self, parent):
+		super(TypeAMachinesReadyPage, self).__init__(parent, "Type A Machines")
+		self.AddText('Your Type A Machines Series 1 Printer has been configured.')
+		self.AddText('Cura is now ready to rumble.')
+		self.AddSeperator()
+
 class Ultimaker2ReadyPage(InfoPage):
 	def __init__(self, parent):
 		super(Ultimaker2ReadyPage, self).__init__(parent, "Ultimaker2")
@@ -892,6 +940,8 @@ class configWizard(wx.wizard.Wizard):
 		self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGING, self.OnPageChanging)
 
 		self.firstInfoPage = FirstInfoPage(self, addNew)
+		self.TypeASelectVersion = SelectVersion(self)
+		self.TypeAReadyPage = TypeAMachinesReadyPage(self)
 		self.machineSelectPage = MachineSelectPage(self)
 		self.ultimakerSelectParts = SelectParts(self)
 		self.ultimakerFirmwareUpgradePage = UltimakerFirmwareUpgradePage(self)
@@ -906,6 +956,9 @@ class configWizard(wx.wizard.Wizard):
 		self.otherMachineInfoPage = OtherMachineInfoPage(self)
 
 		self.ultimaker2ReadyPage = Ultimaker2ReadyPage(self)
+
+		wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.TypeASelectVersion)
+		wx.wizard.WizardPageSimple.Chain(self.TypeASelectVersion, self.TypeAReadyPage)
 
 		wx.wizard.WizardPageSimple.Chain(self.firstInfoPage, self.machineSelectPage)
 		#wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)

@@ -18,7 +18,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME=14.07-MAC-TEST
+export BUILD_NAME=14.07
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -61,8 +61,8 @@ function extract
 	echo "7z x -y $*" >> log.txt
 	7z x -y $* >> log.txt
 	if [ $? != 0 ]; then
-        echo "Failed to extract $*"
-        exit 1
+	echo "Failed to extract $*"
+	exit 1
 	fi
 }
 
@@ -281,7 +281,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/bin/ffmpeg.exe ${TARGET_DIR}/Cura/
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/licenses ${TARGET_DIR}/Cura/ffmpeg-licenses/
 	mv Win32/EjectMedia.exe ${TARGET_DIR}/Cura/
-	
+
 	rm -rf Power/
 	rm -rf \$_OUTDIR
 	rm -rf PURELIB
@@ -336,14 +336,14 @@ if (( ${ARCHIVE_FOR_DISTRIBUTION} )); then
 			rm -rf scripts/win32/dist
 			ln -sf `pwd`/${TARGET_DIR} scripts/win32/dist
 			wine ~/.wine/drive_c/Program\ Files/NSIS/makensis.exe /DVERSION=${BUILD_NAME} scripts/win32/installer.nsi
-            if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
+	    if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
 			mv scripts/win32/Cura_${BUILD_NAME}.exe ./
 		fi
 		if [ -f '/c/Program Files (x86)/NSIS/makensis.exe' ]; then
 			rm -rf scripts/win32/dist
 			mv `pwd`/${TARGET_DIR} scripts/win32/dist
 			'/c/Program Files (x86)/NSIS/makensis.exe' -DVERSION=${BUILD_NAME} 'scripts/win32/installer.nsi' >> log.txt
-            if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
+	    if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
 			mv scripts/win32/Cura_${BUILD_NAME}.exe ./
 		fi
 	else

@@ -1,3 +1,5 @@
 * ultimaker_platform.stl: 3D platform from the Ultimaker. Derivative from Ultimaker lasercut drawings. CC BY-NC 3.0 license (http://creativecommons.org/licenses/by-nc/3.0/)
   http://www.thingiverse.com/thing:13571
 * ultimaker2_platform.stl: 3D platform from the Ultimaker2, released by Ultimaker for Cura. CC BY-NC 3.0 license (http://creativecommons.org/licenses/by-nc/3.0/)
+* Series1_2013_platform.stl: print platform from the Series 1 2013, released by Type A Machines for Cura. CC BY-NC 3.0 license (http://creativecommons.org/licenses/by-nc/3.0/)
+* Series1_2014_platform.stl: print platform from the Series 1 2014, released by Type A Machines for Cura. CC BY-NC 3.0 license (http://creativecommons.org/licenses/by-nc/3.0/)

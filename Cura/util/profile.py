@@ -198,7 +198,7 @@ setting('retraction_combing',       True, bool,  'expert',   _('Retraction')).se
 setting('retraction_minimal_extrusion',0.02, float,'expert', _('Retraction')).setRange(0).setLabel(_("Minimal extrusion before retracting (mm)"), _("The minimal amount of extrusion that needs to be done before retracting again if a retraction needs to happen before this minimal is reached the retraction is ignored.\nThis avoids retracting a lot on the same piece of filament which flattens the filament and causes grinding issues."))
 setting('retraction_hop',            0.0, float, 'expert',   _('Retraction')).setRange(0).setLabel(_("Z hop when retracting (mm)"), _("When a retraction is done, the head is lifted by this amount to travel over the print. A value of 0.075 works well. This feature has a lot of positive effect on delta towers."))
 setting('bottom_thickness',          0.3, float, 'advanced', _('Quality')).setRange(0).setLabel(_("Initial layer thickness (mm)"), _("Layer thickness of the bottom layer. A thicker bottom layer makes sticking to the bed easier. Set to 0.0 to have the bottom layer thickness the same as the other layers."))
-setting('layer0_width_factor',       100, float, 'advanced', _('Quality')).setRange(50, 300).setLabel(_("Initial layer line width (%)"), _("Extra width factor for the extrusion on the first layer, on some printers it's good to have wider extrusion on the first layer to get better bed adhesion."))
+setting('layer0_width_factor',       100, float, 'advanced', _('Quality')).setRange(50, 300).setLabel(_("Initial layer line with (%)"), _("Extra width factor for the extrusion on the first layer, on some printers it's good to have wider extrusion on the first layer to get better bed adhesion."))
 setting('object_sink',               0.0, float, 'advanced', _('Quality')).setRange(0).setLabel(_("Cut off object bottom (mm)"), _("Sinks the object into the platform, this can be used for objects that do not have a flat bottom and thus create a too small first layer."))
 #setting('enable_skin',             False, bool,  'advanced', _('Quality')).setLabel(_("Duplicate outlines"), _("Skin prints the outer lines of the prints twice, each time with half the thickness. This gives the illusion of a higher print quality."))
 setting('overlap_dual',             0.15, float, 'advanced', _('Quality')).setLabel(_("Dual extrusion overlap (mm)"), _("Add a certain amount of overlapping extrusion on dual-extrusion prints. This bonds the different colors together."))
@@ -247,6 +247,77 @@ setting('plugin_config', '', str, 'hidden', 'hidden')
 setting('object_center_x', -1, float, 'hidden', 'hidden')
 setting('object_center_y', -1, float, 'hidden', 'hidden')
 
+#######################################################################################
+#Type A 2013 Series 1 - Start
+setting('Type A  Machines 2013 - Start.gcode', """;-- START GCODE --
+;Sliced at: {day} {date} {time}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Print time: {print_time}
+;Filament used: {filament_amount}m {filament_weight}g
+;Filament cost: {filament_cost}
+;M190 S{print_bed_temperature} ;Uncomment to add your own bed temperature line
+M106 S255
+G21        ;metric values
+G90        ;absolute positioning
+M106 S255    ;start with the fan on
+G28    ;move to endstops
+G1 X150 Y5  Z15.0 F{travel_speed} ;move the platform down 15mm
+M109 S{print_temperature} ;Uncomment to add your own temperature line
+G92 E0                  ;zero the extruded length
+G1 F200 E30              ;extrude 3mm of feed stock
+G92 E0                  ;zero the extruded length again
+G1 F{travel_speed}
+;Put printing message on LCD screen
+M117 Printing...
+""", str, 'alteration', 'alteration')
+#######################################################################################
+#Type A 2013 Series 1 - End
+setting('Type A  Machines 2013 - End.gcode', """;-- END GCODE --
+M104 S0                     ;extruder heater off
+M140 S0                     ;heated bed heater off (if you have it)
+G91                                    ;relative positioning
+G1 E-1 F300                            ;retract the filament a bit before lifting the nozzle, to release some of the pressure
+G1 Z+0.5 E-5 X-20 Y-20 F{travel_speed} ;move Z up a bit and retract filament even more
+G28 X0 Y0                              ;move X/Y to min endstops, so the head is out of the way
+M84                         ;steppers off
+G90                         ;absolute positioning
+""", str, 'alteration', 'alteration')
+#######################################################################################
+#Type A 2014 Series 1 - Start 
+setting('Type A  Machines 2014 - Start.gcode', """;-- START GCODE --
+;Sliced at: {day} {date} {time}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Print time: {print_time}
+;Filament used: {filament_amount}m {filament_weight}g
+;Filament cost: {filament_cost}
+;M190 S{print_bed_temperature} ;Uncomment to add your own bed temperature line
+M106 S255
+G21        ;metric values
+G90        ;absolute positioning
+M106 S255    ;start with the fan on
+G28    ;move to endstops
+G1 X150 Y5  Z15.0 F{travel_speed} ;move the platform down 15mm
+M109 S{print_temperature} ;Uncomment to add your own temperature line
+G92 E0                  ;zero the extruded length
+G1 F200 E30              ;extrude 3mm of feed stock
+G92 E0                  ;zero the extruded length again
+G1 F{travel_speed}
+;Put printing message on LCD screen
+M117 Printing...
+""", str, 'alteration', 'alteration')
+#######################################################################################
+#Type A 2014 Series 1 - End 
+setting('Type A  Machines 2014 - End.gcode', """;-- END GCODE --
+M104 S0                     ;extruder heater off
+M140 S0                     ;heated bed heater off (if you have it)
+G91                                    ;relative positioning
+G1 E-1 F300                            ;retract the filament a bit before lifting the nozzle, to release some of the pressure
+G1 Z+0.5 E-5 X-20 Y-20 F{travel_speed} ;move Z up a bit and retract filament even more
+G28 X0 Y0                              ;move X/Y to min endstops, so the head is out of the way
+M84                         ;steppers off
+G90                         ;absolute positioning
+""", str, 'alteration', 'alteration')
+#######################################################################################
 setting('start.gcode', """;Sliced at: {day} {date} {time}
 ;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
 ;Print time: {print_time}
@@ -388,6 +459,7 @@ M84                         ;steppers off
 G90                         ;absolute positioning
 ;{profile_string}
 """, str, 'alteration', 'alteration')
+#######################################################################################
 setting('start4.gcode', """;Sliced at: {day} {date} {time}
 ;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
 ;Print time: {print_time}
@@ -601,8 +673,6 @@ def getBasePath():
 		#If we have a frozen python install, we need to step out of the library.zip
 		if hasattr(sys, 'frozen'):
 			basePath = os.path.normpath(os.path.join(basePath, ".."))
-	elif platform.system() == "Darwin":
-		basePath = os.path.expanduser('~/Library/Application Support/Cura/%s' % version.getVersion(False))
 	else:
 		basePath = os.path.expanduser('~/.cura/%s' % version.getVersion(False))
 	if not os.path.isdir(basePath):
@@ -698,10 +768,7 @@ def saveProfile(filename, allMachines = False):
 			else:
 				profileParser.set('profile', set.getName(), set.getValue().encode('utf-8'))
 
-	try:
-		profileParser.write(open(filename, 'w'))
-	except:
-		print "Failed to write profile file: %s" % (filename)
+	profileParser.write(open(filename, 'w'))
 
 def resetProfile():
 	""" Reset the profile for the current machine to default. """
@@ -904,10 +971,7 @@ def savePreferences(filename):
 			if set.isMachineSetting():
 				parser.set('machine_%d' % (n), set.getName(), set.getValue(n).encode('utf-8'))
 		n += 1
-	try:
-		parser.write(open(filename, 'w'))
-	except:
-		print "Failed to write preferences file: %s" % (filename)
+	parser.write(open(filename, 'w'))
 
 def getPreference(name):
 	if name in tempOverride:

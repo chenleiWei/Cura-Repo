@@ -10,7 +10,16 @@ class alterationPanel(wx.Panel):
 		wx.Panel.__init__(self, parent,-1)
 
 		self.callback = callback
-		self.alterationFileList = ['start.gcode', 'end.gcode']#, 'nextobject.gcode', 'replace.csv'
+		self.alterationFileList = ['', '']#, 'nextobject.gcode', 'replace.csv'
+		#Type A Start/End g-code settings for a single extruder/check if we need
+		#multiple extruder settings
+		if profile.getMachineSetting('machine_name') == 'Type A Machines 2013 Series 1':
+			self.alterationFileList = ['Type A  Machines 2013 - Start.gcode', 'Type A  Machines 2013 - End.gcode']
+		elif profile.getMachineSetting('machine_name') == 'Type A Machines 2014 Series 1':
+			self.alterationFileList = ['Type A  Machines 2014 - Start.gcode', 'Type A  Machines 2014 - End.gcode']
+		else: #Default Start/End gcode settings
+			self.alterationFileList = ['start.gcode', 'end.gcode']
+
 		if int(profile.getMachineSetting('extruder_amount')) > 1:
 			self.alterationFileList += ['preSwitchExtruder.gcode', 'postSwitchExtruder.gcode']
 			self.alterationFileList += ['start2.gcode', 'end2.gcode']
