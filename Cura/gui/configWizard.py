@@ -415,7 +415,7 @@ class MachineSelectPage(InfoPage):
 		self.TypeARadio = self.AddRadioButton("Type A Machines Series 1")
 		self.TypeARadio.Bind(wx.EVT_RADIOBUTTON, self.OnTypeASelect)
 		self.TypeARadio.SetValue(True)
-		self.Ultimaker2Radio = self.AddRadioButton("Ultimaker2", style=wx.RB_GROUP)
+		self.Ultimaker2Radio = self.AddRadioButton("Ultimaker2")
 		self.Ultimaker2Radio.Bind(wx.EVT_RADIOBUTTON, self.OnUltimaker2Select)
 		self.UltimakerRadio = self.AddRadioButton("Ultimaker Original")
 		self.UltimakerRadio.Bind(wx.EVT_RADIOBUTTON, self.OnUltimakerSelect)
