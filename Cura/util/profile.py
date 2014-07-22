@@ -768,10 +768,7 @@ def saveProfile(filename, allMachines = False):
 			else:
 				profileParser.set('profile', set.getName(), set.getValue().encode('utf-8'))
 
-	try:
-		profileParser.write(open(filename, 'w'))
-	except:
-		print "Failed to write profile file: %s" % (filename)
+	profileParser.write(open(filename, 'w'))
 
 def resetProfile():
 	""" Reset the profile for the current machine to default. """
@@ -974,10 +971,7 @@ def savePreferences(filename):
 			if set.isMachineSetting():
 				parser.set('machine_%d' % (n), set.getName(), set.getValue(n).encode('utf-8'))
 		n += 1
-	try:
-		parser.write(open(filename, 'w'))
-	except:
-		print "Failed to write preferences file: %s" % (filename)
+	parser.write(open(filename, 'w'))
 
 def getPreference(name):
 	if name in tempOverride:
