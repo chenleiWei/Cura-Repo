@@ -17,13 +17,18 @@ class simpleModePanel(wx.Panel):
 
 		printTypePanel = wx.Panel(self)
 		self.printTypeHigh = wx.RadioButton(printTypePanel, -1, _("High quality print"), style=wx.RB_GROUP)
+		self.printTypeBest = wx.RadioButton(printTypePanel, -1, _("Final quality print"))
 		self.printTypeNormal = wx.RadioButton(printTypePanel, -1, _("Normal quality print"))
-		self.printTypeLow = wx.RadioButton(printTypePanel, -1, _("Fast low quality print"))
+		self.printTypeLow = wx.RadioButton(printTypePanel, -1, _("Low quality print"))
+		self.printTypeDraft = wx.RadioButton(printTypePanel, -1, _("Draft quality print"))
 		self.printTypeJoris = wx.RadioButton(printTypePanel, -1, _("Thin walled cup or vase"))
 		self.printTypeJoris.Hide()
 
 		printMaterialPanel = wx.Panel(self)
 		self.printMaterialPLA = wx.RadioButton(printMaterialPanel, -1, 'PLA', style=wx.RB_GROUP)
+		self.printMaterialFlex = wx.RadioButton(printMaterialPanel, -1, 'FlexiblePLA')
+		self.printMaterialPET = wx.RadioButton(printMaterialPanel, -1, 'PET')
+		self.printMaterialCFPLA = wx.RadioButton(printMaterialPanel, -1, 'CFPLA')
 		self.printMaterialABS = wx.RadioButton(printMaterialPanel, -1, 'ABS')
 		self.printMaterialDiameter = wx.TextCtrl(printMaterialPanel, -1, profile.getProfileSetting('filament_diameter'))
 		if profile.getMachineSetting('gcode_flavor') == 'UltiGCode':
@@ -34,11 +39,13 @@ class simpleModePanel(wx.Panel):
 		sizer = wx.GridBagSizer()
 		self.SetSizer(sizer)
 
-		sb = wx.StaticBox(printTypePanel, label=_("Select a quickprint profile:"))
+		sb = wx.StaticBox(printTypePanel, label=_("Print Quality:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+		boxsizer.Add(self.printTypeBest)
 		boxsizer.Add(self.printTypeHigh)
 		boxsizer.Add(self.printTypeNormal)
 		boxsizer.Add(self.printTypeLow)
+		boxsizer.Add(self.printTypeDraft)
 		boxsizer.Add(self.printTypeJoris, border=5, flag=wx.TOP)
 		printTypePanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		printTypePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
@@ -47,6 +54,9 @@ class simpleModePanel(wx.Panel):
 		sb = wx.StaticBox(printMaterialPanel, label=_("Material:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		boxsizer.Add(self.printMaterialPLA)
+		boxsizer.Add(self.printMaterialFlex)
+		boxsizer.Add(self.printMaterialPET)
+		boxsizer.Add(self.printMaterialCFPLA)
 		boxsizer.Add(self.printMaterialABS)
 		boxsizer.Add(wx.StaticText(printMaterialPanel, -1, _("Diameter:")))
 		boxsizer.Add(self.printMaterialDiameter)
@@ -54,7 +64,7 @@ class simpleModePanel(wx.Panel):
 		printMaterialPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(printMaterialPanel, (1,0), flag=wx.EXPAND)
 
-		sb = wx.StaticBox(self, label=_("Other:"))
+		sb = wx.StaticBox(self, label=_("Support:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		boxsizer.Add(self.printSupport)
 		sizer.Add(boxsizer, (2,0), flag=wx.EXPAND)
@@ -62,12 +72,17 @@ class simpleModePanel(wx.Panel):
 		self.printTypeNormal.SetValue(True)
 		self.printMaterialPLA.SetValue(True)
 
+		self.printTypeBest.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printTypeHigh.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printTypeNormal.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printTypeLow.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
+		self.printTypeDraft.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		#self.printTypeJoris.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 
 		self.printMaterialPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
+		self.printMaterialFlex.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
+		self.printMaterialPET.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
+		self.printMaterialCFPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printMaterialABS.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printMaterialDiameter.Bind(wx.EVT_TEXT, lambda e: self._callback())
 
@@ -86,28 +101,57 @@ class simpleModePanel(wx.Panel):
 
 		nozzle_size = float(get('nozzle_size'))
 		if self.printTypeNormal.GetValue():
-			put('layer_height', '0.2')
 			put('wall_thickness', nozzle_size * 2.0)
-			put('layer_height', '0.10')
-			put('fill_density', '20')
-		elif self.printTypeLow.GetValue():
-			put('wall_thickness', nozzle_size * 2.5)
-			put('layer_height', '0.20')
+			put('layer_height', '0.15')
 			put('fill_density', '10')
-			put('print_speed', '60')
+			put('print_speed', '100')
 			put('cool_min_layer_time', '3')
 			put('bottom_layer_speed', '30')
+		elif self.printTypeLow.GetValue():
+			put('wall_thickness', nozzle_size * 2.0)
+			put('layer_height', '0.20')
+			put('fill_density', '10')
+			put('print_speed', '120')
+			put('cool_min_layer_time', '3')
+			put('bottom_layer_speed', '45')
 		elif self.printTypeHigh.GetValue():
 			put('wall_thickness', nozzle_size * 2.0)
-			put('layer_height', '0.06')
+			put('layer_height', '0.10')
+			put('fill_density', '15')
+			put('print_speed', '90')
+			put('bottom_layer_speed', '30')
+		elif self.printTypeBest.GetValue():
+			put('wall_thickness', nozzle_size * 2.0)
+			put('layer_height', '0.05')
 			put('fill_density', '20')
-			put('bottom_layer_speed', '15')
+			put('print_speed', '80')
+			put('bottom_layer_speed', '25')
+		elif self.printTypeDraft.GetValue():
+			put('wall_thickness', nozzle_size * 2.0)
+			put('layer_height', '0.25')
+			put('fill_density', '8')
+			put('print_speed', '135')
+			put('bottom_layer_speed', '45')
 		elif self.printTypeJoris.GetValue():
 			put('wall_thickness', nozzle_size * 1.5)
 
 		put('filament_diameter', self.printMaterialDiameter.GetValue())
 		if self.printMaterialPLA.GetValue():
-			pass
+			put('print_temperature', '195')
+			put('fan_full_height','0.0')
+		if self.printMaterialFlex.GetValue():
+			put('print_temperature', '220')
+			put('print_speed', '45')
+			put('retraction_amount', '1')
+			put('fan_full_height','0.0')
+		if self.printMaterialPET.GetValue():
+			put('print_temperature', '245')
+			put('fan_full_height','0.0')
+		if self.printMaterialCFPLA.GetValue():
+			put('print_temperature', '220')
+			put('print_speed', '45')
+			put('retraction_amount', '2')
+			put('fan_full_height','0.0')
 		if self.printMaterialABS.GetValue():
 			put('print_bed_temperature', '100')
 			put('platform_adhesion', 'Brim')
