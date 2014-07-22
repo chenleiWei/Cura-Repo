@@ -172,3 +172,21 @@ Ensure that virtualenv is activated, so `python` points to the python of your vi
 Note that application is only guaranteed to work on Mac OS X version used to build and higher, but may not support lower versions.
 E.g. Cura built on 10.8 will work on 10.8 and 10.7, but not on 10.6. In other hand, Cura built on 10.6 will work on 10.6, 10.7 and 10.8.
 
+Microsoft Windows
+----------
+
+Download and install the following programs
+- MinGW32 (make sure to install base and gcc-g++ -you'll see-)
+- 7Zip
+- NSIS
+- Git Bash
+
+Before running package.sh win32 make sure to add the directories for the above apps to your path in Git Bash
+
+Something like:
+
+export PATH=$PATH:"/c/Program Files (x86)/NSIS/":/c/MinGW/bin:"/c/Program Files/7-zip:/"
+
+should work assuming you used the default install directories.
+
+and then just run the package script with win32 switch: package.sh win32
