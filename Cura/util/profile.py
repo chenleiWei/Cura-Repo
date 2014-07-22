@@ -673,8 +673,6 @@ def getBasePath():
 		#If we have a frozen python install, we need to step out of the library.zip
 		if hasattr(sys, 'frozen'):
 			basePath = os.path.normpath(os.path.join(basePath, ".."))
-	elif platform.system() == "Darwin":
-		basePath = os.path.expanduser('~/Library/Application Support/Cura/%s' % version.getVersion(False))
 	else:
 		basePath = os.path.expanduser('~/.cura/%s' % version.getVersion(False))
 	if not os.path.isdir(basePath):
