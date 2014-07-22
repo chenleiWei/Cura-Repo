@@ -171,8 +171,8 @@ class mainWindow(wx.Frame):
 		expertMenu.AppendSeparator()
 		i = expertMenu.Append(-1, _("Run first run wizard..."))
 		self.Bind(wx.EVT_MENU, self.OnFirstRunWizard, i)
-		self.bedLevelWizardMenuItem = expertMenu.Append(-1, _("Run bed leveling wizard..."))
-		self.Bind(wx.EVT_MENU, self.OnBedLevelWizard, self.bedLevelWizardMenuItem)
+		#self.bedLevelWizardMenuItem = expertMenu.Append(-1, _("Run bed leveling wizard..."))
+		#self.Bind(wx.EVT_MENU, self.OnBedLevelWizard, self.bedLevelWizardMenuItem)
 		self.headOffsetWizardMenuItem = expertMenu.Append(-1, _("Run head offset wizard..."))
 		self.Bind(wx.EVT_MENU, self.OnHeadOffsetWizard, self.headOffsetWizardMenuItem)
 
@@ -180,13 +180,15 @@ class mainWindow(wx.Frame):
 
 		helpMenu = wx.Menu()
 		i = helpMenu.Append(-1, _("Online documentation..."))
-		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://daid.github.com/Cura'), i)
+		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://support.typeamachines.com/hc/en-us'), i)
 		i = helpMenu.Append(-1, _("Report a problem..."))
-		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('https://github.com/daid/Cura/issues'), i)
+		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://support.typeamachines.com/hc/en-us/requests/new'), i)
+		#i = helpMenu.Append(-1, _("Check for update..."))
+		#self.Bind(wx.EVT_MENU, self.OnCheckForUpdate, i)
 		i = helpMenu.Append(-1, _("Check for update..."))
-		self.Bind(wx.EVT_MENU, self.OnCheckForUpdate, i)
-		i = helpMenu.Append(-1, _("Open YouMagine website..."))
-		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('https://www.youmagine.com/'), i)
+		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://www.typeamachines.com/pages/downloads'), i)
+		i = helpMenu.Append(-1, _("Open Type A Machines website..."))
+		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('https://www.typeamachines.com/'), i)
 		i = helpMenu.Append(-1, _("About Cura..."))
 		self.Bind(wx.EVT_MENU, self.OnAbout, i)
 		self.menubar.Append(helpMenu, _("Help"))
@@ -330,7 +332,7 @@ class mainWindow(wx.Frame):
 			self.splitter.SetSashSize(4)
 		self.defaultFirmwareInstallMenuItem.Enable(firmwareInstall.getDefaultFirmware() is not None)
 		if profile.getMachineSetting('machine_type') == 'ultimaker2':
-			self.bedLevelWizardMenuItem.Enable(False)
+			#self.bedLevelWizardMenuItem.Enable(False)
 			self.headOffsetWizardMenuItem.Enable(False)
 		if int(profile.getMachineSetting('extruder_amount')) < 2:
 			self.headOffsetWizardMenuItem.Enable(False)
@@ -526,8 +528,8 @@ class mainWindow(wx.Frame):
 		profile.setActiveMachine(index)
 		self.reloadSettingPanels()
 
-	def OnBedLevelWizard(self, e):
-		configWizard.bedLevelWizard()
+	#def OnBedLevelWizard(self, e):
+		#configWizard.bedLevelWizard()
 
 	def OnHeadOffsetWizard(self, e):
 		configWizard.headOffsetWizard()
