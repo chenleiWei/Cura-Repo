@@ -16,11 +16,11 @@ class simpleModePanel(wx.Panel):
 		#self.menubar.Insert(1, toolsMenu, 'Normal mode')
 
 		printTypePanel = wx.Panel(self)
-		self.printTypeHigh = wx.RadioButton(printTypePanel, -1, _("High quality print"), style=wx.RB_GROUP)
-		self.printTypeBest = wx.RadioButton(printTypePanel, -1, _("Final quality print"))
-		self.printTypeNormal = wx.RadioButton(printTypePanel, -1, _("Normal quality print"))
-		self.printTypeLow = wx.RadioButton(printTypePanel, -1, _("Low quality print"))
-		self.printTypeDraft = wx.RadioButton(printTypePanel, -1, _("Draft quality print"))
+		self.printTypeHigh = wx.RadioButton(printTypePanel, -1, _("High quality"), style=wx.RB_GROUP)
+		self.printTypeBest = wx.RadioButton(printTypePanel, -1, _("Final quality"))
+		self.printTypeNormal = wx.RadioButton(printTypePanel, -1, _("Normal quality"))
+		self.printTypeLow = wx.RadioButton(printTypePanel, -1, _("Low quality"))
+		self.printTypeDraft = wx.RadioButton(printTypePanel, -1, _("Draft quality"))
 		self.printTypeJoris = wx.RadioButton(printTypePanel, -1, _("Thin walled cup or vase"))
 		self.printTypeJoris.Hide()
 
@@ -29,7 +29,7 @@ class simpleModePanel(wx.Panel):
 		self.printMaterialFlex = wx.RadioButton(printMaterialPanel, -1, 'FlexiblePLA')
 		self.printMaterialPET = wx.RadioButton(printMaterialPanel, -1, 'PET')
 		self.printMaterialCFPLA = wx.RadioButton(printMaterialPanel, -1, 'CFPLA')
-		self.printMaterialABS = wx.RadioButton(printMaterialPanel, -1, 'ABS')
+		#self.printMaterialABS = wx.RadioButton(printMaterialPanel, -1, 'ABS')
 		self.printMaterialDiameter = wx.TextCtrl(printMaterialPanel, -1, profile.getProfileSetting('filament_diameter'))
 		if profile.getMachineSetting('gcode_flavor') == 'UltiGCode':
 			printMaterialPanel.Show(False)
@@ -57,7 +57,7 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(self.printMaterialFlex)
 		boxsizer.Add(self.printMaterialPET)
 		boxsizer.Add(self.printMaterialCFPLA)
-		boxsizer.Add(self.printMaterialABS)
+		#boxsizer.Add(self.printMaterialABS)
 		boxsizer.Add(wx.StaticText(printMaterialPanel, -1, _("Diameter:")))
 		boxsizer.Add(self.printMaterialDiameter)
 		printMaterialPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
@@ -83,7 +83,7 @@ class simpleModePanel(wx.Panel):
 		self.printMaterialFlex.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printMaterialPET.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printMaterialCFPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
-		self.printMaterialABS.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
+		#self.printMaterialABS.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printMaterialDiameter.Bind(wx.EVT_TEXT, lambda e: self._callback())
 
 		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self._callback())
@@ -152,7 +152,7 @@ class simpleModePanel(wx.Panel):
 			put('print_speed', '45')
 			put('retraction_amount', '2')
 			put('fan_full_height','0.0')
-		if self.printMaterialABS.GetValue():
+		#if self.printMaterialABS.GetValue():
 			put('print_bed_temperature', '100')
 			put('platform_adhesion', 'Brim')
 			put('filament_flow', '107')
