@@ -152,11 +152,11 @@ class simpleModePanel(wx.Panel):
 			put('print_speed', '45')
 			put('retraction_amount', '2')
 			put('fan_full_height','0.0')
-		#if self.printMaterialABS.GetValue():
-			put('print_bed_temperature', '100')
-			put('platform_adhesion', 'Brim')
-			put('filament_flow', '107')
-			put('print_temperature', '245')
+                # if self.printMaterialABS.GetValue():
+                #         put('print_bed_temperature', '100')
+                #         put('platform_adhesion', 'Brim')
+                #         put('filament_flow', '107')
+                #         put('print_temperature', '245')
 		put('plugin_config', '')
 
 	def updateProfileToControls(self):
