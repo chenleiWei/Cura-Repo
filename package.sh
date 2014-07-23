@@ -295,8 +295,9 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#Get the power module for python
 	rm -rf Power
 	git clone https://github.com/GreatFruitOmsk/Power
-	rm -rf CuraEngine
-	git clone ${CURA_ENGINE_REPO}
+	#Commented out because of bug in Master causing problems with windows install: 7/23/14 - FIX SOON
+	#rm -rf CuraEngine
+	#git clone ${CURA_ENGINE_REPO}
     if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
 fi
 
