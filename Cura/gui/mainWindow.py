@@ -188,7 +188,7 @@ class mainWindow(wx.Frame):
 		i = helpMenu.Append(-1, _("Check for update..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://www.typeamachines.com/pages/downloads'), i)
 		i = helpMenu.Append(-1, _("Open Type A Machines website..."))
-		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('https://www.typeamachines.com/'), i)
+		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://www.typeamachines.com/'), i)
 		i = helpMenu.Append(-1, _("About Cura..."))
 		self.Bind(wx.EVT_MENU, self.OnAbout, i)
 		self.menubar.Append(helpMenu, _("Help"))
