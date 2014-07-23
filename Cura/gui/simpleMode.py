@@ -27,8 +27,8 @@ class simpleModePanel(wx.Panel):
 		printMaterialPanel = wx.Panel(self)
 		self.printMaterialPLA = wx.RadioButton(printMaterialPanel, -1, 'PLA', style=wx.RB_GROUP)
 		self.printMaterialFlex = wx.RadioButton(printMaterialPanel, -1, 'FlexiblePLA')
-		self.printMaterialPET = wx.RadioButton(printMaterialPanel, -1, 'PET')
 		self.printMaterialCFPLA = wx.RadioButton(printMaterialPanel, -1, 'CFPLA')
+		self.printMaterialPET = wx.RadioButton(printMaterialPanel, -1, 'PET')
 		#self.printMaterialABS = wx.RadioButton(printMaterialPanel, -1, 'ABS')
 		self.printMaterialDiameter = wx.TextCtrl(printMaterialPanel, -1, profile.getProfileSetting('filament_diameter'))
 		if profile.getMachineSetting('gcode_flavor') == 'UltiGCode':
@@ -55,9 +55,9 @@ class simpleModePanel(wx.Panel):
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		boxsizer.Add(self.printMaterialPLA)
 		boxsizer.Add(self.printMaterialFlex)
-		boxsizer.Add(self.printMaterialPET)
 		boxsizer.Add(self.printMaterialCFPLA)
-		#boxsizer.Add(self.printMaterialABS)
+		boxsizer.Add(self.printMaterialPET)
+                #boxsizer.Add(self.printMaterialABS)
 		boxsizer.Add(wx.StaticText(printMaterialPanel, -1, _("Diameter:")))
 		boxsizer.Add(self.printMaterialDiameter)
 		printMaterialPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
@@ -81,8 +81,8 @@ class simpleModePanel(wx.Panel):
 
 		self.printMaterialPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printMaterialFlex.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
-		self.printMaterialPET.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printMaterialCFPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
+		self.printMaterialPET.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		#self.printMaterialABS.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printMaterialDiameter.Bind(wx.EVT_TEXT, lambda e: self._callback())
 
@@ -137,18 +137,18 @@ class simpleModePanel(wx.Panel):
 
 		put('filament_diameter', self.printMaterialDiameter.GetValue())
 		if self.printMaterialPLA.GetValue():
-			put('print_temperature', '195')
+			put('print_temperature', '220')
 			put('fan_full_height','0.0')
 		if self.printMaterialFlex.GetValue():
-			put('print_temperature', '220')
-			put('print_speed', '45')
+			put('print_temperature', '245')
+			put('print_speed', '40')
 			put('retraction_amount', '1')
 			put('fan_full_height','0.0')
 		if self.printMaterialPET.GetValue():
-			put('print_temperature', '245')
+			put('print_temperature', '260')
 			put('fan_full_height','0.0')
 		if self.printMaterialCFPLA.GetValue():
-			put('print_temperature', '220')
+			put('print_temperature', '230')
 			put('print_speed', '45')
 			put('retraction_amount', '2')
 			put('fan_full_height','0.0')
