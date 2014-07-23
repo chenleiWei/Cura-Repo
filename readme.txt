@@ -5,3 +5,20 @@ Full documentation and manual for Cura can be found at: http://daid.github.com/C
 In case of issues please report to: http://github.com/daid/Cura/issues or Type A Machines Support: http://support.typeamachines.com/hc/en-us/requests/new. 
 
 Cura is 100% OpenSource software, developed and maintained by Ultimaking Ltd. Development can be followed on http://github.com/daid/Cura and https://bitbucket.org/typeamachines/cura.
+
+
+——————————————————————————
+
+If you are having difficulty launching Cura due to security preferences, you have two options. 
+
+Either: 
+
+- Control-click the Cura Application Icon and select ‘open’ in the drop-down list,
+
+or:
+
+- Click the Apple symbol to the top left of your screen, select: ‘System Preferences’ followed by ’Security & Privacy.
+
+Within the General tab, you’ll see dialog that says “Cura was blocked form opening because it is not an identified Developer.”
+
+Select ‘Open Anyway’ and Cura will launch.
