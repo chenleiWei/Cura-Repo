@@ -357,6 +357,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	rm -rf ${TARGET_DIR}/python/Lib/OpenGL/DLLS/gle*
 
     #Build the C++ engine
+    mingw32-make -C CuraEngine clean
 	mingw32-make -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
 fi
