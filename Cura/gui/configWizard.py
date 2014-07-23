@@ -988,9 +988,7 @@ class UltimakerCalibrateStepsPerEPage(InfoPage):
 class TypeAMachinesReadyPage(InfoPage):
 	def __init__(self, parent):
 		super(TypeAMachinesReadyPage, self).__init__(parent, "Type A Machines")
-		self.AddText('Your Type A Machines Series 1 Printer has been configured.')
-		self.AddText('Cura is now ready to rumble.')
-		self.AddSeperator()
+		self.AddText('Cura is now configured to work with your Type A Series 1 Printer.')
 
 class Ultimaker2ReadyPage(InfoPage):
 	def __init__(self, parent):
