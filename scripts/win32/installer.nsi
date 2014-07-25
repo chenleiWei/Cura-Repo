@@ -4,17 +4,17 @@
 !addplugindir "nsisPlugins"
 
 ; The name of the installer
-Name "Cura Series 1 ${VERSION}"
+Name "Cura Type A ${VERSION}"
 
 ; The file to write
-OutFile "Cura Series 1 ${VERSION}.exe"
+OutFile "Cura Type A ${VERSION}.exe"
 
 ; The default installation directory
-InstallDir $PROGRAMFILES\Cura-Series-1_${VERSION}
+InstallDir $PROGRAMFILES\Cura-Type-A_${VERSION}
 
 ; Registry key to check for directory (so if you install again, it will 
 ; overwrite the old one automatically)
-InstallDirRegKey HKLM "Software\cura-series1_${VERSION}" "Install_Dir"
+InstallDirRegKey HKLM "Software\cura-type-a_${VERSION}" "Install_Dir"
 
 ; Request application privileges for Windows Vista
 RequestExecutionLevel admin
@@ -133,13 +133,13 @@ Section "Cura ${VERSION}"
   File /r "dist\"
   
   ; Write the installation path into the registry
-  WriteRegStr HKLM "SOFTWARE\cura-series1_${VERSION}" "Install_Dir" "$INSTDIR"
+  WriteRegStr HKLM "SOFTWARE\cura-type-a_${VERSION}" "Install_Dir" "$INSTDIR"
   
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\cura-series1_${VERSION}" "DisplayName" "Cura ${VERSION}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\cura-series1_${VERSION}" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\cura-series1_${VERSION}" "NoModify" 1
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\cura-series1_${VERSION}" "NoRepair" 1
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\cura-type-a_${VERSION}" "DisplayName" "Cura ${VERSION}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\cura-type-a_${VERSION}" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\cura-type-a_${VERSION}" "NoModify" 1
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\cura-type-a_${VERSION}" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
 
   ; Write start menu entries for all users
@@ -218,8 +218,8 @@ SectionEnd
 Section "Uninstall"
   
   ; Remove registry keys
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\cura-series1_${VERSION}"
-  DeleteRegKey HKLM "SOFTWARE\cura-series1_${VERSION}"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\cura-type-a_${VERSION}"
+  DeleteRegKey HKLM "SOFTWARE\cura-type-a_${VERSION}"
 
   ; Write start menu entries for all users
   SetShellVarContext all
