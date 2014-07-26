@@ -352,7 +352,7 @@ class PrintrbotPage(InfoPage):
                 profile.putMachineSetting('extruder_head_size_max_y', '0')
                 profile.putMachineSetting('extruder_head_size_height', '0')
 
-"""
+
 class DownloadProfile(InfoPage):
     def __init__(self, parent):
         super(DownloadProfile, self).__init__(parent, _("Previous Print Heads"))
@@ -360,8 +360,8 @@ class DownloadProfile(InfoPage):
         panel = wx.Panel(self, -1)
         hyper1 = hl.HyperLinkCtrl(panel, -1, "Click here to download your printer settings.", pos=(100, 100), URL="http://www.typeamachines.com/pages/downloads")
         self.AddText("Then hit next to load them in.")
-"""
-"""
+
+
 class UploadProfile(InfoPage):
     def __init__(self, parent):
         super(UploadProfile, self).__init__(parent, _(""))
@@ -373,7 +373,7 @@ class UploadProfile(InfoPage):
             profile.loadProfile(profileFile)
             dlg.Destroy()
         self.AddText(_("Your profile has been loaded."))
-"""
+
 
 class SelectPrintHead(InfoPage):
     def __init__(self, parent):
@@ -386,9 +386,9 @@ class SelectPrintHead(InfoPage):
         self.oldPrintHeadRadio = self.AddRadioButton("No")
         self.oldPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.OnOldPrintHeadSelect)
 
-    """def OnOldPrintHeadSelect(self, e):
+    def OnOldPrintHeadSelect(self, e):
         wx.wizard.WizardPageSimple.Chain(self, self.GetParent().DownloadProfile)
-	"""
+
     def StoreData(self):
         if self.newPrintHeadRadio.GetValue():
             profile.putMachineSetting('machine_name', "Type A Machines 2014 Series 1")
@@ -1099,8 +1099,8 @@ class configWizard(wx.wizard.Wizard):
 
         self.firstInfoPage = FirstInfoPage(self, addNew)
         self.TypeASelectPrintHead = SelectPrintHead(self)
-        #self.TypeAUploadProfile = UploadProfile(self)
-        #self.TypeADownloadProfile = DownloadProfile(self)
+        self.TypeAUploadProfile = UploadProfile(self)
+        self.TypeADownloadProfile = DownloadProfile(self)
         self.TypeAReadyPage = TypeAMachinesReadyPage(self)
         self.machineSelectPage = MachineSelectPage(self)
         self.ultimakerSelectParts = SelectParts(self)
@@ -1119,16 +1119,16 @@ class configWizard(wx.wizard.Wizard):
 
         wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.TypeASelectPrintHead)
         wx.wizard.WizardPageSimple.Chain(self.TypeASelectPrintHead, self.TypeAReadyPage)
-        #wx.wizard.WizardPageSimple.Chain(self.TypeADownloadProfile, self.TypeAUploadProfile)
-        #wx.wizard.WizardPageSimple.Chain(self.TypeAUploadProfile, self.TypeAReadyPage)
+        wx.wizard.WizardPageSimple.Chain(self.TypeADownloadProfile, self.TypeAUploadProfile)
+        wx.wizard.WizardPageSimple.Chain(self.TypeAUploadProfile, self.TypeAReadyPage)
 
         wx.wizard.WizardPageSimple.Chain(self.firstInfoPage, self.machineSelectPage)
-        # wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)
+        wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)
         wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimakerSelectParts)
         wx.wizard.WizardPageSimple.Chain(self.ultimakerSelectParts, self.ultimakerFirmwareUpgradePage)
         wx.wizard.WizardPageSimple.Chain(self.ultimakerFirmwareUpgradePage, self.ultimakerCheckupPage)
         wx.wizard.WizardPageSimple.Chain(self.ultimakerCheckupPage, self.bedLevelPage)
-        #wx.wizard.WizardPageSimple.Chain(self.ultimakerCalibrationPage, self.ultimakerCalibrateStepsPerEPage)
+        wx.wizard.WizardPageSimple.Chain(self.ultimakerCalibrationPage, self.ultimakerCalibrateStepsPerEPage)
         wx.wizard.WizardPageSimple.Chain(self.printrbotSelectType, self.otherMachineInfoPage)
         wx.wizard.WizardPageSimple.Chain(self.otherMachineSelectPage, self.customRepRapInfoPage)
 

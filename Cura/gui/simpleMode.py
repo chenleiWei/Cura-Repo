@@ -96,6 +96,8 @@ class simpleModePanel(wx.Panel):
 				continue
 			profile.setTempOverride(setting.getName(), setting.getDefault())
 
+		machine_type = profile.getMachineSetting('machine_type')
+
 		if self.printSupport.GetValue():
 			put('support', _("Exterior Only"))
 
@@ -137,8 +139,13 @@ class simpleModePanel(wx.Panel):
 
 		put('filament_diameter', self.printMaterialDiameter.GetValue())
 		if self.printMaterialPLA.GetValue():
-			put('print_temperature', '220')
+			if machine_type == '2013Series1':
+				put('print_temperature', '195')
+			elif machine_type == '2014Series1':
+				put('print_temperature', '220')
 			put('fan_full_height','0.0')
+		
+
 		if self.printMaterialFlex.GetValue():
 			put('print_temperature', '245')
 			put('print_speed', '40')
