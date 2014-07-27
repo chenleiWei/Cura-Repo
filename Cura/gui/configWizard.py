@@ -8,7 +8,11 @@ import math
 
 import wx
 import wx.wizard
+<<<<<<< Updated upstream
 
+=======
+import wx.lib.agw.hyperlink as hl
+>>>>>>> Stashed changes
 from Cura.gui import firmwareInstall
 from Cura.gui import printWindow
 from Cura.util import machineCom
@@ -16,6 +20,44 @@ from Cura.util import profile
 from Cura.util import gcodeGenerator
 from Cura.util import resources
 
+<<<<<<< Updated upstream
+=======
+#!/usr/bin/env python
+
+
+"""
+
+class profileUploadPopup(wx.Menu):
+     class Prototype(wx.Frame):
+
+     
+  def __init__(self, parent, title):
+       wx.Frame.__init__(self, None, title="First Frame", size=(1240,705))
+       self.UI()
+       self.Centre()
+       self.Show()
+
+
+  def UI(self):
+       self.panel1 = wx.Panel(self, -1)
+       self.sizer = wx.BoxSizer()
+       self.sizer.Add(self.panel1, 1, flag=wx.EXPAND) 
+       b = wx.Button(self.panel1, label='second window', size=(180,100), pos=(650,25))
+       b.Bind(wx.EVT_BUTTON, self.OnB)        
+
+       self.SetSizer(self.sizer)  
+
+
+  def OnB(self, event):
+       frame = SecondFrame()
+       frame.Show()
+
+
+ app = wx.App(False)
+ Prototype(None, title='')
+ app.MainLoop()
+"""
+>>>>>>> Stashed changes
 
 class InfoBox(wx.Panel):
 	def __init__(self, parent):
@@ -108,6 +150,7 @@ class InfoBox(wx.Panel):
 
 
 class InfoPage(wx.wizard.WizardPageSimple):
+<<<<<<< Updated upstream
 	def __init__(self, parent, title):
 		wx.wizard.WizardPageSimple.__init__(self, parent)
 
@@ -215,6 +258,122 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def StoreData(self):
 		pass
+=======
+    def __init__(self, parent, title):
+        wx.wizard.WizardPageSimple.__init__(self, parent)
+
+        sizer = wx.GridBagSizer(5, 5)
+        self.sizer = sizer
+        self.SetSizer(sizer)
+
+        title = wx.StaticText(self, -1, title)
+        title.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
+        sizer.Add(title, pos=(0, 0), span=(1, 2), flag=wx.ALIGN_CENTRE | wx.ALL)
+        sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
+        sizer.AddGrowableCol(1)
+
+        self.rowNr = 2
+
+    def AddHyperLinkText(self, info, link):
+        hyperText = hl.HyperLinkCtrl(self, -1, info, URL=str(link))
+        self.GetSizer().Add(hyperText, pos=(self.rowNr,0), span=(1, 2), flag= wx.LEFT | wx.RIGHT | wx.ALIGN_CENTRE)
+        self.rowNr += 1
+        self.rowNr += 1
+        return hyperText
+
+    def AddText(self, info):
+        text = wx.StaticText(self, -1, info)
+        self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT | wx.ALIGN_CENTRE)
+        self.rowNr += 1
+        return text
+
+    def AddSeperator(self):
+        self.GetSizer().Add(wx.StaticLine(self, -1), pos=(self.rowNr, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
+        self.rowNr += 1
+
+    def AddHiddenSeperator(self):
+        self.AddText("")
+
+    def AddInfoBox(self):
+        infoBox = InfoBox(self)
+        self.GetSizer().Add(infoBox, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT | wx.EXPAND)
+        self.rowNr += 1
+        return infoBox
+
+    def AddRadioButton(self, label, style=0):
+        radio = wx.RadioButton(self, -1, label, style=style)
+        self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
+        self.rowNr += 1
+        return radio
+
+    def AddCheckbox(self, label, checked=False):
+        check = wx.CheckBox(self, -1)
+        text = wx.StaticText(self, -1, label)
+        check.SetValue(checked)
+        self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT | wx.RIGHT)
+        self.GetSizer().Add(check, pos=(self.rowNr, 1), span=(1, 2), flag=wx.ALL)
+        self.rowNr += 1
+        return check
+
+    def AddButton(self, label):
+        button = wx.Button(self, -1, label)
+        self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT)
+        self.rowNr += 1
+        return button
+
+    def AddDualButton(self, label1, label2):
+        button1 = wx.Button(self, -1, label1)
+        self.GetSizer().Add(button1, pos=(self.rowNr, 0), flag=wx.RIGHT)
+        button2 = wx.Button(self, -1, label2)
+        self.GetSizer().Add(button2, pos=(self.rowNr, 1))
+        self.rowNr += 1
+        return button1, button2
+
+    def AddTextCtrl(self, value):
+        ret = wx.TextCtrl(self, -1, value)
+        self.GetSizer().Add(ret, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT)
+        self.rowNr += 1
+        return ret
+
+    def AddLabelTextCtrl(self, info, value):
+        text = wx.StaticText(self, -1, info)
+        ret = wx.TextCtrl(self, -1, value)
+        self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT)
+        self.GetSizer().Add(ret, pos=(self.rowNr, 1), span=(1, 1), flag=wx.LEFT)
+        self.rowNr += 1
+        return ret
+
+    def AddTextCtrlButton(self, value, buttonText):
+        text = wx.TextCtrl(self, -1, value)
+        button = wx.Button(self, -1, buttonText)
+        self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT)
+        self.GetSizer().Add(button, pos=(self.rowNr, 1), span=(1, 1), flag=wx.LEFT)
+        self.rowNr += 1
+        return text, button
+
+    def AddBitmap(self, bitmap):
+        bitmap = wx.StaticBitmap(self, -1, bitmap)
+        self.GetSizer().Add(bitmap, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT | wx.ALIGN_CENTER_VERTICAL)
+        self.rowNr += 1
+        return bitmap
+
+    def AddCheckmark(self, label, bitmap):
+        check = wx.StaticBitmap(self, -1, bitmap)
+        text = wx.StaticText(self, -1, label)
+        self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT | wx.RIGHT)
+        self.GetSizer().Add(check, pos=(self.rowNr, 1), span=(1, 1), flag=wx.ALL)
+        self.rowNr += 1
+        return check
+
+    def AllowNext(self):
+        return True
+
+    def AllowBack(self):
+        return True
+
+    def StoreData(self):
+        pass
+>>>>>>> Stashed changes
 
 
 class FirstInfoPage(InfoPage):
@@ -239,6 +398,7 @@ class FirstInfoPage(InfoPage):
 		return False
 
 class PrintrbotPage(InfoPage):
+<<<<<<< Updated upstream
 	def __init__(self, parent):
 		self._printer_info = {
 			# X, Y, Z, Filament Diameter, PrintTemperature, Print Speed, Travel Speed, Retract speed, Retract amount
@@ -405,6 +565,194 @@ class SelectVersion(InfoPage):
 			profile.putProfileSetting('print_temperature', '180')
 			profile.putProfileSetting('travel_speed', '150')
 		profile.checkAndUpdateMachineName()
+=======
+    def __init__(self, parent):
+        self._printer_info = {
+            # X, Y, Z, Filament Diameter, PrintTemperature, Print Speed, Travel Speed, Retract speed, Retract amount
+            "Original": (130, 130, 130, 2.95, 208, 40, 70, 30, 1),
+            "Simple Maker's Edition v1": (100, 100, 100, 1.75, 208, 40, 70, 30, 1),
+            "Simple Maker's Edition v2 (2013 Printrbot Simple)": (100, 100, 100, 1.75, 208, 40, 70, 30, 1),
+            "Simple Maker's Edition v3 (2014 Printrbot Simple)": (100, 100, 100, 1.75, 208, 40, 70, 30, 1),
+            "Simple Maker's Edition v4 (Model 1405)": (100, 100, 100, 1.75, 208, 40, 70, 30, 1),
+            "Simple Metal": (150, 150, 150, 1.75, 208, 40, 70, 30, 1),
+            "Jr v1": (150, 100, 80, 1.75, 208, 40, 70, 30, 1),
+            "Jr v2": (150, 150, 150, 1.75, 208, 40, 70, 30, 1),
+            "LC v2": (150, 150, 150, 1.75, 208, 40, 70, 30, 1),
+            "Plus v2": (200, 200, 200, 1.75, 208, 40, 70, 30, 1),
+            "Plus v2.1": (200, 200, 200, 1.75, 208, 40, 70, 30, 1),
+            "Plus v2.2 (Model 1404/140422)": (250, 250, 250, 1.75, 208, 40, 70, 30, 1),
+            "Plus v2.3 (Model 140501)": (250, 250, 250, 1.75, 208, 40, 70, 30, 1),
+            "Plus v2.4 (Model 140507)": (250, 250, 250, 1.75, 208, 40, 70, 30, 1),
+        }
+
+        super(PrintrbotPage, self).__init__(parent, "Printrbot Selection")
+        self.AddText(_("Select which Printrbot machine you have:"))
+        keys = self._printer_info.keys()
+        keys.sort()
+        self._items = []
+        for name in keys:
+            item = self.AddRadioButton(name)
+            item.data = self._printer_info[name]
+            self._items.append(item)
+
+    def StoreData(self):
+        profile.putMachineSetting('machine_name', 'Printrbot ???')
+        for item in self._items:
+            if item.GetValue():
+                data = item.data
+                profile.putMachineSetting('machine_name', 'Printrbot ' + item.GetLabel())
+                profile.putMachineSetting('machine_width', data[0])
+                profile.putMachineSetting('machine_depth', data[1])
+                profile.putMachineSetting('machine_height', data[2])
+                profile.putProfileSetting('nozzle_size', '0.5')
+                profile.putProfileSetting('filament_diameter', data[3])
+                profile.putProfileSetting('print_temperature', data[4])
+                profile.putProfileSetting('print_speed', data[5])
+                profile.putProfileSetting('travel_speed', data[6])
+                profile.putProfileSetting('retraction_speed', data[7])
+                profile.putProfileSetting('retraction_amount', data[8])
+                profile.putProfileSetting('wall_thickness', float(profile.getProfileSettingFloat('nozzle_size')) * 2)
+                profile.putMachineSetting('has_heated_bed', 'False')
+                profile.putMachineSetting('machine_center_is_zero', 'False')
+                profile.putMachineSetting('extruder_head_size_min_x', '0')
+                profile.putMachineSetting('extruder_head_size_min_y', '0')
+                profile.putMachineSetting('extruder_head_size_max_x', '0')
+                profile.putMachineSetting('extruder_head_size_max_y', '0')
+                profile.putMachineSetting('extruder_head_size_height', '0')
+
+
+class DownloadProfile(InfoPage):
+    def __init__(self, parent):
+        super(DownloadProfile, self).__init__(parent, _("Previous Print Heads"))
+        self.AddSeperator()
+        self.AddText(_("Type A Machines has machine settings optimized for\n       your printer on the download page."))
+        self.AddHiddenSeperator()
+        self.AddHyperLinkText("Click here to upload your settings", "typeamachines.com")
+        self.AddText("Then hit next to load them in.")
+        wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TypeAUploadProfile)
+
+
+class UploadProfile(InfoPage):
+    def __init__(self, parent):
+        super(UploadProfile, self).__init__(parent, _("Your Machine Settings Profile Selection"))
+        self.AddSeperator()
+        button = self.AddButton('Upload Profile Settings')
+        self.Bind(wx.EVT_BUTTON, self.OnB, button)
+
+    def OnB(self, event):
+        dlg=wx.FileDialog(self, _("Select profile file to load"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
+        dlg.SetWildcard("ini files (*.ini)|*.ini")
+        if dlg.ShowModal() == wx.ID_OK:
+            profileFile = dlg.GetPath()
+            profile.loadProfile(profileFile)
+        dlg.Destroy()
+
+
+class SelectPrintHead(InfoPage):
+    def __init__(self, parent):
+        super(SelectPrintHead, self).__init__(parent, _("Print Head Selection"))
+        panel = wx.Panel(self, -1)
+        self.AddText(_("Are you using a Winchester G2 Print Head?\n"))
+        image = wx.Bitmap(resources.getPathForImage('printHeadImage.png'))
+        self.AddBitmap(image)
+        self.AddSeperator()
+        self.newPrintHeadRadio = self.AddRadioButton("Yes")
+        self.newPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.StoreData)
+        self.newPrintHeadRadio.SetValue(True)
+        self.oldPrintHeadRadio = self.AddRadioButton("No")
+        self.oldPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.OnOldPrintHeadSelect)
+
+    def OnOldPrintHeadSelect(self, e):
+        wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TypeADownloadProfile)
+
+    def StoreData(self):
+        if self.newPrintHeadRadio.GetValue():
+            profile.putMachineSetting('machine_name', "Type A Machines 2014 Series 1")
+            profile.putMachineSetting('machine_type', '2014Series1')
+            profile.putMachineSetting('machine_width', '305')
+            profile.putMachineSetting('machine_depth', '305')
+            profile.putMachineSetting('machine_height', '305')
+            profile.putMachineSetting('machine_center_is_zero', 'False')
+            profile.putMachineSetting('has_heated_bed', 'False')
+            profile.putMachineSetting('gcode_flavor', "RepRap (Marlin/Sprinter")
+            profile.putMachineSetting('extruder_amount', '1')
+            profile.putProfileSetting('layer_height', '0.15')
+            profile.putProfileSetting('wall_thickness', '0.8')
+            profile.putProfileSetting('retraction_enable', 'True')
+            profile.putProfileSetting('solid_layer_thickness', '0.8')
+            profile.putProfileSetting('fill_density', '8')
+            profile.putProfileSetting('nozzle_size', '0.4')
+            profile.putProfileSetting('print_speed', '100')
+            profile.putProfileSetting('print_temperature', '220')
+            profile.putProfileSetting('print_temperature2', '0')
+            profile.putProfileSetting('print_temperature3', '0')
+            profile.putProfileSetting('print_temperature4', '0')
+            profile.putProfileSetting('print_bed_temperature', '70')
+            profile.putProfileSetting('support', 'None')
+            profile.putProfileSetting('platform_adhesion', 'None')
+            profile.putProfileSetting('support_dual_extrusion', 'Both')
+            profile.putProfileSetting('wipe_tower', 'False')
+            profile.putProfileSetting('wipe_tower_volume', '15')
+            profile.putProfileSetting('ooze_shield', 'False')
+            profile.putProfileSetting('filament_diameter', '1.75')
+            profile.putProfileSetting('filament_diameter2', '0')
+            profile.putProfileSetting('filament_diameter3', '0')
+            profile.putProfileSetting('filament_diameter4', '0')
+            profile.putProfileSetting('filament_flow', '100.0')
+            profile.putProfileSetting('retraction_speed', '60')
+            profile.putProfileSetting('retraction_amount', '4.5')
+            profile.putProfileSetting('retraction_dual_amount', '16.5')
+            profile.putProfileSetting('retraction_min_travel', '1.5')
+            profile.putProfileSetting('retraction_combing', 'True')
+            profile.putProfileSetting('retraction_minimal_extrusion', '0.02')
+            profile.putProfileSetting('retraction_hop', '0.0')
+            profile.putProfileSetting('bottom_thickness', '0.3')
+            profile.putProfileSetting('layer0_width_factor', '100')
+            profile.putProfileSetting('object_sink', '0.0')
+            profile.putProfileSetting('overlap_dual', '0.15')
+            profile.putProfileSetting('travel_speed', '200.0')
+            profile.putProfileSetting('bottom_layer_speed', '45')
+            profile.putProfileSetting('infill_speed', '0.0')
+            profile.putProfileSetting('inset0_speed', '0.0')
+            profile.putProfileSetting('insetx_speed', '0.0')
+            profile.putProfileSetting('cool_min_layer_time', '3')
+            profile.putProfileSetting('fan_enabled', 'True')
+            profile.putProfileSetting('skirt_line_count', '1')
+            profile.putProfileSetting('skirt_gap', '3.0')
+            profile.putProfileSetting('skirt_minimal_length', '150.0')
+            profile.putProfileSetting('fan_full_height', '0.0')
+            profile.putProfileSetting('fan_speed', '100')
+            profile.putProfileSetting('fan_speed_max', '100')
+            profile.putProfileSetting('cool_min_feedrate', '10')
+            profile.putProfileSetting('cool_head_lift', 'False')
+            profile.putProfileSetting('solid_top', 'True')
+            profile.putProfileSetting('solid_bottom', 'True')
+            profile.putProfileSetting('fill_overlap', '15')
+            profile.putProfileSetting('support_type', 'Grid')
+            profile.putProfileSetting('support_angle', '60')
+            profile.putProfileSetting('support_fill_rate', '15')
+            profile.putProfileSetting('support_xy_distance', '0.7')
+            profile.putProfileSetting('support_z_distance', '0.15')
+            profile.putProfileSetting('spiralize', 'False')
+            profile.putProfileSetting('simple_mode', 'False')
+            profile.putProfileSetting('brim_line_count', '20')
+            profile.putProfileSetting('raft_margin', '5')
+            profile.putProfileSetting('raft_line_spacing', '1.0')
+            profile.putProfileSetting('raft_base_thickness', '0.3')
+            profile.putProfileSetting('raft_base_linewidth', '0.7')
+            profile.putProfileSetting('raft_interface_thickness', '0.2')
+            profile.putProfileSetting('raft_interface_linewidth', '0.2')
+            profile.putProfileSetting('raft_airgap', '0.22')
+            profile.putProfileSetting('raft_surface_layers', '2')
+            profile.putProfileSetting('fix_horrible_union_all_type_a', 'True')
+            profile.putProfileSetting('fix_horrible_union_all_type_b', 'False')
+            profile.putProfileSetting('fix_horrible_use_open_bits', 'False')
+            profile.putProfileSetting('fix_horrible_extensive_stitching', 'False')
+            profile.putProfileSetting('object_center_x', '-1')
+            profile.putProfileSetting('object_center_y', '-1')
+            profile.checkAndUpdateMachineName()
+
+>>>>>>> Stashed changes
 
 class OtherMachineSelectPage(InfoPage):
 	def __init__(self, parent):
@@ -998,6 +1346,7 @@ class Ultimaker2ReadyPage(InfoPage):
 		self.AddSeperator()
 
 class configWizard(wx.wizard.Wizard):
+<<<<<<< Updated upstream
 	def __init__(self, addNew = False):
 		super(configWizard, self).__init__(None, -1, "Configuration Wizard")
 
@@ -1053,6 +1402,67 @@ class configWizard(wx.wizard.Wizard):
 			self.FindWindowById(wx.ID_BACKWARD).Enable()
 		else:
 			self.FindWindowById(wx.ID_BACKWARD).Disable()
+=======
+    def __init__(self, addNew=False):
+        super(configWizard, self).__init__(None, -1, "Configuration Wizard")
+
+        self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGED, self.OnPageChanged)
+        self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGING, self.OnPageChanging)
+
+        self.firstInfoPage = FirstInfoPage(self, addNew)
+        self.TypeASelectPrintHead = SelectPrintHead(self)
+        self.TypeAUploadProfile = UploadProfile(self)
+        self.TypeADownloadProfile = DownloadProfile(self)
+        self.TypeAReadyPage = TypeAMachinesReadyPage(self)
+        self.machineSelectPage = MachineSelectPage(self)
+        self.ultimakerSelectParts = SelectParts(self)
+        self.ultimakerFirmwareUpgradePage = UltimakerFirmwareUpgradePage(self)
+        self.ultimakerCheckupPage = UltimakerCheckupPage(self)
+        self.ultimakerCalibrationPage = UltimakerCalibrationPage(self)
+        self.ultimakerCalibrateStepsPerEPage = UltimakerCalibrateStepsPerEPage(self)
+        self.bedLevelPage = bedLevelWizardMain(self)
+        self.headOffsetCalibration = headOffsetCalibrationPage(self)
+        self.printrbotSelectType = PrintrbotPage(self)
+        self.otherMachineSelectPage = OtherMachineSelectPage(self)
+        self.customRepRapInfoPage = CustomRepRapInfoPage(self)
+        self.otherMachineInfoPage = OtherMachineInfoPage(self)
+
+        self.ultimaker2ReadyPage = Ultimaker2ReadyPage(self)
+
+        wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.TypeASelectPrintHead)
+        wx.wizard.WizardPageSimple.Chain(self.TypeASelectPrintHead, self.TypeAReadyPage)
+        wx.wizard.WizardPageSimple.Chain(self.TypeAUploadProfile, self.TypeAReadyPage)
+
+        wx.wizard.WizardPageSimple.Chain(self.firstInfoPage, self.machineSelectPage)
+        wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)
+        wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimakerSelectParts)
+        wx.wizard.WizardPageSimple.Chain(self.ultimakerSelectParts, self.ultimakerFirmwareUpgradePage)
+        wx.wizard.WizardPageSimple.Chain(self.ultimakerFirmwareUpgradePage, self.ultimakerCheckupPage)
+        wx.wizard.WizardPageSimple.Chain(self.ultimakerCheckupPage, self.bedLevelPage)
+        wx.wizard.WizardPageSimple.Chain(self.ultimakerCalibrationPage, self.ultimakerCalibrateStepsPerEPage)
+        wx.wizard.WizardPageSimple.Chain(self.printrbotSelectType, self.otherMachineInfoPage)
+        wx.wizard.WizardPageSimple.Chain(self.otherMachineSelectPage, self.customRepRapInfoPage)
+
+        self.FitToPage(self.firstInfoPage)
+        self.GetPageAreaSizer().Add(self.firstInfoPage)
+
+        self.RunWizard(self.firstInfoPage)
+        self.Destroy()
+
+    def OnPageChanging(self, e):
+        e.GetPage().StoreData()
+
+    def OnPageChanged(self, e):
+        if e.GetPage().AllowNext():
+            self.FindWindowById(wx.ID_FORWARD).Enable()
+        else:
+            self.FindWindowById(wx.ID_FORWARD).Disable()
+        if e.GetPage().AllowBack():
+            self.FindWindowById(wx.ID_BACKWARD).Enable()
+        else:
+            self.FindWindowById(wx.ID_BACKWARD).Disable()
+
+>>>>>>> Stashed changes
 
 class bedLevelWizardMain(InfoPage):
 	def __init__(self, parent):
