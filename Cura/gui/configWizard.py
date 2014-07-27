@@ -364,6 +364,7 @@ class UploadProfile(InfoPage):
             profileFile = dlg.GetPath()
             profile.loadProfile(profileFile)
             profile.loadMachineSettings(profileFile)
+            profile.checkAndUpdateMachineName()
         dlg.Destroy()
 
 
