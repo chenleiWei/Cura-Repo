@@ -1,0 +1,61 @@
+[machine_specific_SLICER_presets]
+printTypeNormal.GetValue():
+			put('wall_thickness', nozzle_size * 2.0)
+			put('layer_height', '0.15')
+			put('fill_density', '12')
+			put('solid_layer_thickness', '0.75')
+			put('bottom_thickness', '0.75')
+			put('print_speed', '100')
+			put('cool_min_layer_time', '3')
+			put('bottom_layer_speed', '30')
+printTypeLow.GetValue():
+			put('wall_thickness', nozzle_size * 2.0)
+			put('layer_height', '0.20')
+			put('fill_density', '12')
+			put('solid_layer_thickness', '0.8')
+			put('bottom_thickness', '0.8')
+			put('print_speed', '120')
+			put('cool_min_layer_time', '3')
+			put('bottom_layer_speed', '45')
+printTypeHigh.GetValue():
+			put('wall_thickness', nozzle_size * 2.0)
+			put('layer_height', '0.10')
+			put('fill_density', '18')
+			put('solid_layer_thickness', '0.6')
+			put('bottom_thickness', '0.6')
+			put('print_speed', '90')
+			put('bottom_layer_speed', '30')
+printTypeBest.GetValue():
+			put('wall_thickness', nozzle_size * 2.0)
+			put('layer_height', '0.05')
+			put('fill_density', '25')
+			put('solid_layer_thickness', '0.4')
+			put('bottom_thickness', '0.4')
+			put('print_speed', '80')
+			put('bottom_layer_speed', '25')
+printTypeDraft.GetValue():
+			put('wall_thickness', nozzle_size * 2.0)
+			put('layer_height', '0.25')
+			put('fill_density', '12')
+			put('solid_layer_thickness', '1.0')
+			put('bottom_thickness', '1.0')
+			put('print_speed', '135')
+			put('bottom_layer_speed', '45')
+
+[machine_specific_MATERIAL_presets]
+		if self.printMaterialPLA.GetValue():
+			put('print_temperature', '220')
+			put('fan_full_height','0.0')
+		if self.printMaterialFlex.GetValue():
+			put('print_temperature', '245')
+			put('print_speed', '40')
+			put('retraction_amount', '1')
+			put('fan_full_height','0.0')
+		if self.printMaterialPET.GetValue():
+			put('print_temperature', '260')
+			put('fan_full_height','0.0')
+		if self.printMaterialCFPLA.GetValue():
+			put('print_temperature', '230')
+			put('print_speed', '45')
+			put('retraction_amount', '2')
+			put('fan_full_height','0.0')
