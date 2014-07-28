@@ -345,7 +345,7 @@ class DownloadProfile(InfoPage):
         self.AddSeperator()
         self.AddText(_("Type A Machines has machine settings optimized for\n       your printer on the download page."))
         self.AddHiddenSeperator()
-        self.AddHyperLinkText("Click here to upload your settings", "typeamachines.com")
+        self.AddHyperLinkText("Click here to upload your settings", "http://www.typeamachines.com")
         self.AddText("Then hit next to load them in.")
         wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TypeAUploadProfile)
 
@@ -356,6 +356,7 @@ class UploadProfile(InfoPage):
         self.AddSeperator()
         button = self.AddButton('Upload Profile Settings')
         self.Bind(wx.EVT_BUTTON, self.OnB, button)
+        #wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TypeAReadyPage)
 
     def OnB(self, event):
         dlg=wx.FileDialog(self, _("Select profile file to load"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
@@ -377,13 +378,17 @@ class SelectPrintHead(InfoPage):
         self.AddBitmap(image)
         self.AddSeperator()
         self.newPrintHeadRadio = self.AddRadioButton("Yes")
-        self.newPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.StoreData)
+        self.newPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.OnNewPrintHeadSelect)
         self.newPrintHeadRadio.SetValue(True)
         self.oldPrintHeadRadio = self.AddRadioButton("No")
         self.oldPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.OnOldPrintHeadSelect)
 
     def OnOldPrintHeadSelect(self, e):
         wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TypeADownloadProfile)
+
+    def OnNewPrintHeadSelect(self, e):
+        wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TypeAReadyPage)
+        self.StoreData()
 
     def StoreData(self):
         if self.newPrintHeadRadio.GetValue():
@@ -1114,9 +1119,6 @@ class configWizard(wx.wizard.Wizard):
         self.ultimaker2ReadyPage = Ultimaker2ReadyPage(self)
 
         wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.TypeASelectPrintHead)
-        wx.wizard.WizardPageSimple.Chain(self.TypeASelectPrintHead, self.TypeAReadyPage)
-        wx.wizard.WizardPageSimple.Chain(self.TypeAUploadProfile, self.TypeAReadyPage)
-
         wx.wizard.WizardPageSimple.Chain(self.firstInfoPage, self.machineSelectPage)
         wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)
         wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimakerSelectParts)
