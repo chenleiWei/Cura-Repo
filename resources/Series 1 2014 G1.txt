@@ -18,7 +18,7 @@ solid_layer_thickness = 0.8
 fill_density = 8
 nozzle_size = 0.4
 print_speed = 100
-print_temperature = 220
+print_temperature = 195
 print_temperature2 = 0
 print_temperature3 = 0
 print_temperature4 = 0
@@ -92,7 +92,7 @@ object_center_y = -1
 start.gcode = ; -- START GCODE --
 	;Sliced at: {day} {date} {time}
 	;Sliced By Cura for Type A Machines 1.0.0a3
-	;Sliced for Type A Machines Series 1 2014 G2 Print Head (July 2014)
+	;Sliced for Type A Machines Series 1 2014 (PRE-July 2014)
 	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
 	;Print time: {print_time}
 	;Filament used: {filament_amount}m {filament_weight}g
