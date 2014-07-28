@@ -323,6 +323,8 @@ G90                         ;absolute positioning
 """, str, 'alteration', 'alteration')
 #######################################################################################
 setting('start2.gcode', """;Sliced at: {day} {date} {time}
+;Sliced By Cura for Type A Machines 1.0.0
+;Sliced for Type A Machines Series 1 2014 G2 Print Head (July 2014)
 ;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
