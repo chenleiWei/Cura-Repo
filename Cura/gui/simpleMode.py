@@ -35,6 +35,7 @@ class simpleModePanel(wx.Panel):
 			printMaterialPanel.Show(False)
 		
 		self.printSupport = wx.CheckBox(self, -1, _("Print support structure"))
+		self.printBrim = wx.CheckBox(self, -1, _("Print Brim"))
 
 		sizer = wx.GridBagSizer()
 		self.SetSizer(sizer)
@@ -67,6 +68,7 @@ class simpleModePanel(wx.Panel):
 		sb = wx.StaticBox(self, label=_("Support:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		boxsizer.Add(self.printSupport)
+		boxsizer.Add(self.printBrim)
 		sizer.Add(boxsizer, (2,0), flag=wx.EXPAND)
 
 		self.printTypeNormal.SetValue(True)
@@ -87,6 +89,7 @@ class simpleModePanel(wx.Panel):
 		self.printMaterialDiameter.Bind(wx.EVT_TEXT, lambda e: self._callback())
 
 		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self._callback())
+		self.printBrim.Bind(wx.EVT_CHECKBOX, lambda e: self._callback())
 
 	def setupSlice(self):
 		put = profile.setTempOverride
@@ -98,7 +101,8 @@ class simpleModePanel(wx.Panel):
 
 		if self.printSupport.GetValue():
 			put('support', _("Exterior Only"))
-
+		if self.printBrim.GetValue():
+			put('platform_adhesion', _("Brim"))
 		nozzle_size = float(get('nozzle_size'))
 		if self.printTypeNormal.GetValue():
 			put('wall_thickness', nozzle_size * 2.0)
