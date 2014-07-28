@@ -120,10 +120,10 @@ class CuraApp(wx.App):
 		#If we haven't run it before, run the configuration wizard.
 		if profile.getMachineSetting('machine_type') == 'unknown':
 			if platform.system() == "Windows":
-				exampleFile = os.path.normpath(os.path.join(resources.resourceBasePath, 'example', 'UltimakerRobot_support.stl'))
+				exampleFile = os.path.normpath(os.path.join(resources.resourceBasePath, 'example', 'FirstPrintCone.stl'))
 			else:
 				#Check if we need to copy our examples
-				exampleFile = os.path.expanduser('~/CuraExamples/UltimakerRobot_support.stl')
+				exampleFile = os.path.expanduser('~/CuraExamples/FirstPrintCone.stl')
 				if not os.path.isfile(exampleFile):
 					try:
 						os.makedirs(os.path.dirname(exampleFile))
