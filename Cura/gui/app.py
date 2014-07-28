@@ -136,14 +136,6 @@ class CuraApp(wx.App):
 				self.splash.Show(False)
 			configWizard.configWizard()
 
-		if profile.getPreference('check_for_updates') == 'True':
-			newVersion = version.checkForNewerVersion()
-			if newVersion is not None:
-				if self.splash is not None:
-					self.splash.Show(False)
-				if wx.MessageBox(_("A new version of Cura is available, would you like to download?"), _("New version available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
-					webbrowser.open(newVersion)
-					return
 		if profile.getMachineSetting('machine_name') == '':
 			return
 		self.mainWindow = mainWindow.mainWindow()

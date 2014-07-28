@@ -49,7 +49,6 @@ class preferencesDialog(wx.Dialog):
 
 		configBase.TitleRow(right, _("Cura settings"))
 		configBase.SettingRow(right, 'auto_detect_sd')
-		configBase.SettingRow(right, 'check_for_updates')
 
 		self.okButton = wx.Button(right, -1, 'Ok')
 		right.GetSizer().Add(self.okButton, (right.GetSizer().GetRows(), 0), flag=wx.BOTTOM, border=5)
