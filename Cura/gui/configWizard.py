@@ -384,6 +384,7 @@ class SelectPrintHead(InfoPage):
         self.newPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.StoreData)
         self.newPrintHeadRadio.SetValue(True)
         self.oldPrintHeadRadio = self.AddRadioButton("No")
+<<<<<<< guiAdditions
         self.oldPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.OnOldPrintHeadSelect)
 
     def OnOldPrintHeadSelect(self, e):
@@ -391,6 +392,17 @@ class SelectPrintHead(InfoPage):
 
     def StoreData(self):
         if self.newPrintHeadRadio.GetValue():
+=======
+        self.oldPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.StoreData)
+
+    def StoreData(self):
+        if self.oldPrintHeadRadio.GetValue:
+            profile.putMachineSetting('machine_name', "Type A Machines 2014 Series 1")
+            profile.putMachineSetting('machine_type', 'WinG1_Series1')
+            profile.putProfileSetting('print_temperature', '195')
+            profile.checkAndUpdateMachineName()
+        elif self.newPrintHeadRadio.GetValue():
+>>>>>>> local
             profile.putMachineSetting('machine_name', "Type A Machines 2014 Series 1")
             profile.putMachineSetting('machine_type', '2014Series1')
             profile.putMachineSetting('machine_width', '305')
@@ -475,6 +487,7 @@ class SelectPrintHead(InfoPage):
             profile.putProfileSetting('object_center_x', '-1')
             profile.putProfileSetting('object_center_y', '-1')
             profile.checkAndUpdateMachineName()
+
 
 
 class OtherMachineSelectPage(InfoPage):
@@ -1099,8 +1112,6 @@ class configWizard(wx.wizard.Wizard):
 
         self.firstInfoPage = FirstInfoPage(self, addNew)
         self.TypeASelectPrintHead = SelectPrintHead(self)
-        self.TypeAUploadProfile = UploadProfile(self)
-        self.TypeADownloadProfile = DownloadProfile(self)
         self.TypeAReadyPage = TypeAMachinesReadyPage(self)
         self.machineSelectPage = MachineSelectPage(self)
         self.ultimakerSelectParts = SelectParts(self)
@@ -1119,9 +1130,12 @@ class configWizard(wx.wizard.Wizard):
 
         wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.TypeASelectPrintHead)
         wx.wizard.WizardPageSimple.Chain(self.TypeASelectPrintHead, self.TypeAReadyPage)
+<<<<<<< guiAdditions
         wx.wizard.WizardPageSimple.Chain(self.TypeADownloadProfile, self.TypeAUploadProfile)
         wx.wizard.WizardPageSimple.Chain(self.TypeAUploadProfile, self.TypeAReadyPage)
 
+=======
+>>>>>>> local
         wx.wizard.WizardPageSimple.Chain(self.firstInfoPage, self.machineSelectPage)
         wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)
         wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimakerSelectParts)
