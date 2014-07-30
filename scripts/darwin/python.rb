@@ -1,19 +1,19 @@
 require 'formula'
 
-class Distribute < Formula
-  url 'http://pypi.python.org/packages/source/d/distribute/distribute-0.6.34.tar.gz'
-  sha1 'b6f9cfbaf3e63833b71009812a613be13e68f5de'
-end
-
-class Pip < Formula
-  url 'http://pypi.python.org/packages/source/p/pip/pip-1.2.1.tar.gz'
-  sha1 '35db84983ef3f66a8a161d320e61d192afc233d9'
-end
-
 class Python < Formula
-  homepage 'http://www.python.org'
-  url 'http://www.python.org/ftp/python/2.7.3/Python-2.7.3.tar.bz2'
-  sha1 '842c4e2aff3f016feea3c6e992c7fa96e49c9aa0'
+    homepage 'http://www.python.org'
+    url 'http://www.python.org/ftp/python/2.7.3/Python-2.7.3.tar.bz2'
+    sha1 '842c4e2aff3f016feea3c6e992c7fa96e49c9aa0'
+    version '2.7.3'
+
+    resource("Distribute") do
+        url 'http://pypi.python.org/packages/source/d/distribute/distribute-0.6.34.tar.gz'
+        sha1 'b6f9cfbaf3e63833b71009812a613be13e68f5de'
+    end
+    resource("Pip") do
+        url 'http://pypi.python.org/packages/source/p/pip/pip-1.2.1.tar.gz'
+        sha1 '35db84983ef3f66a8a161d320e61d192afc233d9'
+    end
 
   option :universal
   option 'quicktest', 'Run `make quicktest` after the build'
@@ -155,8 +155,8 @@ class Python < Formula
     # into /Library/Python/X.Y/site-packages with /usr/bin/easy_install.
     mkdir_p scripts_folder unless scripts_folder.exist?
     setup_args = ["-s", "setup.py", "--no-user-cfg", "install", "--force", "--verbose", "--install-lib=#{site_packages_cellar}", "--install-scripts=#{bin}" ]
-    Distribute.new.brew { system "#{bin}/python", *setup_args }
-    Pip.new.brew { system "#{bin}/python", *setup_args }
+    resource("Distribute").stage { system "#{bin}/python", *setup_args }
+    resource("Pip").stage{ system "#{bin}/python", *setup_args }
 
     # Tell distutils-based installers where to put scripts and python modules
     (prefix/"Frameworks/Python.framework/Versions/2.7/lib/python2.7/distutils/distutils.cfg").write <<-EOF.undent
@@ -186,13 +186,13 @@ class Python < Formula
     unless MacOS::CLT.installed?
       # Help Python's build system (distribute/pip) to build things on Xcode-only systems
       # The setup.py looks at "-isysroot" to get the sysroot (and not at --sysroot)
-      cflags += " -isysroot #{MacOS.sdk_path}"
-      ldflags += " -isysroot #{MacOS.sdk_path}"
+      cflags += "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk"
+      ldflags += "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk"
       # Same zlib.h-not-found-bug as in env :std (see below)
-      args << "CPPFLAGS=-I#{MacOS.sdk_path}/usr/include"
+      args << "CPPFLAGS=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/usr/include"
       # For the Xlib.h, Python needs this header dir with the system Tk
       unless build.include? 'with-brewed-tk'
-        cflags += " -I#{MacOS.sdk_path}/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers"
+        cflags += "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers"
       end
     end
     args << cflags
@@ -209,7 +209,7 @@ class Python < Formula
     # the needed includes with "-I" here to avoid this err:
     #     building dbm using ndbm
     #     error: /usr/include/zlib.h: No such file or directory
-    ENV.append 'CPPFLAGS', "-I#{MacOS.sdk_path}/usr/include" unless MacOS::CLT.installed?
+    ENV.append 'CPPFLAGS', "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/usr/include" unless MacOS::CLT.installed?
     ENV.append_to_cflags '-msse2 -mno-sse3 -mno-sse4'
 
     # Don't use optimizations other than "-Os" here, because Python's distutils
