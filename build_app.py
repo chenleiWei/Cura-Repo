@@ -13,7 +13,7 @@ if sys.platform.startswith('darwin'):
         u'CFBundleName': u'Cura',
         u'CFBundleShortVersionString': version,
         u'CFBundleVersion': version,
-        u'CFBundleIdentifier': u'com.ultimaker.Cura-'+version,
+        u'CFBundleIdentifier': u'com.typeamachines.cura'
         u'LSMinimumSystemVersion': u'10.6',
         u'LSApplicationCategoryType': u'public.app-category.graphics-design',
         u'CFBundleDocumentTypes': [
