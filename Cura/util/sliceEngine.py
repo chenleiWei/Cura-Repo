@@ -481,8 +481,8 @@ class Engine(object):
 			'minimalLayerTime': int(profile.getProfileSettingFloat('cool_min_layer_time')),
 			'minimalFeedrate': int(profile.getProfileSettingFloat('cool_min_feedrate')),
 			'coolHeadLift': 1 if profile.getProfileSetting('cool_head_lift') == 'True' else 0,
-			'startCode': profile.getAlterationFileContents('TypeAStart.gcode', extruderCount) if profile.getMachineSetting('machine_type') == '2014Series1' else profile.getAlterationFileContents('start.gcode', extruderCount),
-			'endCode': profile.getAlterationFileContents('TypeAEnd.gcode', extruderCount) if profile.getMachineSetting('machine_type') == '2014Series1' else profile.getAlterationFileContents('end.gcode', extruderCount),
+			'startCode': profile.getAlterationFileContents('TypeAStart.gcode', extruderCount) if profile.getMachineSetting('machine_type') == 'WinG1_2014Series1' or 'WinG1_2014Series1' else profile.getAlterationFileContents('start.gcode', extruderCount),
+			'endCode': profile.getAlterationFileContents('TypeAEnd.gcode', extruderCount) if profile.getMachineSetting('machine_type') == 'WinG1_2014Series1' or 'WinG2_2014Series1' else profile.getAlterationFileContents('end.gcode', extruderCount),
 			'preSwitchExtruderCode': profile.getAlterationFileContents('preSwitchExtruder.gcode', extruderCount),
 			'postSwitchExtruderCode': profile.getAlterationFileContents('postSwitchExtruder.gcode', extruderCount),
 

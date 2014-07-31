@@ -13,7 +13,7 @@ class alterationPanel(wx.Panel):
         self.alterationFileList = ['', ''] # default
         # Type A start/end gcode settings for a single extruder
         machine_type = profile.getMachineSetting('machine_type')
-        if machine_type == '2014Series1':
+        if machine_type == 'WinG1_2014Series1' or 'WinG2_2014Series1':
             self.alterationFileList[0] = 'TypeAStart.gcode'
             self.alterationFileList[1] = 'TypeAEnd.gcode'
         else:
