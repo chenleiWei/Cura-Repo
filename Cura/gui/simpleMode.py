@@ -153,7 +153,7 @@ class simpleModePanel(wx.Panel):
 
 		put('filament_diameter', self.printMaterialDiameter.GetValue())
 		if self.printMaterialPLA.GetValue():
-			if machine_type == 'WinG1_Series1':
+			if machine_type == 'WinG1_2014Series1':
 				put('print_temperature', '195')
 			else:
 				put('print_temperature', '220')
