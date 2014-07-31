@@ -12,6 +12,7 @@ class alterationPanel(wx.Panel):
         self.callback = callback
         self.alterationFileList = ['start.gcode', 'end.gcode'] # default
         # Type A start/end gcode settings for a single extruder
+<<<<<<< refs/remotes/origin/feature/dubious-changes
         machine_name = profile.getMachineSetting('machine_name')
         if machine_name == 'Type A Machines 2013 Series 1':
             self.alterationFileList = [
@@ -21,6 +22,15 @@ class alterationPanel(wx.Panel):
             self.alterationFileList = [
                 'Type A  Machines 2014 - Start.gcode',
                 'Type A  Machines 2014 - End.gcode']
+=======
+        machine_type = profile.getMachineSetting('machine_type')
+        if machine_type == 'WinG1_2014Series1' or 'WinG2_2014Series1':
+            self.alterationFileList[0] = 'TypeAStart.gcode'
+            self.alterationFileList[1] = 'TypeAEnd.gcode'
+        else:
+            self.alterationFileList = ['start.gcode', 'end.gcode']
+
+>>>>>>> local
         if int(profile.getMachineSetting('extruder_amount')) > 1:
             self.alterationFileList += ['preSwitchExtruder.gcode',
                                         'postSwitchExtruder.gcode']

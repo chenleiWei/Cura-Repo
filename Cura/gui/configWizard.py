@@ -239,6 +239,7 @@ class FirstInfoPage(InfoPage):
 		return False
 
 class PrintrbotPage(InfoPage):
+<<<<<<< refs/remotes/origin/feature/dubious-changes
 	def __init__(self, parent):
 		self._printer_info = {
 			# X, Y, Z, Filament Diameter, PrintTemperature, Print Speed, Travel Speed, Retract speed, Retract amount
@@ -337,6 +338,167 @@ class SelectVersion(InfoPage):
 			profile.putProfileSetting('print_temperature', '180')
 			profile.putProfileSetting('travel_speed', '150')
 		profile.checkAndUpdateMachineName()
+=======
+    def __init__(self, parent):
+        self._printer_info = {
+            # X, Y, Z, Filament Diameter, PrintTemperature, Print Speed, Travel Speed, Retract speed, Retract amount
+            "Original": (130, 130, 130, 2.95, 208, 40, 70, 30, 1),
+            "Simple Maker's Edition v1": (100, 100, 100, 1.75, 208, 40, 70, 30, 1),
+            "Simple Maker's Edition v2 (2013 Printrbot Simple)": (100, 100, 100, 1.75, 208, 40, 70, 30, 1),
+            "Simple Maker's Edition v3 (2014 Printrbot Simple)": (100, 100, 100, 1.75, 208, 40, 70, 30, 1),
+            "Simple Maker's Edition v4 (Model 1405)": (100, 100, 100, 1.75, 208, 40, 70, 30, 1),
+            "Simple Metal": (150, 150, 150, 1.75, 208, 40, 70, 30, 1),
+            "Jr v1": (150, 100, 80, 1.75, 208, 40, 70, 30, 1),
+            "Jr v2": (150, 150, 150, 1.75, 208, 40, 70, 30, 1),
+            "LC v2": (150, 150, 150, 1.75, 208, 40, 70, 30, 1),
+            "Plus v2": (200, 200, 200, 1.75, 208, 40, 70, 30, 1),
+            "Plus v2.1": (200, 200, 200, 1.75, 208, 40, 70, 30, 1),
+            "Plus v2.2 (Model 1404/140422)": (250, 250, 250, 1.75, 208, 40, 70, 30, 1),
+            "Plus v2.3 (Model 140501)": (250, 250, 250, 1.75, 208, 40, 70, 30, 1),
+            "Plus v2.4 (Model 140507)": (250, 250, 250, 1.75, 208, 40, 70, 30, 1),
+        }
+
+        super(PrintrbotPage, self).__init__(parent, "Printrbot Selection")
+        self.AddText(_("Select which Printrbot machine you have:"))
+        keys = self._printer_info.keys()
+        keys.sort()
+        self._items = []
+        for name in keys:
+            item = self.AddRadioButton(name)
+            item.data = self._printer_info[name]
+            self._items.append(item)
+
+    def StoreData(self):
+        profile.putMachineSetting('machine_name', 'Printrbot ???')
+        for item in self._items:
+            if item.GetValue():
+                data = item.data
+                profile.putMachineSetting('machine_name', 'Printrbot ' + item.GetLabel())
+                profile.putMachineSetting('machine_width', data[0])
+                profile.putMachineSetting('machine_depth', data[1])
+                profile.putMachineSetting('machine_height', data[2])
+                profile.putProfileSetting('nozzle_size', '0.5')
+                profile.putProfileSetting('filament_diameter', data[3])
+                profile.putProfileSetting('print_temperature', data[4])
+                profile.putProfileSetting('print_speed', data[5])
+                profile.putProfileSetting('travel_speed', data[6])
+                profile.putProfileSetting('retraction_speed', data[7])
+                profile.putProfileSetting('retraction_amount', data[8])
+                profile.putProfileSetting('wall_thickness', float(profile.getProfileSettingFloat('nozzle_size')) * 2)
+                profile.putMachineSetting('has_heated_bed', 'False')
+                profile.putMachineSetting('machine_center_is_zero', 'False')
+                profile.putMachineSetting('extruder_head_size_min_x', '0')
+                profile.putMachineSetting('extruder_head_size_min_y', '0')
+                profile.putMachineSetting('extruder_head_size_max_x', '0')
+                profile.putMachineSetting('extruder_head_size_max_y', '0')
+                profile.putMachineSetting('extruder_head_size_height', '0')
+
+
+class SelectPrintHead(InfoPage):
+    def __init__(self, parent):
+        super(SelectPrintHead, self).__init__(parent, _("Print Head Selection"))
+        panel = wx.Panel(self, -1)
+
+        self.AddText(_("Are you using a Winchester G2 Print Head?\n"))
+        image = wx.Bitmap(resources.getPathForImage('printHeadImage.png'))
+        self.AddBitmap(image)
+        self.AddSeperator()
+        self.newPrintHeadRadio = self.AddRadioButton("Yes")
+        self.newPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.StoreData)
+        self.newPrintHeadRadio.SetValue(True)
+        self.oldPrintHeadRadio = self.AddRadioButton("No")
+        self.oldPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.StoreData)
+
+    def StoreData(self):
+        if self.oldPrintHeadRadio.GetValue():
+            profile.putMachineSetting('machine_type', 'WinG1_2014Series1')
+            profile.putProfileSetting('print_temperature', '195')
+        elif self.newPrintHeadRadio.GetValue():
+            profile.putMachineSetting('machine_type', 'WinG2_2014Series1')
+            profile.putProfileSetting('print_temperature', '220')
+        profile.putMachineSetting('machine_name', "Type A Machines 2014 Series 1")
+        profile.putMachineSetting('machine_width', '305')
+        profile.putMachineSetting('machine_depth', '305')
+        profile.putMachineSetting('machine_height', '305')
+        profile.putMachineSetting('machine_center_is_zero', 'False')
+        profile.putMachineSetting('has_heated_bed', 'False')
+        profile.putMachineSetting('gcode_flavor', "RepRap (Marlin/Sprinter")
+        profile.putMachineSetting('extruder_amount', '1')
+        profile.putProfileSetting('layer_height', '0.15')
+        profile.putProfileSetting('wall_thickness', '0.8')
+        profile.putProfileSetting('retraction_enable', 'True')
+        profile.putProfileSetting('solid_layer_thickness', '0.8')
+        profile.putProfileSetting('fill_density', '8')
+        profile.putProfileSetting('nozzle_size', '0.4')
+        profile.putProfileSetting('print_speed', '100')
+        profile.putProfileSetting('print_temperature2', '0')
+        profile.putProfileSetting('print_temperature3', '0')
+        profile.putProfileSetting('print_temperature4', '0')
+        profile.putProfileSetting('print_bed_temperature', '70')
+        profile.putProfileSetting('support', 'None')
+        profile.putProfileSetting('platform_adhesion', 'None')
+        profile.putProfileSetting('support_dual_extrusion', 'Both')
+        profile.putProfileSetting('wipe_tower', 'False')
+        profile.putProfileSetting('wipe_tower_volume', '15')
+        profile.putProfileSetting('ooze_shield', 'False')
+        profile.putProfileSetting('filament_diameter', '1.75')
+        profile.putProfileSetting('filament_diameter2', '0')
+        profile.putProfileSetting('filament_diameter3', '0')
+        profile.putProfileSetting('filament_diameter4', '0')
+        profile.putProfileSetting('filament_flow', '100.0')
+        profile.putProfileSetting('retraction_speed', '60')
+        profile.putProfileSetting('retraction_amount', '4.5')
+        profile.putProfileSetting('retraction_dual_amount', '16.5')
+        profile.putProfileSetting('retraction_min_travel', '1.5')
+        profile.putProfileSetting('retraction_combing', 'True')
+        profile.putProfileSetting('retraction_minimal_extrusion', '0.02')
+        profile.putProfileSetting('retraction_hop', '0.0')
+        profile.putProfileSetting('bottom_thickness', '0.3')
+        profile.putProfileSetting('layer0_width_factor', '100')
+        profile.putProfileSetting('object_sink', '0.0')
+        profile.putProfileSetting('overlap_dual', '0.15')
+        profile.putProfileSetting('travel_speed', '200.0')
+        profile.putProfileSetting('bottom_layer_speed', '45')
+        profile.putProfileSetting('infill_speed', '0.0')
+        profile.putProfileSetting('inset0_speed', '0.0')
+        profile.putProfileSetting('insetx_speed', '0.0')
+        profile.putProfileSetting('cool_min_layer_time', '3')
+        profile.putProfileSetting('fan_enabled', 'True')
+        profile.putProfileSetting('skirt_line_count', '1')
+        profile.putProfileSetting('skirt_gap', '3.0')
+        profile.putProfileSetting('skirt_minimal_length', '150.0')
+        profile.putProfileSetting('fan_full_height', '0.0')
+        profile.putProfileSetting('fan_speed', '100')
+        profile.putProfileSetting('fan_speed_max', '100')
+        profile.putProfileSetting('cool_min_feedrate', '10')
+        profile.putProfileSetting('cool_head_lift', 'False')
+        profile.putProfileSetting('solid_top', 'True')
+        profile.putProfileSetting('solid_bottom', 'True')
+        profile.putProfileSetting('fill_overlap', '15')
+        profile.putProfileSetting('support_type', 'Grid')
+        profile.putProfileSetting('support_angle', '60')
+        profile.putProfileSetting('support_fill_rate', '15')
+        profile.putProfileSetting('support_xy_distance', '0.7')
+        profile.putProfileSetting('support_z_distance', '0.15')
+        profile.putProfileSetting('spiralize', 'False')
+        profile.putProfileSetting('simple_mode', 'False')
+        profile.putProfileSetting('brim_line_count', '20')
+        profile.putProfileSetting('raft_margin', '5')
+        profile.putProfileSetting('raft_line_spacing', '1.0')
+        profile.putProfileSetting('raft_base_thickness', '0.3')
+        profile.putProfileSetting('raft_base_linewidth', '0.7')
+        profile.putProfileSetting('raft_interface_thickness', '0.2')
+        profile.putProfileSetting('raft_interface_linewidth', '0.2')
+        profile.putProfileSetting('raft_airgap', '0.22')
+        profile.putProfileSetting('raft_surface_layers', '2')
+        profile.putProfileSetting('fix_horrible_union_all_type_a', 'True')
+        profile.putProfileSetting('fix_horrible_union_all_type_b', 'False')
+        profile.putProfileSetting('fix_horrible_use_open_bits', 'False')
+        profile.putProfileSetting('fix_horrible_extensive_stitching', 'False')
+        profile.putProfileSetting('object_center_x', '-1')
+        profile.putProfileSetting('object_center_y', '-1')
+        profile.checkAndUpdateMachineName()
+>>>>>>> local
 
 class OtherMachineSelectPage(InfoPage):
 	def __init__(self, parent):
@@ -933,6 +1095,7 @@ class Ultimaker2ReadyPage(InfoPage):
 		self.AddSeperator()
 
 class configWizard(wx.wizard.Wizard):
+<<<<<<< refs/remotes/origin/feature/dubious-changes
 	def __init__(self, addNew = False):
 		super(configWizard, self).__init__(None, -1, "Configuration Wizard")
 
@@ -988,6 +1151,63 @@ class configWizard(wx.wizard.Wizard):
 			self.FindWindowById(wx.ID_BACKWARD).Enable()
 		else:
 			self.FindWindowById(wx.ID_BACKWARD).Disable()
+=======
+    def __init__(self, addNew=False):
+        super(configWizard, self).__init__(None, -1, "Configuration Wizard")
+
+        self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGED, self.OnPageChanged)
+        self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGING, self.OnPageChanging)
+
+        self.firstInfoPage = FirstInfoPage(self, addNew)
+        self.machineSelectPage = MachineSelectPage(self)
+        self.TypeASelectPrintHead = SelectPrintHead(self)
+        self.TypeAReadyPage = TypeAMachinesReadyPage(self)
+        self.ultimakerSelectParts = SelectParts(self)
+        self.ultimakerFirmwareUpgradePage = UltimakerFirmwareUpgradePage(self)
+        self.ultimakerCheckupPage = UltimakerCheckupPage(self)
+        self.ultimakerCalibrationPage = UltimakerCalibrationPage(self)
+        self.ultimakerCalibrateStepsPerEPage = UltimakerCalibrateStepsPerEPage(self)
+        self.bedLevelPage = bedLevelWizardMain(self)
+        self.headOffsetCalibration = headOffsetCalibrationPage(self)
+        self.printrbotSelectType = PrintrbotPage(self)
+        self.otherMachineSelectPage = OtherMachineSelectPage(self)
+        self.customRepRapInfoPage = CustomRepRapInfoPage(self)
+        self.otherMachineInfoPage = OtherMachineInfoPage(self)
+
+        self.ultimaker2ReadyPage = Ultimaker2ReadyPage(self)
+
+        wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.TypeASelectPrintHead)
+        wx.wizard.WizardPageSimple.Chain(self.TypeASelectPrintHead, self.TypeAReadyPage)
+        wx.wizard.WizardPageSimple.Chain(self.firstInfoPage, self.machineSelectPage)
+        wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)
+        wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimakerSelectParts)
+        wx.wizard.WizardPageSimple.Chain(self.ultimakerSelectParts, self.ultimakerFirmwareUpgradePage)
+        wx.wizard.WizardPageSimple.Chain(self.ultimakerFirmwareUpgradePage, self.ultimakerCheckupPage)
+        wx.wizard.WizardPageSimple.Chain(self.ultimakerCheckupPage, self.bedLevelPage)
+        wx.wizard.WizardPageSimple.Chain(self.ultimakerCalibrationPage, self.ultimakerCalibrateStepsPerEPage)
+        wx.wizard.WizardPageSimple.Chain(self.printrbotSelectType, self.otherMachineInfoPage)
+        wx.wizard.WizardPageSimple.Chain(self.otherMachineSelectPage, self.customRepRapInfoPage)
+
+        self.FitToPage(self.firstInfoPage)
+        self.GetPageAreaSizer().Add(self.firstInfoPage)
+
+        self.RunWizard(self.firstInfoPage)
+        self.Destroy()
+
+    def OnPageChanging(self, e):
+        e.GetPage().StoreData()
+
+    def OnPageChanged(self, e):
+        if e.GetPage().AllowNext():
+            self.FindWindowById(wx.ID_FORWARD).Enable()
+        else:
+            self.FindWindowById(wx.ID_FORWARD).Disable()
+        if e.GetPage().AllowBack():
+            self.FindWindowById(wx.ID_BACKWARD).Enable()
+        else:
+            self.FindWindowById(wx.ID_BACKWARD).Disable()
+
+>>>>>>> local
 
 class bedLevelWizardMain(InfoPage):
 	def __init__(self, parent):
