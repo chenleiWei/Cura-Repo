@@ -238,7 +238,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
     def AddBitmap(self, bitmap):
         bitmap = wx.StaticBitmap(self, -1, bitmap)
-        self.GetSizer().Add(bitmap, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT | wx.ALIGN_CENTER_VERTICAL)
+        self.GetSizer().Add(bitmap, pos=(self.rowNr, 0), span=(1, 2), flag= wx.CENTER)
         self.rowNr += 1
         return bitmap
 
@@ -386,12 +386,13 @@ class SelectPrintHead(InfoPage):
 
     def StoreData(self):
         if self.oldPrintHeadRadio.GetValue():
+            profile.putMachineSetting('machine_name', "2014 Series 1 - Winchester G1")
             profile.putMachineSetting('machine_type', 'WinG1_2014Series1')
             profile.putProfileSetting('print_temperature', '195')
         elif self.newPrintHeadRadio.GetValue():
+            profile.putMachineSetting('machine_name', "2014 Series 1 - Winchester G2")
             profile.putMachineSetting('machine_type', 'WinG2_2014Series1')
             profile.putProfileSetting('print_temperature', '220')
-        profile.putMachineSetting('machine_name', "Type A Machines 2014 Series 1")
         profile.putMachineSetting('machine_width', '305')
         profile.putMachineSetting('machine_depth', '305')
         profile.putMachineSetting('machine_height', '305')
@@ -553,7 +554,7 @@ class MachineSelectPage(InfoPage):
         super(MachineSelectPage, self).__init__(parent, _("Select your machine"))
         self.AddText(_("What kind of machine do you have:"))
 
-        self.TypeARadio = self.AddRadioButton("Type A Machines Series 1")
+        self.TypeARadio = self.AddRadioButton("Type A Machines 2014 Series 1")
         self.TypeARadio.Bind(wx.EVT_RADIOBUTTON, self.OnTypeASelect)
         self.TypeARadio.SetValue(True)
         self.Ultimaker2Radio = self.AddRadioButton("Ultimaker2")
