@@ -81,17 +81,17 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, lambda e: self.scene._showEngineLog(), i)
 
 		self.fileMenu.AppendSeparator()
-		i = self.fileMenu.Append(-1, _("Open Profile..."))
+		i = self.fileMenu.Append(-1, _("Open Settings Profile..."))
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnLoadProfile, i)
-		i = self.fileMenu.Append(-1, _("Save Profile..."))
+		i = self.fileMenu.Append(-1, _("Save Settings Profile..."))
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnSaveProfile, i)
-		i = self.fileMenu.Append(-1, _("Load Profile from GCode..."))
+		i = self.fileMenu.Append(-1, _("Load Settings Profile from GCode..."))
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnLoadProfileFromGcode, i)
 		self.fileMenu.AppendSeparator()
-		i = self.fileMenu.Append(-1, _("Reset Profile to default"))
+		i = self.fileMenu.Append(-1, _("Reset Settings Profile"))
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnResetProfile, i)
 
@@ -487,7 +487,7 @@ class mainWindow(wx.Frame):
 		dlg.Destroy()
 
 	def OnResetProfile(self, e):
-		dlg = wx.MessageDialog(self, _("This will reset all profile settings to defaults.\nUnless you have saved your current profile, all settings will be lost!\nDo you really want to reset?"), _("Profile reset"), wx.YES_NO | wx.ICON_QUESTION)
+		dlg = wx.MessageDialog(self, _("NOTE: Consider saving your current settings by selecting \'Save Settings Profile\' under the \'File\' menu before continuing.\n\n\nReset your profile and machine settings back to the \'%s\' default?") % profile.getMachineSetting('machine_name'), _("Reset Settings"), wx.YES_NO | wx.ICON_QUESTION)
 		result = dlg.ShowModal() == wx.ID_YES
 		dlg.Destroy()
 		if result:
