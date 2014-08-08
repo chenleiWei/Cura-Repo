@@ -389,7 +389,7 @@ class SelectPrintHead(InfoPage):
             profile.putMachineSetting('machine_name', "2014 Series 1 - Winchester G1")
             profile.putMachineSetting('machine_type', 'WinG1_2014Series1')
             profile.putProfileSetting('print_temperature', '195')
-        elif self.newPrintHeadRadio.GetValue():
+        if self.newPrintHeadRadio.GetValue():
             profile.putMachineSetting('machine_name', "2014 Series 1 - Winchester G2")
             profile.putMachineSetting('machine_type', 'WinG2_2014Series1')
             profile.putProfileSetting('print_temperature', '220')
