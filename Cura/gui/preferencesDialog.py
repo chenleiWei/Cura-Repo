@@ -61,6 +61,7 @@ class preferencesDialog(wx.Dialog):
 		#self.parent.reloadSettingPanels()
 		self.Destroy()
 
+
 class machineSettingsDialog(wx.Dialog):
 	def __init__(self, parent):
 		super(machineSettingsDialog, self).__init__(None, title="Machine settings")
@@ -141,11 +142,14 @@ class machineSettingsDialog(wx.Dialog):
 		self.parent.Show()
 		self.parent.reloadSettingPanels()
 		self.parent.updateMachineMenu()
+		machine_name = profile.getMachineSetting("machine_name")
 
-		prefDialog = machineSettingsDialog(self.parent)
-		prefDialog.Centre()
-		prefDialog.Show()
-		wx.CallAfter(self.Close)
+		wx.MessageBox(_("  %s") % (machine_name), _("Machine Successfully Added"), wx.OK | wx.CENTRE | wx.ICON_INFORMATION)
+
+		#prefDialog = machineSettingsDialog(self.parent)
+		#prefDialog.Centre()
+		#prefDialog.Show()
+		#wx.CallAfter(self.Close)
 
 	def OnRemoveMachine(self, e):
 		if profile.getMachineCount() < 2:
