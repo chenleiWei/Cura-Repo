@@ -81,17 +81,17 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, lambda e: self.scene._showEngineLog(), i)
 
 		self.fileMenu.AppendSeparator()
-		i = self.fileMenu.Append(-1, _("Open Settings Profile..."))
+		i = self.fileMenu.Append(-1, _("Open Profile Settings..."))
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnLoadProfile, i)
-		i = self.fileMenu.Append(-1, _("Save Settings Profile..."))
+		i = self.fileMenu.Append(-1, _("Save Profile Settings..."))
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnSaveProfile, i)
-		i = self.fileMenu.Append(-1, _("Load Settings Profile from GCode..."))
+		i = self.fileMenu.Append(-1, _("Load Profile Settings from GCode..."))
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnLoadProfileFromGcode, i)
 		self.fileMenu.AppendSeparator()
-		i = self.fileMenu.Append(-1, _("Reset Settings Profile"))
+		i = self.fileMenu.Append(-1, _("Reset Profile Settings"))
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnResetProfile, i)
 
@@ -487,12 +487,16 @@ class mainWindow(wx.Frame):
 		dlg.Destroy()
 
 	def OnResetProfile(self, e):
-		dlg = wx.MessageDialog(self, _("NOTE: Consider saving your current settings by selecting \'Save Settings Profile\' under the \'File\' menu before continuing.\n\n\nReset your profile and machine settings back to the \'%s\' default?") % profile.getMachineSetting('machine_name'), _("Reset Settings"), wx.YES_NO | wx.ICON_QUESTION)
+		machine_name = profile.getMachineSetting('machine_name')
+		dlg = wx.MessageDialog(self, _("NOTE: Consider saving your current settings by selecting \'Save Settings Profile\' under the \'File\' menu before continuing.\n\n\nReset your profile and machine settings back to the \'%s\' default?") % machine_name, _("Reset Profile Settings"), wx.YES_NO | wx.ICON_QUESTION)
 		result = dlg.ShowModal() == wx.ID_YES
 		dlg.Destroy()
 		if result:
+			wx.MessageBox(_("Your settings have been reset to the %s default settings.") % machine_name, _("Reset Profile Settings"), wx.OK | wx.CENTRE | wx.ICON_INFORMATION)
 			profile.resetProfile()
 			self.updateProfileToAllControls()
+
+
 
 	def OnSimpleSwitch(self, e):
 		profile.putPreference('startMode', 'Simple')
