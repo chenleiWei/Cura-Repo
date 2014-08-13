@@ -105,17 +105,19 @@ class CuraApp(wx.App):
 
 		resources.setupLocalization(profile.getPreference('language'))  # it's important to set up localization at very beginning to install _
 
+		#Eventually ask the user if they want their old settings from previous Cura installs
+
 		#If we do not have preferences yet, try to load it from a previous Cura install
-		if profile.getMachineSetting('machine_type') == 'unknown':
-			try:
-				otherCuraInstalls = profile.getAlternativeBasePaths()
-				otherCuraInstalls.sort()
-				if len(otherCuraInstalls) > 0:
-					profile.loadPreferences(os.path.join(otherCuraInstalls[-1], 'preferences.ini'))
-					profile.loadProfile(os.path.join(otherCuraInstalls[-1], 'current_profile.ini'))
-			except:
-				import traceback
-				print traceback.print_exc()
+		#if profile.getMachineSetting('machine_type') == 'unknown':
+		#	try:
+		#		otherCuraInstalls = profile.getAlternativeBasePaths()
+		#		otherCuraInstalls.sort()
+		#		if len(otherCuraInstalls) > 0:
+		#			profile.loadPreferences(os.path.join(otherCuraInstalls[-1], 'preferences.ini'))
+		#			profile.loadProfile(os.path.join(otherCuraInstalls[-1], 'current_profile.ini'))
+		#	except:
+		#		import traceback
+		#		print traceback.print_exc()
 
 		#If we haven't run it before, run the configuration wizard.
 		if profile.getMachineSetting('machine_type') == 'unknown':
