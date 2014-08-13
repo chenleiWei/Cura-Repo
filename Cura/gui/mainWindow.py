@@ -488,7 +488,7 @@ class mainWindow(wx.Frame):
 
 	def OnResetProfile(self, e):
 		machine_name = profile.getMachineSetting('machine_name')
-		dlg = wx.MessageDialog(self, _("NOTE: Consider saving your current settings by selecting \'Save Settings Profile\' under the \'File\' menu before continuing.\n\n\nReset your profile and machine settings back to the \'%s\' default?") % machine_name, _("Reset Profile Settings"), wx.YES_NO | wx.ICON_QUESTION)
+		dlg = wx.MessageDialog(self, _("Reset your profile and machine settings back to the \'%s\' default?\n\n\nNOTE: Consider saving your current settings by selecting \'Save Settings Profile\' under the \'File\' menu before continuing.") % machine_name, _("Reset Profile Settings"), wx.YES_NO | wx.ICON_QUESTION)
 		result = dlg.ShowModal() == wx.ID_YES
 		dlg.Destroy()
 		if result:
