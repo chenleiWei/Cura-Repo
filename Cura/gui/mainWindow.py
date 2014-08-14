@@ -85,7 +85,7 @@ class mainWindow(wx.Frame):
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnLoadProfile, i)
 		i = self.fileMenu.Append(-1, _("Save Profile Settings..."))
-		self.normalModeOnlyItems.append(i)
+		#self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnSaveProfile, i)
 		i = self.fileMenu.Append(-1, _("Load Profile Settings from GCode..."))
 		self.normalModeOnlyItems.append(i)
