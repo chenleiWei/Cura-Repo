@@ -8,7 +8,7 @@ import math
 
 import wx
 import wx.wizard
-import wx.lib.agw.hyperlink as hl
+
 from Cura.gui import firmwareInstall
 from Cura.gui import printWindow
 from Cura.util import machineCom
@@ -16,41 +16,7 @@ from Cura.util import profile
 from Cura.util import gcodeGenerator
 from Cura.util import resources
 
-#!/usr/bin/env python
 
-
-"""
-
-class profileUploadPopup(wx.Menu):
-     class Prototype(wx.Frame):
-
-     
-  def __init__(self, parent, title):
-       wx.Frame.__init__(self, None, title="First Frame", size=(1240,705))
-       self.UI()
-       self.Centre()
-       self.Show()
-
-
-  def UI(self):
-       self.panel1 = wx.Panel(self, -1)
-       self.sizer = wx.BoxSizer()
-       self.sizer.Add(self.panel1, 1, flag=wx.EXPAND) 
-       b = wx.Button(self.panel1, label='second window', size=(180,100), pos=(650,25))
-       b.Bind(wx.EVT_BUTTON, self.OnB)        
-
-       self.SetSizer(self.sizer)  
-
-
-  def OnB(self, event):
-       frame = SecondFrame()
-       frame.Show()
-
-
- app = wx.App(False)
- Prototype(None, title='')
- app.MainLoop()
-"""
 
 class InfoBox(wx.Panel):
     def __init__(self, parent):
@@ -554,17 +520,21 @@ class MachineSelectPage(InfoPage):
         super(MachineSelectPage, self).__init__(parent, _("Select your machine"))
         self.AddText(_("What kind of machine do you have:"))
 
-        self.TypeARadio = self.AddRadioButton("Type A Machines 2014 Series 1")
-        self.TypeARadio.Bind(wx.EVT_RADIOBUTTON, self.OnTypeASelect)
-        self.TypeARadio.SetValue(True)
-        self.Ultimaker2Radio = self.AddRadioButton("Ultimaker2")
-        self.Ultimaker2Radio.Bind(wx.EVT_RADIOBUTTON, self.OnUltimaker2Select)
-        self.UltimakerRadio = self.AddRadioButton("Ultimaker Original")
-        self.UltimakerRadio.Bind(wx.EVT_RADIOBUTTON, self.OnUltimakerSelect)
-        self.PrintrbotRadio = self.AddRadioButton("Printrbot")
-        self.PrintrbotRadio.Bind(wx.EVT_RADIOBUTTON, self.OnPrintrbotSelect)
-        self.OtherRadio = self.AddRadioButton(_("Other (Ex: RepRap, MakerBot)"))
-        self.OtherRadio.Bind(wx.EVT_RADIOBUTTON, self.OnOtherSelect)
+		self.Ultimaker2Radio = self.AddRadioButton("Ultimaker2", style=wx.RB_GROUP)
+		self.Ultimaker2Radio.SetValue(True)
+		self.Ultimaker2Radio.Bind(wx.EVT_RADIOBUTTON, self.OnUltimaker2Select)
+		self.UltimakerRadio = self.AddRadioButton("Ultimaker Original")
+		self.UltimakerRadio.Bind(wx.EVT_RADIOBUTTON, self.OnUltimakerSelect)
+		self.PrintrbotRadio = self.AddRadioButton("Printrbot")
+		self.PrintrbotRadio.Bind(wx.EVT_RADIOBUTTON, self.OnPrintrbotSelect)
+		self.OtherRadio = self.AddRadioButton(_("Other (Ex: RepRap, MakerBot, Witbox)"))
+		self.OtherRadio.Bind(wx.EVT_RADIOBUTTON, self.OnOtherSelect)
+		self.AddSeperator()
+		self.AddText(_("The collection of anonymous usage information helps with the continued improvement of Cura."))
+		self.AddText(_("This does NOT submit your models online nor gathers any privacy related information."))
+		self.SubmitUserStats = self.AddCheckbox(_("Submit anonymous usage information:"))
+		self.AddText(_("For full details see: http://wiki.ultimaker.com/Cura:stats"))
+		self.SubmitUserStats.SetValue(True)
 
     # self.AddSeperator()
     #self.AddText(_("The collection of anonymous usage information helps with the continued improvement of Cura."))
