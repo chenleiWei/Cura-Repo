@@ -74,6 +74,9 @@ class simpleModePanel(wx.Panel):
 		self.printTypeNormal.SetValue(True)
 		self.printMaterialPLA.SetValue(True)
 
+		initialRadioButtonValue = -1
+		materialRadioButtonValue = 'z'
+
 		self.printTypeBest.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printTypeHigh.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printTypeNormal.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
@@ -91,7 +94,28 @@ class simpleModePanel(wx.Panel):
 		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self._callback())
 		self.printBrim.Bind(wx.EVT_CHECKBOX, lambda e: self._callback())
 
-	def setupSlice(self):
+		if self.printTypeBest.GetValue():
+			initialRadioButtonValue = 1
+		elif self.printTypeHigh.GetValue():
+			initialRadioButtonValue = 2
+		elif self.printTypeNormal.GetValue():
+			initialRadioButtonValue = 3
+		elif self.printTypeLow.GetValue():
+			initialRadioButtonValue = 4
+		else:
+			initialRadioButtonValue = 5
+
+		if self.printMaterialPLA.GetValue():
+			materialRadioButtonValue = 'pla'
+		elif self.printMaterialFlex.GetValue():
+			materialRadioButtonValue = 'flex'
+		elif self.printMaterialCFPLA.GetValue():
+			materialRadioButtonValue = 'cfpla'
+		else:
+			materialRadioButtonValue = 'PET'
+			
+
+	def setupSlice(self, initialRadioButtonValue, materialRadioButtonValue):
 		put = profile.setTempOverride
 		get = profile.getProfileSetting
 		for setting in profile.settingsList:
@@ -101,12 +125,12 @@ class simpleModePanel(wx.Panel):
 
 		machine_type = profile.getMachineSetting('machine_type')
 
-		if self.printSupport.GetValue():
+		if initialRadioButtonValue == 1:
 			put('support', _("Exterior Only"))
 		if self.printBrim.GetValue():
 			put('platform_adhesion', _("Brim"))
 		nozzle_size = float(get('nozzle_size'))
-		if self.printTypeNormal.GetValue():
+		if initialRadioButtonValue == 2:
 			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.15')
 			put('fill_density', '12')
@@ -115,7 +139,7 @@ class simpleModePanel(wx.Panel):
 			put('print_speed', '100')
 			put('cool_min_layer_time', '3')
 			put('bottom_layer_speed', '30')
-		elif self.printTypeLow.GetValue():
+		elif initialRadioButtonValue == 3:
 			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.20')
 			put('fill_density', '12')
@@ -124,7 +148,7 @@ class simpleModePanel(wx.Panel):
 			put('print_speed', '120')
 			put('cool_min_layer_time', '3')
 			put('bottom_layer_speed', '45')
-		elif self.printTypeHigh.GetValue():
+		elif initialRadioButtonValue == 4:
 			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.10')
 			put('fill_density', '18')
@@ -132,7 +156,7 @@ class simpleModePanel(wx.Panel):
 			put('bottom_thickness', '0.25')
 			put('print_speed', '90')
 			put('bottom_layer_speed', '30')
-		elif self.printTypeBest.GetValue():
+		elif initialRadioButtonValue == 5:
 			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.05')
 			put('fill_density', '25')
@@ -140,7 +164,7 @@ class simpleModePanel(wx.Panel):
 			put('bottom_thickness', '0.25')
 			put('print_speed', '80')
 			put('bottom_layer_speed', '25')
-		elif self.printTypeDraft.GetValue():
+		elif initialRadioButtonValue == 6:
 			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.25')
 			put('fill_density', '12')
@@ -152,31 +176,35 @@ class simpleModePanel(wx.Panel):
 			put('wall_thickness', nozzle_size * 1.5)
 
 		put('filament_diameter', self.printMaterialDiameter.GetValue())
-		if self.printMaterialPLA.GetValue():
+		if materialRadioButtonValue = 'pla':
 			if machine_type == 'WinG1_2014Series1':
 				put('print_temperature', '195')
 			else:
 				put('print_temperature', '220')
 			put('fan_full_height','0.0')
-		if self.printMaterialFlex.GetValue():
+		if materialRadioButtonValue = 'flex':
 			put('print_temperature', '245')
 			put('print_speed', '40')
 			put('retraction_amount', '1')
 			put('fan_full_height','0.0')
-		if self.printMaterialPET.GetValue():
-			put('print_temperature', '260')
-			put('fan_full_height','0.0')
-		if self.printMaterialCFPLA.GetValue():
+		if materialRadioButtonValue = 'cfpla':
 			put('print_temperature', '230')
 			put('print_speed', '45')
 			put('retraction_amount', '2')
 			put('fan_full_height','0.0')
+		if materialRadioButtonValue = 'pet':
+			put('print_temperature', '260')
+			put('fan_full_height','0.0')
+
                 # if self.printMaterialABS.GetValue():
                 #         put('print_bed_temperature', '100')
                 #         put('platform_adhesion', 'Brim')
                 #         put('filament_flow', '107')
                 #         put('print_temperature', '245')
 		put('plugin_config', '')
+
+	def setupSliceCallback(self, currentRadioButton):
+		
 
 	def updateProfileToControls(self):
 		pass
