@@ -98,7 +98,7 @@ class CuraApp(wx.App):
 		import webbrowser
 		from Cura.gui import mainWindow
 		from Cura.gui import configWizard
-		#from Cura.gui import newVersionDialog
+		from Cura.gui import newVersionDialog
 		from Cura.util import profile
 		from Cura.util import resources
 		from Cura.util import version
@@ -114,13 +114,14 @@ class CuraApp(wx.App):
 		#		otherCuraInstalls.sort()
 		#		if len(otherCuraInstalls) > 0:
 		#			profile.loadPreferences(os.path.join(otherCuraInstalls[-1], 'preferences.ini'))
+
 		#			profile.loadProfile(os.path.join(otherCuraInstalls[-1], 'current_profile.ini'))
 		#	except:
 		#		import traceback
 		#		print traceback.print_exc()
 
 		#If we haven't run it before, run the configuration wizard.
-		if profile.getMachineSetting('machine_type') == 'unknown':
+		if profile.getMachineSetting('machine_type') =='unknown':
 			if platform.system() == "Windows":
 				exampleFile = os.path.normpath(os.path.join(resources.resourceBasePath, 'example', 'FirstPrintCone.stl'))
 			else:
@@ -146,13 +147,11 @@ class CuraApp(wx.App):
 		self.SetTopWindow(self.mainWindow)
 		self.mainWindow.Show()
 		self.mainWindow.OnDropFiles(self.loadFiles)
-		
+		#newVersionDialog.newVersionDialog().Show()
+
 		#if profile.getPreference('last_run_version') != version.getVersion(False):
 		#	profile.putPreference('last_run_version', version.getVersion(False))
-		#	newVersionDialog.newVersionDialog().Show()
-		
-		setFullScreenCapable(self.mainWindow)
-
+			
 		if sys.platform.startswith('darwin'):
 			wx.CallAfter(self.StupidMacOSWorkaround)
 
