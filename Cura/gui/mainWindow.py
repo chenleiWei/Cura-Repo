@@ -85,7 +85,7 @@ class mainWindow(wx.Frame):
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnLoadProfile, i)
 		i = self.fileMenu.Append(-1, _("Save Profile Settings..."))
-		#self.normalModeOnlyItems.append(i)
+		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnSaveProfile, i)
 		i = self.fileMenu.Append(-1, _("Load Profile Settings from GCode..."))
 		self.normalModeOnlyItems.append(i)
@@ -477,8 +477,9 @@ class mainWindow(wx.Frame):
 		dlg.Destroy()
 
 	def OnSaveProfile(self, e):
-		dlg=wx.FileDialog(self, _("Select profile file to save"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_SAVE)
+		dlg=wx.FileDialog(self, _("Select profile destination"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_SAVE)
 		dlg.SetWildcard("ini files (*.ini)|*.ini")
+
 		if dlg.ShowModal() == wx.ID_OK:
 			profileFile = dlg.GetPath()
 			if not profileFile.lower().endswith('.ini'): #hack for linux, as for some reason the .ini is not appended.
@@ -488,7 +489,7 @@ class mainWindow(wx.Frame):
 
 	def OnResetProfile(self, e):
 		machine_name = profile.getMachineSetting('machine_name')
-		dlg = wx.MessageDialog(self, _("Reset your profile and machine settings back to the \'%s\' default?\n\n\nNOTE: Consider saving your current settings by selecting \'Save Settings Profile\' under the \'File\' menu before continuing.") % machine_name, _("Reset Profile Settings"), wx.YES_NO | wx.ICON_QUESTION)
+		dlg = wx.MessageDialog(self, _("Reset your profile and machine settings to default? NOTE: These settings are specific to the Series 1 machines. Consider saving your current settings to a file before continuing.") % machine_name, _("Reset Profile Settings"), wx.YES_NO | wx.ICON_QUESTION)
 		result = dlg.ShowModal() == wx.ID_YES
 		dlg.Destroy()
 		if result:
