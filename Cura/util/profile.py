@@ -250,25 +250,28 @@ setting('object_center_y', -1, float, 'hidden', 'hidden')
 #######################################################################################
 #Type A 2014 Series 1 - Start
 setting('start.gcode', """;-- START GCODE --
+;Sliced for Type A Machines Series 1
 ;Sliced at: {day} {date} {time}
 ;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Print Speed: {print_speed} Support: {support} 
+;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
-;M190 S{print_bed_temperature} ;Uncomment to add your own bed temperature line
-M106 S255
+M106 S255	 ;start with the fan on
 G21        ;metric values
 G90        ;absolute positioning
 M106 S255    ;start with the fan on
 G28    ;move to endstops
-G1 X150 Y5  Z15.0 F{travel_speed} ;move the platform down 15mm
-M109 S{print_temperature} ;Uncomment to add your own temperature line
+G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+M109 S{print_temperature} ;Heat To temp
 G92 E0                  ;zero the extruded length
-G1 F200 E30              ;extrude 3mm of feed stock
+G1 F200 E30              ;extrude 30mm of feed stock
 G92 E0                  ;zero the extruded length again
+G1 X175 Y25  Z0 F{travel_speed} ;remove bugger
+G1 X220 F{travel_speed} ;remove bugger
+G1 X150 Y150  Z15 F{travel_speed} ;recenter and begin
 G1 F{travel_speed}
-;Put printing message on LCD screen
-M117 Printing...
 """, str, 'alteration', 'alteration')
 #######################################################################################
 #Type A 2014 Series 1 - End
@@ -721,13 +724,9 @@ def resetProfile():
 		if not set.isProfile():
 			continue
 		set.setValue(set.getDefault())
-	if getMachineSetting('machine_type') == 'WinG1_2014Series1':
-		putMachineSetting("machine_name", "2014 Series 1 - Winchester G1")
-		putMachineSetting('print_temperature', '195')
-	if getMachineSetting('machine_type') == 'WinG2_2014Series1':
-		putMachineSetting("machine_name", "2014 Series 1 - Winchester G2")
-		putProfileSetting('print_temperature', '220')
-
+	if getMachineSetting('machine_type') == 'WinG1_2014Series1' or getMachineSetting('machine_name') == "2014 Series 1 - Winchester G1":
+		#putMachineSetting("machine_name", "2014 Series 1 - Winchester G1")
+		putProfileSetting('print_temperature', '195')
 
 def setProfileFromString(options):
 	"""
