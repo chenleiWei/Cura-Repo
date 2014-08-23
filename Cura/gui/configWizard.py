@@ -379,22 +379,25 @@ class SelectPrintHead(InfoPage):
         self.AddBitmap(image)
         self.AddSeperator()
         self.newPrintHeadRadio = self.AddRadioButton("Yes")
-        self.newPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.StoreData)
+        self.newPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.newPrintHead)
         self.newPrintHeadRadio.SetValue(True)
         self.oldPrintHeadRadio = self.AddRadioButton("No")
-        self.oldPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.StoreData)
+        self.oldPrintHeadRadio.Bind(wx.EVT_RADIOBUTTON, self.oldPrintHead)
+        self.label = ["Winchester G1", "Winchester G2"]
+        self.machine_type = ['WinG1, WinG2']
+        self.values = [195, 220]
+        self.printNum = -1
+
+    def oldPrintHead(self, e):
+         self.printNum = 0
+
+    def newPrintHead(self, e):
+          self.printNum = 1
 
     def StoreData(self):
-        if self.oldPrintHeadRadio.GetValue():
-            profile.putMachineSetting('machine_name', "2014 Series 1 - Winchester G1")
-            profile.putMachineSetting('machine_type', 'WinG1_2014Series1')
-            profile.putProfileSetting('print_temperature', '195')
-        elif self.newPrintHeadRadio.GetValue():
-            profile.putMachineSetting('machine_name', "2014 Series 1 - Winchester G2")
-            profile.putMachineSetting('machine_type', 'WinG2_2014Series1')
-            profile.putProfileSetting('print_temperature', '220')
-
-        profile.checkAndUpdateMachineName()
+        profile.putMachineSetting('machine_name', "2014 Series 1 - " + self.label[self.printNum])
+        profile.putMachineSetting('machine_type', self.machine_type[self.printNum] + '_2014Series1')
+        profile.putProfileSetting('print_temperature', self.values[self.printNum])
 
 
 class OtherMachineSelectPage(InfoPage):
