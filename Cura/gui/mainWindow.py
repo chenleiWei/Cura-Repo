@@ -489,15 +489,15 @@ class mainWindow(wx.Frame):
 
 	def OnResetProfile(self, e):
 		machine_name = profile.getMachineSetting('machine_name')
-		dlg = wx.MessageDialog(self, _("Reset your profile and machine settings to default? NOTE: These settings are specific to the Series 1 machines. Consider saving your current settings to a file before continuing."), _("Reset Profile Settings"), wx.YES_NO | wx.ICON_QUESTION)
+		dlg = wx.MessageDialog(self, _("Reset your profile and printer settings to default?\n\n\n NOTE: These settings are specific to the Series 1 printers. Consider saving your current settings to a file before continuing."), _("Reset Profile Settings"), wx.YES_NO | wx.ICON_QUESTION)
 		result = dlg.ShowModal() == wx.ID_YES
 		dlg.Destroy()
 		if result:
 			wx.MessageBox(_("Your settings have been reset to the %s default settings.") % machine_name, _("Reset Profile Settings"), wx.OK | wx.CENTRE | wx.ICON_INFORMATION)
 			profile.resetProfile()
+			if profile.getMachineSetting('machine_type') == 'WinG1_2014Series1':
+				profile.putProfileSetting('print_temperature', '195')
 			self.updateProfileToAllControls()
-
-
 
 	def OnSimpleSwitch(self, e):
 		profile.putPreference('startMode', 'Simple')
