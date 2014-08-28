@@ -262,7 +262,8 @@ M106 S255	 ;start with the fan on
 G21        ;metric values
 G90        ;absolute positioning
 M106 S255    ;start with the fan on
-G28    ;move to endstops
+G28     ;move to endstops
+G29		;allows for auto-levelling
 G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
 M109 S{print_temperature} ;Heat To temp
 G92 E0                  ;zero the extruded length
