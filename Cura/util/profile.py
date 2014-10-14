@@ -261,6 +261,8 @@ G21        ;metric values
 G90        ;absolute positioning
 M106 S255    ;start with the fan on
 G28    ;move to endstops
+G29    ;auto-align if able
+
 G1 X150 Y5  Z15.0 F{travel_speed} ;move the platform down 15mm
 M109 S{print_temperature} ;Uncomment to add your own temperature line
 G92 E0                  ;zero the extruded length
