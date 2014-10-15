@@ -9,7 +9,22 @@ class simpleModePanel(wx.Panel):
 	def __init__(self, parent, callback):
 		super(simpleModePanel, self).__init__(parent)
 		self._callback = callback
-
+		
+		printQualityPanel = wx.Panel(self)
+		self.QChoice = 1
+		self.QNum = -1
+		self.QList = {
+			'wall_thickness': None,
+			'layer_height' : None, 
+			'fill_density' : None,
+			'solid_layer_thickness' : None,
+			'bottom_thickness' : None,
+			'print_speed' : None,
+			'bottom_layer_speed' : None,
+			'cool_min_layer_time' : None,
+			'bottom_layer_speed' : None
+			}
+	
 		#toolsMenu = wx.Menu()
 		#i = toolsMenu.Append(-1, 'Switch to Normal mode...')
 		#self.Bind(wx.EVT_MENU, self.OnNormalSwitch, i)
@@ -70,6 +85,13 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(self.printSupport)
 		boxsizer.Add(self.printBrim)
 		sizer.Add(boxsizer, (2,0), flag=wx.EXPAND)
+		
+		sb = wx.StaticBox(printQualityPanel, label=_("Print Quality Values:"))
+		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+		boxsizer.Add(self.printTypeBest)
+		printQualityPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
+		printQualityPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
+		sizer.Add(printQualityPanel, (3,0), flag=wx.EXPAND)
 
 		self.printTypeNormal.SetValue(True)
 		self.printMaterialPLA.SetValue(True)
@@ -94,6 +116,7 @@ class simpleModePanel(wx.Panel):
 	def setupSlice(self):
 		put = profile.setTempOverride
 		get = profile.getProfileSetting
+
 		for setting in profile.settingsList:
 			if not setting.isProfile():
 				continue
@@ -106,7 +129,25 @@ class simpleModePanel(wx.Panel):
 		if self.printBrim.GetValue():
 			put('platform_adhesion', _("Brim"))
 		nozzle_size = float(get('nozzle_size'))
-		if self.printTypeNormal.GetValue():
+		if self.printTypeBest.GetValue():
+			put('wall_thickness', nozzle_size * 2.0)
+			put('layer_height', '0.05')
+			put('fill_density', '25')
+			put('solid_layer_thickness', '0.4')
+			put('bottom_thickness', '0.25')
+			put('print_speed', '80')
+			put('bottom_layer_speed', '25')
+			self.QChoice = 1
+		elif self.printTypeHigh.GetValue():
+			put('wall_thickness', nozzle_size * 2.0)
+			put('layer_height', '0.10')
+			put('fill_density', '18')
+			put('solid_layer_thickness', '0.6')
+			put('bottom_thickness', '0.25')
+			put('print_speed', '90')
+			put('bottom_layer_speed', '30')
+			self.QChoice = 2
+		elif self.printTypeNormal.GetValue():
 			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.15')
 			put('fill_density', '12')
@@ -115,6 +156,7 @@ class simpleModePanel(wx.Panel):
 			put('print_speed', '100')
 			put('cool_min_layer_time', '3')
 			put('bottom_layer_speed', '30')
+			self.QChoice = 3
 		elif self.printTypeLow.GetValue():
 			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.20')
@@ -124,22 +166,7 @@ class simpleModePanel(wx.Panel):
 			put('print_speed', '120')
 			put('cool_min_layer_time', '3')
 			put('bottom_layer_speed', '45')
-		elif self.printTypeHigh.GetValue():
-			put('wall_thickness', nozzle_size * 2.0)
-			put('layer_height', '0.10')
-			put('fill_density', '18')
-			put('solid_layer_thickness', '0.6')
-			put('bottom_thickness', '0.25')
-			put('print_speed', '90')
-			put('bottom_layer_speed', '30')
-		elif self.printTypeBest.GetValue():
-			put('wall_thickness', nozzle_size * 2.0)
-			put('layer_height', '0.05')
-			put('fill_density', '25')
-			put('solid_layer_thickness', '0.4')
-			put('bottom_thickness', '0.25')
-			put('print_speed', '80')
-			put('bottom_layer_speed', '25')
+			self.QChoice = 4
 		elif self.printTypeDraft.GetValue():
 			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.25')
@@ -148,8 +175,10 @@ class simpleModePanel(wx.Panel):
 			put('bottom_thickness', '.25')
 			put('print_speed', '135')
 			put('bottom_layer_speed', '45')
+			self.QChoice = 5
 		elif self.printTypeJoris.GetValue():
 			put('wall_thickness', nozzle_size * 1.5)
+			
 
 		put('filament_diameter', self.printMaterialDiameter.GetValue())
 		if self.printMaterialPLA.GetValue():
@@ -177,6 +206,25 @@ class simpleModePanel(wx.Panel):
                 #         put('filament_flow', '107')
                 #         put('print_temperature', '245')
 		put('plugin_config', '')
+		self.replaceValues()
+		print self.QChoice
+		
+	def replaceValues(self):
+		put = profile.setTempOverride
+		get = profile.getProfileSetting
+		if self.QNum != self.QChoice:
+			self.QList['wall_thickness'] = get('wall_thickness')
+			self.QList['layer_height'] = get('layer_height')
+			self.QList['fill_density'] = get('fill_density')
+			self.QList['solid_layer_thickness'] = get('solid_layer_thickness')
+			self.QList['bottom_thickness'] = get('bottom_thickness')
+			self.QList['print_speed'] = get('print_speed')
+			self.QList['bottom_layer_speed'] = get('bottom_layer_speed')
+			self.QList['cool_min_layer_time'] = get('cool_min_layer_time')
+			self.QList['bottom_layer_speed'] = get('bottom_layer_speed')
+			self.QNum = self.QChoice
+			print self.QList
+			
 
 	def updateProfileToControls(self):
 		pass
