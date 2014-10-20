@@ -12,18 +12,19 @@ class simpleModePanel(wx.Panel):
 		
 		printQualityPanel = wx.Panel(self)
 		self.QChoice = 1
+		self.mChoice = 'a'
 		self.QNum = -1
-		self.QList = {
-			'wall_thickness': None,
-			'layer_height' : None, 
-			'fill_density' : None,
-			'solid_layer_thickness' : None,
-			'bottom_thickness' : None,
-			'print_speed' : None,
-			'bottom_layer_speed' : None,
-			'cool_min_layer_time' : None,
-			'bottom_layer_speed' : None
-			}
+		self.mLetter = 'z'
+		self.QVList = {}
+		self.printTemperature = wx.StaticText(printQualityPanel, -1, label = '')
+		self.printSpeed = wx.StaticText(printQualityPanel, -1, label = '')
+		self.retractionAmount = wx.StaticText(printQualityPanel, -1, label = '')
+		self.layerHeight = wx.StaticText(printQualityPanel, -1, label= '')
+		self.fillDensity = wx.StaticText(printQualityPanel, -1, label = '', style=wx.ALIGN_RIGHT) 
+		self.wallThickness = wx.StaticText(printQualityPanel, -1, label = '')
+		self.bottomThickness = wx.StaticText(printQualityPanel, -1, label = '', style=wx.ALIGN_RIGHT)
+		self.diameter = wx.StaticText(printQualityPanel, -1, label = '')
+
 	
 		#toolsMenu = wx.Menu()
 		#i = toolsMenu.Append(-1, 'Switch to Normal mode...')
@@ -45,7 +46,7 @@ class simpleModePanel(wx.Panel):
 		self.printMaterialCFPLA = wx.RadioButton(printMaterialPanel, -1, 'CFPLA')
 		self.printMaterialPET = wx.RadioButton(printMaterialPanel, -1, 'PET')
 		#self.printMaterialABS = wx.RadioButton(printMaterialPanel, -1, 'ABS')
-		self.printMaterialDiameter = wx.TextCtrl(printMaterialPanel, -1, profile.getProfileSetting('filament_diameter'))
+		#self.printMaterialDiameter = wx.TextCtrl(printMaterialPanel, -1, profile.getProfileSetting('filament_diameter'))
 		if profile.getMachineSetting('gcode_flavor') == 'UltiGCode':
 			printMaterialPanel.Show(False)
 		
@@ -74,8 +75,8 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(self.printMaterialCFPLA)
 		boxsizer.Add(self.printMaterialPET)
                 #boxsizer.Add(self.printMaterialABS)
-		boxsizer.Add(wx.StaticText(printMaterialPanel, -1, _("Diameter:")))
-		boxsizer.Add(self.printMaterialDiameter)
+		#boxsizer.Add(wx.StaticText(printMaterialPanel, -1, _("Diameter:")))
+		#boxsizer.Add(self.printMaterialDiameter)
 		printMaterialPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		printMaterialPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(printMaterialPanel, (1,0), flag=wx.EXPAND)
@@ -86,12 +87,57 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(self.printBrim)
 		sizer.Add(boxsizer, (2,0), flag=wx.EXPAND)
 		
+		
 		sb = wx.StaticBox(printQualityPanel, label=_("Print Quality Values:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		boxsizer.Add(self.printTypeBest)
+		#self.title = wx.StaticText(printQualityPanel, -1, "Wall Thickness: ")
+		#self.label = wx.StaticText(printQualityPanel, -1, label = '') 
+		gs = wx.GridSizer(7,2,2,0)
+		gs2 = wx.GridSizer(7,1,0,0) 
+		#self.replaceValues()
+		
+		labelFont = wx.Font(15, wx.SWISS, wx.NORMAL, wx.ITALIC)
+		tempLabel = wx.StaticText(printQualityPanel, -1, "Temperature")
+		printSpeedLabel = wx.StaticText(printQualityPanel, -1, "Print Speed")
+		retractionLabel = wx.StaticText(printQualityPanel, -1, "Retraction")
+		layerHeightLabel = wx.StaticText(printQualityPanel, -1, "Layer Height")
+		fillDensityLabel = wx.StaticText(printQualityPanel, -1, "Fill Density")
+		wallThicknessLabel = wx.StaticText(printQualityPanel, -1, "Wall Thickness")
+		bottomThicknessLabel = wx.StaticText(printQualityPanel, -1, "First Layer Height")
+		diameterLabel = wx.StaticText(printQualityPanel, -1, "Diameter")
+		
+#		tempLabel.SetFont(labelFont)
+#		printSpeedLabel.SetFont(labelFont)
+#		retractionLabel.SetFont(labelFont)
+#		layerHeightLabel.SetFont(labelFont)
+#		fillDensityLabel.SetFont(labelFont)
+#		wallThicknessLabel.SetFont(labelFont)
+#		bottomThicknessLabel.SetFont(labelFont)
+
+		gs.Add(tempLabel)
+		gs.Add(self.printTemperature)
+		gs.Add(printSpeedLabel)
+		gs.Add(self.printSpeed)
+		gs.Add(retractionLabel)
+		gs.Add(self.retractionAmount)		
+		gs.Add(layerHeightLabel)
+		gs.Add(self.layerHeight)
+		gs.Add(fillDensityLabel)
+		gs.Add(self.fillDensity)
+		gs.Add(wallThicknessLabel)
+		gs.Add(self.wallThickness)
+		gs.Add(bottomThicknessLabel)
+		gs.Add(self.bottomThickness)
+		gs.Add(diameterLabel)
+		gs.Add(self.diameter)
+		
 		printQualityPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
-		printQualityPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
-		sizer.Add(printQualityPanel, (3,0), flag=wx.EXPAND)
+		#printQualityPanel.GetSizer().Add(boxsizer)
+		boxsizer.Add(gs, proportion = 0)
+
+		#boxsizer.Add(gs2, proportion = 1, flag=wx.EXPAND)
+		printQualityPanel.GetSizer().Add(boxsizer)
+		sizer.Add(printQualityPanel, (3,0))
 
 		self.printTypeNormal.SetValue(True)
 		self.printMaterialPLA.SetValue(True)
@@ -108,10 +154,11 @@ class simpleModePanel(wx.Panel):
 		self.printMaterialCFPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		self.printMaterialPET.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		#self.printMaterialABS.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
-		self.printMaterialDiameter.Bind(wx.EVT_TEXT, lambda e: self._callback())
+		#self.printMaterialDiameter.Bind(wx.EVT_TEXT, lambda e: self._callback())
 
 		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self._callback())
 		self.printBrim.Bind(wx.EVT_CHECKBOX, lambda e: self._callback())
+		
 
 	def setupSlice(self):
 		put = profile.setTempOverride
@@ -139,7 +186,7 @@ class simpleModePanel(wx.Panel):
 			put('bottom_layer_speed', '25')
 			self.QChoice = 1
 		elif self.printTypeHigh.GetValue():
-			put('wall_thickness', nozzle_size * 2.0)
+			put('wall_thickness', nozzle_size * 4.0)
 			put('layer_height', '0.10')
 			put('fill_density', '18')
 			put('solid_layer_thickness', '0.6')
@@ -148,7 +195,7 @@ class simpleModePanel(wx.Panel):
 			put('bottom_layer_speed', '30')
 			self.QChoice = 2
 		elif self.printTypeNormal.GetValue():
-			put('wall_thickness', nozzle_size * 2.0)
+			put('wall_thickness', nozzle_size * 6.0)
 			put('layer_height', '0.15')
 			put('fill_density', '12')
 			put('solid_layer_thickness', '0.75')
@@ -158,7 +205,7 @@ class simpleModePanel(wx.Panel):
 			put('bottom_layer_speed', '30')
 			self.QChoice = 3
 		elif self.printTypeLow.GetValue():
-			put('wall_thickness', nozzle_size * 2.0)
+			put('wall_thickness', nozzle_size * 8.0)
 			put('layer_height', '0.20')
 			put('fill_density', '12')
 			put('solid_layer_thickness', '0.8')
@@ -168,7 +215,7 @@ class simpleModePanel(wx.Panel):
 			put('bottom_layer_speed', '45')
 			self.QChoice = 4
 		elif self.printTypeDraft.GetValue():
-			put('wall_thickness', nozzle_size * 2.0)
+			put('wall_thickness', nozzle_size * 10.0)
 			put('layer_height', '0.25')
 			put('fill_density', '12')
 			put('solid_layer_thickness', '1.0')
@@ -178,53 +225,81 @@ class simpleModePanel(wx.Panel):
 			self.QChoice = 5
 		elif self.printTypeJoris.GetValue():
 			put('wall_thickness', nozzle_size * 1.5)
-			
+		self.qualityValues()
 
-		put('filament_diameter', self.printMaterialDiameter.GetValue())
+		#put('filament_diameter', self.printMaterialDiameter.GetValue())
 		if self.printMaterialPLA.GetValue():
 			if machine_type == 'WinG1_2014Series1':
 				put('print_temperature', '195')
 			else:
 				put('print_temperature', '220')
 			put('fan_full_height','0.0')
+			self.mChoice = 'a'
 		if self.printMaterialFlex.GetValue():
 			put('print_temperature', '245')
 			put('print_speed', '40')
 			put('retraction_amount', '1')
 			put('fan_full_height','0.0')
+			self.mChoice = 'b'
 		if self.printMaterialPET.GetValue():
 			put('print_temperature', '260')
 			put('fan_full_height','0.0')
+			self.mChoice = 'c'
 		if self.printMaterialCFPLA.GetValue():
 			put('print_temperature', '230')
 			put('print_speed', '45')
 			put('retraction_amount', '2')
 			put('fan_full_height','0.0')
+			self.mChoice = 'd'
                 # if self.printMaterialABS.GetValue():
                 #         put('print_bed_temperature', '100')
                 #         put('platform_adhesion', 'Brim')
                 #         put('filament_flow', '107')
                 #         put('print_temperature', '245')
 		put('plugin_config', '')
-		self.replaceValues()
-		print self.QChoice
+		self.materialValues()
+		print self.mChoice
 		
-	def replaceValues(self):
+		
+	def qualityValues(self):
 		put = profile.setTempOverride
 		get = profile.getProfileSetting
-		if self.QNum != self.QChoice:
-			self.QList['wall_thickness'] = get('wall_thickness')
-			self.QList['layer_height'] = get('layer_height')
-			self.QList['fill_density'] = get('fill_density')
-			self.QList['solid_layer_thickness'] = get('solid_layer_thickness')
-			self.QList['bottom_thickness'] = get('bottom_thickness')
-			self.QList['print_speed'] = get('print_speed')
-			self.QList['bottom_layer_speed'] = get('bottom_layer_speed')
-			self.QList['cool_min_layer_time'] = get('cool_min_layer_time')
-			self.QList['bottom_layer_speed'] = get('bottom_layer_speed')
-			self.QNum = self.QChoice
-			print self.QList
-			
+		#printQualityPanel = wx.Panel(self)
+		self.QVList['printTemperature'] = get('print_temperature')
+		self.QVList['retractionAmount'] = get('retraction_amount')
+		self.QVList['printSpeed'] = get('print_speed')
+		self.QVList['layerHeight'] = get('layer_height')
+		self.QVList['fillDensity'] = get('fill_density')
+		self.QVList['wallThickness'] = get('wall_thickness')
+		self.QVList['bottomThickness'] = get('bottom_thickness')
+		self.QVList['diameter'] = get('filament_diameter')
+		self.QNum = self.QChoice
 
+	
+	def materialValues(self):
+		put = profile.setTempOverride
+		get = profile.getProfileSetting
+		degree_sign= u'\N{DEGREE SIGN}'
+		
+		if self.mLetter != self.mChoice:
+			if self.QVList['printTemperature'] != get('print_temperature'):
+				self.QVList['printTemperature'] = get('print_temperature')
+			if self.QVList['retractionAmount'] != get('retraction_amount'):
+				self.QVList['retractionAmount'] = get('retraction_amount')
+			if self.QVList['printSpeed'] != get('print_speed'):
+				self.QVList['printSpeed'] = get('print_speed')
+			self.mLetter = self.mChoice
+		
+		degree_sign= u'\N{DEGREE SIGN}'
+		self.printTemperature.SetLabel("\t" + str(self.QVList['printTemperature']) +  degree_sign + "C")
+		self.printSpeed.SetLabel(str("\t" + self.QVList['printSpeed']) + " mm/s")
+		self.retractionAmount.SetLabel("\t" + str(self.QVList['retractionAmount']) + " mm")
+		self.layerHeight.SetLabel("\t" + str(self.QVList['layerHeight']) + " mm")
+		self.fillDensity.SetLabel("\t" + str(self.QVList['fillDensity']) + "%")
+		self.wallThickness.SetLabel("\t" + str(self.QVList['wallThickness']) + " mm")
+		self.bottomThickness.SetLabel("\t" + str(self.QVList['bottomThickness']) + " mm")
+		self.diameter.SetLabel("\t" + str(self.QVList['diameter']) + " mm")
+		
+		
 	def updateProfileToControls(self):
 		pass
