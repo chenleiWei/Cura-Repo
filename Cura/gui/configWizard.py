@@ -339,36 +339,6 @@ class PrintrbotPage(InfoPage):
                 profile.putMachineSetting('extruder_head_size_height', '0')
 
 
-class DownloadProfile(InfoPage):
-    def __init__(self, parent):
-        super(DownloadProfile, self).__init__(parent, _("Previous Print Heads"))
-        self.AddSeperator()
-        self.AddText(_("Type A Machines has machine settings optimized for\n       your printer on the download page."))
-        self.AddHiddenSeperator()
-        self.AddHyperLinkText("Click here to upload your settings", "http://www.typeamachines.com")
-        self.AddText("Then hit next to load them in.")
-        wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TypeAUploadProfile)
-
-
-class UploadProfile(InfoPage):
-    def __init__(self, parent):
-        super(UploadProfile, self).__init__(parent, _("Your Machine Settings Profile Selection"))
-        self.AddSeperator()
-        button = self.AddButton('Upload Profile Settings')
-        self.Bind(wx.EVT_BUTTON, self.OnB, button)
-        #wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TypeAReadyPage)
-
-    def OnB(self, event):
-        dlg=wx.FileDialog(self, _("Select profile file to load"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
-        dlg.SetWildcard("ini files (*.ini)|*.ini")
-        if dlg.ShowModal() == wx.ID_OK:
-            profileFile = dlg.GetPath()
-            profile.loadProfile(profileFile)
-            profile.loadMachineSettings(profileFile)
-            profile.checkAndUpdateMachineName()
-        dlg.Destroy()
-
-
 class SelectPrintHead(InfoPage):
     def __init__(self, parent):
         super(SelectPrintHead, self).__init__(parent, _("Print Head Selection"))
@@ -398,6 +368,7 @@ class SelectPrintHead(InfoPage):
         profile.putMachineSetting('machine_name', "2014 Series 1 - " + self.label[self.printNum])
         profile.putMachineSetting('machine_type', self.machine_type[self.printNum] + '_2014Series1')
         profile.putProfileSetting('print_temperature', self.values[self.printNum])
+        profile.putMachineSetting('support_type', 'lines')
 
 
 class OtherMachineSelectPage(InfoPage):
