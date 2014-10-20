@@ -98,8 +98,8 @@ class mainWindow(wx.Frame):
 		self.fileMenu.AppendSeparator()
 		i = self.fileMenu.Append(-1, _("Preferences...\tCTRL+,"))
 		self.Bind(wx.EVT_MENU, self.OnPreferences, i)
-		i = self.fileMenu.Append(-1, _("Machine settings..."))
-		self.Bind(wx.EVT_MENU, self.OnMachineSettings, i)
+		#i = self.fileMenu.Append(-1, _("Machine settings..."))
+		#self.Bind(wx.EVT_MENU, self.OnMachineSettings, i)
 		self.fileMenu.AppendSeparator()
 
 		# Model MRU list
