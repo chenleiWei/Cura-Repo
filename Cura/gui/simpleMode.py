@@ -1,8 +1,11 @@
 __copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
 
 import wx
+import os
 
 from Cura.util import profile
+from Cura.gui import sceneView
+
 
 class simpleModePanel(wx.Panel):
 	"Main user interface window for Quickprint mode"
@@ -10,22 +13,24 @@ class simpleModePanel(wx.Panel):
 		super(simpleModePanel, self).__init__(parent)
 		self._callback = callback
 		
-		printQualityPanel = wx.Panel(self)
-		self.QChoice = 1
+
+		# below are key-value pairs used for simple mode info list
+		self.QChoice = 1 
 		self.mChoice = 'a'
 		self.QNum = -1
 		self.mLetter = 'z'
 		self.QVList = {}
-		self.printTemperature = wx.StaticText(printQualityPanel, -1, label = '')
-		self.printSpeed = wx.StaticText(printQualityPanel, -1, label = '')
-		self.retractionAmount = wx.StaticText(printQualityPanel, -1, label = '')
-		self.layerHeight = wx.StaticText(printQualityPanel, -1, label= '')
-		self.fillDensity = wx.StaticText(printQualityPanel, -1, label = '', style=wx.ALIGN_RIGHT) 
-		self.wallThickness = wx.StaticText(printQualityPanel, -1, label = '')
-		self.bottomThickness = wx.StaticText(printQualityPanel, -1, label = '', style=wx.ALIGN_RIGHT)
-		self.diameter = wx.StaticText(printQualityPanel, -1, label = '')
+		self.fileNameCallBack = 0
 
+		printQualityPanel = wx.Panel(self)	
+		self.layerHeight = wx.StaticText(printQualityPanel, -1, label= '')
+		self.printSpeed = wx.StaticText(printQualityPanel, -1, label = '')
+		self.printTemperature = wx.StaticText(printQualityPanel, -1, label = '')	
+		self.fillDensity = wx.StaticText(printQualityPanel, -1, label = '', style=wx.ALIGN_RIGHT) 
 	
+		currentFilePanel = wx.Panel(self)
+		self.currentFileName = wx.StaticText(currentFilePanel, -1, label = '')
+
 		#toolsMenu = wx.Menu()
 		#i = toolsMenu.Append(-1, 'Switch to Normal mode...')
 		#self.Bind(wx.EVT_MENU, self.OnNormalSwitch, i)
@@ -87,57 +92,40 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(self.printBrim)
 		sizer.Add(boxsizer, (2,0), flag=wx.EXPAND)
 		
-		
+		"""------Start-Quality-Details-Panel---------"""
+
 		sb = wx.StaticBox(printQualityPanel, label=_("Print Quality Values:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		#self.title = wx.StaticText(printQualityPanel, -1, "Wall Thickness: ")
-		#self.label = wx.StaticText(printQualityPanel, -1, label = '') 
-		gs = wx.GridSizer(7,2,2,0)
-		gs2 = wx.GridSizer(7,1,0,0) 
-		#self.replaceValues()
-		
+		gs = wx.GridSizer(4,2,2,0)		
 		labelFont = wx.Font(15, wx.SWISS, wx.NORMAL, wx.ITALIC)
-		tempLabel = wx.StaticText(printQualityPanel, -1, "Temperature")
-		printSpeedLabel = wx.StaticText(printQualityPanel, -1, "Print Speed")
-		retractionLabel = wx.StaticText(printQualityPanel, -1, "Retraction")
-		layerHeightLabel = wx.StaticText(printQualityPanel, -1, "Layer Height")
-		fillDensityLabel = wx.StaticText(printQualityPanel, -1, "Fill Density")
-		wallThicknessLabel = wx.StaticText(printQualityPanel, -1, "Wall Thickness")
-		bottomThicknessLabel = wx.StaticText(printQualityPanel, -1, "First Layer Height")
-		diameterLabel = wx.StaticText(printQualityPanel, -1, "Diameter")
-		
-#		tempLabel.SetFont(labelFont)
-#		printSpeedLabel.SetFont(labelFont)
-#		retractionLabel.SetFont(labelFont)
-#		layerHeightLabel.SetFont(labelFont)
-#		fillDensityLabel.SetFont(labelFont)
-#		wallThicknessLabel.SetFont(labelFont)
-#		bottomThicknessLabel.SetFont(labelFont)
 
-		gs.Add(tempLabel)
-		gs.Add(self.printTemperature)
-		gs.Add(printSpeedLabel)
-		gs.Add(self.printSpeed)
-		gs.Add(retractionLabel)
-		gs.Add(self.retractionAmount)		
+		layerHeightLabel = wx.StaticText(printQualityPanel, -1, "Layer Height")
+		printSpeedLabel = wx.StaticText(printQualityPanel, -1, "Print Speed")
+		tempLabel = wx.StaticText(printQualityPanel, -1, "Temperature")
+		fillDensityLabel = wx.StaticText(printQualityPanel, -1, "Fill Density")
+
 		gs.Add(layerHeightLabel)
 		gs.Add(self.layerHeight)
+		gs.Add(printSpeedLabel)
+		gs.Add(self.printSpeed)	
+		gs.Add(tempLabel)
+		gs.Add(self.printTemperature)
 		gs.Add(fillDensityLabel)
 		gs.Add(self.fillDensity)
-		gs.Add(wallThicknessLabel)
-		gs.Add(self.wallThickness)
-		gs.Add(bottomThicknessLabel)
-		gs.Add(self.bottomThickness)
-		gs.Add(diameterLabel)
-		gs.Add(self.diameter)
 		
 		printQualityPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
-		#printQualityPanel.GetSizer().Add(boxsizer)
 		boxsizer.Add(gs, proportion = 0)
-
-		#boxsizer.Add(gs2, proportion = 1, flag=wx.EXPAND)
 		printQualityPanel.GetSizer().Add(boxsizer)
 		sizer.Add(printQualityPanel, (3,0))
+
+		"""------End-Quality-Details-Panel---------"""
+
+		sb = wx.StaticBox(currentFilePanel, label=_("Last File Opened"))
+		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+		currentFilePanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
+		boxsizer.Add(self.currentFileName)
+		currentFilePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
+		sizer.Add(currentFilePanel, (4,0), flag=wx.EXPAND)
 
 		self.printTypeNormal.SetValue(True)
 		self.printMaterialPLA.SetValue(True)
@@ -264,42 +252,48 @@ class simpleModePanel(wx.Panel):
 	def qualityValues(self):
 		put = profile.setTempOverride
 		get = profile.getProfileSetting
+		filePath = profile.getPreference('lastFile')
+		self.fileName = str(os.path.basename(filePath))
+
 		#printQualityPanel = wx.Panel(self)
-		self.QVList['printTemperature'] = get('print_temperature')
-		self.QVList['retractionAmount'] = get('retraction_amount')
-		self.QVList['printSpeed'] = get('print_speed')
 		self.QVList['layerHeight'] = get('layer_height')
+		self.QVList['printSpeed'] = get('print_speed')	
+		self.QVList['printTemperature'] = get('print_temperature')
 		self.QVList['fillDensity'] = get('fill_density')
-		self.QVList['wallThickness'] = get('wall_thickness')
-		self.QVList['bottomThickness'] = get('bottom_thickness')
-		self.QVList['diameter'] = get('filament_diameter')
+
+		if self.fileNameCallBack == 0:
+			self.QVList['fileName'] = "No file currently open"
+		else: 
+			self.QVList['fileName'] = str(self.fileName)
 		self.QNum = self.QChoice
 
 	
 	def materialValues(self):
 		put = profile.setTempOverride
 		get = profile.getProfileSetting
+		filePath = profile.getPreference('lastFile')
+		fileName = str(os.path.basename(filePath))
+
 		degree_sign= u'\N{DEGREE SIGN}'
 		
 		if self.mLetter != self.mChoice:
 			if self.QVList['printTemperature'] != get('print_temperature'):
 				self.QVList['printTemperature'] = get('print_temperature')
-			if self.QVList['retractionAmount'] != get('retraction_amount'):
-				self.QVList['retractionAmount'] = get('retraction_amount')
 			if self.QVList['printSpeed'] != get('print_speed'):
 				self.QVList['printSpeed'] = get('print_speed')
 			self.mLetter = self.mChoice
+
+		if self.fileNameCallBack != 0:
+			if self.QVList['fileName'] != fileName:
+				self.fileName = os.path.basename(fileName)
+				self.QVList['fileName'] = self.fileName
 		
-		degree_sign= u'\N{DEGREE SIGN}'
-		self.printTemperature.SetLabel("\t" + str(self.QVList['printTemperature']) +  degree_sign + "C")
-		self.printSpeed.SetLabel(str("\t" + self.QVList['printSpeed']) + " mm/s")
-		self.retractionAmount.SetLabel("\t" + str(self.QVList['retractionAmount']) + " mm")
 		self.layerHeight.SetLabel("\t" + str(self.QVList['layerHeight']) + " mm")
+		self.printSpeed.SetLabel(str("\t" + self.QVList['printSpeed']) + " mm/s")
+		self.printTemperature.SetLabel("\t" + str(self.QVList['printTemperature']) +  degree_sign + "C")
 		self.fillDensity.SetLabel("\t" + str(self.QVList['fillDensity']) + "%")
-		self.wallThickness.SetLabel("\t" + str(self.QVList['wallThickness']) + " mm")
-		self.bottomThickness.SetLabel("\t" + str(self.QVList['bottomThickness']) + " mm")
-		self.diameter.SetLabel("\t" + str(self.QVList['diameter']) + " mm")
-		
-		
+		self.currentFileName.SetLabel(str(self.QVList['fileName']))
+
+		self.fileNameCallBack += 1
 	def updateProfileToControls(self):
 		pass
