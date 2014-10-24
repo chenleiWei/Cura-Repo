@@ -21,11 +21,11 @@ class aboutWindow(wx.Frame):
 		title.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
 		s.Add(title, flag=wx.ALIGN_CENTRE|wx.EXPAND|wx.BOTTOM, border=5)
 		
-		title = wx.StaticText(p, -1, 'Version 1.0')
+		title = wx.StaticText(p, -1, 'Version 1.2.0a1')
 		title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
 		s.Add(title, flag=wx.ALIGN_CENTRE|wx.EXPAND|wx.BOTTOM, border=5)
 
-		s.Add(wx.StaticText(p, -1, 'Cura Type A version 1.0.0 has been optimized for the Type A Machines Series 1 3D Printer.'))
+		s.Add(wx.StaticText(p, -1, 'Cura Type A version 1.2.0a1 has been optimized for the Type A Machines Series 1 3D Printer.'))
 		s.Add(wx.StaticText(p, -1, 'This version is for use with the late-2014 Series 1 print head only.'))
 		s.Add(wx.StaticText(p, -1, 'Cura Type A is based on Cura 14.07.'))
 		s.Add(wx.StaticText(p, -1, 'Cura is a solution for Open Source Fused Filament Fabrication 3D printing.'))
