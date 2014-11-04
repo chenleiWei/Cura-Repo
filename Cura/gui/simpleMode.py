@@ -174,7 +174,7 @@ class simpleModePanel(wx.Panel):
 			put('bottom_layer_speed', '25')
 			self.QChoice = 1
 		elif self.printTypeHigh.GetValue():
-			put('wall_thickness', nozzle_size * 4.0)
+			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.10')
 			put('fill_density', '18')
 			put('solid_layer_thickness', '0.6')
@@ -183,7 +183,7 @@ class simpleModePanel(wx.Panel):
 			put('bottom_layer_speed', '30')
 			self.QChoice = 2
 		elif self.printTypeNormal.GetValue():
-			put('wall_thickness', nozzle_size * 6.0)
+			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.15')
 			put('fill_density', '12')
 			put('solid_layer_thickness', '0.75')
@@ -193,7 +193,7 @@ class simpleModePanel(wx.Panel):
 			put('bottom_layer_speed', '30')
 			self.QChoice = 3
 		elif self.printTypeLow.GetValue():
-			put('wall_thickness', nozzle_size * 8.0)
+			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.20')
 			put('fill_density', '12')
 			put('solid_layer_thickness', '0.8')
@@ -203,7 +203,7 @@ class simpleModePanel(wx.Panel):
 			put('bottom_layer_speed', '45')
 			self.QChoice = 4
 		elif self.printTypeDraft.GetValue():
-			put('wall_thickness', nozzle_size * 10.0)
+			put('wall_thickness', nozzle_size * 2.0)
 			put('layer_height', '0.25')
 			put('fill_density', '12')
 			put('solid_layer_thickness', '1.0')
