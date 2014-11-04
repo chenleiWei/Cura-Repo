@@ -18,7 +18,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME=1.2.0a1
+export BUILD_NAME=1.2.0a2
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -390,14 +390,14 @@ if (( ${ARCHIVE_FOR_DISTRIBUTION} )); then
 			ln -sf `pwd`/${TARGET_DIR} scripts/win32/dist
 			wine ~/.wine/drive_c/Program\ Files/NSIS/makensis.exe /DVERSION=${BUILD_NAME} scripts/win32/installer.nsi
             if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
-			mv scripts/win32/Cura_${BUILD_NAME}.exe ./
+			mv scripts/win32/Cura\ Type\ A\ ${BUILD_NAME}.exe ./
 		fi
 		if [ -f '/c/Program Files (x86)/NSIS/makensis.exe' ]; then
 			rm -rf scripts/win32/dist
 			mv `pwd`/${TARGET_DIR} scripts/win32/dist
 			'/c/Program Files (x86)/NSIS/makensis.exe' -DVERSION=${BUILD_NAME} 'scripts/win32/installer.nsi' >> log.txt
             if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
-			mv scripts/win32/Cura_${BUILD_NAME}.exe ./
+			mv scripts/win32/Cura\ Type\ A\ ${BUILD_NAME}.exe ./
 		fi
 	else
 		echo "Archiving to ${TARGET_DIR}.tar.gz"
