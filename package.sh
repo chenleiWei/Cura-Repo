@@ -18,7 +18,10 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME=1.2.0a2
+file="currentVersion"
+BUILD_NAME=$(cat $file)
+echo $BUILD_NAME
+export BUILD_NAME
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -137,13 +140,35 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	cd ..
 
 	# Create sparse image for distribution
-	hdiutil detach /Volumes/Cura\ -\ Ultimaker/
+	hdiutil detach /Volumes/Cura\ Type\ A/
 	rm -rf Cura.dmg.sparseimage
 	hdiutil convert DmgTemplateCompressed.dmg -format UDSP -o Cura.dmg
 	hdiutil resize -size 500m Cura.dmg.sparseimage
 	hdiutil attach Cura.dmg.sparseimage
-	cp -a dist/Cura.app /Volumes/Cura\ -\ Ultimaker/Cura/
-	hdiutil detach /Volumes/Cura\ -\ Ultimaker
+	cp -a dist/Cura.app /Volumes/Cura\ Type\ A/Cura\ Type\ A/
+
+	if [ -f ../../identityFile ]; then
+		echo "identityFile exists"
+		sigFile=../../identityFile
+		sig=$(cat $sigFile)
+		echo $sig
+		codesign -s $sig /Volumes/Cura\ Type\ A/Cura\ Type\ A/Cura.app/Contents/Frameworks/libwx_osx_cocoau-2.9.4.0.0.dylib
+
+		codesign -s $sig /Volumes/Cura\ Type\ A/Cura\ Type\ A/Cura.app/Contents/Frameworks/libwx_osx_cocoau_gl-2.9.4.0.0.dylib
+		
+		codesign -s $sig /Volumes/Cura\ Type\ A/Cura\ Type\ A/Cura.app/Contents/Frameworks/Python.framework
+		
+		codesign -s $sig /Volumes/Cura\ Type\ A/Cura\ Type\ A/Cura.app/Contents/Info.plist
+		
+		codesign -s $sig /Volumes/Cura\ Type\ A/Cura\ Type\ A/Cura.app/Contents/MacOS/python
+		
+		codesign -s $sig /Volumes/Cura\ Type\ A/Cura\ Type\ A/Cura.app -r="designated => anchor trusted"
+		rm ../../identityFile
+		echo "Successfully codesigned"
+	else
+		echo "identityFile does not exist"
+	fi
+	hdiutil detach /Volumes/Cura\ Type\ A/
 	hdiutil convert Cura.dmg.sparseimage -format UDZO -imagekey zlib-level=9 -ov -o ../../${TARGET_DIR}.dmg
 	exit
 fi
