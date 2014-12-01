@@ -30,11 +30,11 @@ def loadMeshes(filename):
 	ext = os.path.splitext(filename)[1].lower()
 	if ext == '.stl':
 		return stl.loadScene(filename)
-	if ext == '.obj':
+	elif ext == '.obj':
 		return obj.loadScene(filename)
-	if ext == '.dae':
+	elif ext == '.dae':
 		return dae.loadScene(filename)
-	if ext == '.amf':
+	elif ext == '.amf':
 		return amf.loadScene(filename)
 	print 'Error: Unknown model extension: %s' % (ext)
 	return []

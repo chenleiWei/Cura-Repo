@@ -2,6 +2,7 @@ __copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AG
 
 import wx
 import platform
+from Cura.util import profile
 
 class aboutWindow(wx.Frame):
 	def __init__(self):
@@ -16,16 +17,17 @@ class aboutWindow(wx.Frame):
 		s.Add(p, flag=wx.ALL, border=15)
 		s = wx.BoxSizer(wx.VERTICAL)
 		p.SetSizer(s)
-
+		currentVersion = profile.versionNumber()
+		print ("CURRENT VERSION: %s"%currentVersion)
 		title = wx.StaticText(p, -1, 'Cura Type A')
 		title.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
 		s.Add(title, flag=wx.ALIGN_CENTRE|wx.EXPAND|wx.BOTTOM, border=5)
 		
-		title = wx.StaticText(p, -1, 'Version 1.2.0a1')
+		title = wx.StaticText(p, -1, _('Version %s'%currentVersion))
 		title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
 		s.Add(title, flag=wx.ALIGN_CENTRE|wx.EXPAND|wx.BOTTOM, border=5)
 
-		s.Add(wx.StaticText(p, -1, 'Cura Type A version 1.2.0a1 has been optimized for the Type A Machines Series 1 3D Printer.'))
+		s.Add(wx.StaticText(p, -1, 'Cura Type A version %s has been optimized for the Type A Machines Series 1 3D Printer.'%currentVersion))
 		s.Add(wx.StaticText(p, -1, 'This version is for use with the late-2014 Series 1 print head only.'))
 		s.Add(wx.StaticText(p, -1, 'Cura Type A is based on Cura 14.07.'))
 		s.Add(wx.StaticText(p, -1, 'Cura is a solution for Open Source Fused Filament Fabrication 3D printing.'))
