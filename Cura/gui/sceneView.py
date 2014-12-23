@@ -164,6 +164,7 @@ class SceneView(openglGui.glGuiPanel):
 			# pop first entry for processing and append new files at end
 			while filenames:
 				filename = filenames.pop(0)
+				profile.putPreference('lastFile', str(filename))
 				if os.path.isdir(filename):
 					# directory: queue all included files and directories
 					filenames.extend(os.path.join(filename, f) for f in os.listdir(filename))

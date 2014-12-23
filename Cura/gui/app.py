@@ -24,7 +24,7 @@ class CuraApp(wx.App):
 		self.mainWindow = None
 		self.splash = None
 		self.loadFiles = files
-
+	
 		self.Bind(wx.EVT_ACTIVATE_APP, self.OnActivate)
 
 		if sys.platform.startswith('win'):
@@ -58,6 +58,9 @@ class CuraApp(wx.App):
 		else:
 			from Cura.gui import splashScreen
 			self.splash = splashScreen.splashScreen(self.afterSplashCallback)
+	# Imports the filename opened in Cura 
+	def currentlyOpenFile(self):
+		return filename
 
 	def MacOpenFile(self, path):
 		try:
@@ -123,7 +126,7 @@ class CuraApp(wx.App):
 		#If we haven't run it before, run the configuration wizard.
 		if profile.getMachineSetting('machine_type') =='unknown':
 			if platform.system() == "Windows":
-				exampleFile = os.path.normpath(os.path.join(resources.resourceBasePath, 'example', 'FirstPrintCone.stl'))
+				exampleFile = os.path.normpath(os.path.join(resources.resourceBasePath, 'FirstPrintCone.stl', 'FirstPrintCone.stl'))
 			else:
 				#Check if we need to copy our examples
 				exampleFile = os.path.expanduser('~/CuraExamples/FirstPrintCone.stl')
@@ -132,8 +135,9 @@ class CuraApp(wx.App):
 						os.makedirs(os.path.dirname(exampleFile))
 					except:
 						pass
-					for filename in glob.glob(os.path.normpath(os.path.join(resources.resourceBasePath, 'example', '*.*'))):
+					for filename in glob.glob(os.path.normpath(os.path.join(resources.resourceBasePath, 'FirstPrintCone.stl', '*.*'))):
 						shutil.copy(filename, os.path.join(os.path.dirname(exampleFile), os.path.basename(filename)))
+			profile.putPreference('lastFile', exampleFile)
 			self.loadFiles = [exampleFile]
 			if self.splash is not None:
 				self.splash.Show(False)
@@ -150,8 +154,7 @@ class CuraApp(wx.App):
 		#newVersionDialog.newVersionDialog().Show()
 
 		#if profile.getPreference('last_run_version') != version.getVersion(False):
-		#	profile.putPreference('last_run_version', version.getVersion(False))
-			
+		#	profile.putPreference('last_run_version', version.getVersion(False))	
 		if sys.platform.startswith('darwin'):
 			wx.CallAfter(self.StupidMacOSWorkaround)
 
