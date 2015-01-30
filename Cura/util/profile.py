@@ -25,6 +25,7 @@ if sys.version_info[0] < 3:
 else:
 	import configparser as ConfigParser
 
+from Cura.util import resources
 from Cura.util import version
 from Cura.util import validators
 
@@ -179,8 +180,8 @@ setting('print_temperature2',          0, int,   'basic',    _('Speed and Temper
 setting('print_temperature3',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("3th nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 220C is usually used."))
 setting('print_temperature4',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("4th nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 220C is usually used."))
 setting('print_bed_temperature',      70, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("Bed temperature (C)"), _("Temperature used for the heated printer bed. Set at 0 to pre-heat yourself."))
-setting('support', 'None', ['None', 'Touching buildplate', 'Everywhere'], 'basic', _('Support')).setLabel(_("Support type"), _("Type of support structure build.\n\"Touching buildplate\" is the most commonly used support setting.\n\nNone does not do any support.\nTouching buildplate only creates support where the support structure will touch the build platform.\nEverywhere creates support even on top of parts of the model."))
-setting('platform_adhesion',      'None', ['None', 'Brim', 'Raft'], 'basic', _('Support')).setLabel(_("Platform adhesion type"), _("Different options that help in preventing corners from lifting due to warping.\nBrim adds a single layer thick flat area around your object which is easy to cut off afterwards, and it is the recommended option.\nRaft adds a thick raster below the object and a thin interface between this and your object.\n(Note that enabling the brim or raft disables the skirt)"))
+setting('support', 'Everywhere', ['None', 'Touching buildplate', 'Everywhere'], 'basic', _('Support')).setLabel(_("Support type"), _("Type of support structure build.\n\"Touching buildplate\" is the most commonly used support setting.\n\nNone does not do any support.\nTouching buildplate only creates support where the support structure will touch the build platform.\nEverywhere creates support even on top of parts of the model."))
+setting('platform_adhesion',      'Brim', ['None', 'Brim', 'Raft'], 'basic', _('Support')).setLabel(_("Platform adhesion type"), _("Different options that help in preventing corners from lifting due to warping.\nBrim adds a single layer thick flat area around your object which is easy to cut off afterwards, and it is the recommended option.\nRaft adds a thick raster below the object and a thin interface between this and your object.\n(Note that enabling the brim or raft disables the skirt)"))
 setting('support_dual_extrusion',  'Both', [_('Both'), _('First extruder'), _('Second extruder')], 'basic', _('Support')).setLabel(_("Support dual extrusion"), _("Which extruder to use for support material, for break-away support you can use both extruders.\nBut if one of the materials is more expensive then the other you could select an extruder to use for support material. This causes more extruder switches.\nYou can also use the 2nd extruder for soluble support materials."))
 setting('wipe_tower',              False, bool,  'basic',    _('Dual extrusion')).setLabel(_("Wipe&prime tower"), _("The wipe-tower is a tower printed on every layer when switching between nozzles.\nThe old nozzle is wiped off on the tower before the new nozzle is used to print the 2nd color."))
 setting('wipe_tower_volume',          15, float, 'expert',   _('Dual extrusion')).setLabel(_("Wipe&prime tower volume per layer (mm3)"), _("The amount of material put in the wipe/prime tower.\nThis is done in volume because in general you want to extrude a\ncertain amount of volume to get the extruder going, independent on the layer height.\nThis means that with thinner layers, your tower gets bigger."))
@@ -616,6 +617,33 @@ def getBasePath():
 		except:
 			print "Failed to create directory: %s" % (basePath)
 	return basePath
+	
+#	print ("BasePath: %s" % basePath)
+#	putProfileSetting('current_version', currentVersion)
+#Create a function in version.py that gets the version
+# TYPE A MACHINES -- Below is used development purposes, and is temporary
+#versionPath = os.path.join(os.path.dirname(__file__), '../../.version')
+#v = open(versionPath, 'r+')
+#currentVersion = version.pullVersionNumber()
+	
+#	print("VersionPath: %s" % versionPath)
+#	print("Version: %s" % currentVersion)
+#	v = open(versionPath, 'r')
+#	print("Current Version as written in version.py line 30: %s"%str(versionPath))
+
+#	putProfileSetting('current_version', str(currentVersion))
+#	return currentVersion
+#	currentVersionNumber = getProfileSetting('current_version')
+#	print("CurrentVersionNumber within profile.py line 609 %s" %currentVersionNumber)
+#	basePath = os.path.join(path, currentVersionNumber)
+#	print("basePath variable (profile.py, line 610): %s"%basePath)
+#	if platform.system() == "Windows":
+#		basePath = os.path.normpath(os.path.expanduser('~/.cura/%s' % #version.getVersion(False)))
+#	elif platform.system() == "Darwin":
+#		basePath = os.path.expanduser('~/Library/Application Support/Cura/%s' % version.getVersion(False))
+#	else:
+#		basePath = os.path.expanduser('~/.cura/%s' % version.getVersion(False))
+
 
 def getAlternativeBasePaths():
 	"""
@@ -650,13 +678,6 @@ def getDefaultProfilePath():
 	"""
 	return os.path.join(getBasePath(), 'current_profile.ini')
 
-def versionNumber():
-	versionPath = os.path.join(os.path.dirname(__file__), "../../currentVersion")
-	v = open('currentVersion', 'r')
-	currentVersion = v.read()
-
-	putProfileSetting('current_version', str(currentVersion))
-	return currentVersion
 
 def loadProfile(filename, allMachines = False):
 	"""
