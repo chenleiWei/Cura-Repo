@@ -61,6 +61,7 @@ class SceneView(openglGui.glGuiPanel):
 		self._projMatrix = None
 		self.tempMatrix = None
 
+		self.filename = None
 		self.openFileButton      = openglGui.glButton(self, 4, _("Load"), (0,0), self.showLoadModel)
 		self.printButton         = openglGui.glButton(self, 6, _("Print"), (1,0), self.OnPrintButton)
 		self.printButton.setDisabled(True)
@@ -164,6 +165,7 @@ class SceneView(openglGui.glGuiPanel):
 			# pop first entry for processing and append new files at end
 			while filenames:
 				filename = filenames.pop(0)
+				self.filename = filename
 				profile.putPreference('lastFile', str(filename))
 				if os.path.isdir(filename):
 					# directory: queue all included files and directories

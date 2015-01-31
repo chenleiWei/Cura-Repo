@@ -5,13 +5,14 @@ import os
 
 from Cura.util import profile
 from Cura.gui import sceneView
+from Cura.util import resources
 
 #Add option for no infill
 class simpleModePanel(wx.Panel):
 	"Main user interface window for Quickprint mode"
 	def __init__(self, parent, callback):
 		super(simpleModePanel, self).__init__(parent)
-		self._callback = callback
+		self.callback = callback
 		
 		# below are key-value pairs used for simple mode info list
 		self.QChoice = 1 
@@ -19,21 +20,29 @@ class simpleModePanel(wx.Panel):
 		self.QNum = -1
 		self.mLetter = 'z'
 		self.QVList = {}
-		self.fileNameCallBack = 0
+		self.QVList['fileName'] = 'No File Currently Open'
+		self.QVList['fillDensity'] = -1
+		self.fillDensityOverride = -1
 		
-# These are the quality value containers; because the values displayed are dynamic in accordance to the quality choice
-#the text contain in 'label' is replaced when the user clicks through the options 
-		printQualityPanel = wx.Panel(self)	
-		self.layerHeight = wx.StaticText(printQualityPanel, -1, label= '')
-		self.printSpeed = wx.StaticText(printQualityPanel, -1, label = '')
-		self.printTemperature = wx.StaticText(printQualityPanel, -1, label = '')	
-		self.fillDensity = wx.StaticText(printQualityPanel, -1, label = '')
+# Print Quality Type Details Panel
+		printQualityDetailsPanel = wx.Panel(self)	
+		layerHeightLabel = wx.StaticText(printQualityDetailsPanel, -1, "Layer Height")
+		printSpeedLabel = wx.StaticText(printQualityDetailsPanel, -1, "Print Speed")
+		tempLabel = wx.StaticText(printQualityDetailsPanel, -1, "Temperature")
+#		fillDensityLabel = wx.StaticText(printQualityDetailsPanel, -1, "Fill Density")
+		
+# Because dynamic text cannot be passed as a wx.staticText argument, but can be passed through the label argument, label is set to nothing by default.
+# When values are picked through the 'Print Quality Type' panel below, the labels change with respect to the settings of the quality type in question		
+		self.layerHeight = wx.StaticText(printQualityDetailsPanel, -1, label= '')
+		self.printSpeed = wx.StaticText(printQualityDetailsPanel, -1, label = '')
+		self.printTemperature = wx.StaticText(printQualityDetailsPanel, -1, label = '')	
+#		self.fillDensity = wx.StaticText(printQualityDetailsPanel, -1, label = '')
 	
-# Panel specific to the last file opened
+# Displays the file name of the model that is currently loaded in Cura
 		currentFilePanel = wx.Panel(self)
-		self.currentFileName = wx.StaticText(currentFilePanel, -1, label = '')
-
-# Print quality type panel
+		self.currentFileName = wx.StaticText(currentFilePanel, -1, label = 'No File Currently Open')
+	
+# Print Quality Type Panel
 		printTypePanel = wx.Panel(self)
 		self.printTypeHigh = wx.RadioButton(printTypePanel, -1, _("High quality"), style=wx.RB_GROUP)
 		self.printTypeBest = wx.RadioButton(printTypePanel, -1, _("Final quality"))
@@ -43,7 +52,7 @@ class simpleModePanel(wx.Panel):
 		self.printTypeJoris = wx.RadioButton(printTypePanel, -1, _("Thin walled cup or vase"))
 		self.printTypeJoris.Hide()
 
-# Print material panel
+# Print Material Panel
 		printMaterialPanel = wx.Panel(self)
 		self.printMaterialPLA = wx.RadioButton(printMaterialPanel, -1, 'PLA', style=wx.RB_GROUP)
 		self.printMaterialFlex = wx.RadioButton(printMaterialPanel, -1, 'Flexible')
@@ -51,21 +60,26 @@ class simpleModePanel(wx.Panel):
 		self.printMaterialPET = wx.RadioButton(printMaterialPanel, -1, 'PET')
 		#self.printMaterialABS = wx.RadioButton(printMaterialPanel, -1, 'ABS')
 		#self.printMaterialDiameter = wx.TextCtrl(printMaterialPanel, -1, profile.getProfileSetting('filament_diameter'))
-		if profile.getMachineSetting('gcode_flzavor') == 'UltiGCode':
-			printMaterialPanel.Show(False)
+#		if profile.getMachineSetting('gcode_flzavor') == 'UltiGCode':
+#			printMaterialPanel.Show(False)
 		
-# Infill panel
+# Infill Override Panel
 		infillPanel = wx.Panel(self)
 		self.infillAmount = wx.StaticText(infillPanel, -1, label = '')
-		infillPercent = wx.StaticText(infillPanel, -1, " Infill\t")
+		infillPercent = wx.StaticText(infillPanel, -1, " Infill\t\t")
+		self.infillReset = wx.BitmapButton(infillPanel, -1, wx.Bitmap(resources.getPathForImage('resetButton.png')))
+		self.infill = wx.Slider(infillPanel, value=0, minValue=5, maxValue=100)
+		self.infill.SetLineSize(33)
 		
-		self.printSupport = wx.CheckBox(self, -1, _("Print support structure"))
+# Print Support and Adhesion-Type Panel
+		self.printSupport = wx.CheckBox(self, -1, _("Print Support Structure"))
 		self.printBrim = wx.CheckBox(self, -1, _("Print Brim"))
 		self.printRaft = wx.CheckBox(self, -1, _("Print Raft"))
-		self.infill = wx.Slider(infillPanel, value = 0, minValue = 0, maxValue = 100)
 		sizer = wx.GridBagSizer()
 		self.SetSizer(sizer)
-# Adds print quality panel to interface with items to choose from 
+
+
+# Creates a boxed space to display Print Quality Panel objects; also proportions out space for all radio buttons
 		sb = wx.StaticBox(printTypePanel, label=_("Print Quality:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		boxsizer.Add(self.printTypeBest)
@@ -78,6 +92,7 @@ class simpleModePanel(wx.Panel):
 		printTypePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(printTypePanel, (0,0), flag=wx.EXPAND)
 
+# Material Box
 		sb = wx.StaticBox(printMaterialPanel, label=_("Material:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		boxsizer.Add(self.printMaterialPLA)
@@ -90,54 +105,61 @@ class simpleModePanel(wx.Panel):
 		printMaterialPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		printMaterialPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(printMaterialPanel, (1,0), flag=wx.EXPAND)
-
-		sb = wx.StaticBox(infillPanel, label=_("Infill:"))
-		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		gs = wx.GridSizer(2,2,2,0)	
-		boxsizer.Add(self.infill)
-		gs.Add(infillPercent)
-		gs.Add(self.infillAmount)
-		boxsizer.Add(gs)
-		infillPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
-		infillPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
-		sizer.Add(infillPanel, (2,0), flag=wx.EXPAND)
 		
-
+# Support Box
 		sb = wx.StaticBox(self, label=_("Support:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		boxsizer.Add(self.printSupport)
 		boxsizer.Add(self.printBrim)
 		boxsizer.Add(self.printRaft)
-		sizer.Add(boxsizer, (3,0), flag=wx.EXPAND)
+		sizer.Add(boxsizer, (2,0), flag=wx.EXPAND)
 		
-		"""------Start-Quality-Details-Panel---------"""
-
-		sb = wx.StaticBox(printQualityPanel, label=_("Print Quality Values:"))
+# Print Quality Type Details Box
+		sb = wx.StaticBox(printQualityDetailsPanel, label=_("Print Quality Details:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		gs = wx.GridSizer(4,2,2,0)		
+		gs = wx.GridSizer(3,2,2,2)		
 		labelFont = wx.Font(15, wx.SWISS, wx.NORMAL, wx.ITALIC)
-
-		layerHeightLabel = wx.StaticText(printQualityPanel, -1, "Layer Height")
-		printSpeedLabel = wx.StaticText(printQualityPanel, -1, "Print Speed")
-		tempLabel = wx.StaticText(printQualityPanel, -1, "Temperature")
-		fillDensityLabel = wx.StaticText(printQualityPanel, -1, "Fill Density")
-
 		gs.Add(layerHeightLabel)
 		gs.Add(self.layerHeight)
 		gs.Add(printSpeedLabel)
 		gs.Add(self.printSpeed)	
 		gs.Add(tempLabel)
 		gs.Add(self.printTemperature)
-		gs.Add(fillDensityLabel)
-		gs.Add(self.fillDensity)
-		
-		printQualityPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
+#		gs.Add(fillDensityLabel)
+#		gs.Add(self.fillDensity)
+		printQualityDetailsPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		boxsizer.Add(gs, proportion = 0)
-		printQualityPanel.GetSizer().Add(boxsizer)
-		sizer.Add(printQualityPanel, (4,0))
+		printQualityDetailsPanel.GetSizer().Add(boxsizer)
+		sizer.Add(printQualityDetailsPanel, (3,0))
+		
+# Infill Box
+		sb = wx.StaticBox(infillPanel, label=_("Fill Density:"))
+		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+		bs1 = wx.BoxSizer(wx.HORIZONTAL)
+		bs2 = wx.BoxSizer(wx.HORIZONTAL)
+		bs1.Add(self.infill, flag=wx.ALIGN_LEFT | wx.TOP | wx.LEFT, border=5)
+		bs1.Add(self.infillReset, flag=wx.ALIGN_RIGHT)
+		bs2.Add(infillPercent, flag = wx.ALIGN_LEFT | wx.TOP | wx.LEFT, border = 5)
+		bs2.Add(self.infillAmount, flag = wx.ALIGN_RIGHT)
+		boxsizer.Add(bs1, wx.EXPAND)
+		boxsizer.Add(bs2, wx.EXPAND)
+		infillPanel.SetSizer(boxsizer)
+		sizer.Add(infillPanel, (4,0), flag=wx.EXPAND)
 
-		"""------End-Quality-Details-Panel---------"""
+	
 
+#		gs = wx.GridSizer(2,2,0,0)	
+#		gs.Add(self.infill)
+#		gs.Add(self.infillReset, flag = wx.LEFT)
+#		gs.Add(infillPercent)
+#		gs.Add(self.infillAmount)
+#		boxsizer.Add(gs)
+#		infillPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
+#		infillPanel.GetSizer().Add(gs)
+#		sizer.Add(infillPanel, (4,0))
+#		sizer.AddGrowableRow(4)
+        
+# Current File Loaded Box
 		sb = wx.StaticBox(currentFilePanel, label=_("Last File Opened"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		currentFilePanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
@@ -145,36 +167,54 @@ class simpleModePanel(wx.Panel):
 		currentFilePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(currentFilePanel, (5,0), flag=wx.EXPAND)
 
+
 		self.printTypeNormal.SetValue(True)
 		self.printMaterialPLA.SetValue(True)
+		self.printBrim.SetValue(True)
 
-		self.printTypeBest.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
-		self.printTypeHigh.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
-		self.printTypeNormal.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
-		self.printTypeLow.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
-		self.printTypeDraft.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
+		self.printTypeBest.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
+		self.printTypeHigh.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
+		self.printTypeNormal.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
+		self.printTypeLow.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
+		self.printTypeDraft.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
 		#self.printTypeJoris.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 
-		self.printMaterialPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
-		self.printMaterialFlex.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
-		self.printMaterialCFPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
-		self.printMaterialPET.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
+		self.printMaterialPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
+		self.printMaterialFlex.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
+		self.printMaterialCFPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
+		self.printMaterialPET.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
 		#self.printMaterialABS.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
 		#self.printMaterialDiameter.Bind(wx.EVT_TEXT, lambda e: self._callback())
 
-		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self._callback())
-		self.printBrim.Bind(wx.EVT_CHECKBOX, lambda e: self._callback())
-		self.printRaft.Bind(wx.EVT_CHECKBOX, lambda e: self._callback())
+		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
+		self.printBrim.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
+		self.printRaft.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
 		self.infill.Bind(wx.EVT_SCROLL, self.OnSliderScroll)
-
+		self.infillReset.Bind(wx.EVT_BUTTON, lambda e: self.callback())
+	
 	def OnSliderScroll(self, e):
 		get = profile.getProfileSetting
 		put = profile.setTempOverride
 		obj = e.GetEventObject()
-		val = obj.GetValue()
-		put('fill_density', val)
-		print ("Fill Density: " + get('fill_density'))
+		self.fillDensityOverride = obj.GetValue()
+#		self.QVList['fillDensity'] = get('fill_density')
 		self.infillAmount.SetLabel('\t' + get('fill_density') + '%')
+		put('fill_density', self.fillDensityOverride)
+		
+		
+#		if int(self.QVList['fillDensity']) != int(self.infill.GetValue()):
+#					self.callback()
+				
+	def displayLoadedFileName(self):
+		mainWindow = self.GetParent().GetParent().GetParent()
+		sceneView = mainWindow.scene
+		filename = str(os.path.basename(sceneView.filename))
+		
+		if self.QVList['fileName'] == filename:
+			pass
+		else:
+			self.QVList['fileName'] = filename
+			self.currentFileName.SetLabel(str(self.QVList['fileName']))
 	
 	def setupSlice(self):
 		put = profile.setTempOverride
@@ -279,6 +319,7 @@ class simpleModePanel(wx.Panel):
 		put('plugin_config', '')
 		self.materialValues()
 		print self.mChoice
+		self.displayLoadedFileName()
 		
 		
 	def qualityValues(self):
@@ -287,27 +328,15 @@ class simpleModePanel(wx.Panel):
 		filePath = profile.getPreference('lastFile')
 		self.fileName = str(os.path.basename(filePath))
 
-		#printQualityPanel = wx.Panel(self)
+		#printQualityDetailsPanel = wx.Panel(self)
 		self.QVList['layerHeight'] = get('layer_height')
 		self.QVList['printSpeed'] = get('print_speed')	
 		self.QVList['printTemperature'] = get('print_temperature')
 		self.QVList['fillDensity'] = get('fill_density')
 		
-		if self.fileName == "FirstPrintCone.stl":
-			self.QVList['fileName'] = "FirstPrintCone.stl"
-		elif self.fileNameCallBack == 0:
-			self.QVList['fileName'] = "No file currently open"
-		else: 
-			self.QVList['fileName'] = str(self.fileName)
-		self.QNum = self.QChoice
-
-	
 	def materialValues(self):
 		put = profile.setTempOverride
 		get = profile.getProfileSetting
-		filePath = profile.getPreference('lastFile')
-		fileName = str(os.path.basename(filePath))
-
 		degree_sign= u'\N{DEGREE SIGN}'
 		
 		if self.mLetter != self.mChoice:
@@ -315,22 +344,17 @@ class simpleModePanel(wx.Panel):
 				self.QVList['printTemperature'] = get('print_temperature')
 			if self.QVList['printSpeed'] != get('print_speed'):
 				self.QVList['printSpeed'] = get('print_speed')
+			if self.QVList['fillDensity'] != get('fill_density'):
+				self.QVList['fillDensity'] = get('fill_density')
 			self.mLetter = self.mChoice
 
-		if self.fileNameCallBack != 0:
-			if self.QVList['fileName'] != fileName:
-				self.fileName = os.path.basename(fileName)
-				self.QVList['fileName'] = self.fileName
-		
 		self.layerHeight.SetLabel("\t" + str(self.QVList['layerHeight']) + " mm")
 		self.printSpeed.SetLabel(str("\t" + self.QVList['printSpeed']) + " mm/s")
 		self.printTemperature.SetLabel("\t" + str(self.QVList['printTemperature']) +  degree_sign + "C")
-		self.fillDensity.SetLabel("\t" + str(self.QVList['fillDensity']) + "%")
+#		self.fillDensity.SetLabel("\t" + str(self.QVList['fillDensity']) + "%")
 		self.infillAmount.SetLabel('\t' + get('fill_density') + '%')
 		self.infill.SetValue(int(get('fill_density')))
-		self.currentFileName.SetLabel(str(self.QVList['fileName']))
-
-		self.fileNameCallBack += 1
+	
 	def updateProfileToControls(self):
 		pass
 	

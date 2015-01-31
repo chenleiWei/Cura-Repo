@@ -253,26 +253,24 @@ setting('current_version', '', str, 'hidden', 'hidden')
 setting('start.gcode', """;-- START GCODE --
 ;Sliced for Type A Machines Series 1
 ;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-;Print Speed: {print_speed} Support: {support} 
+;Basic settings: Layer height: {layer_height} Walls:{wall_thickness} Fill: {fill_density}
+;Print Speed: {print_speed} Support: {support}
 ;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 ;Print time: {print_time}
-;Filament used: {filament_amount}m {filament_weight}g
-;Filament cost: {filament_cost}
-M106 S255	 ;start with the fan on
-G21        ;metric values
-G90        ;absolute positioning
-M106 S255    ;start with the fan on
-G28     ;move to endstops
-G29		;allows for auto-levelling
-G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
-M109 S{print_temperature} ;Heat To temp
-G92 E0                  ;zero the extruded length
-G1 F200 E30              ;extrude 30mm of feed stock
-G92 E0                  ;zero the extruded length again
-G1 X175 Y25  Z0 F{travel_speed} ;remove bugger
-G1 X220 F{travel_speed} ;remove bugger
-G1 X150 Y150  Z15 F{travel_speed} ;recenter and begin
+;Filament used: {filament_amount} m {filament_weight} g
+;Filament cost: {filament_cost} 
+M106 S255	;start with the fan on G21 ;metric values
+G90			;absolute positioning
+M106 S255	;start with the fan on
+G28			;move to endstops
+G29			;allows for auto-levelling
+G1 X150 Y5 Z15.0 F{travel_speed}	;center and move the platform down 15mm
+M109 S{print_temperature}		;Heat To temp
+G1 X150 Y5 Z0.3			;move the platform to test/purge extrusion position
+G92 E0					;zero the extruded length
+G1 F200 X250 E30		;extrude 30mm of feed stock
+G92 E0								;zero the extruded length again
+G1 X150 Y150 Z15 F{travel_speed}	;recenter and begin
 G1 F{travel_speed}
 """, str, 'alteration', 'alteration')
 #######################################################################################
