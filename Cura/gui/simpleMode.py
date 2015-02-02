@@ -118,7 +118,7 @@ class simpleModePanel(wx.Panel):
 		sb = wx.StaticBox(printQualityDetailsPanel, label=_("Print Quality Details:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		gs = wx.GridSizer(3,2,2,2)		
-		labelFont = wx.Font(15, wx.SWISS, wx.NORMAL, wx.ITALIC)
+#		labelFont = wx.Font(15, wx.SWISS, wx.NORMAL, wx.ITALIC)
 		gs.Add(layerHeightLabel)
 		gs.Add(self.layerHeight)
 		gs.Add(printSpeedLabel)
