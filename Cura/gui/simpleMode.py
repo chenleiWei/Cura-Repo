@@ -163,8 +163,6 @@ class simpleModePanel(wx.Panel):
 		self.printMaterialFlex.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
 		self.printMaterialCFPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
 		self.printMaterialPET.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
-		#self.printMaterialABS.Bind(wx.EVT_RADIOBUTTON, lambda e: self._callback())
-		#self.printMaterialDiameter.Bind(wx.EVT_TEXT, lambda e: self._callback())
 
 		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
 		self.printBrim.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
@@ -172,8 +170,8 @@ class simpleModePanel(wx.Panel):
 		self.printRaft.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
 		self.infillSlider.Bind(wx.EVT_SCROLL, self.OnSliderScroll)
 		self.infillReset.Bind(wx.EVT_BUTTON, lambda e: self.callback())
-	
-	
+
+
 	def OnSliderScroll(self, e):
 		get = profile.getProfileSetting
 		put = profile.setTempOverride
@@ -214,7 +212,7 @@ class simpleModePanel(wx.Panel):
 			put('support', _('Everywhere'))
 		else:
 			put('support', _('None'))
-			
+	
 		if self.printBrim.GetValue():
 			put('platform_adhesion', _("Brim"))
 		if self.printRaft.GetValue():
@@ -296,18 +294,18 @@ class simpleModePanel(wx.Panel):
 			put('retraction_amount', '1.8')
 			put('fan_full_height','0.0')
 			self.mChoice = 'd'
-                # if self.printMaterialABS.GetValue():
-                #         put('print_bed_temperature', '100')
-                #         put('platform_adhesion', 'Brim')
-                #         put('filament_flow', '107')
-                #         put('print_temperature', '245')
+				# if self.printMaterialABS.GetValue():
+				#         put('print_bed_temperature', '100')
+				#         put('platform_adhesion', 'Brim')
+				#         put('filament_flow', '107')
+				#         put('print_temperature', '245')
 
 		put('plugin_config', '')
 		self.materialValues()
 		print self.mChoice
 		self.displayLoadedFileName()
-		
-		
+
+
 	def qualityValues(self):
 		put = profile.setTempOverride
 		get = profile.getProfileSetting
@@ -317,13 +315,13 @@ class simpleModePanel(wx.Panel):
 		self.QVList['printSpeed'] = get('print_speed')	
 		self.QVList['printTemperature'] = get('print_temperature')
 		self.QVList['fillDensity'] = get('fill_density')
-		
-		
+
+
 	def materialValues(self):
 		put = profile.setTempOverride
 		get = profile.getProfileSetting
 		degree_sign= u'\N{DEGREE SIGN}'
-		
+
 		if self.mLetter != self.mChoice:
 			self.mLetter = self.mChoice
 			if self.QVList['printTemperature'] != get('print_temperature'):
@@ -337,14 +335,16 @@ class simpleModePanel(wx.Panel):
 			self.QVList['fillDensity'] = self.fillDensityOverride
 			put('fill_density', self.QVList['fillDensity'])
 			self.infillOverride = False
+		else: 
+			self.infillPercentage.SetLabel('\t' + get('fill_density') + '%')
+			self.infillSlider.SetValue(int(get('fill_density')))
+
 
 		self.layerHeight.SetLabel("\t" + str(self.QVList['layerHeight']) + " mm")
 		self.printSpeed.SetLabel(str("\t" + self.QVList['printSpeed']) + " mm/s")
 		self.printTemperature.SetLabel("\t" + str(self.QVList['printTemperature']) +  degree_sign + "C")
-		self.infillPercentage.SetLabel('\t' + get('fill_density') + '%')
-		self.infillSlider.SetValue(int(get('fill_density')))
+
 
 
 	def updateProfileToControls(self):
 		pass
-	
