@@ -18,8 +18,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-file="currentVersion"
-BUILD_NAME=$(cat $file)
+BUILD_NAME='1.2.1a1'
 echo $BUILD_NAME
 export BUILD_NAME
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
