@@ -17,7 +17,7 @@ class aboutWindow(wx.Frame):
 		s.Add(p, flag=wx.ALL, border=15)
 		s = wx.BoxSizer(wx.VERTICAL)
 		p.SetSizer(s)
-		currentVersion = profile.versionNumber()
+		currentVersion = '1.2.1a1'
 		print ("CURRENT VERSION: %s"%currentVersion)
 		title = wx.StaticText(p, -1, 'Cura Type A')
 		title.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
