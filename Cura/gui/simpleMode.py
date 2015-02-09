@@ -150,6 +150,7 @@ class simpleModePanel(wx.Panel):
 		self.printTypeNormal.SetValue(True)
 		self.printMaterialPLA.SetValue(True)
 		self.printBrim.SetValue(True)
+		self.printSupport.SetValue(True)
 
 		self.printTypeBest.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
 		self.printTypeHigh.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
@@ -167,6 +168,7 @@ class simpleModePanel(wx.Panel):
 
 		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
 		self.printBrim.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
+		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
 		self.printRaft.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
 		self.infillSlider.Bind(wx.EVT_SCROLL, self.OnSliderScroll)
 		self.infillReset.Bind(wx.EVT_BUTTON, lambda e: self.callback())
@@ -210,7 +212,9 @@ class simpleModePanel(wx.Panel):
 
 		if self.printSupport.GetValue():
 			put('support', _('Everywhere'))
-			print('Support is set to everywhere')
+		else:
+			put('support', _('None'))
+			
 		if self.printBrim.GetValue():
 			put('platform_adhesion', _("Brim"))
 		if self.printRaft.GetValue():
@@ -297,6 +301,7 @@ class simpleModePanel(wx.Panel):
                 #         put('platform_adhesion', 'Brim')
                 #         put('filament_flow', '107')
                 #         put('print_temperature', '245')
+
 		put('plugin_config', '')
 		self.materialValues()
 		print self.mChoice
