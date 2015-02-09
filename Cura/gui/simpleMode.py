@@ -69,7 +69,7 @@ class simpleModePanel(wx.Panel):
 		infillPercent = wx.StaticText(infillPanel, -1, " Infill\t\t")
 		self.infillReset = wx.BitmapButton(infillPanel, -1, wx.Bitmap(resources.getPathForImage('resetButton.png')))
 		self.infill = wx.Slider(infillPanel, value=0, minValue=5, maxValue=100)
-		self.infill.SetLineSize(33)
+		self.infillOverride = False
 		
 # Print Support and Adhesion-Type Panel
 		self.printSupport = wx.CheckBox(self, -1, _("Print Support Structure"))
@@ -197,14 +197,12 @@ class simpleModePanel(wx.Panel):
 		put = profile.setTempOverride
 		obj = e.GetEventObject()
 		self.fillDensityOverride = obj.GetValue()
-#		self.QVList['fillDensity'] = get('fill_density')
+		self.QVList['fillDensity'] = get('fill_density')
 		self.infillAmount.SetLabel('\t' + get('fill_density') + '%')
 		put('fill_density', self.fillDensityOverride)
-		
-		
-#		if int(self.QVList['fillDensity']) != int(self.infill.GetValue()):
-#					self.callback()
-				
+		self.infillOverride = True
+		self.callback()
+
 	def displayLoadedFileName(self):
 		mainWindow = self.GetParent().GetParent().GetParent()
 		sceneView = mainWindow.scene
@@ -344,16 +342,27 @@ class simpleModePanel(wx.Panel):
 				self.QVList['printTemperature'] = get('print_temperature')
 			if self.QVList['printSpeed'] != get('print_speed'):
 				self.QVList['printSpeed'] = get('print_speed')
+
+			self.mLetter = self.mChoice
+
+		if self.infillOverride == False:		
 			if self.QVList['fillDensity'] != get('fill_density'):
 				self.QVList['fillDensity'] = get('fill_density')
-			self.mLetter = self.mChoice
+		if self.infillOverride == True:
+			self.QVList['fillDensity'] = self.fillDensityOverride
+			put('fill_density', self.QVList['fillDensity'])
+			self.infillOverride = False
+
 
 		self.layerHeight.SetLabel("\t" + str(self.QVList['layerHeight']) + " mm")
 		self.printSpeed.SetLabel(str("\t" + self.QVList['printSpeed']) + " mm/s")
 		self.printTemperature.SetLabel("\t" + str(self.QVList['printTemperature']) +  degree_sign + "C")
 #		self.fillDensity.SetLabel("\t" + str(self.QVList['fillDensity']) + "%")
+
 		self.infillAmount.SetLabel('\t' + get('fill_density') + '%')
 		self.infill.SetValue(int(get('fill_density')))
+
+
 	
 	def updateProfileToControls(self):
 		pass
