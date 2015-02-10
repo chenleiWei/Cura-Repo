@@ -62,7 +62,7 @@ class simpleModePanel(wx.Panel):
 		self.infillPercentage = wx.StaticText(infillPanel, -1, label = '')
 		literalInfillLabel = wx.StaticText(infillPanel, -1, " Infill\t\t")
 		self.infillReset = wx.BitmapButton(infillPanel, -1, wx.Bitmap(resources.getPathForImage('resetButton.png')))
-		self.infillSlider = wx.Slider(infillPanel, value=0, minValue=5, maxValue=100)
+		self.infillSlider = wx.Slider(infillPanel, value=0, minValue=0, maxValue=100)
 		self.infillOverride = False
 		
 		# Print Support and Adhesion-Type Panel
