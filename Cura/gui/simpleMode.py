@@ -32,9 +32,9 @@ class simpleModePanel(wx.Panel):
 		
 		# Because dynamic text cannot be passed as a wx.staticText argument, but can be passed through the label argument, label is set to nothing by default.
 		# When values are picked through the 'Print Quality Type' panel below, the labels change with respect to the settings of the quality type in question		
-		self.layerHeight = wx.StaticText(printQualityDetailsPanel, -1, label= '')
-		self.printSpeed = wx.StaticText(printQualityDetailsPanel, -1, label = '')
-		self.printTemperature = wx.StaticText(printQualityDetailsPanel, -1, label = '')	
+		self.layerHeight = wx.StaticText(printQualityDetailsPanel, -1, label= "")
+		self.printSpeed = wx.StaticText(printQualityDetailsPanel, -1, label = "")
+		self.printTemperature = wx.StaticText(printQualityDetailsPanel, -1, label = "")	
 	
 		# Displays the file name of the model that is currently loaded in Cura
 		currentFilePanel = wx.Panel(self)
@@ -42,15 +42,22 @@ class simpleModePanel(wx.Panel):
 	
 		# Print Quality Type Panel
 		printTypePanel = wx.Panel(self)
-		self.printTypeHigh = wx.RadioButton(printTypePanel, -1, _("High quality"), style=wx.RB_GROUP)
-		self.printTypeBest = wx.RadioButton(printTypePanel, -1, _("Final quality"))
-		self.printTypeNormal = wx.RadioButton(printTypePanel, -1, _("Normal quality"))
-		self.printTypeLow = wx.RadioButton(printTypePanel, -1, _("Low quality"))
-		self.printTypeDraft = wx.RadioButton(printTypePanel, -1, _("Draft quality"))
+		self.printTypeHigh = wx.RadioButton(printTypePanel, -1, _("High Quality"), style=wx.RB_GROUP)
+		self.printTypeBest = wx.RadioButton(printTypePanel, -1, _("Final Quality"))
+		self.printTypeNormal = wx.RadioButton(printTypePanel, -1, _("Normal Quality"))
+		self.printTypeLow = wx.RadioButton(printTypePanel, -1, _("Low Quality"))
+		self.printTypeDraft = wx.RadioButton(printTypePanel, -1, _("Draft Quality"))
 		self.printTypeJoris = wx.RadioButton(printTypePanel, -1, _("Thin walled cup or vase"))
 		self.printTypeJoris.Hide()
 
-# Print Material Panel
+		# Support Panel
+		supportPanel = wx.Panel(self)
+		self.printNoAdhesion = wx.RadioButton(supportPanel, -1, _("None"))
+		self.printBrim = wx.RadioButton(supportPanel, -1, _("Brim"))
+		self.printRaft = wx.RadioButton(supportPanel, -1, _("Raft"))
+		self.printSupportStructure = wx.CheckBox(supportPanel, -1, _("Print Support Structure"))
+
+		# Print Material Panel
 		printMaterialPanel = wx.Panel(self)
 		self.printMaterialPLA = wx.RadioButton(printMaterialPanel, -1, 'PLA', style=wx.RB_GROUP)
 		self.printMaterialFlex = wx.RadioButton(printMaterialPanel, -1, 'Flexible')
@@ -65,10 +72,6 @@ class simpleModePanel(wx.Panel):
 		self.infillSlider = wx.Slider(infillPanel, value=0, minValue=0, maxValue=100)
 		self.infillOverride = False
 		
-		# Print Support and Adhesion-Type Panel
-		self.printSupport = wx.CheckBox(self, -1, _("Print Support Structure"))
-		self.printBrim = wx.CheckBox(self, -1, _("Print Brim"))
-		self.printRaft = wx.CheckBox(self, -1, _("Print Raft"))
 		sizer = wx.GridBagSizer()
 		self.SetSizer(sizer)
 
@@ -100,13 +103,24 @@ class simpleModePanel(wx.Panel):
 		printMaterialPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(printMaterialPanel, (1,0), flag=wx.EXPAND)
 		
-		# Support Box
-		sb = wx.StaticBox(self, label=_("Support:"))
+
+		sb = wx.StaticBox(supportPanel, label=_("Adhesion and Support"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		boxsizer.Add(self.printSupport)
 		boxsizer.Add(self.printBrim)
 		boxsizer.Add(self.printRaft)
-		sizer.Add(boxsizer, (2,0), flag=wx.EXPAND)
+		boxsizer.Add(self.printNoAdhesion)
+		boxsizer.Add(wx.StaticText(supportPanel, -1, _(' ')))
+		boxsizer.Add(self.printSupportStructure)
+		supportPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
+		supportPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
+		sizer.Add(supportPanel, (2,0), flag=wx.EXPAND)
+		# Support Box
+#		sb = wx.StaticBox(self, label=_("Adhesion and Support:"))
+#		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+#		boxsizer.Add(self.printSupport)
+#		boxsizer.Add(self.printBrim)
+#		boxsizer.Add(self.printRaft)
+#		sizer.Add(boxsizer, (2,0), flag=wx.EXPAND)
 		
 		# Print Quality Type Details Box
 		sb = wx.StaticBox(printQualityDetailsPanel, label=_("Print Quality Details:"))
@@ -150,7 +164,7 @@ class simpleModePanel(wx.Panel):
 		self.printTypeNormal.SetValue(True)
 		self.printMaterialPLA.SetValue(True)
 		self.printBrim.SetValue(True)
-		self.printSupport.SetValue(True)
+		self.printSupportStructure.SetValue(True)
 
 		self.printTypeBest.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
 		self.printTypeHigh.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
@@ -164,10 +178,11 @@ class simpleModePanel(wx.Panel):
 		self.printMaterialCFPLA.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
 		self.printMaterialPET.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
 
-		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
-		self.printBrim.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
-		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
-		self.printRaft.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
+		self.printSupportStructure.Bind(wx.EVT_CHECKBOX, lambda e: self.callback())
+		self.printBrim.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
+		self.printRaft.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
+		self.printNoAdhesion.Bind(wx.EVT_RADIOBUTTON, lambda e: self.callback())
+
 		self.infillSlider.Bind(wx.EVT_SCROLL, self.OnSliderScroll)
 		self.infillReset.Bind(wx.EVT_BUTTON, lambda e: self.callback())
 
@@ -208,15 +223,22 @@ class simpleModePanel(wx.Panel):
 
 		machine_type = profile.getMachineSetting('machine_type')
 
-		if self.printSupport.GetValue():
+		#Deals with the support structure turning on and off
+		if self.printSupportStructure.GetValue():
 			put('support', _('Everywhere'))
 		else:
 			put('support', _('None'))
 	
+		# Deals with the platform adhesion variables
 		if self.printBrim.GetValue():
 			put('platform_adhesion', _("Brim"))
-		if self.printRaft.GetValue():
+		elif self.printRaft.GetValue():
 			put('platform_adhesion', _("Raft"))
+			put('fan_enabled', _("True"))
+		elif self.printNoAdhesion.GetValue():
+			put('platform_adhesion', _("None"))
+
+
 		nozzle_size = float(get('nozzle_size'))
 		if self.printTypeBest.GetValue():
 			put('wall_thickness', nozzle_size * 2.0)
@@ -278,7 +300,7 @@ class simpleModePanel(wx.Panel):
 			put('fan_full_height','0.0')
 			self.mChoice = 'a'
 		if self.printMaterialFlex.GetValue():
-			put('print_temperature', '245')
+			put('print_temperature', '218')
 			put('print_speed', '40')
 			put('retraction_amount', '1')
 			put('fan_full_height','0.0')
@@ -343,6 +365,8 @@ class simpleModePanel(wx.Panel):
 		self.layerHeight.SetLabel("\t" + str(self.QVList['layerHeight']) + " mm")
 		self.printSpeed.SetLabel(str("\t" + self.QVList['printSpeed']) + " mm/s")
 		self.printTemperature.SetLabel("\t" + str(self.QVList['printTemperature']) +  degree_sign + "C")
+		print('Brim Status: %s' % self.printBrim.GetValue())
+		print('Raft Status: %s' % self.printRaft.GetValue())
 
 
 
