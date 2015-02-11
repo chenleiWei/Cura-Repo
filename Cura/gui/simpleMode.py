@@ -141,11 +141,11 @@ class simpleModePanel(wx.Panel):
 		sb = wx.StaticBox(infillPanel, label=_("Fill Density:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		bs1 = wx.BoxSizer(wx.HORIZONTAL)
-		bs2 = wx.BoxSizer(wx.HORIZONTAL)
+		bs2 = wx.GridSizer(1,2,2,2)
 		bs1.Add(self.infillSlider, flag=wx.ALIGN_LEFT | wx.TOP | wx.LEFT, border=5)
 		bs1.Add(self.infillReset, flag=wx.ALIGN_RIGHT)
-		bs2.Add(literalInfillLabel, flag = wx.ALIGN_LEFT | wx.TOP | wx.LEFT, border = 5)
-		bs2.Add(self.infillPercentage, flag = wx.ALIGN_RIGHT)
+		bs2.Add(literalInfillLabel)
+		bs2.Add(self.infillPercentage)
 		boxsizer.Add(bs1, wx.EXPAND)
 		boxsizer.Add(bs2, wx.EXPAND)
 		infillPanel.SetSizer(boxsizer)
@@ -192,7 +192,7 @@ class simpleModePanel(wx.Panel):
 		obj = e.GetEventObject()
 		self.fillDensityOverride = obj.GetValue()
 		self.QVList['fillDensity'] = get('fill_density')
-		self.infillPercentage.SetLabel('\t' + get('fill_density') + '%')
+		self.infillPercentage.SetLabel(get('fill_density') + '%')
 		put('fill_density', self.fillDensityOverride)
 		self.infillOverride = True
 		self.callback()
@@ -357,13 +357,13 @@ class simpleModePanel(wx.Panel):
 			put('fill_density', self.QVList['fillDensity'])
 			self.infillOverride = False
 		else: 
-			self.infillPercentage.SetLabel('\t' + get('fill_density') + '%')
+			self.infillPercentage.SetLabel(get('fill_density') + '%')
 			self.infillSlider.SetValue(int(get('fill_density')))
 
 
-		self.layerHeight.SetLabel("\t" + str(self.QVList['layerHeight']) + " mm")
-		self.printSpeed.SetLabel(str("\t" + self.QVList['printSpeed']) + " mm/s")
-		self.printTemperature.SetLabel("\t" + str(self.QVList['printTemperature']) +  degree_sign + "C")
+		self.layerHeight.SetLabel(str(self.QVList['layerHeight']) + " mm")
+		self.printSpeed.SetLabel(str(self.QVList['printSpeed']) + " mm/s")
+		self.printTemperature.SetLabel(str(self.QVList['printTemperature']) +  degree_sign + "C")
 		print('Brim Status: %s' % self.printBrim.GetValue())
 		print('Raft Status: %s' % self.printRaft.GetValue())
 
