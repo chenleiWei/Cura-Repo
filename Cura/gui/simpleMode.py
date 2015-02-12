@@ -69,7 +69,7 @@ class simpleModePanel(wx.Panel):
 		self.infillPercentage = wx.StaticText(infillPanel, -1, label = '')
 		literalInfillLabel = wx.StaticText(infillPanel, -1, " Infill\t\t")
 		self.infillReset = wx.BitmapButton(infillPanel, -1, wx.Bitmap(resources.getPathForImage('resetButton.png')))
-		self.infillSlider = wx.Slider(infillPanel, value=0, minValue=0, maxValue=100)
+		self.infillSlider = wx.Slider(infillPanel, -1, value=0, minValue=0, maxValue=100, size=(100,20))
 		self.infillOverride = False
 		
 		sizer = wx.GridBagSizer()
@@ -141,13 +141,13 @@ class simpleModePanel(wx.Panel):
 		sb = wx.StaticBox(infillPanel, label=_("Fill Density:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		bs1 = wx.BoxSizer(wx.HORIZONTAL)
-		bs2 = wx.GridSizer(1,2,2,2)
-		bs1.Add(self.infillSlider, flag=wx.ALIGN_LEFT | wx.TOP | wx.LEFT, border=5)
-		bs1.Add(self.infillReset, flag=wx.ALIGN_RIGHT)
+		bs2 = wx.GridSizer(1,2,0,0)
+		bs2.Add(self.infillSlider, flag=wx.ALIGN_RIGHT)
+		bs2.Add(self.infillReset, flag=wx.ALIGN_RIGHT)
 		bs2.Add(literalInfillLabel)
 		bs2.Add(self.infillPercentage)
+		boxsizer.Add(bs2)
 		boxsizer.Add(bs1, wx.EXPAND)
-		boxsizer.Add(bs2, wx.EXPAND)
 		infillPanel.SetSizer(boxsizer)
 		sizer.Add(infillPanel, (4,0), flag=wx.EXPAND)
 
