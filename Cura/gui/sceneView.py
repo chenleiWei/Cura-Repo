@@ -9,6 +9,7 @@ import threading
 import math
 import sys
 import cStringIO as StringIO
+import webbrowser
 
 import OpenGL
 OpenGL.ERROR_CHECKING = False
@@ -38,7 +39,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self._yaw = 30
 		self._pitch = 60
-		self._zoom = 300
+		self._zoom = 800
 		self._scene = objectScene.Scene()
 		self._objectShader = None
 		self._objectLoadShader = None
@@ -104,7 +105,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self.viewSelection = openglGui.glComboButton(self, _("View mode"), [7,19,11,15,23], [_("Normal"), _("Overhang"), _("Transparent"), _("X-Ray"), _("Layers")], (-1,0), self.OnViewChange)
 
-		#self.youMagineButton = openglGui.glButton(self, 26, _("Share on YouMagine"), (2,0), lambda button: youmagineGui.youmagineManager(self.GetTopLevelParent(), self._scene))
+		#self.youMagineButton = openglGui.glButton(self, 26, _("Slice Now"), (2,0), lambda button: self.sceneUpdated())
 		#self.youMagineButton.setDisabled(True)
 
 		self.notification = openglGui.glNotification(self, (0, 0))
@@ -894,9 +895,9 @@ class SceneView(openglGui.glGuiPanel):
 		glDisable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-		glClearColor(0.8, 0.8, 0.8, 1.0)
+		glClearColor(0.8, 0.8, 0.8, 1.0) #BACKGROUND COLOR 
 		glClearStencil(0)
-		glClearDepth(1.0)
+		glClearDepth(1)
 
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
@@ -1236,13 +1237,15 @@ class SceneView(openglGui.glGuiPanel):
 	def _drawMachine(self):
 		glEnable(GL_CULL_FACE)
 		glEnable(GL_BLEND)
-
+		
+		size = [profile.getMachineSettingFloat('machine_width'), profile.getMachineSettingFloat('machine_depth'), profile.getMachineSettingFloat('machine_height')]
 		size = [profile.getMachineSettingFloat('machine_width'), profile.getMachineSettingFloat('machine_depth'), profile.getMachineSettingFloat('machine_height')]
 
 		machine = profile.getMachineSetting('machine_type')
 		if machine.startswith('ultimaker'):
 			if machine not in self._platformMesh:
-				meshes = meshLoader.loadMeshes(resources.getPathForMesh(machine + '_platform.stl'))
+				#meshes = meshLoader.loadMeshes(resources.getPathForMesh(machine + '_platform.stl'))
+				meshes = meshLoader.loadMeshes(resources.getPathForMesh('Series1.stl'))
 				if len(meshes) > 0:
 					self._platformMesh[machine] = meshes[0]
 				else:
@@ -1256,44 +1259,6 @@ class SceneView(openglGui.glGuiPanel):
 			self._renderObject(self._platformMesh[machine], False, False)
 			self._objectShader.unbind()
 
-			#For the Ultimaker 2 render the texture on the back plate to show the Ultimaker2 text.
-			if machine == 'ultimaker2':
-				if not hasattr(self._platformMesh[machine], 'texture'):
-					self._platformMesh[machine].texture = openglHelpers.loadGLTexture('Ultimaker2backplate.png')
-				glBindTexture(GL_TEXTURE_2D, self._platformMesh[machine].texture)
-				glEnable(GL_TEXTURE_2D)
-				glPushMatrix()
-				glColor4f(1,1,1,1)
-
-				glTranslate(0,150,-5)
-				h = 50
-				d = 8
-				w = 100
-				glEnable(GL_BLEND)
-				glBlendFunc(GL_DST_COLOR, GL_ZERO)
-				glBegin(GL_QUADS)
-				glTexCoord2f(1, 0)
-				glVertex3f( w, 0, h)
-				glTexCoord2f(0, 0)
-				glVertex3f(-w, 0, h)
-				glTexCoord2f(0, 1)
-				glVertex3f(-w, 0, 0)
-				glTexCoord2f(1, 1)
-				glVertex3f( w, 0, 0)
-
-				glTexCoord2f(1, 0)
-				glVertex3f(-w, d, h)
-				glTexCoord2f(0, 0)
-				glVertex3f( w, d, h)
-				glTexCoord2f(0, 1)
-				glVertex3f( w, d, 0)
-				glTexCoord2f(1, 1)
-				glVertex3f(-w, d, 0)
-				glEnd()
-				glDisable(GL_TEXTURE_2D)
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-				glPopMatrix()
-				
 		elif machine.startswith('Witbox'):
 			if machine not in self._platformMesh:
 				meshes = meshLoader.loadMeshes(resources.getPathForMesh(machine + '_platform.stl'))
@@ -1308,6 +1273,7 @@ class SceneView(openglGui.glGuiPanel):
 			self._renderObject(self._platformMesh[machine], False, False)
 			self._objectShader.unbind()
 		else:
+			
 			glColor4f(0,0,0,1)
 			glLineWidth(3)
 			glBegin(GL_LINES)
@@ -1350,22 +1316,29 @@ class SceneView(openglGui.glGuiPanel):
 
 		#Draw checkerboard
 		if self._platformTexture is None:
-			self._platformTexture = openglHelpers.loadGLTexture('checkerboard.png')
+			self._platformTexture = openglHelpers.loadGLTexture('buildplate.png')
 			glBindTexture(GL_TEXTURE_2D, self._platformTexture)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-		glColor4f(1,1,1,0.5)
+		#	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+		#	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+		glColor4f(1,1,1,70)
 		glBindTexture(GL_TEXTURE_2D, self._platformTexture)
 		glEnable(GL_TEXTURE_2D)
+#		glCullFace(GL_FRONT_AND_BACK)
 		glBegin(GL_TRIANGLE_FAN)
-		for p in polys[0]:
-			glTexCoord2f(p[0]/20, p[1]/20)
-			glVertex3f(p[0], p[1], 0)
+		glTexCoord2f(0, 1)
+		glVertex3f(-153, 153, 0)
+		glTexCoord2f(0, 0)     
+		glVertex3f(-153, -153, 0)
+		glTexCoord2f(1, 0)     
+		glVertex3f(153, -153, 0)
+		glTexCoord2f(1, 1)     
+		glVertex3f(153, 153, 0)
+		
 		glEnd()
-
+		
 		#Draw no-go zones. (clips in case of UM2)
 		glDisable(GL_TEXTURE_2D)
-		glColor4ub(127, 127, 127, 200)
+		glColor4ub(127, 127, 127, 0)
 		for poly in polys[1:]:
 			glBegin(GL_TRIANGLE_FAN)
 			for p in poly:
