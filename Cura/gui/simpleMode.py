@@ -2,9 +2,10 @@ __copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AG
 
 import wx
 import ConfigParser as configparser
-import os.path
+import os
 
 from Cura.util import profile
+from Cura.gui import sceneView
 from Cura.util import resources
 
 class simpleModePanel(wx.Panel):
@@ -15,7 +16,7 @@ class simpleModePanel(wx.Panel):
 
 		self._print_profile_options = []
 		self._print_material_options = []
-
+		self.lastOpenedFileName = "No File Currently Open"
 		printTypePanel = wx.Panel(self)
 		for filename in resources.getSimpleModeProfiles():
 			cp = configparser.ConfigParser()
@@ -45,6 +46,9 @@ class simpleModePanel(wx.Panel):
 			self._print_material_options.append(button)
 			if profile.getPreference('simpleModeMaterial') == base_filename:
 				button.SetValue(True)
+		
+		currentFilePanel = wx.Panel(self)
+		self.currentFileName = wx.StaticText(currentFilePanel, -1, label = 'No File Currently Open')
 
 		if profile.getMachineSetting('gcode_flavor') == 'UltiGCode':
 			printMaterialPanel.Show(False)
@@ -53,6 +57,13 @@ class simpleModePanel(wx.Panel):
 
 		sizer = wx.GridBagSizer()
 		self.SetSizer(sizer)
+		
+		sb = wx.StaticBox(currentFilePanel, label=_("Last File Opened"))
+		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+		currentFilePanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
+		boxsizer.Add(self.currentFileName)
+		currentFilePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
+		sizer.Add(currentFilePanel, (0,0), flag=wx.EXPAND)
 
 		sb = wx.StaticBox(printTypePanel, label=_("Select a quickprint profile:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
@@ -60,7 +71,7 @@ class simpleModePanel(wx.Panel):
 			boxsizer.Add(button)
 		printTypePanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		printTypePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
-		sizer.Add(printTypePanel, (0,0), flag=wx.EXPAND)
+		sizer.Add(printTypePanel, (1,0), flag=wx.EXPAND)
 
 		sb = wx.StaticBox(printMaterialPanel, label=_("Material:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
@@ -68,12 +79,12 @@ class simpleModePanel(wx.Panel):
 			boxsizer.Add(button)
 		printMaterialPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		printMaterialPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
-		sizer.Add(printMaterialPanel, (1,0), flag=wx.EXPAND)
+		sizer.Add(printMaterialPanel, (2,0), flag=wx.EXPAND)
 
 		sb = wx.StaticBox(self, label=_("Other:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		boxsizer.Add(self.printSupport)
-		sizer.Add(boxsizer, (2,0), flag=wx.EXPAND)
+		sizer.Add(boxsizer, (3,0), flag=wx.EXPAND)
 
 		for button in self._print_profile_options:
 			button.Bind(wx.EVT_RADIOBUTTON, self._update)
@@ -90,8 +101,21 @@ class simpleModePanel(wx.Panel):
 			if button.GetValue():
 				profile.putPreference('simpleModeMaterial', button.base_filename)
 		self._callback()
+		
+	def displayLoadedFileName(self):
+		mainWindow = self.GetParent().GetParent().GetParent()
+		sceneView = mainWindow.scene
+		filename = str(os.path.basename(sceneView.filename))
+		print("Filename within displayLoadedFileName: %s" %filename)
+		if self.lastOpenedFileName != filename:
+			self.lastOpenedFileName = filename
+			self.currentFileName.SetLabel(str(self.lastOpenedFileName))
+		else:
+			pass
+	
 
 	def getSettingOverrides(self):
+		self.displayLoadedFileName()
 		settings = {}
 		for setting in profile.settingsList:
 			if not setting.isProfile():

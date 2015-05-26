@@ -81,6 +81,8 @@ class SceneView(openglGui.glGuiPanel):
 		self.mirrorYButton       = openglGui.glButton(self, 18, _("Mirror Y"), (2,-3), lambda button: self.OnMirror(1))
 		self.mirrorZButton       = openglGui.glButton(self, 22, _("Mirror Z"), (2,-4), lambda button: self.OnMirror(2))
 
+		self.filename = None
+			
 		self.rotateToolButton.setExpandArrow(True)
 		self.scaleToolButton.setExpandArrow(True)
 		self.mirrorToolButton.setExpandArrow(True)
@@ -167,6 +169,8 @@ class SceneView(openglGui.glGuiPanel):
 			# pop first entry for processing and append new files at end
 			while filenames:
 				filename = filenames.pop(0)
+				self.filename = filename
+				profile.putPreference('lastFile', str(filename))
 				if os.path.isdir(filename):
 					# directory: queue all included files and directories
 					filenames.extend(os.path.join(filename, f) for f in os.listdir(filename))
