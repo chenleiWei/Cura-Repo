@@ -48,24 +48,45 @@ def getPathForFirmware(name):
 def getDefaultMachineProfiles():
 	path = os.path.normpath(os.path.join(resourceBasePath, 'machine_profiles', '*.ini'))
 	return glob.glob(path)
-
-def getSimpleModeProfiles():
-	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'profiles', '*.ini'))
-	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'quickprint', 'profiles')))
-	if os.path.isdir(user_path):
-		files = sorted(glob.glob(os.path.join(user_path, '*.ini')))
-		if len(files) > 0:
-			return files
-	return sorted(glob.glob(path))
-
+	
 def getSimpleModeMaterials():
-	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'materials', '*.ini'))
+	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'Materials', '*.ini'))
 	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'quickprint', 'materials')))
 	if os.path.isdir(user_path):
 		files = sorted(glob.glob(os.path.join(user_path, '*.ini')))
 		if len(files) > 0:
 			return files
 	return sorted(glob.glob(path))
+
+def getSimpleModeQualityProfiles():
+	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'Quality', '*.ini'))
+	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'quickprint', 'Quality')))
+	if os.path.isdir(user_path):
+		files = sorted(glob.glob(os.path.join(user_path, '*.ini')))
+		if len(files) > 0:
+			return files
+	return sorted(glob.glob(path))
+	
+def getSimpleModeStrengthProfiles():
+	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'Strength', '*.ini'))
+	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'quickprint', 'Strength')))
+	if os.path.isdir(user_path):
+		files = sorted(glob.glob(os.path.join(user_path, '*.ini')))
+		if len(files) > 0:
+			return files
+	return sorted(glob.glob(path))
+	
+def getSimpleModeAdvancedProfiles():
+	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'Advanced', '*.ini'))
+	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'quickprint', 'Advanced')))
+	if os.path.isdir(user_path):
+		files = sorted(glob.glob(os.path.join(user_path, '*.ini')))
+		if len(files) > 0:
+			return files
+	return sorted(glob.glob(path))
+
+
+
 
 def setupLocalization(selectedLanguage = None):
 	#Default to english
