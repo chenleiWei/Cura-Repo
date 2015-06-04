@@ -49,7 +49,7 @@ def getDefaultMachineProfiles():
 	path = os.path.normpath(os.path.join(resourceBasePath, 'machine_profiles', '*.ini'))
 	return glob.glob(path)
 	
-def getSimpleModeMaterials():
+def getSimpleModeMaterialsProfiles():
 	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'Materials', '*.ini'))
 	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'quickprint', 'materials')))
 	if os.path.isdir(user_path):

@@ -2,7 +2,9 @@ __copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AG
 
 import wx
 import ConfigParser as configparser
+from collections import defaultdict
 import os
+import re
 
 from Cura.util import profile
 from Cura.gui import sceneView
@@ -17,6 +19,7 @@ class simpleModePanel(wx.Panel):
 		self._print_profile_options = []
 		self._print_material_options = []
 		self.lastOpenedFileName = "No File Currently Open"
+		self.materials = []
 		printTypePanel = wx.Panel(self)
 		for filename in resources.getSimpleModeQualityProfiles():
 			cp = configparser.ConfigParser()
@@ -31,7 +34,8 @@ class simpleModePanel(wx.Panel):
 			self._print_profile_options.append(button)
 			if profile.getPreference('simpleModeProfile') == base_filename:
 				button.SetValue(True)
-
+		
+		"""
 		printMaterialPanel = wx.Panel(self)
 		for filename in resources.getSimpleModeMaterials():
 			cp = configparser.ConfigParser()
@@ -46,7 +50,7 @@ class simpleModePanel(wx.Panel):
 			self._print_material_options.append(button)
 			if profile.getPreference('simpleModeMaterial') == base_filename:
 				button.SetValue(True)
-		
+		"""
 		# Panel 1, which dynamically shows the user the name of the last file loaded
 		currentFilePanel = wx.Panel(self)
 		self.currentFileName = wx.StaticText(currentFilePanel, -1, label = "No File Currently Open")
@@ -89,7 +93,8 @@ class simpleModePanel(wx.Panel):
 		printTypePanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		printTypePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(printTypePanel, (2,0), flag=wx.EXPAND)
-
+		
+		"""
 		sb = wx.StaticBox(printMaterialPanel, label=_("Material:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		for button in self._print_material_options:
@@ -97,6 +102,7 @@ class simpleModePanel(wx.Panel):
 		printMaterialPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		printMaterialPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(printMaterialPanel, (3,0), flag=wx.EXPAND)
+		"""
 		
 		sb = wx.StaticBox(supportSelectionPanel, label=_("Support:"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
@@ -122,7 +128,7 @@ class simpleModePanel(wx.Panel):
 		
 	def OnSelectBtn(self, event):
 		self.popUpBox.Show()
-
+		
 	def _update(self, e):
 		for button in self._print_profile_options:
 			if button.GetValue():
@@ -145,9 +151,6 @@ class simpleModePanel(wx.Panel):
 		else:
 			pass
 			
-	def OnClose(self, event):
-		self.Close()		
-	
 	def getSettingOverrides(self):
 		self.displayLoadedFileName()
 		settings = {}
@@ -180,22 +183,85 @@ class simpleModePanel(wx.Panel):
 
 	def updateProfileToControls(self):
 		pass
+		
+	def getMaterialProfiles(self):
+		return self.sortedMaterialsProfiles
 
 class PopUpBox(wx.Frame):
 	def __init__(self, parent, id, title):
 		wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition)
+# -----------material profiles organization start-----------
+		list = []
+		list = resources.getSimpleModeMaterialsProfiles()
+				
+		brandsList = []
+		materialsList = []
+		unsortedMaterialsProfiles = {}
+		self.sortedMaterialsProfiles = {}
 
-		exampleList = ["One", "Two", "Three"]
+		for filename in list:
+			m = re.search(r'(\w+)__', filename)
+			n = re.search(r'__\w+', filename)
+	
+			# Takes the first part of filename string to the end of the double underscore
+			if m:
+				materialsDirectoryList = str(m.group())
+				splitString = materialsDirectoryList.split("__")
+				removeUnderscores = filter(None, splitString)
+				brandsList.append(removeUnderscores)
+			# Takes from underscore to second part of the filename string
+			if n:
+				materialsDirectoryList = str(n.group())
+				splitString = materialsDirectoryList.split("__")
+				removeUnderscores = filter(None, splitString)
+				materialsList.append(removeUnderscores)
 
+
+		for count in range(0, len(materialsList)):
+			material = str(materialsList[count])
+			brand = str(brandsList[count])
+			# because there are multiple materials for every brand, but not the opposite: it made sense to have 
+			# materials play the role of the keys and brands play the role of values
+			unsortedMaterialsProfiles.update({material:brand})
+	
+		# materials are read in as keys and brands are read in as values; takes above info and creates a dictionary 
+		# of brands lists containing either a single value or a list of materials belonging to that particular brand
+		for materials, brands in unsortedMaterialsProfiles.items():
+			self.sortedMaterialsProfiles.setdefault(brands.title(), []).append(materials.title())
+	
+# -----------material profiles organization end-----------
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		panel = wx.Panel(self, -1)
-		self.exampleListBox = wx.ListBox(panel, 5, wx.DefaultPosition, (170,130), exampleList, wx.LB_SINGLE)
+		brandNames = []
+	#	self.text = [wx.TextCtrl(panel, -1, '', size=(200, 130), style=wx.TE_MULTILINE)]
+#		print("BrandNameKeys %s" % self.sortedMaterialsProfiles.items())
+		self.text = wx.TextCtrl(panel, -1, 'Central European Time', size=(200, 130), style=wx.TE_MULTILINE)
+		self.materialPanel = wx.StaticText(panel, -1, '')
+		for brands, materials in self.sortedMaterialsProfiles.items():
+			brandNames.append(brands.strip('\'[]\''))
+			
+		self.exampleListBox = wx.ListBox(panel, 26, wx.DefaultPosition, (170,130), brandNames)
 		btn = wx.Button(panel, wx.ID_CLOSE, 'Close')
 		hbox1.Add(self.exampleListBox, 0, wx.TOP, 40)
+		hbox1.Add(self.text, 1, wx.LEFT | wx.TOP, 40)
 		hbox2.Add(btn, 1, wx.ALIGN_CENTRE)
 		vbox.Add(hbox1, 0, wx.ALIGN_CENTRE)
 		vbox.Add(hbox2, 1, wx.ALIGN_CENTRE)
 		panel.SetSizer(vbox)
+		
+		
+		self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_CLOSE)
+		self.Bind(wx.EVT_LISTBOX, self.OnSelect, id=26)
 
+	def OnClose(self, event):
+		self.Close()		
+		
+	def OnSelect(self, event):
+		panel = wx.Panel(self)
+		index = event.GetSelection()
+		brandSelection = self.exampleListBox.GetString(index)
+		materials = [y for x, y in self.sortedMaterialsProfiles.items() if x.strip('\'[]\'') == brandSelection]
+		
+		self.text.SetValue(str(materials))
