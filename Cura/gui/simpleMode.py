@@ -19,7 +19,6 @@ class simpleModePanel(wx.Panel):
 		self._print_profile_options = []
 		self._print_material_options = []
 		self.lastOpenedFileName = "No File Currently Open"
-		self.materials = []
 		printTypePanel = wx.Panel(self)
 		for filename in resources.getSimpleModeQualityProfiles():
 			cp = configparser.ConfigParser()
@@ -198,7 +197,7 @@ class PopUpBox(wx.Frame):
 		materialsList = []
 		unsortedMaterialsProfiles = {}
 		self.sortedMaterialsProfiles = {}
-
+		self.materials = []
 		for filename in list:
 			m = re.search(r'(\w+)__', filename)
 			n = re.search(r'__\w+', filename)
@@ -237,8 +236,8 @@ class PopUpBox(wx.Frame):
 		brandNames = []
 	#	self.text = [wx.TextCtrl(panel, -1, '', size=(200, 130), style=wx.TE_MULTILINE)]
 #		print("BrandNameKeys %s" % self.sortedMaterialsProfiles.items())
-		self.text = wx.TextCtrl(panel, -1, 'Central European Time', size=(200, 130), style=wx.TE_MULTILINE)
-		self.materialPanel = wx.StaticText(panel, -1, '')
+
+		self.text = wx.ListBox(panel, -1, wx.DefaultPosition, (200, 130), self.materials)
 		for brands, materials in self.sortedMaterialsProfiles.items():
 			brandNames.append(brands.strip('\'[]\''))
 			
@@ -258,10 +257,17 @@ class PopUpBox(wx.Frame):
 	def OnClose(self, event):
 		self.Close()		
 		
+	
+	
 	def OnSelect(self, event):
+		self.text.Clear()
+		self.materials[:] = []
 		panel = wx.Panel(self)
 		index = event.GetSelection()
 		brandSelection = self.exampleListBox.GetString(index)
-		materials = [y for x, y in self.sortedMaterialsProfiles.items() if x.strip('\'[]\'') == brandSelection]
 		
-		self.text.SetValue(str(materials))
+		for x, y in self.sortedMaterialsProfiles.items():
+			if x.strip('\'[]\'') == brandSelection:
+				self.text.Append(str(y))
+				
+	#	self.text.Append(str(self.materials))
