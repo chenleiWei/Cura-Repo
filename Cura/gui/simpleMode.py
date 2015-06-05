@@ -3,6 +3,8 @@ __copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AG
 import wx
 import ConfigParser as configparser
 from collections import defaultdict
+import itertools
+from itertools import chain
 import os
 import re
 
@@ -237,7 +239,7 @@ class PopUpBox(wx.Frame):
 	#	self.text = [wx.TextCtrl(panel, -1, '', size=(200, 130), style=wx.TE_MULTILINE)]
 #		print("BrandNameKeys %s" % self.sortedMaterialsProfiles.items())
 
-		self.text = wx.ListBox(panel, -1, wx.DefaultPosition, (200, 130), self.materials)
+		self.text = wx.ListBox(panel, -1, wx.DefaultPosition, (200, 130), choices=str(self.materials).strip('\'[]\''))
 		for brands, materials in self.sortedMaterialsProfiles.items():
 			brandNames.append(brands.strip('\'[]\''))
 			
@@ -254,6 +256,7 @@ class PopUpBox(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_CLOSE)
 		self.Bind(wx.EVT_LISTBOX, self.OnSelect, id=26)
 
+
 	def OnClose(self, event):
 		self.Close()		
 		
@@ -261,13 +264,18 @@ class PopUpBox(wx.Frame):
 	
 	def OnSelect(self, event):
 		self.text.Clear()
-		self.materials[:] = []
+		self.materials = []
 		panel = wx.Panel(self)
 		index = event.GetSelection()
 		brandSelection = self.exampleListBox.GetString(index)
 		
-		for x, y in self.sortedMaterialsProfiles.items():
+		for x, y in self.sortedMaterialsProfiles.iteritems():
 			if x.strip('\'[]\'') == brandSelection:
-				self.text.Append(str(y))
 				
-	#	self.text.Append(str(self.materials))
+				self.materials.append(itertools.chain(y))
+				
+				print("Simple Material: %s" % y)
+	
+		materialsList = itertools.chain.from_iterable(self.materials)
+		self.materials = materialsList
+		self.text.Set(list(self.materials))
