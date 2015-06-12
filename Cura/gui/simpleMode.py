@@ -17,7 +17,6 @@ class simpleModePanel(wx.Panel):
 	def __init__(self, parent, callback):
 		super(simpleModePanel, self).__init__(parent)
 		self._callback = callback
-
 		self._print_profile_options = []
 		self._print_material_options = []
 		self.lastOpenedFileName = "No File Currently Open"
@@ -29,6 +28,8 @@ class simpleModePanel(wx.Panel):
 			name = base_filename
 			if cp.has_option('info', 'name'):
 				name = cp.get('info', 'name')
+				print("Name (line 32): %s" % name)
+			print("len(self._print_profile_options) = %s" % len(self._print_profile_options))
 			button = wx.RadioButton(printTypePanel, -1, name, style=wx.RB_GROUP if len(self._print_profile_options) == 0 else 0)
 			button.base_filename = base_filename
 			button.filename = filename
@@ -129,7 +130,8 @@ class simpleModePanel(wx.Panel):
 		
 	def OnSelectBtn(self, event):
 		self.popUpBox.Show()
-		
+		item = self.popUpBox.ReturnMaterialProfile()
+		print("Item %s" % item)
 	def _update(self, e):
 		for button in self._print_profile_options:
 			if button.GetValue():
@@ -138,6 +140,7 @@ class simpleModePanel(wx.Panel):
 			if button.GetValue():
 				profile.putPreference('simpleModeMaterial', button.base_filename)
 		self._callback()
+		
 		
 	def displayLoadedFileName(self):
 		# Displays file names as they are loaded into sceneView
@@ -189,12 +192,15 @@ class simpleModePanel(wx.Panel):
 		return self.sortedMaterialsProfiles
 
 class PopUpBox(wx.Frame):
-	def __init__(self, parent, id, title):
-		wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition)
+	def __init__(self, parent, id, callback):
+		super(PopUpBox, self).__init__(parent, title="Material Profiles Selection", style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+		self._callback = callback
+	#	wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition)
 # -----------material profiles organization start-----------
 		list = []
 		list = resources.getSimpleModeMaterialsProfiles()
-				
+		self.Brand = None
+		self.materialProfile = ""
 		brandsList = []
 		materialsList = []
 		unsortedMaterialsProfiles = {}
@@ -239,30 +245,65 @@ class PopUpBox(wx.Frame):
 	#	self.text = [wx.TextCtrl(panel, -1, '', size=(200, 130), style=wx.TE_MULTILINE)]
 #		print("BrandNameKeys %s" % self.sortedMaterialsProfiles.items())
 
-		self.text = wx.ListBox(panel, -1, wx.DefaultPosition, (200, 130), choices=str(self.materials).strip('\'[]\''))
+		self.text = wx.ListBox(panel, 27, wx.DefaultPosition, (200, 130), choices=str(self.materials).strip('\'[]\''))
 		for brands, materials in self.sortedMaterialsProfiles.items():
 			brandNames.append(brands.strip('\'[]\''))
 			
 		self.exampleListBox = wx.ListBox(panel, 26, wx.DefaultPosition, (170,130), brandNames)
-		btn = wx.Button(panel, wx.ID_CLOSE, 'Close')
+		self.btn = wx.Button(panel, 25, 'Select', (150, 130), (110, -1))
+		self.btn.Enable(False)
 		hbox1.Add(self.exampleListBox, 0, wx.TOP, 40)
 		hbox1.Add(self.text, 1, wx.LEFT | wx.TOP, 40)
-		hbox2.Add(btn, 1, wx.ALIGN_CENTRE)
+		hbox2.Add(self.btn, 26, wx.ALIGN_CENTRE)
 		vbox.Add(hbox1, 0, wx.ALIGN_CENTRE)
 		vbox.Add(hbox2, 1, wx.ALIGN_CENTRE)
 		panel.SetSizer(vbox)
-		
-		
-		self.Bind(wx.EVT_BUTTON, self.OnClose, id=wx.ID_CLOSE)
-		self.Bind(wx.EVT_LISTBOX, self.OnSelect, id=26)
+			
+		self.Bind(wx.EVT_BUTTON, self.OnSelectMaterialProfile, id=25)
+		self.Bind(wx.EVT_LISTBOX, self.OnBrandSelect, id=26)
+		self.Bind(wx.EVT_LISTBOX, self.OnMaterialSelect, id=27)
 
 
 	def OnClose(self, event):
 		self.Close()		
 		
-	
-	
-	def OnSelect(self, event):
+	def OnEnable(self, enable):
+		if enable:
+			self.btn.Enable(True)
+		#self.callback
+		
+				
+	def OnSelectMaterialProfile(self, event):
+		myObject = event.GetEventObject()
+		
+		if self.Brand and self.Material is not None:
+			self.materialProfile = str(self.Brand) + "__" + self.Material.strip('\'[]\'')
+			print "materialProfile: %s" % self.materialProfile
+
+			settings = {}
+			cp = configparser.ConfigParser()
+			cp.read(self.materialProfile)
+			"""						
+			for setting in profile.settingsList:
+				if setting.isProfile():
+					print setting.getName()
+					if cp.has_option('profile', setting.getName()):
+						settings[setting.getName()] = cp.get('profile', setting.getName())
+			"""
+			for setting in profile.settingsList:
+				if not setting.isProfile():
+					continue
+				settings[setting.getName()] = setting.getDefault()					
+				
+			profile.putPreference('simpleModeMaterial', self.materialProfile)
+			self._callback
+			print(profile.getPreference('simpleModeMaterial'))
+		self.Close()
+		
+	def ReturnMaterialProfile(self):
+		return self.materialProfile
+
+	def OnBrandSelect(self, event):
 		self.text.Clear()
 		self.materials = []
 		panel = wx.Panel(self)
@@ -279,3 +320,17 @@ class PopUpBox(wx.Frame):
 		materialsList = itertools.chain.from_iterable(self.materials)
 		self.materials = materialsList
 		self.text.Set(list(self.materials))
+		self.Brand = brandSelection
+		print("Brand: %s" % brandSelection)
+		
+	# Displays specific material selection
+	def OnMaterialSelect(self, event):
+		index = event.GetSelection()
+		materialSelection = self.text.GetString(index)
+		
+		self.Material = materialSelection
+		print("Material %s" % materialSelection)
+		self.OnEnable(True)
+		
+		
+
