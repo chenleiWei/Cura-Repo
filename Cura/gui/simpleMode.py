@@ -51,7 +51,6 @@ class simpleModePanel(wx.Panel):
 		self.returnProfile = self.selectedMaterial.GetLabel()
 
 		pub.subscribe(self.displayAndLoadMaterialData, 'settings.update')
-		pub.subscribe(self.updateFileName, 'filename.update')
 
 		# Panel 3 titled "Advanced"; contains print support
 		supportSelectionPanel = wx.Panel(self)
@@ -139,23 +138,21 @@ class simpleModePanel(wx.Panel):
 		self.profileSettingsList = settings			
 		self._callback()
 		
-	def updateFileName(self, filename):
-		self.currentFileName.SetLabel(filename)			
-		
 	def displayLoadedFileName(self):
 		# Displays file names as they are loaded into sceneView
 		# and references them directly from that source
 		mainWindow = self.GetParent().GetParent().GetParent()
 		sceneView = mainWindow.scene
 		filename = str(os.path.basename(sceneView.filename))
+		print("Filename within displayLoadedFileName: %s" %filename)
 		if self.lastOpenedFileName != filename:
-			pub.sendMessage('filename.update', filename=filename)
 			self.lastOpenedFileName = filename
+			self.currentFileName.SetLabel(str(self.lastOpenedFileName))
 		else:
 			pass
 
-	
 	def getSettingOverrides(self):
+		self.displayLoadedFileName()
 		if self.profileSettingsList is not profile.settingsList:
 			return self.profileSettingsList
 			
