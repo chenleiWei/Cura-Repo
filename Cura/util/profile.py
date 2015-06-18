@@ -262,42 +262,40 @@ setting('plugin_config', '', str, 'hidden', 'hidden')
 setting('object_center_x', -1, float, 'hidden', 'hidden')
 setting('object_center_y', -1, float, 'hidden', 'hidden')
 
-setting('start.gcode', """;Sliced at: {day} {date} {time}
+setting('start.gcode', """;-- START GCODE --
+;Sliced for Type A Machines Series 1
+;Sliced at: {day} {date} {time}
 ;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Print Speed: {print_speed} Support: {support}
+;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
-;M190 S{print_bed_temperature} ;Uncomment to add your own bed temperature line
-;M109 S{print_temperature} ;Uncomment to add your own temperature line
 G21        ;metric values
 G90        ;absolute positioning
-M82        ;set extruder to absolute mode
-M107       ;start with the fan off
-
-G28 X0 Y0  ;move X/Y to min endstops
-G28 Z0     ;move Z to min endstops
-
-G1 Z15.0 F{travel_speed} ;move the platform down 15mm
-
-G92 E0                  ;zero the extruded length
-G1 F200 E3              ;extrude 3mm of feed stock
-G92 E0                  ;zero the extruded length again
+G28     ;move to endstops
+G29		;allows for auto-levelling
+G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+M140 S{print_bed_temperature} ;Prep Heat Bed
+M109 S{print_temperature} ;Heat To temp
+M190 S{print_bed_temperature} ;Heat Bed to temp
+G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
+G92 E0 ;zero the extruded length
+G1 F200 X250 E30 ;extrude 30mm of feed stock
+G92 E0 ;zero the extruded length again
+G1 X150 Y150  Z25 F12000 ;recenter and begin
 G1 F{travel_speed}
-;Put printing message on LCD screen
-M117 Printing...
 """, str, 'alteration', 'alteration')
 #######################################################################################
-setting('end.gcode', """;End GCode
-M104 S0                     ;extruder heater off
-M140 S0                     ;heated bed heater off (if you have it)
-
-G91                                    ;relative positioning
-G1 E-1 F300                            ;retract the filament a bit before lifting the nozzle, to release some of the pressure
+setting('end.gcode', """;-- END GCODE --
+M104 S0     ;extruder heater off
+M140 S0     ;heated bed heater off (if you have it)
+G91         ;relative positioning
+G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
 G1 Z+0.5 E-5 X-20 Y-20 F{travel_speed} ;move Z up a bit and retract filament even more
-G28 X0 Y0                              ;move X/Y to min endstops, so the head is out of the way
-
-M84                         ;steppers off
-G90                         ;absolute positioning
+G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
+M84           ;steppers off
+G90           ;absolute positioning
 ;{profile_string}
 """, str, 'alteration', 'alteration')
 #######################################################################################
