@@ -48,6 +48,7 @@ class simpleModePanel(wx.Panel):
 		self.selectedMaterial = wx.StaticText(materialSelectorPanel, -1, label=self.materialProfileText.GetText())
 		self.materialLoadButton = wx.Button(materialSelectorPanel, 4, _("Load Materials"))
 		self.printSupport = wx.CheckBox(self, -1, _("Print support structure"))
+		self.printSupport.SetValue(True)
 		self.returnProfile = self.selectedMaterial.GetLabel()
 
 		pub.subscribe(self.displayAndLoadMaterialData, 'settings.update')
@@ -57,6 +58,7 @@ class simpleModePanel(wx.Panel):
 		support_raft = wx.RadioButton(supportSelectionPanel, -1, label="Raft")
 		support_brim = wx.RadioButton(supportSelectionPanel, -1, label="Brim")
 		support_disabled = wx.RadioButton(supportSelectionPanel, -1, label="No Support")
+		support_raft.SetValue(True)
 		
 		sizer = wx.GridBagSizer()
 		self.SetSizer(sizer)
@@ -76,7 +78,9 @@ class simpleModePanel(wx.Panel):
 		materialSelectorPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(materialSelectorPanel, (1,0), flag=wx.EXPAND)
 		
-		sb = wx.StaticBox(printTypePanel, label=_("Select a quickprint profile:"))
+		
+		#The data here isn't being populated correctly
+		sb = wx.StaticBox(printTypePanel, label=_("Quality"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		for button in self._print_profile_options:
 			boxsizer.Add(button)
@@ -84,7 +88,7 @@ class simpleModePanel(wx.Panel):
 		printTypePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(printTypePanel, (2,0), flag=wx.EXPAND)
 		
-		sb = wx.StaticBox(supportSelectionPanel, label=_("Support:"))
+		sb = wx.StaticBox(supportSelectionPanel, label=_("Adhesion"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		supportSelectionPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		boxsizer.Add(support_raft)
@@ -93,7 +97,7 @@ class simpleModePanel(wx.Panel):
 		supportSelectionPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(supportSelectionPanel, (3,0), flag=wx.EXPAND)
 		
-		sb = wx.StaticBox(self, label=_("Other:"))
+		sb = wx.StaticBox(self, label=_("Support"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		boxsizer.Add(self.printSupport)
 		sizer.Add(boxsizer, (4,0), flag=wx.EXPAND)
@@ -150,6 +154,7 @@ class simpleModePanel(wx.Panel):
 			self.currentFileName.SetLabel(str(self.lastOpenedFileName))
 		else:
 			pass
+		self._callback()
 
 	def getSettingOverrides(self):
 		self.displayLoadedFileName()
