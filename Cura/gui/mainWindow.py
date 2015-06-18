@@ -195,8 +195,6 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('https://github.com/daid/Cura/issues'), i)
 		i = helpMenu.Append(-1, _("Check for update..."))
 		self.Bind(wx.EVT_MENU, self.OnCheckForUpdate, i)
-		i = helpMenu.Append(-1, _("Open YouMagine website..."))
-		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('https://www.youmagine.com/'), i)
 		i = helpMenu.Append(-1, _("About Cura..."))
 		self.Bind(wx.EVT_MENU, self.OnAbout, i)
 		self.menubar.Append(helpMenu, _("Help"))
@@ -566,7 +564,7 @@ class mainWindow(wx.Frame):
 		dlg.Destroy()
 		if result:
 			profile.resetProfile()
-			for k, v in self.simpleSettingsPanel.getSettingOverrides().items():
+			for k, v in self.simpleSettingsPanel.getSettingOverrides():
 				profile.putProfileSetting(k, v)
 			self.updateProfileToAllControls()
 		self.updateSliceMode()

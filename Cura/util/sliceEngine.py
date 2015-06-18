@@ -165,13 +165,6 @@ class EngineResult(object):
 			'printtime': self._printTimeSeconds,
 			'filament': ','.join(map(str, self._filamentMM)),
 		}
-		try:
-			f = urllib2.urlopen("https://stats.youmagine.com/curastats/slice", data = urllib.urlencode(data), timeout = 1)
-			f.read()
-			f.close()
-		except:
-			import traceback
-			traceback.print_exc()
 
 class Engine(object):
 	"""

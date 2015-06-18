@@ -29,7 +29,6 @@ from Cura.gui.util import previewTools
 from Cura.gui.util import openglHelpers
 from Cura.gui.util import openglGui
 from Cura.gui.util import engineResultView
-from Cura.gui.tools import youmagineGui
 from Cura.gui.tools import imageToMesh
 
 class SceneView(openglGui.glGuiPanel):
@@ -106,9 +105,6 @@ class SceneView(openglGui.glGuiPanel):
 
 		self.viewSelection = openglGui.glComboButton(self, _("View mode"), [7,19,11,15,23], [_("Normal"), _("Overhang"), _("Transparent"), _("X-Ray"), _("Layers")], (-1,0), self.OnViewChange)
 
-		self.youMagineButton = openglGui.glButton(self, 26, _("Share on YouMagine"), (2,0), lambda button: youmagineGui.youmagineManager(self.GetTopLevelParent(), self._scene))
-		self.youMagineButton.setDisabled(True)
-
 		self.notification = openglGui.glNotification(self, (0, 0))
 
 		self._engine = sliceEngine.Engine(self._updateEngineProgress)
@@ -136,11 +132,9 @@ class SceneView(openglGui.glGuiPanel):
 		self.printButton.setBottomText('')
 		self.viewSelection.setValue(4)
 		self.printButton.setDisabled(False)
-		self.youMagineButton.setDisabled(True)
 		self.OnViewChange()
 
 	def loadSceneFiles(self, filenames):
-		self.youMagineButton.setDisabled(False)
 		#if self.viewSelection.getValue() == 4:
 		#	self.viewSelection.setValue(0)
 		#	self.OnViewChange()

@@ -505,7 +505,6 @@ def _getMyDocumentsFolder():
 setting('sdcard_rootfolder', _getMyDocumentsFolder(), str, 'preference', 'hidden').setLabel(_("Base folder to replicate on SD card"), _("The specified folder will be used as a base path. Any gcode generated from object coming from within that folder will be automatically saved on the SD card at the same sub-folder. Any object coming from outside of this path will save the gcode on the root folder of the card."))
 setting('check_for_updates', 'True', bool, 'preference', 'hidden').setLabel(_("Check for updates"), _("Check for newer versions of Cura on startup"))
 setting('submit_slice_information', 'False', bool, 'preference', 'hidden').setLabel(_("Send usage statistics"), _("Submit anonymous usage information to improve future versions of Cura"))
-setting('youmagine_token', '', str, 'preference', 'hidden')
 setting('filament_physical_density', '1240', float, 'preference', 'hidden').setRange(500.0, 3000.0).setLabel(_("Density (kg/m3)"), _("Weight of the filament per m3. Around 1240 for PLA. And around 1040 for ABS. This value is used to estimate the weight if the filament used for the print."))
 setting('language', 'English', str, 'preference', 'hidden').setLabel(_('Language'), _('Change the language in which Cura runs. Switching language requires a restart of Cura'))
 setting('active_machine', '0', int, 'preference', 'hidden')
@@ -875,7 +874,7 @@ def getPreferencesString():
 	p = []
 	global settingsList
 	for set in settingsList:
-		if (set.isPreference() and set.getName() != 'lastFile' and set.getName() != 'youmagine_token') or set.isMachineSetting():
+		if (set.isPreference() and set.getName() != 'lastFile' and set.getName()) or set.isMachineSetting():
 			p.append(set.getName() + "=" + set.getValue().encode('utf-8'))
 	ret = '\b'.join(p)
 	ret = base64.b64encode(zlib.compress(ret, 9))
