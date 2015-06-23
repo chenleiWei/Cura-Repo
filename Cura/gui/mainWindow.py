@@ -568,7 +568,7 @@ class mainWindow(wx.Frame):
 		dlg.Destroy()
 		if result:
 			profile.resetProfile()
-			for k, v in self.simpleSettingsPanel.getSettingOverrides():
+			for k, v in self.simpleSettingsPanel.getSettingOverrides().items():
 				profile.putProfileSetting(k, v)
 			self.updateProfileToAllControls()
 		self.updateSliceMode()

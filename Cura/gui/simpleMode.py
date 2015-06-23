@@ -20,30 +20,15 @@ class simpleModePanel(wx.Panel):
 		self._callback = callback
 		self._print_profile_options = []
 		self._print_material_options = []
-		self.profileSettingsList = [profile.settingsList]
+		self.profileSettingsList = {}
 		self.materialProfileText = wx.TextDataObject(text=profile.getPreference("simpleModeMaterial"))
 		self.lastOpenedFileName = "No File Currently Open"
-		printTypePanel = wx.Panel(self)
-		for filename in resources.getSimpleModeQualityProfiles():
-			cp = configparser.ConfigParser()
-			cp.read(filename)
-			base_filename = os.path.splitext(os.path.basename(filename))[0]
-			name = base_filename
-			if cp.has_option('info', 'name'):
-				name = cp.get('info', 'name')
 
-			button = wx.RadioButton(printTypePanel, -1, name, style=wx.RB_GROUP if len(self._print_profile_options) == 0 else 0)
-			button.base_filename = base_filename
-			button.filename = filename
-			self._print_profile_options.append(button)
-			if profile.getPreference('simpleModeProfile') == base_filename:
-				button.SetValue(True)
-		
-		# Panel 1, which dynamically shows the user the name of the last file loaded
+		# Panel 1: Last File Loaded
 		currentFilePanel = wx.Panel(self)
 		self.currentFileName = wx.StaticText(currentFilePanel, -1, label = "No File Currently Open")
 		
-		# Panel 2 of simple mode tools that displays information about loaded filament
+		# Panel 2: Material Profile Select
 		materialSelectorPanel = wx.Panel(self)
 		self.selectedMaterial = wx.StaticText(materialSelectorPanel, -1, label=self.materialProfileText.GetText())
 		self.materialLoadButton = wx.Button(materialSelectorPanel, 4, _("Load Materials"))
@@ -52,17 +37,37 @@ class simpleModePanel(wx.Panel):
 		self.returnProfile = self.selectedMaterial.GetLabel()
 
 		pub.subscribe(self.displayAndLoadMaterialData, 'settings.update')
-
-		# Panel 3 titled "Advanced"; contains print support
+		pub.subscribe(self.refreshSimpleMode, 'settings.refresh')
+		
+		# Panel 3: Select Quality
+		printQualityPanel = wx.Panel(self)
+		quality_items = resources.getSimpleModeQualityProfiles()
+		quality_ButtonsList = self.buttonCreator(quality_items, setValue="Normal", panel_name=printQualityPanel)
+		
+		print("Material Profile Text: %s" % self.materialProfileText.GetText())
+		
+		# Panel 4: Structural Strength
+		structuralStrengthPanel = wx.Panel(self)
+		structuralStrength_Items = resources.getSimpleModeStrengthProfiles()
+		structuralStrength_ButtonsList = self.buttonCreator(structuralStrength_Items, setValue="Medium", panel_name=structuralStrengthPanel)
+		
+		chosenProfile = self.materialProfileText.GetText()
+		materials_items = resources.getSimpleModeMaterialsProfiles()
+		self.overrideSettings = self.parseDirectoryItems(chosenProfile, materials_items)
+		
+		# Panel 5: Print Support/Adhesion
 		supportSelectionPanel = wx.Panel(self)
 		support_raft = wx.RadioButton(supportSelectionPanel, -1, label="Raft")
 		support_brim = wx.RadioButton(supportSelectionPanel, -1, label="Brim")
 		support_disabled = wx.RadioButton(supportSelectionPanel, -1, label="No Support")
 		support_raft.SetValue(True)
 		
+		#----------- Panel Items Populate Below ----------- #
+		
 		sizer = wx.GridBagSizer()
 		self.SetSizer(sizer)
 		
+		# Panel 0: Last File Loaded
 		sb = wx.StaticBox(currentFilePanel, label=_("Last File Opened"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		currentFilePanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
@@ -70,6 +75,7 @@ class simpleModePanel(wx.Panel):
 		currentFilePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(currentFilePanel, (0,0), flag=wx.EXPAND)
 		
+		# Panel 1: Material Profile Select
 		sb = wx.StaticBox(materialSelectorPanel, label=_("Material Profile"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		materialSelectorPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
@@ -78,16 +84,27 @@ class simpleModePanel(wx.Panel):
 		materialSelectorPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(materialSelectorPanel, (1,0), flag=wx.EXPAND)
 		
-		
-		#The data here isn't being populated correctly
-		sb = wx.StaticBox(printTypePanel, label=_("Quality"))
+		# Panel 2: Select Quality
+		# Items aren't being populated correctly here
+		sb = wx.StaticBox(printQualityPanel, label=_("Quality"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		for button in self._print_profile_options:
+		for button, path in quality_ButtonsList.items():
 			boxsizer.Add(button)
-		printTypePanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
-		printTypePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
-		sizer.Add(printTypePanel, (2,0), flag=wx.EXPAND)
 		
+		printQualityPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
+		printQualityPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
+		sizer.Add(printQualityPanel, (2,0), flag=wx.EXPAND)
+
+		# Panel 3: Structural Strength		
+		sb = wx.StaticBox(structuralStrengthPanel, label=_("Structural Strength"))
+		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+		for button, path in structuralStrength_ButtonsList.items():
+			boxsizer.Add(button)
+		structuralStrengthPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
+		structuralStrengthPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
+		sizer.Add(structuralStrengthPanel, (3,0), flag=wx.EXPAND)
+
+		# Panel 4: Adhesion
 		sb = wx.StaticBox(supportSelectionPanel, label=_("Adhesion"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		supportSelectionPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
@@ -95,26 +112,97 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(support_brim)
 		boxsizer.Add(support_disabled)
 		supportSelectionPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
-		sizer.Add(supportSelectionPanel, (3,0), flag=wx.EXPAND)
+		sizer.Add(supportSelectionPanel, (4,0), flag=wx.EXPAND)
 		
+		# Panel 5: Support
+		# *temporary panel; will be combined with adhesion
 		sb = wx.StaticBox(self, label=_("Support"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		boxsizer.Add(self.printSupport)
-		sizer.Add(boxsizer, (4,0), flag=wx.EXPAND)
+		sizer.Add(boxsizer, (5,0), flag=wx.EXPAND)
+		
+		for button in quality_ButtonsList:
+			button.Bind(wx.EVT_RADIOBUTTON,  lambda e: self.updateInfo(quality_ButtonsList, quality_items),  self._callback())
+		for button in structuralStrength_ButtonsList:
+			button.Bind(wx.EVT_RADIOBUTTON, lambda e: self.updateInfo(structuralStrength_ButtonsList, structuralStrength_Items), self._callback())	
+		
 		self.Bind(wx.EVT_BUTTON, self.OnSelectBtn, id=4)
 		
 	
-	def OnSelectBtn(self, event):
-		frame = MaterialSelectorFrame()
-		frame.Show()
-	
+	# Overrides particular profile settings with settings corresponding to the selected radio button
+	def updateInfo(self, buttonsList, directory):
+		toUpdate = []
+		for button, path in buttonsList.items():
+			if button.GetValue():
+				chosenProfile = os.path.splitext(os.path.basename(path))[0]
+				toUpdate = self.parseDirectoryItems(chosenProfile, directory, hasName=True)
+		for k, v in toUpdate.items():
+			if profile.isPreference(k):
+				profile.putPreference(k, v)
+			elif profile.isMachineSetting(k):
+				profile.putMachineSetting(k, v)
+			elif profile.isProfileSetting(k):
+				profile.putProfileSetting(k, v)
+	#			print("profile.putProfileSetting(%s, %s)" % (k, v))
+			else:
+				print "None of the above"
 		
+	# Refreshes simple mode when the user hits select within the materials selection tool
+	def refreshSimpleMode(self, refresh=False):
+		if refresh:
+			self._callback()
+		
+	# Parses name from the filename
+	def parseDirectoryItemNames(self, directoryItems):
+		names = []
+		for filename in directoryItems:
+			settingName = os.path.splitext(os.path.basename(filename))[0]
+			names.append(settingName)
+		return names
+	
+	# Reads in key/value pairs from one of the directories located in the resources/quickprint folder 
+	def parseDirectoryItems(self, chosenProfile, directory, hasName=False):
+		settingsKeyValuePairs = {}
+		# reads out all files in the specified directory
+		for file in directory:
+			base_filename = os.path.splitext(os.path.basename(file))[0]
+			# matches base file name to selected profile
+			if base_filename.lower() == chosenProfile.lower():
+				cp = configparser.ConfigParser()
+				# reads items within the matched file
+				cp.read(file)
+				for name, value in cp.items('profile'):
+					settingsKeyValuePairs[name] = value
+					
+		return settingsKeyValuePairs
+		
+	
+	def buttonCreator(self, names, setValue, panel_name):
+		buttonsList = []
+		filePaths = []
+		buttons = {}
+		
+		namesList = self.parseDirectoryItemNames(names)
+		
+		for name in namesList:
+			button = wx.RadioButton(panel_name, -1, name, style=wx.RB_GROUP)
+			if name == setValue:
+				button.SetValue(True)
+			buttonsList.append(button)
+		
+		for name in names:
+			filePaths.append(name)
+			
+		for n in range(0, len(names)):
+			buttons[buttonsList[n]] = filePaths[n]
+			
+		return buttons
+			
 	def displayAndLoadMaterialData(self, mat):
 		profile.putPreference('simpleModeMaterial', mat)
 		mainWindow = self.GetParent().GetParent().GetParent()
 		self.selectedMaterial.SetLabel(mat)
 		self.materialProfileText.SetText(mat)
-		self.profileSettingsList = []
 		settings = {}
 		
 		for filename in resources.getSimpleModeMaterialsProfiles():	
@@ -130,7 +218,6 @@ class simpleModePanel(wx.Panel):
 					if cp.has_option('profile', setting.getName()):
 						settingName = setting.getName()
 						settingValue = cp.get('profile', setting.getName())
-
 						if setting.isProfile():
 							profile.putProfileSetting(settingName, settingValue)
 							settings[settingName] = settingValue
@@ -139,7 +226,6 @@ class simpleModePanel(wx.Panel):
 						elif setting.isMachineSetting():
 							profile.putMachineSetting(settingName, settingValue)
 		mainWindow.updateProfileToAllControls()
-		self.profileSettingsList = settings			
 		self._callback()
 		
 	def displayLoadedFileName(self):
@@ -147,19 +233,21 @@ class simpleModePanel(wx.Panel):
 		# and references them directly from that source
 		mainWindow = self.GetParent().GetParent().GetParent()
 		sceneView = mainWindow.scene
-		filename = str(os.path.basename(sceneView.filename))
+		filename = str(os.path.basename(str(sceneView.filename)))
 		print("Filename within displayLoadedFileName: %s" %filename)
 		if self.lastOpenedFileName != filename:
 			self.lastOpenedFileName = filename
 			self.currentFileName.SetLabel(str(self.lastOpenedFileName))
 		else:
 			pass
-		self._callback()
+
+	def OnSelectBtn(self, event):
+		frame = MaterialSelectorFrame()
+		frame.Show()
 
 	def getSettingOverrides(self):
 		self.displayLoadedFileName()
-		if self.profileSettingsList is not profile.settingsList:
-			return self.profileSettingsList
+		return self.overrideSettings
 			
 	def updateProfileToControls(self):
 		pass
@@ -209,7 +297,6 @@ class MaterialSelectorFrame(wx.Frame):
 		for materials, brands in unsortedMaterialsProfiles.items():
 			self.sortedMaterialsProfiles.setdefault(brands.title(), []).append(materials.title())
 	
-# -----------material profiles organization end-----------
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
@@ -235,25 +322,19 @@ class MaterialSelectorFrame(wx.Frame):
 		self.Bind(wx.EVT_LISTBOX, self.OnMaterialSelect, id=27)
 
 	def OnClose(self, event):
-		self.Close()		
+		self.Close()	
 		
-
 	def OnEnable(self, enable):
 		if enable:
 			self.btn.Enable(True)
-
 				
 	def OnSelectMaterialProfile(self, event):
 		myObject = event.GetEventObject()
 		if self.Brand and self.Material is not None:
 			self.materialProfile = str(self.Brand) + "__" + self.Material.strip('\'[]\'')
 			pub.sendMessage('settings.update', mat=self.materialProfile)
+			pub.sendMessage('settings.refresh', refresh=True)	
 		self.Close()
-		
-		
-	def ReturnMaterialProfile(self):
-		return self.materialProfile
-
 
 	def OnBrandSelect(self, event):
 		self.text.Clear()
@@ -262,7 +343,7 @@ class MaterialSelectorFrame(wx.Frame):
 		index = event.GetSelection()
 		brandSelection = self.exampleListBox.GetString(index)
 		
-		for x, y in self.sortedMaterialsProfiles.iteritems():
+		for x, y in self.sortedMaterialsProfiles.items():
 			if x.strip('\'[]\'') == brandSelection:
 				self.materials.append(itertools.chain(y))
 				
@@ -270,7 +351,6 @@ class MaterialSelectorFrame(wx.Frame):
 		self.materials = materialsList
 		self.text.Set(list(self.materials))
 		self.Brand = brandSelection
-		
 		
 	# Displays specific material selection
 	def OnMaterialSelect(self, event):
