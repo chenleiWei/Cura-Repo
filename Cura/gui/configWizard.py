@@ -116,7 +116,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.SetSizer(sizer)
 
 		title = wx.StaticText(self, -1, title)
-		title.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
+		title.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.BOLD))
 		sizer.Add(title, pos=(0, 0), span=(1, 2), flag=wx.ALIGN_CENTRE | wx.ALL)
 		sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 		sizer.AddGrowableCol(1)
@@ -128,6 +128,31 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT)
 		self.rowNr += 1
 		return text
+		
+	def AddTextSubtitle(self, info):
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
+		font = wx.Font(pointSize=16, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.NORMAL)
+		text.SetFont(font)
+		text.Wrap(500)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return text
+		
+	def AddTextTitle(self, info):
+		text = wx.StaticText(self, -1, info)
+		font = wx.Font(pointSize=25, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.BOLD)
+		text.SetFont(font)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return text
+		
+	def AddImage(self, imagePath):
+		image = wx.Image(imagePath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+		self.GetSizer().Add(wx.StaticBitmap(self, -1, image), pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return image
 
 	def AddSeperator(self):
 		self.GetSizer().Add(wx.StaticLine(self, -1), pos=(self.rowNr, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
@@ -227,18 +252,27 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 class FirstInfoPage(InfoPage):
 	def __init__(self, parent, addNew):
+		typeALogo = resources.getPathForImage('TypeALogo.png')
 		if addNew:
-			super(FirstInfoPage, self).__init__(parent, _("Add new machine wizard"))
+			super(FirstInfoPage, self).__init__(parent, _("Printer Selection"))
 		else:
-			super(FirstInfoPage, self).__init__(parent, _("First time run wizard"))
-			self.AddText(_("Welcome, and thanks for trying Cura!"))
+			super(FirstInfoPage, self).__init__(parent, _("Welcome"))
+			self.AddTextSubtitle(_("Thank you for downloading Cura for Type A Machines!"))
 			self.AddSeperator()
-		self.AddText(_("This wizard will help you in setting up Cura for your machine."))
+		self.AddTextSubtitle(_("Thank you for trying Cura for Type A Machines!"))
 		if not addNew:
 			self.AddSeperator()
 			self._language_option = self.AddCombo(_("Select your language:"), map(lambda o: o[1], resources.getLanguageOptions()))
 		else:
 			self._language_option = None
+		
+		for n in range(0, 5):
+			self.AddHiddenSeperator()
+		self.AddImage(typeALogo)
+		for n in range(0, 4):
+			self.AddHiddenSeperator()
+		self.AddTextSubtitle(_("This wizard will help you set up Cura for your Series 1 and guide you through the Cura workflow."))
+
 		# self.AddText(_("This wizard will help you with the following steps:"))
 		# self.AddText(_("* Configure Cura for your machine"))
 		# self.AddText(_("* Optionally upgrade your firmware"))
