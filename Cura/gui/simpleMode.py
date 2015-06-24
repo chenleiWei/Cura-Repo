@@ -18,8 +18,6 @@ class simpleModePanel(wx.Panel):
 	def __init__(self, parent, callback):
 		super(simpleModePanel, self).__init__(parent)
 		self._callback = callback
-		self._print_profile_options = []
-		self._print_material_options = []
 		self.profileSettingsList = {}
 		self.materialProfileText = wx.TextDataObject(text=profile.getPreference("simpleModeMaterial"))
 		self.lastOpenedFileName = "No File Currently Open"
@@ -43,8 +41,6 @@ class simpleModePanel(wx.Panel):
 		printQualityPanel = wx.Panel(self)
 		quality_items = resources.getSimpleModeQualityProfiles()
 		quality_ButtonsList = self.buttonCreator(quality_items, setValue="Normal", panel_name=printQualityPanel)
-		
-		print("Material Profile Text: %s" % self.materialProfileText.GetText())
 		
 		# Panel 4: Structural Strength
 		structuralStrengthPanel = wx.Panel(self)
@@ -137,11 +133,7 @@ class simpleModePanel(wx.Panel):
 				chosenProfile = os.path.splitext(os.path.basename(path))[0]
 				toUpdate = self.parseDirectoryItems(chosenProfile, directory, hasName=True)
 		for k, v in toUpdate.items():
-			if profile.isPreference(k):
-				profile.putPreference(k, v)
-			elif profile.isMachineSetting(k):
-				profile.putMachineSetting(k, v)
-			elif profile.isProfileSetting(k):
+			if profile.isProfileSetting(k):
 				profile.putProfileSetting(k, v)
 	#			print("profile.putProfileSetting(%s, %s)" % (k, v))
 			else:
@@ -234,12 +226,11 @@ class simpleModePanel(wx.Panel):
 		mainWindow = self.GetParent().GetParent().GetParent()
 		sceneView = mainWindow.scene
 		filename = str(os.path.basename(str(sceneView.filename)))
-		print("Filename within displayLoadedFileName: %s" %filename)
-		if self.lastOpenedFileName != filename:
-			self.lastOpenedFileName = filename
-			self.currentFileName.SetLabel(str(self.lastOpenedFileName))
-		else:
-			pass
+		if str(filename) != "None":
+			if self.lastOpenedFileName != filename:
+				self.lastOpenedFilename = filename
+				self.currentFileName.SetLabel(filename)
+		
 
 	def OnSelectBtn(self, event):
 		frame = MaterialSelectorFrame()
@@ -270,20 +261,18 @@ class MaterialSelectorFrame(wx.Frame):
 		self.materials = []
 	
 		for filename in list:
-			m = re.search(r'(\w+)__', filename)
-			n = re.search(r'__\w+', filename)
+			m = re.search(r'(\w+)\s*(?=\__)', filename)
+			n = re.search(r'(?<=__)(\w+)', filename)
 			# Takes the first part of filename string to the end of the double underscore
 			if m:
 				materialsDirectoryList = str(m.group())
-				splitString = materialsDirectoryList.split("__")
-				removeUnderscores = filter(None, splitString)
-				brandsList.append(removeUnderscores)
+				brandsList.append(materialsDirectoryList)
+				
 			# Takes from underscore to second part of the filename string
 			if n:
 				materialsDirectoryList = str(n.group())
-				splitString = materialsDirectoryList.split("__")
-				removeUnderscores = filter(None, splitString)
-				materialsList.append(removeUnderscores)
+				materialsList.append(materialsDirectoryList)
+
 
 		for count in range(0, len(materialsList)):
 			material = str(materialsList[count])
