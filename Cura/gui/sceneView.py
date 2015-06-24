@@ -1454,22 +1454,29 @@ class SceneView(openglGui.glGuiPanel):
 
 		#Draw checkerboard
 		if self._platformTexture is None:
-			self._platformTexture = openglHelpers.loadGLTexture('checkerboard.png')
+			self._platformTexture = openglHelpers.loadGLTexture('buildplate.png')
 			glBindTexture(GL_TEXTURE_2D, self._platformTexture)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-		glColor4f(1,1,1,0.5)
+		#	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+		#	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+		glColor4f(1,1,1,70)
 		glBindTexture(GL_TEXTURE_2D, self._platformTexture)
 		glEnable(GL_TEXTURE_2D)
+#		glCullFace(GL_FRONT_AND_BACK)
 		glBegin(GL_TRIANGLE_FAN)
-		for p in polys[0]:
-			glTexCoord2f(p[0]/20, p[1]/20)
-			glVertex3f(p[0], p[1], 0)
+		glTexCoord2f(0, 1)
+		glVertex3f(-153, 153, 0)
+		glTexCoord2f(0, 0)     
+		glVertex3f(-153, -153, 0)
+		glTexCoord2f(1, 0)     
+		glVertex3f(153, -153, 0)
+		glTexCoord2f(1, 1)     
+		glVertex3f(153, 153, 0)
+		
 		glEnd()
 
 		#Draw no-go zones. (clips in case of UM2)
 		glDisable(GL_TEXTURE_2D)
-		glColor4ub(127, 127, 127, 200)
+		glColor4ub(127, 127, 127, 0)
 		for poly in polys[1:]:
 			glBegin(GL_TRIANGLE_FAN)
 			for p in poly:
