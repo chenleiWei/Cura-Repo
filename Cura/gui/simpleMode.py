@@ -47,10 +47,6 @@ class simpleModePanel(wx.Panel):
 		structuralStrength_Items = resources.getSimpleModeStrengthProfiles()
 		structuralStrength_ButtonsList = self.buttonCreator(structuralStrength_Items, setValue="Medium", panel_name=structuralStrengthPanel)
 		
-		chosenProfile = self.materialProfileText.GetText()
-		materials_items = resources.getSimpleModeMaterialsProfiles()
-		self.overrideSettings = self.parseDirectoryItems(chosenProfile, materials_items)
-		
 		# Panel 5: Print Support/Adhesion
 		supportSelectionPanel = wx.Panel(self)
 		support_raft = wx.RadioButton(supportSelectionPanel, -1, label="Raft")
@@ -135,10 +131,7 @@ class simpleModePanel(wx.Panel):
 		for k, v in toUpdate.items():
 			if profile.isProfileSetting(k):
 				profile.putProfileSetting(k, v)
-	#			print("profile.putProfileSetting(%s, %s)" % (k, v))
-			else:
-				print "None of the above"
-		
+
 	# Refreshes simple mode when the user hits select within the materials selection tool
 	def refreshSimpleMode(self, refresh=False):
 		if refresh:
@@ -168,23 +161,18 @@ class simpleModePanel(wx.Panel):
 					
 		return settingsKeyValuePairs
 		
-	
 	def buttonCreator(self, names, setValue, panel_name):
 		buttonsList = []
 		filePaths = []
 		buttons = {}
-		
 		namesList = self.parseDirectoryItemNames(names)
-		
 		for name in namesList:
 			button = wx.RadioButton(panel_name, -1, name, style=wx.RB_GROUP)
 			if name == setValue:
 				button.SetValue(True)
 			buttonsList.append(button)
-		
 		for name in names:
 			filePaths.append(name)
-			
 		for n in range(0, len(names)):
 			buttons[buttonsList[n]] = filePaths[n]
 			
@@ -231,14 +219,17 @@ class simpleModePanel(wx.Panel):
 				self.lastOpenedFilename = filename
 				self.currentFileName.SetLabel(filename)
 		
-
 	def OnSelectBtn(self, event):
 		frame = MaterialSelectorFrame()
 		frame.Show()
 
 	def getSettingOverrides(self):
 		self.displayLoadedFileName()
-		return self.overrideSettings
+		chosenProfile = self.materialProfileText.GetText()
+		materials_items = resources.getSimpleModeMaterialsProfiles()
+
+		overrideSettings = self.parseDirectoryItems(chosenProfile, materials_items)
+		return overrideSettings
 			
 	def updateProfileToControls(self):
 		pass
@@ -250,57 +241,45 @@ class simpleModePanel(wx.Panel):
 class MaterialSelectorFrame(wx.Frame):
 	def __init__(self):
 		wx.Frame.__init__(self, None, wx.ID_ANY, "Secondary Frame")
-		list = []
 		list = resources.getSimpleModeMaterialsProfiles()
 		self.Brand = None
+		self.Material = None
 		self.materialProfile = ""
-		brandsList = []
-		materialsList = []
-		unsortedMaterialsProfiles = {}
 		self.sortedMaterialsProfiles = {}
-		self.materials = []
-	
+		materialsProfilesList = []
+
 		for filename in list:
-			m = re.search(r'(\w+)\s*(?=\__)', filename)
-			n = re.search(r'(?<=__)(\w+)', filename)
-			# Takes the first part of filename string to the end of the double underscore
-			if m:
-				materialsDirectoryList = str(m.group())
-				brandsList.append(materialsDirectoryList)
-				
-			# Takes from underscore to second part of the filename string
-			if n:
-				materialsDirectoryList = str(n.group())
-				materialsList.append(materialsDirectoryList)
-
-
-		for count in range(0, len(materialsList)):
-			material = str(materialsList[count])
-			brand = str(brandsList[count])
-			# because there are multiple materials for every brand, but not the opposite: it made sense to have 
-			# materials play the role of the keys and brands play the role of values
-			unsortedMaterialsProfiles.update({material:brand})
-	
-		# materials are read in as keys and brands are read in as values; takes above info and creates a dictionary 
-		# of brands lists containing either a single value or a list of materials belonging to that particular brand
-		for materials, brands in unsortedMaterialsProfiles.items():
-			self.sortedMaterialsProfiles.setdefault(brands.title(), []).append(materials.title())
+			cp = configparser.ConfigParser()
+			cp.read(filename)
+			if cp.has_option('info', 'name'):
+				materialProfile = cp.get('info', 'name')
+				materialsProfilesList.append(materialProfile)
+		
+		for item in materialsProfilesList:
+			profiles = item.split()
+			count =	len(profiles)									
+			floatCount = float(count)
+			self.sortedMaterialsProfiles.setdefault(profiles[0].title(), []).append(profiles[1])
 	
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		panel = wx.Panel(self, -1)
 		brandNames = []
+		materialNames = []
 
-		self.text = wx.ListBox(panel, 27, wx.DefaultPosition, (200, 130), choices=str(self.materials).strip('\'[]\''))
 		for brands, materials in self.sortedMaterialsProfiles.items():
-			brandNames.append(brands.strip('\'[]\''))
+			brandNames.append(brands)
+			materialNames.append(materials)
 			
-		self.exampleListBox = wx.ListBox(panel, 26, wx.DefaultPosition, (170,130), brandNames)
+		self.materialsListBox = wx.ListBox(panel, 27, wx.DefaultPosition, (200, 130), materialNames[0])			
+		self.brandsListBox = wx.ListBox(panel, 26, wx.DefaultPosition, (170,130), brandNames)
+		self.brandsListBox.SetSelection(0)
+		self.materialsListBox.SetSelection(0)
 		self.btn = wx.Button(panel, 25, 'Select', (150, 130), (110, -1))
 		self.btn.Enable(False)
-		hbox1.Add(self.exampleListBox, 0, wx.TOP, 40)
-		hbox1.Add(self.text, 1, wx.LEFT | wx.TOP, 40)
+		hbox1.Add(self.brandsListBox, 0, wx.TOP, 40)
+		hbox1.Add(self.materialsListBox, 1, wx.LEFT | wx.TOP, 40)
 		hbox2.Add(self.btn, 26, wx.ALIGN_CENTRE)
 		vbox.Add(hbox1, 0, wx.ALIGN_CENTRE)
 		vbox.Add(hbox2, 1, wx.ALIGN_CENTRE)
@@ -320,31 +299,32 @@ class MaterialSelectorFrame(wx.Frame):
 	def OnSelectMaterialProfile(self, event):
 		myObject = event.GetEventObject()
 		if self.Brand and self.Material is not None:
-			self.materialProfile = str(self.Brand) + "__" + self.Material.strip('\'[]\'')
+			self.materialProfile = str(self.Brand) + "__" + self.Material
 			pub.sendMessage('settings.update', mat=self.materialProfile)
+			print("Mat: %s" % self.materialProfile)
 			pub.sendMessage('settings.refresh', refresh=True)	
 		self.Close()
 
 	def OnBrandSelect(self, event):
-		self.text.Clear()
+		self.materialsListBox.Clear()
 		self.materials = []
 		panel = wx.Panel(self)
 		index = event.GetSelection()
-		brandSelection = self.exampleListBox.GetString(index)
+		brandSelection = self.brandsListBox.GetString(index)
 		
 		for x, y in self.sortedMaterialsProfiles.items():
-			if x.strip('\'[]\'') == brandSelection:
+			if x == brandSelection:
 				self.materials.append(itertools.chain(y))
 				
 		materialsList = itertools.chain.from_iterable(self.materials)
 		self.materials = materialsList
-		self.text.Set(list(self.materials))
+		self.materialsListBox.Set(list(self.materials))
 		self.Brand = brandSelection
 		
 	# Displays specific material selection
 	def OnMaterialSelect(self, event):
 		index = event.GetSelection()
-		materialSelection = self.text.GetString(index)
+		materialSelection = self.materialsListBox.GetString(index)
 		
 		self.Material = materialSelection
 		self.OnEnable(True)
