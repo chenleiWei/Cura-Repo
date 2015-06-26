@@ -37,7 +37,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self._yaw = 30
 		self._pitch = 60
-		self._zoom = 300
+		self._zoom = 800
 		self._scene = objectScene.Scene(self)
 		self._objectShader = None
 		self._objectLoadShader = None
@@ -737,12 +737,12 @@ class SceneView(openglGui.glGuiPanel):
 		if self._selectedObj is not None:
 			scale = self._selectedObj.getScale()
 			size = self._selectedObj.getSize()
-			self.scaleXctrl.setValue(round(scale[0], 3))
-			self.scaleYctrl.setValue(round(scale[1], 3))
-			self.scaleZctrl.setValue(round(scale[2], 3))
-			self.scaleXmmctrl.setValue(round(size[0], 3))
-			self.scaleYmmctrl.setValue(round(size[1], 3))
-			self.scaleZmmctrl.setValue(round(size[2], 3))
+			self.scaleXctrl.setValue(round(scale[0], 2))
+			self.scaleYctrl.setValue(round(scale[1], 2))
+			self.scaleZctrl.setValue(round(scale[2], 2))
+			self.scaleXmmctrl.setValue(round(size[0], 2))
+			self.scaleYmmctrl.setValue(round(size[1], 2))
+			self.scaleZmmctrl.setValue(round(size[2], 2))
 
 	def OnKeyChar(self, keyCode):
 		if self._engineResultView.OnKeyChar(keyCode):
@@ -978,7 +978,7 @@ class SceneView(openglGui.glGuiPanel):
 		glDisable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-		glClearColor(0.8, 0.8, 0.8, 1.0)
+		glClearColor(0.8, 0.8, 0.8, 1.0) #BACKGROUND COLOR 
 		glClearStencil(0)
 		glClearDepth(1.0)
 
@@ -1464,13 +1464,13 @@ class SceneView(openglGui.glGuiPanel):
 #		glCullFace(GL_FRONT_AND_BACK)
 		glBegin(GL_TRIANGLE_FAN)
 		glTexCoord2f(0, 1)
-		glVertex3f(-115, 115, 0)
+		glVertex3f(-153, 153, 0)
 		glTexCoord2f(0, 0)     
-		glVertex3f(-115, -115, 0)
+		glVertex3f(-153, -153, 0)
 		glTexCoord2f(1, 0)     
-		glVertex3f(115, -115, 0)
+		glVertex3f(153, -153, 0)
 		glTexCoord2f(1, 1)     
-		glVertex3f(115, 115, 0)
+		glVertex3f(153, 153, 0)
 		
 		glEnd()
 
