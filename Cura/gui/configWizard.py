@@ -7,7 +7,9 @@ import time
 import math
 
 import wx
+import re
 import wx.wizard
+import ConfigParser as configparser
 
 from Cura.gui import firmwareInstall
 from Cura.gui import printWindow
@@ -139,6 +141,16 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.rowNr += 1
 		return text
 		
+	def AddTextDescription(self, info):
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
+		font = wx.Font(pointSize=13.5, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.NORMAL)
+		text.SetFont(font)
+		text.Wrap(300)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_LEFT)
+		self.rowNr += 1
+		return text
+		
 	def AddTextTitle(self, info):
 		text = wx.StaticText(self, -1, info)
 		font = wx.Font(pointSize=25, family = wx.DEFAULT,
@@ -169,6 +181,8 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddRadioButton(self, label, style=0):
 		radio = wx.RadioButton(self, -1, label, style=style)
+		font = wx.Font(pointSize=20, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
+		radio.SetFont(font)
 		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 		self.rowNr += 1
 		return radio
@@ -176,6 +190,8 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddCheckbox(self, label, checked=False):
 		check = wx.CheckBox(self, -1)
 		text = wx.StaticText(self, -1, label)
+		font = wx.Font(pointSize=20, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
+		text.SetFont(font)
 		check.SetValue(checked)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT | wx.RIGHT)
 		self.GetSizer().Add(check, pos=(self.rowNr, 1), span=(1, 2), flag=wx.ALL)
@@ -272,7 +288,8 @@ class FirstInfoPage(InfoPage):
 		for n in range(0, 4):
 			self.AddHiddenSeperator()
 		self.AddTextSubtitle(_("This wizard will help you set up Cura for your Series 1 and guide you through the Cura workflow."))
-
+		for n in range(0, 2):
+			self.AddHiddenSeperator()
 		# self.AddText(_("This wizard will help you with the following steps:"))
 		# self.AddText(_("* Configure Cura for your machine"))
 		# self.AddText(_("* Optionally upgrade your firmware"))
@@ -443,11 +460,9 @@ class CustomRepRapInfoPage(InfoPage):
 		profile.putMachineSetting('extruder_head_size_height', '0')
 		profile.checkAndUpdateMachineName()
 
-class MachineSelectPage(InfoPage):
+class NonTAM(InfoPage):
 	def __init__(self, parent):
-		super(MachineSelectPage, self).__init__(parent, _("Select your machine"))
-		self.AddText(_("What kind of machine do you have:"))
-
+		super(NonTAM, self).__init__(parent, _("Select Machine"))
 		self.Ultimaker2Radio = self.AddRadioButton("Ultimaker2", style=wx.RB_GROUP)
 		self.Ultimaker2Radio.SetValue(True)
 		self.Ultimaker2Radio.Bind(wx.EVT_RADIOBUTTON, self.OnUltimaker2Select)
@@ -473,7 +488,7 @@ class MachineSelectPage(InfoPage):
 		self.SubmitUserStats = self.AddCheckbox(_("Submit anonymous usage information:"))
 		self.AddText(_("For full details see: http://wiki.ultimaker.com/Cura:stats"))
 		self.SubmitUserStats.SetValue(True)
-
+		
 	def OnUltimaker2Select(self, e):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ultimaker2ReadyPage)
 
@@ -600,7 +615,173 @@ class MachineSelectPage(InfoPage):
 		else:
 			profile.putPreference('submit_slice_information', 'False')
 
+class MachineSelectPage(InfoPage):
+	def __init__(self, parent):
+		super(MachineSelectPage, self).__init__(parent, _("Select your machine"))
+		
+		for n in range(0, 3):
+			self.AddHiddenSeperator()
+		self.Series1_Pro_Radio = self.AddRadioButton("Series 1 Pro", style=wx.RB_GROUP)
+		self.Series1_Pro_Radio.SetValue(True)
+		self.AddTextDescription(_("\t(serial numbers 10,000+)"))
+		for n in range(0, 3):
+			self.AddHiddenSeperator()
+		
+		self.Series1_Radio = self.AddRadioButton("Series 1", style=wx.RB_GROUP)
+		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
+		self.AddTextDescription(_("\t(serial numbers 1000+)"))
+		for n in range(0, 3):
+			self.AddHiddenSeperator()
+		
+		self.Series1_Legacy = self.AddRadioButton("Legacy Series 1", style=wx.RB_GROUP)
+		self.AddTextDescription(_("\t(serial numbers <1000)"))
 
+		for n in range(0, 3):
+			self.AddHiddenSeperator()
+
+		self.nonTAMRadio = self.AddRadioButton("Other", style=wx.RB_GROUP)
+		for n in range(0, 2):
+			self.AddHiddenSeperator()
+			
+		self.nonTAMRadio.Bind(wx.EVT_RADIOBUTTON, self.OnNonTAM)
+		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
+		self.Series1_Legacy.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1_Legacy)
+		
+	def OnNonTAM(self, e):
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().nonTAM)
+
+	def OnSeries1Pro(self, e):
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
+	
+	def OnSeries1(self, e):
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().selectTAMOptions)
+		
+	def OnSeries1_Legacy(self, e):
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().selectTAMOptions)
+		
+	def StoreData(self):
+		allMachineProfiles = resources.getDefaultMachineProfiles()
+		machSettingsToStore = {}
+		n = None
+		
+		for machineProfile in allMachineProfiles:
+			if self.Series1_Legacy.GetValue():
+				n = re.search(r'Series1Legacy', machineProfile)
+			elif self.Series1_Radio.GetValue():
+				n = re.search(r'Series1\.ini', machineProfile)
+			elif self.Series1_Pro_Radio.GetValue():
+				n = re.search(r'Series1Pro', machineProfile)
+				# also load alteration file
+				
+			if n is not None:
+				machProfile = machineProfile
+				cp = configparser.ConfigParser()
+				cp.read(machProfile)
+				if cp.has_section('machine'):
+					for setting, value in cp.items('machine'):
+						machSettingsToStore[setting] = value
+		
+		# if Series 1 Pro, load the appropriate alteration file
+		if self.Series1_Pro_Radio.GetValue():
+			alterationDirectoryList = resources.getAlterationFiles()		
+			for filename in alterationDirectoryList:
+				alterationFileExists = re.search(r'series1_hasBed', filename)
+				if alterationFileExists:
+					print(filename)
+					profile.setAlterationFileFromFilePath(filename)
+		
+		if machSettingsToStore:	
+			for setting, value in machSettingsToStore.items():
+				profile.putMachineSetting(setting, value)
+
+class SelectTAMOptions(InfoPage):
+	def __init__(self, parent):
+		super(SelectTAMOptions, self).__init__(parent, _("Options and Upgrades"))
+		
+		for n in range(0,3):
+			self.AddHiddenSeperator()
+		
+		# G2 extruder
+		self.G2ExtruderCheckBox = self.AddCheckbox("G2 Extruder")
+		self.AddTextDescription("The G2 extruder is standard on all Series 1 3D Printers.\nIf you have an early 2014 Series 1 or a custom print head, please uncheck this option.")
+		self.G2ExtruderCheckBox.SetValue(True)
+		
+		# Spacer
+		for n in range(0,3):
+			self.AddHiddenSeperator()
+
+		# Heated bed
+		self.HeatedBedCheckBox = self.AddCheckbox("Heated Bed")
+		self.AddTextDescription("*The heated bed upgrade is available for purchase on our website.")
+		
+		# Spacer
+		for n in range(0,2):
+			self.AddHiddenSeperator()
+	
+	def StoreData(self):
+		# Print temp 185 for non-G2
+		if not self.G2ExtruderCheckBox.GetValue():
+			profile.putProfileSetting('print_temperature', 185)
+		# Heated bed item population
+		if self.HeatedBedCheckBox.GetValue():
+			print("Heated Bed Checked")
+			profile.putProfileSetting("has_heated_bed", True)
+			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
+	;Sliced for Type A Machines Series 1
+	;Sliced at: {day} {date} {time}
+	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+	;Print Speed: {print_speed} Support: {support}
+	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
+	;Print time: {print_time}
+	;Filament used: {filament_amount}m {filament_weight}g
+	;Filament cost: {filament_cost}
+	G21        ;metric values
+	G90        ;absolute positioning
+	G28     ;move to endstops
+	G29		;allows for auto-levelling
+	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+	M140 S{print_bed_temperature} ;Prep Heat Bed
+	M109 S{print_temperature} ;Heat To temp
+	M190 S{print_bed_temperature} ;Heat Bed to temp
+	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
+	G92 E0 ;zero the extruded length
+	G1 F200 X250 E30 ;extrude 30mm of feed stock
+	G92 E0 ;zero the extruded length again
+	G1 X150 Y150  Z25 F12000 ;recenter and begin
+	G1 F{travel_speed}""")
+		if not self.HeatedBedCheckBox.GetValue():
+			print("No heated bed\n")
+			profile.putProfileSetting("has_heated_bed", False)
+			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
+	;Sliced for Type A Machines Series 1
+	;Sliced at: {day} {date} {time}
+	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+	;Print Speed: {print_speed} Support: {support}
+	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
+	;Print time: {print_time}
+	;Filament used: {filament_amount}m {filament_weight}g
+	;Filament cost: {filament_cost}
+	G21        ;metric values
+	G90        ;absolute positioning
+	G28     ;move to endstops
+	G29		;allows for auto-levelling
+	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+	M109 S{print_temperature} ;Heat To temp
+	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
+	G92 E0 ;zero the extruded length
+	G1 F200 X250 E30 ;extrude 30mm of feed stock
+	G92 E0 ;zero the extruded length again
+	G1 X150 Y150  Z25 F12000 ;recenter and begin
+	G1 F{travel_speed}""")
+		profile.setAlterationFile('end.gcode', """;-- END GCODE --
+M104 S0     ;extruder heater off
+G91         ;relative positioning
+G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
+G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
+G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
+M84           ;steppers off
+G90           ;absolute positioning""")
+				
 class SelectParts(InfoPage):
 	def __init__(self, parent):
 		super(SelectParts, self).__init__(parent, _("Select upgraded parts you have"))
@@ -1061,6 +1242,20 @@ class LulzbotReadyPage(InfoPage):
 		super(LulzbotReadyPage, self).__init__(parent, _("Lulzbot TAZ/Mini"))
 		self.AddText(_('Cura is now ready to be used with your Lulzbot.'))
 		self.AddSeperator()
+		
+		
+class TAMReadyPage(InfoPage):
+	def __init__(self, parent):
+		super(TAMReadyPage, self).__init__(parent, _("Configuration Complete"))
+		typeALogo = resources.getPathForImage('TypeALogo.png')
+		for x in range(0,3):
+			self.AddHiddenSeperator()		
+		self.AddImage(typeALogo)
+		for x in range(0,3):
+			self.AddHiddenSeperator()
+			
+		self.AddTextSubtitle(_("Cura for Type A Machines is now configured to get the most out of your 3D printer."))
+		
 
 class ConfigWizard(wx.wizard.Wizard):
 	def __init__(self, addNew = False):
@@ -1076,6 +1271,9 @@ class ConfigWizard(wx.wizard.Wizard):
 
 		self.firstInfoPage = FirstInfoPage(self, addNew)
 		self.machineSelectPage = MachineSelectPage(self)
+		self.selectTAMOptions = SelectTAMOptions(self)
+		self.nonTAM = NonTAM(self)
+		self.tamReadyPage = TAMReadyPage(self)
 		self.ultimakerSelectParts = SelectParts(self)
 		self.ultimakerFirmwareUpgradePage = UltimakerFirmwareUpgradePage(self)
 		self.ultimakerCheckupPage = UltimakerCheckupPage(self)
@@ -1093,10 +1291,10 @@ class ConfigWizard(wx.wizard.Wizard):
 
 		wx.wizard.WizardPageSimple.Chain(self.firstInfoPage, self.machineSelectPage)
 		#wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)
-		wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimakerSelectParts)
-		wx.wizard.WizardPageSimple.Chain(self.ultimakerSelectParts, self.ultimakerFirmwareUpgradePage)
-		wx.wizard.WizardPageSimple.Chain(self.ultimakerFirmwareUpgradePage, self.ultimakerCheckupPage)
-		wx.wizard.WizardPageSimple.Chain(self.ultimakerCheckupPage, self.bedLevelPage)
+#		wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimakerSelectParts)
+#		wx.wizard.WizardPageSimple.Chain(self.ultimakerSelectParts, self.ultimakerFirmwareUpgradePage)
+#		wx.wizard.WizardPageSimple.Chain(self.ultimakerFirmwareUpgradePage, self.ultimakerCheckupPage)
+#		wx.wizard.WizardPageSimple.Chain(self.ultimakerCheckupPage, self.bedLevelPage)
 		#wx.wizard.WizardPageSimple.Chain(self.ultimakerCalibrationPage, self.ultimakerCalibrateStepsPerEPage)
 		wx.wizard.WizardPageSimple.Chain(self.printrbotSelectType, self.otherMachineInfoPage)
 		wx.wizard.WizardPageSimple.Chain(self.otherMachineSelectPage, self.customRepRapInfoPage)
