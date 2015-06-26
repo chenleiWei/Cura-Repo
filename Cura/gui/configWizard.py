@@ -627,19 +627,19 @@ class MachineSelectPage(InfoPage):
 		for n in range(0, 3):
 			self.AddHiddenSeperator()
 		
-		self.Series1_Radio = self.AddRadioButton("Series 1", style=wx.RB_GROUP)
+		self.Series1_Radio = self.AddRadioButton("Series 1")
 		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
 		self.AddTextDescription(_("\t(serial numbers 1000+)"))
 		for n in range(0, 3):
 			self.AddHiddenSeperator()
 		
-		self.Series1_Legacy = self.AddRadioButton("Legacy Series 1", style=wx.RB_GROUP)
+		self.Series1_Legacy = self.AddRadioButton("Legacy Series 1")
 		self.AddTextDescription(_("\t(serial numbers <1000)"))
 
 		for n in range(0, 3):
 			self.AddHiddenSeperator()
 
-		self.nonTAMRadio = self.AddRadioButton("Other", style=wx.RB_GROUP)
+		self.nonTAMRadio = self.AddRadioButton("Other")
 		for n in range(0, 2):
 			self.AddHiddenSeperator()
 			
