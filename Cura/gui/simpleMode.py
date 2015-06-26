@@ -29,7 +29,7 @@ class simpleModePanel(wx.Panel):
 		# Panel 2: Material Profile Select
 		materialSelectorPanel = wx.Panel(self)
 		self.selectedMaterial = wx.StaticText(materialSelectorPanel, -1, label=self.materialProfileText.GetText())
-		self.materialLoadButton = wx.Button(materialSelectorPanel, 4, _("Load Materials"))
+		self.materialLoadButton = wx.Button(materialSelectorPanel, 4, _("Load Material"))
 		self.printSupport = wx.CheckBox(self, -1, _("Print support structure"))
 		self.printSupport.SetValue(True)
 		self.returnProfile = self.selectedMaterial.GetLabel()
@@ -39,19 +39,19 @@ class simpleModePanel(wx.Panel):
 		
 		# Panel 3: Select Quality
 		printQualityPanel = wx.Panel(self)
-		quality_items = resources.getSimpleModeQualityProfiles()
-		quality_ButtonsList = self.buttonCreator(quality_items, setValue="Normal", panel_name=printQualityPanel)
+		self.quality_items = resources.getSimpleModeQualityProfiles()
+		self.quality_buttonslist = self.buttonCreator(self.quality_items, setValue="Normal", panel_name=printQualityPanel)
 		
 		# Panel 4: Structural Strength
 		structuralStrengthPanel = wx.Panel(self)
-		structuralStrength_Items = resources.getSimpleModeStrengthProfiles()
-		structuralStrength_ButtonsList = self.buttonCreator(structuralStrength_Items, setValue="Medium", panel_name=structuralStrengthPanel)
+		self.structStrength_items = resources.getSimpleModeStrengthProfiles()
+		self.structStrength_buttonslist = self.buttonCreator(self.structStrength_items, setValue="Low", panel_name=structuralStrengthPanel)
 		
 		# Panel 5: Print Support/Adhesion
 		supportSelectionPanel = wx.Panel(self)
 		support_raft = wx.RadioButton(supportSelectionPanel, -1, label="Raft")
 		support_brim = wx.RadioButton(supportSelectionPanel, -1, label="Brim")
-		support_disabled = wx.RadioButton(supportSelectionPanel, -1, label="No Support")
+		support_disabled = wx.RadioButton(supportSelectionPanel, -1, label="None")
 		support_raft.SetValue(True)
 		
 		#----------- Panel Items Populate Below ----------- #
@@ -77,12 +77,11 @@ class simpleModePanel(wx.Panel):
 		sizer.Add(materialSelectorPanel, (1,0), flag=wx.EXPAND)
 		
 		# Panel 2: Select Quality
-		# Items aren't being populated correctly here
 		sb = wx.StaticBox(printQualityPanel, label=_("Quality"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		for button, path in quality_ButtonsList.items():
+		# haxxy fix for list order
+		for button, path in reversed(self.quality_buttonslist.items()):
 			boxsizer.Add(button)
-		
 		printQualityPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		printQualityPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(printQualityPanel, (2,0), flag=wx.EXPAND)
@@ -90,13 +89,20 @@ class simpleModePanel(wx.Panel):
 		# Panel 3: Structural Strength		
 		sb = wx.StaticBox(structuralStrengthPanel, label=_("Structural Strength"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		for button, path in structuralStrength_ButtonsList.items():
+		for button, path in self.structStrength_buttonslist.items():
 			boxsizer.Add(button)
 		structuralStrengthPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		structuralStrengthPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(structuralStrengthPanel, (3,0), flag=wx.EXPAND)
 
-		# Panel 4: Adhesion
+		# Panel 4: Support
+		# *temporary panel; will be combined with adhesion
+		sb = wx.StaticBox(self, label=_("Support"))
+		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+		boxsizer.Add(self.printSupport)
+		sizer.Add(boxsizer, (4,0), flag=wx.EXPAND)
+
+		# Panel 5: Adhesion
 		sb = wx.StaticBox(supportSelectionPanel, label=_("Adhesion"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		supportSelectionPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
@@ -104,19 +110,12 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(support_brim)
 		boxsizer.Add(support_disabled)
 		supportSelectionPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
-		sizer.Add(supportSelectionPanel, (4,0), flag=wx.EXPAND)
+		sizer.Add(supportSelectionPanel, (5,0), flag=wx.EXPAND)
 		
-		# Panel 5: Support
-		# *temporary panel; will be combined with adhesion
-		sb = wx.StaticBox(self, label=_("Support"))
-		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		boxsizer.Add(self.printSupport)
-		sizer.Add(boxsizer, (5,0), flag=wx.EXPAND)
-		
-		for button in quality_ButtonsList:
-			button.Bind(wx.EVT_RADIOBUTTON,  lambda e: self.updateInfo(quality_ButtonsList, quality_items),  self._callback())
-		for button in structuralStrength_ButtonsList:
-			button.Bind(wx.EVT_RADIOBUTTON, lambda e: self.updateInfo(structuralStrength_ButtonsList, structuralStrength_Items), self._callback())	
+		for button in self.quality_buttonslist:
+			button.Bind(wx.EVT_RADIOBUTTON,  lambda e: self.updateInfo(self.quality_buttonslist, self.quality_items),  self._callback())
+		for button in self.structStrength_buttonslist:
+			button.Bind(wx.EVT_RADIOBUTTON, lambda e: self.updateInfo(self.structStrength_buttonslist, self.structStrength_items), self._callback())	
 		
 		self.Bind(wx.EVT_BUTTON, self.OnSelectBtn, id=4)
 		
@@ -166,6 +165,7 @@ class simpleModePanel(wx.Panel):
 		filePaths = []
 		buttons = {}
 		namesList = self.parseDirectoryItemNames(names)
+		
 		for name in namesList:
 			button = wx.RadioButton(panel_name, -1, name, style=wx.RB_GROUP)
 			if name == setValue:
@@ -174,8 +174,7 @@ class simpleModePanel(wx.Panel):
 		for name in names:
 			filePaths.append(name)
 		for n in range(0, len(names)):
-			buttons[buttonsList[n]] = filePaths[n]
-			
+			buttons[buttonsList[n]] = filePaths[n]	
 		return buttons
 			
 	def displayAndLoadMaterialData(self, mat):
@@ -205,7 +204,13 @@ class simpleModePanel(wx.Panel):
 							profile.putPreference(settingName, settingValue)
 						elif setting.isMachineSetting():
 							profile.putMachineSetting(settingName, settingValue)
+		
+		# make sure that the simple mode panel quality/strength overrides are applied
+		self.updateInfo(self.quality_buttonslist, self.quality_items)
+		self.updateInfo(self.structStrength_buttonslist, self.structStrength_items)
+		
 		mainWindow.updateProfileToAllControls()
+		
 		self._callback()
 		
 	def displayLoadedFileName(self):
@@ -240,7 +245,7 @@ class simpleModePanel(wx.Panel):
 
 class MaterialSelectorFrame(wx.Frame):
 	def __init__(self):
-		wx.Frame.__init__(self, None, wx.ID_ANY, "Secondary Frame")
+		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection")
 		list = resources.getSimpleModeMaterialsProfiles()
 		self.Brand = None
 		self.Material = None
@@ -265,19 +270,21 @@ class MaterialSelectorFrame(wx.Frame):
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		panel = wx.Panel(self, -1)
-		brandNames = []
+		self.brandNames = []
 		materialNames = []
 
 		for brands, materials in self.sortedMaterialsProfiles.items():
-			brandNames.append(brands)
+			self.brandNames.append(brands)
 			materialNames.append(materials)
 			
 		self.materialsListBox = wx.ListBox(panel, 27, wx.DefaultPosition, (200, 130), materialNames[0])			
-		self.brandsListBox = wx.ListBox(panel, 26, wx.DefaultPosition, (170,130), brandNames)
+		self.brandsListBox = wx.ListBox(panel, 26, wx.DefaultPosition, (170,130), self.brandNames)
+		# highlights first brand options upon window open
 		self.brandsListBox.SetSelection(0)
-		self.materialsListBox.SetSelection(0)
+		
 		self.btn = wx.Button(panel, 25, 'Select', (150, 130), (110, -1))
 		self.btn.Enable(False)
+		
 		hbox1.Add(self.brandsListBox, 0, wx.TOP, 40)
 		hbox1.Add(self.materialsListBox, 1, wx.LEFT | wx.TOP, 40)
 		hbox2.Add(self.btn, 26, wx.ALIGN_CENTRE)
@@ -298,6 +305,8 @@ class MaterialSelectorFrame(wx.Frame):
 				
 	def OnSelectMaterialProfile(self, event):
 		myObject = event.GetEventObject()
+		if self.Brand is None:
+			self.Brand = self.brandNames[0]
 		if self.Brand and self.Material is not None:
 			self.materialProfile = str(self.Brand) + "__" + self.Material
 			pub.sendMessage('settings.update', mat=self.materialProfile)
