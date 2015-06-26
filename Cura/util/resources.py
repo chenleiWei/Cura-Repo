@@ -58,6 +58,15 @@ def getSimpleModeMaterialsProfiles():
 			return files
 	return sorted(glob.glob(path))
 
+def getAlterationFiles():
+	path = os.path.normpath(os.path.join(resourceBasePath, 'alterations', '*.ini'))
+	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'alterations')))
+	if os.path.isdir(user_path):
+		files = sorted(glob.glob(os.path.join(user_path, '*.ini')))
+		if len(files) > 0:
+			return files
+	return sorted(glob.glob(path))
+
 def getSimpleModeQualityProfiles():
 	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'Quality', '*.ini'))
 	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'quickprint', 'Quality')))
