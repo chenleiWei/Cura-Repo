@@ -1464,13 +1464,13 @@ class SceneView(openglGui.glGuiPanel):
 #		glCullFace(GL_FRONT_AND_BACK)
 		glBegin(GL_TRIANGLE_FAN)
 		glTexCoord2f(0, 1)
-		glVertex3f(-153, 153, 0)
+		glVertex3f(-115, 115, 0)
 		glTexCoord2f(0, 0)     
-		glVertex3f(-153, -153, 0)
+		glVertex3f(-115, -115, 0)
 		glTexCoord2f(1, 0)     
-		glVertex3f(153, -153, 0)
+		glVertex3f(115, -115, 0)
 		glTexCoord2f(1, 1)     
-		glVertex3f(153, 153, 0)
+		glVertex3f(115, 115, 0)
 		
 		glEnd()
 
