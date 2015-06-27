@@ -76,12 +76,25 @@ class simpleModePanel(wx.Panel):
 		materialSelectorPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(materialSelectorPanel, (1,0), flag=wx.EXPAND)
 		
+		
 		# Panel 2: Select Quality
 		sb = wx.StaticBox(printQualityPanel, label=_("Quality"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		# haxxy fix for list order
-		for button, path in reversed(self.quality_buttonslist.items()):
-			boxsizer.Add(button)
+		first = None
+		second = None
+		third = None
+		for button, path in self.quality_buttonslist.items():
+			print("Path: %s" % path)
+			basename = os.path.splitext(os.path.basename(path))[0]
+			if basename == "Final":
+				first = button
+			elif basename == "Normal":
+				second = button
+			elif basename == "Draft":
+				third = button
+		boxsizer.Add(first)
+		boxsizer.Add(second)
+		boxsizer.Add(third)
 		printQualityPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		printQualityPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(printQualityPanel, (2,0), flag=wx.EXPAND)
@@ -89,8 +102,21 @@ class simpleModePanel(wx.Panel):
 		# Panel 3: Structural Strength		
 		sb = wx.StaticBox(structuralStrengthPanel, label=_("Strength"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+		first = None
+		second = None
+		third = None
 		for button, path in self.structStrength_buttonslist.items():
-			boxsizer.Add(button)
+			print("Path: %s" % path)
+			basename = os.path.splitext(os.path.basename(path))[0]
+			if basename == "High":
+				first = button
+			elif basename == "Medium":
+				second = button
+			elif basename == "Low":
+				third = button
+		boxsizer.Add(first)
+		boxsizer.Add(second)
+		boxsizer.Add(third)
 		structuralStrengthPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		structuralStrengthPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(structuralStrengthPanel, (3,0), flag=wx.EXPAND)
