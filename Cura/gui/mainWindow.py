@@ -181,10 +181,6 @@ class mainWindow(wx.Frame):
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnExpertOpen, i)
 		expertMenu.AppendSeparator()
-		self.bedLevelWizardMenuItem = expertMenu.Append(-1, _("Run bed leveling wizard..."))
-		self.Bind(wx.EVT_MENU, self.OnBedLevelWizard, self.bedLevelWizardMenuItem)
-		self.headOffsetWizardMenuItem = expertMenu.Append(-1, _("Run head offset wizard..."))
-		self.Bind(wx.EVT_MENU, self.OnHeadOffsetWizard, self.headOffsetWizardMenuItem)
 
 		self.menubar.Append(expertMenu, _("Expert"))
 
@@ -386,10 +382,9 @@ class mainWindow(wx.Frame):
 			self.splitter.SetSashSize(4)
 		self.defaultFirmwareInstallMenuItem.Enable(firmwareInstall.getDefaultFirmware() is not None)
 		if profile.getMachineSetting('machine_type').startswith('ultimaker2'):
-			self.bedLevelWizardMenuItem.Enable(False)
-			self.headOffsetWizardMenuItem.Enable(False)
+			pass
 		if int(profile.getMachineSetting('extruder_amount')) < 2:
-			self.headOffsetWizardMenuItem.Enable(False)
+			pass
 		self.scene.updateProfileToControls()
 		self.scene._scene.pushFree()
 
@@ -599,12 +594,6 @@ class mainWindow(wx.Frame):
 	def OnSelectMachine(self, index):
 		profile.setActiveMachine(index)
 		self.reloadSettingPanels()
-
-	def OnBedLevelWizard(self, e):
-		configWizard.bedLevelWizard()
-
-	def OnHeadOffsetWizard(self, e):
-		configWizard.headOffsetWizard()
 
 	def OnExpertOpen(self, e):
 		ecw = expertConfig.expertConfigWindow(lambda : self.scene.sceneUpdated())
