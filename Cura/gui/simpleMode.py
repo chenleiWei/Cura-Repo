@@ -30,8 +30,8 @@ class simpleModePanel(wx.Panel):
 		materialSelectorPanel = wx.Panel(self)
 		self.selectedMaterial = wx.StaticText(materialSelectorPanel, -1, label=self.materialProfileText.GetText())
 		self.materialLoadButton = wx.Button(materialSelectorPanel, 4, _("Load Material"))
-		self.printSupport = wx.CheckBox(self, -1, _("Print support structure"))
-		self.printSupport.SetValue(True)
+		printSupport = wx.CheckBox(self, -1, _("Print support structure"))
+		printSupport.SetValue(True)
 		self.returnProfile = self.selectedMaterial.GetLabel()
 
 		pub.subscribe(self.displayAndLoadMaterialData, 'settings.update')
@@ -87,7 +87,7 @@ class simpleModePanel(wx.Panel):
 		sizer.Add(printQualityPanel, (2,0), flag=wx.EXPAND)
 
 		# Panel 3: Structural Strength		
-		sb = wx.StaticBox(structuralStrengthPanel, label=_("Structural Strength"))
+		sb = wx.StaticBox(structuralStrengthPanel, label=_("Strength"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		for button, path in self.structStrength_buttonslist.items():
 			boxsizer.Add(button)
@@ -99,7 +99,7 @@ class simpleModePanel(wx.Panel):
 		# *temporary panel; will be combined with adhesion
 		sb = wx.StaticBox(self, label=_("Support"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		boxsizer.Add(self.printSupport)
+		boxsizer.Add(printSupport)
 		sizer.Add(boxsizer, (4,0), flag=wx.EXPAND)
 
 		# Panel 5: Adhesion
@@ -112,12 +112,17 @@ class simpleModePanel(wx.Panel):
 		supportSelectionPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(supportSelectionPanel, (5,0), flag=wx.EXPAND)
 		
+		self.supportAdhesionButtonList = {'raft': support_raft, 'brim': support_brim, 'None': support_disabled, 'Everywhere': printSupport}
+		
 		for button in self.quality_buttonslist:
 			button.Bind(wx.EVT_RADIOBUTTON,  lambda e: self.updateInfo(self.quality_buttonslist, self.quality_items),  self._callback())
 		for button in self.structStrength_buttonslist:
 			button.Bind(wx.EVT_RADIOBUTTON, lambda e: self.updateInfo(self.structStrength_buttonslist, self.structStrength_items), self._callback())	
-		
 		self.Bind(wx.EVT_BUTTON, self.OnSelectBtn, id=4)
+		for label, button in self.supportAdhesionButtonList.items():
+			if label == 'Everywhere':
+				button.Bind(wx.EVT_CHECKBOX, lambda e: self.updateSupportAndAdhesion(self.supportAdhesionButtonList), self._callback())
+			button.Bind(wx.EVT_RADIOBUTTON, lambda e: self.updateSupportAndAdhesion(self.supportAdhesionButtonList), self._callback())
 		
 	
 	# Overrides particular profile settings with settings corresponding to the selected radio button
@@ -131,6 +136,27 @@ class simpleModePanel(wx.Panel):
 			if profile.isProfileSetting(k):
 				profile.putProfileSetting(k, v)
 
+	# overrides for support and adhesion
+	def updateSupportAndAdhesion(self, buttonsList):
+		for k, v in buttonsList.items():
+			if k == 'Everywhere':
+				if v.IsChecked():
+					profile.putProfileSetting('support', k)
+					print("Support: %s" % k)
+				else:
+					profile.putProfileSetting('support', 'None')
+					print("Support: None")
+			else:
+				if v.GetValue():
+					if k == 'raft':
+						profile.putProfileSetting('platform_adhesion', k)
+						print("Platform Adhesion: %s" % k)
+					elif k == 'brim':
+						profile.putProfileSetting('platform_adhesion', k)
+						print("Platform Adhesion: %s" % k)
+		
+				
+	
 	# Refreshes simple mode when the user hits select within the materials selection tool
 	def refreshSimpleMode(self, refresh=False):
 		if refresh:
@@ -208,6 +234,7 @@ class simpleModePanel(wx.Panel):
 		# make sure that the simple mode panel quality/strength overrides are applied
 		self.updateInfo(self.quality_buttonslist, self.quality_items)
 		self.updateInfo(self.structStrength_buttonslist, self.structStrength_items)
+		self.updateSupportAndAdhesion(self.supportAdhesionButtonList)
 		
 		mainWindow.updateProfileToAllControls()
 		
