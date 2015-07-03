@@ -482,6 +482,8 @@ setting('postSwitchExtruder.gcode', """;Switch between the current extruder and 
 setting('startMode', 'Simple', ['Simple', 'Normal'], 'preference', 'hidden')
 setting('simpleModeProfile', '2_normal', str, 'preference', 'hidden')
 setting('simpleModeMaterial', 'Generic_PLA', str, 'preference', 'hidden')
+setting('simpleModeStrength', 'High', str, 'preference', 'hidden')
+setting('simpleModeQuality', 'Normal', str, 'preference', 'hidden')
 setting('oneAtATime', 'True', bool, 'preference', 'hidden')
 setting('lastFile', os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'firstPrintCone.stl')), str, 'preference', 'hidden')
 setting('save_profile', 'False', bool, 'preference', 'hidden').setLabel(_("Save profile on slice"), _("When slicing save the profile as [stl_file]_profile.ini next to the model."))
