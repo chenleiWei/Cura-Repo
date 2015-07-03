@@ -127,6 +127,8 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddText(self, info):
 		text = wx.StaticText(self, -1, info)
+		font = wx.Font(pointSize=11, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
+		text.SetFont(font)
 		text.Wrap(500)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT)
 		self.rowNr += 1
@@ -153,10 +155,11 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return text
 		
 	def AddTextTitle(self, info):
-		text = wx.StaticText(self, -1, info)
-		font = wx.Font(pointSize=25, family = wx.DEFAULT,
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
+		font = wx.Font(pointSize=24, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.BOLD)
 		text.SetFont(font)
+		text.Wrap(500)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return text
@@ -267,25 +270,26 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 class FirstInfoPage(InfoPage):
 	def __init__(self, parent, addNew):
-		typeALogo = resources.getPathForImage('TypeALogo.png')
 		if addNew:
 			super(FirstInfoPage, self).__init__(parent, _("Printer Selection"))
+			
 		else:
 			super(FirstInfoPage, self).__init__(parent, _("Welcome"))
-			self.AddTextSubtitle(_("Thank you for downloading Cura for Type A Machines!"))
-			self.AddSeperator()
-		self.AddTextSubtitle(_("Thank you for trying Cura for Type A Machines!"))
-		if not addNew:
-			self.AddSeperator()
-			self._language_option = self.AddCombo(map(lambda o: o[1], resources.getLanguageOptions()))
-		else:
-			self._language_option = None
-		
-		for n in range(0, 5):
+			
+
+	
+		typeALogo = resources.getPathForImage('TypeALogo.png')
+		for n in range(0, 3):
 			self.AddHiddenSeperator()
 		self.AddImage(typeALogo)
-		for n in range(0, 4):
+		for n in range(0, 5):
 			self.AddHiddenSeperator()
+		
+		if addNew: 
+			self.AddTextTitle(_("Thank you for trying Cura for Type A Machines!"))
+		else: 
+			self.AddTextTitle(_("Thank you for downloading Cura for Type A Machines!"))
+		
 		self.AddTextSubtitle(_("This wizard will help you set up Cura for your Series 1 and guide you through the Cura workflow."))
 		for n in range(0, 2):
 			self.AddHiddenSeperator()
@@ -302,9 +306,7 @@ class FirstInfoPage(InfoPage):
 		return False
 
 	def StoreData(self):
-		if self._language_option is not None:
-			profile.putPreference('language', self._language_option.GetValue())
-			resources.setupLocalization(self._language_option.GetValue())
+		pass
 
 
 class MachineSelectPage(InfoPage):
@@ -344,13 +346,13 @@ class MachineSelectPage(InfoPage):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().nonTAM)
 	
 	def OnSeries1(self, e):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().selectTAMOptions)
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_select_options)
 	
 	def OnSeries1Pro(self, e):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
 		
 	def OnSeries1_Legacy(self, e):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().selectTAMOptions)
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_select_options)
 
 		
 	def StoreData(self):
@@ -388,9 +390,9 @@ class MachineSelectPage(InfoPage):
 				profile.putMachineSetting(setting, value)
 
 
-class SelectTAMOptions(InfoPage):
+class TAMSelectOptions(InfoPage):
 	def __init__(self, parent):
-		super(SelectTAMOptions, self).__init__(parent, _("Options and Upgrades"))
+		super(TAMSelectOptions, self).__init__(parent, _("Options and Upgrades"))
 		
 		for n in range(0,3):
 			self.AddHiddenSeperator()
@@ -411,6 +413,8 @@ class SelectTAMOptions(InfoPage):
 		# Spacer
 		for n in range(0,2):
 			self.AddHiddenSeperator()
+			
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
 	
 	def StoreData(self):
 		# Print temp 185 for non-G2
@@ -475,121 +479,110 @@ M84           ;steppers off
 G90           ;absolute positioning""")
 
 
-class TypeAProcesses(object):
-	@staticmethod
-	def processWalkthroughValues(directory):
-		items = {}
-		for filepath in directory:
-			basename = os.path.splitext(os.path.basename(filepath))[0]
-			items[basename] = filepath
-		return items
-			
-	@staticmethod
-	def saveValuesToProfile(path):
-			cp = configparser.ConfigParser()
-			cp.read(path)
-			if cp.has_section('profile'):
-				for name, value in cp.items('profile'):
-					profile.putProfileSetting(name, value)
-
-
 class TAMReadyPage(InfoPage):
 	def __init__(self, parent):
-		super(TAMReadyPage, self).__init__(parent, _("Configuration Complete"))
+		super(TAMReadyPage, self).__init__(parent, _(" "))
 		typeALogo = resources.getPathForImage('TypeALogo.png')
 		for x in range(0,3):
 			self.AddHiddenSeperator()		
 		self.AddImage(typeALogo)
-		for x in range(0,3):
+		for x in range(0,5):
 			self.AddHiddenSeperator()
-			
-		self.AddTextSubtitle(_("Cura for Type A Machines is now configured to get the most out of your 3D printer."))
 		
-		for x in range(0,3):
+		self.AddTextTitle(_("Configuration Complete"))
+		self.AddTextSubtitle(_("Cura for Type A Machines is now configured to get the most out of your 3D printer."))
+		for x in range(0, 3):
 			self.AddHiddenSeperator()
-
 		self.AddTextSubtitle(_("Click 'next' to tour the interface."))
-
 
 class TAMSelectMaterials(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectMaterials, self).__init__(parent, _("Material Selection"))
-
 		for x in range(0,3):
 			self.AddHiddenSeperator()
-	#	self.displayComboBox(materialNames=materialNames)
+		typeALogo = resources.getPathForImage('TypeALogo.png')
+		self.AddImage(typeALogo)
 		self.addText()
-	#	self.Bind(wx.EVT_COMBOBOX, self.OnSelect)
 	
 	# General informative text
 	def addText(self):
-		for x in range(0,4):
+		for x in range(0,5):
 			self.AddHiddenSeperator()
-		self.AddTextTitle("Having the right material matters")
-		self.AddTextSubtitle("Cura for Type A Machines includes presets for the majority of materials available for 3D printing.\nThe current material is displayed in the first panel.")
-		for x in range(0,3):
-			self.AddHiddenSeperator()
-
+		self.AddTextTitle("Having The Right Material Matters")
+		self.AddTextSubtitle("Cura for Type A Machines includes presets for the majority of materials available for 3D printing. The current material is displayed in the first panel.")
 
 class TAMSelectStrength(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectStrength, self).__init__(parent, _("Strength Selection"))
 		for x in range(0,3):
-			self.AddHiddenSeperator()	
-
+			self.AddHiddenSeperator()
+		typeALogo = resources.getPathForImage('TypeALogo.png')
+		self.AddImage(typeALogo)
 		self.addText()
 
 	
 	# General informative text
 	def addText(self):
-		for x in range(0,4):
+		for x in range(0,5):
 			self.AddHiddenSeperator()
 		self.AddTextTitle("Better, Faster, Stronger")
 		self.AddTextSubtitle("Different materials have different properties. Materails have varied properties depending on its strength settings.")
-		for x in range(0,5):
+		for x in range(0,4):
 			self.AddHiddenSeperator()
 			
 		self.AddText("Tip: Selecting low quality and high strength will result in the strongest part possible for a given material.")
 
-# Hasn't been tied into wizardry
 class TAMSelectQuality(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectQuality, self).__init__(parent, _("Quality Selection"))
 		for x in range(0,3):
 			self.AddHiddenSeperator()
+		typeALogo = resources.getPathForImage('TypeALogo.png')
+		self.AddImage(typeALogo)
 		self.addText()
 	
 	# General informative text
 	def addText(self):
-		for x in range(0,4):
+		for x in range(0,5):
 			self.AddHiddenSeperator()
 		self.AddTextTitle("Quality and Quantity")
 		self.AddTextSubtitle("Quality controls how fine the resolution of your print will be. In general, higher resolution prints take longer than lower resolution prints.")
-		for x in range(0,3):
-			self.AddHiddenSeperator()
+
 	
 class TAMSelectSupport(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectSupport, self).__init__(parent, _("Support Selection"))
-		
-		for x in range(0, 4):
+		for x in range(0,3):
 			self.AddHiddenSeperator()
-			
+		typeALogo = resources.getPathForImage('TypeALogo.png')
+		self.AddImage(typeALogo)
+		for x in range(0,5):
+			self.AddHiddenSeperator()
 		self.AddTextTitle("Lean On Me")
-		self.AddHiddenSeperator()
-		self.AddTextSubtitle("Many models have overhangs. In order to print these, extra material may be needed for structural support. This material can be removed after printing.\nA raft or brim helps the print adhere to the build plate.\nIf you do not want to print using support, uncheck this option.\n")
+		self.AddTextSubtitle("If a 3D model has an overhang, extra material may be needed for structural support. This material can be removed after printing.")
+		for x in range(0,2):
+			self.AddHiddenSeperator()		
+		self.AddTextSubtitle("A raft or brim helps the print adhere to the build plate. If you do not wish to have print support, please uncheck this option.")
 	
-		for x in range(0, 10):
+		for x in range(0,2):
 			self.AddHiddenSeperator()
 			
-		self.AddText("Tip:\nYou can preview the support materials by selecting 'View Mode' icon located in the upper-right of the screen, and then select 'layers'.") 
+		self.AddText("Tip: You can preview the support materials by selecting the 'Layers' icon within the 'View Mode' icon located in the upper-right corner of the window.")
 		
 class TAMFirstPrint(InfoPage):
 	def __init__(self, parent):
 		super(TAMFirstPrint, self).__init__(parent, _("Your First Print"))
-		
-		self.AddTextTitle("Get your motor running")
-		self.AddTextSubtitle("Time to start printing. When you click 'done', the example cone will automatically be loaded.\nAdjust the settings to your liking or leave the default configuration as-is. Select the 'save gcode' icon in the upper-left of to save your sliced file.")
+		for x in range(0,3):
+			self.AddHiddenSeperator()
+		typeALogo = resources.getPathForImage('TypeALogo.png')
+		self.AddImage(typeALogo)
+		for x in range(0,5):
+			self.AddHiddenSeperator()
+		self.AddTextTitle("Get Your Motor Running")
+		self.AddTextSubtitle("It's time to start printing.")
+		for x in range(0,3):
+			self.AddHiddenSeperator()
+		self.AddTextSubtitle("Select 'Finish' below to load an example model. \n\nAdjust the settings to your liking or leave the default configuration as-is. Select the 'save gcode' icon in the upper-left of to save your sliced file.")
 
 class NonTAM(InfoPage):
 	def __init__(self, parent):
@@ -1383,10 +1376,10 @@ class ConfigWizard(wx.wizard.Wizard):
 
 		self.firstInfoPage = FirstInfoPage(self, addNew)
 		self.machineSelectPage = MachineSelectPage(self)
-		self.selectTAMOptions = SelectTAMOptions(self)
 		self.nonTAM = NonTAM(self)
 		self.tamReadyPage = TAMReadyPage(self)
 		self.TAM_select_materials = TAMSelectMaterials(self)
+		self.TAM_select_options = TAMSelectOptions(self)
 		self.TAM_select_strength = TAMSelectStrength(self)
 		self.TAM_select_quality = TAMSelectQuality(self)
 		self.TAM_select_support = TAMSelectSupport(self)
