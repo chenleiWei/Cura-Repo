@@ -5,7 +5,7 @@ import webbrowser
 import threading
 import time
 import math
-
+import ConfigParser as configparser
 import wx
 import re
 import wx.wizard
@@ -127,6 +127,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddText(self, info):
 		text = wx.StaticText(self, -1, info)
+		text.Wrap(500)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT)
 		self.rowNr += 1
 		return text
@@ -183,7 +184,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		radio = wx.RadioButton(self, -1, label, style=style)
 		font = wx.Font(pointSize=20, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
 		radio.SetFont(font)
-		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
+		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL | wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return radio
 
@@ -248,11 +249,9 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.rowNr += 1
 		return check
 
-	def AddCombo(self, label, options):
+	def AddCombo(self, options):
 		combo = wx.ComboBox(self, -1, options[0], choices=options, style=wx.CB_DROPDOWN|wx.CB_READONLY)
-		text = wx.StaticText(self, -1, label)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT | wx.RIGHT)
-		self.GetSizer().Add(combo, pos=(self.rowNr, 1), span=(1, 1), flag=wx.LEFT | wx.RIGHT)
+		self.GetSizer().Add(combo, pos=(self.rowNr, 1), span=(1, 0), flag=wx.LEFT)
 		self.rowNr += 1
 		return combo
 
@@ -278,7 +277,7 @@ class FirstInfoPage(InfoPage):
 		self.AddTextSubtitle(_("Thank you for trying Cura for Type A Machines!"))
 		if not addNew:
 			self.AddSeperator()
-			self._language_option = self.AddCombo(_("Select your language:"), map(lambda o: o[1], resources.getLanguageOptions()))
+			self._language_option = self.AddCombo(map(lambda o: o[1], resources.getLanguageOptions()))
 		else:
 			self._language_option = None
 		
@@ -307,158 +306,290 @@ class FirstInfoPage(InfoPage):
 			profile.putPreference('language', self._language_option.GetValue())
 			resources.setupLocalization(self._language_option.GetValue())
 
-class PrintrbotPage(InfoPage):
+
+class MachineSelectPage(InfoPage):
 	def __init__(self, parent):
-		self._printer_info = [
-			# X, Y, Z, Nozzle Size, Filament Diameter, PrintTemperature, Print Speed, Travel Speed, Retract speed, Retract amount, use bed level sensor
-			("Simple Metal", 150, 150, 150, 0.4, 1.75, 208, 40, 70, 30, 1, True),
-			("Metal Plus", 250, 250, 250, 0.4, 1.75, 208, 40, 70, 30, 1, True),
-			("Simple Makers Kit", 100, 100, 100, 0.4, 1.75, 208, 40, 70, 30, 1, True),
-			(":" + _("Older models"),),
-			("Original", 130, 130, 130, 0.5, 2.95, 208, 40, 70, 30, 1, False),
-			("Simple Maker's Edition v1", 100, 100, 100, 0.4, 1.75, 208, 40, 70, 30, 1, False),
-			("Simple Maker's Edition v2 (2013 Printrbot Simple)", 100, 100, 100, 0.4, 1.75, 208, 40, 70, 30, 1, False),
-			("Simple Maker's Edition v3 (2014 Printrbot Simple)", 100, 100, 100, 0.4, 1.75, 208, 40, 70, 30, 1, False),
-			("Jr v1", 115, 120, 80, 0.4, 1.75, 208, 40, 70, 30, 1, False),
-			("Jr v2", 150, 150, 150, 0.4, 1.75, 208, 40, 70, 30, 1, False),
-			("LC v1", 150, 150, 150, 0.4, 1.75, 208, 40, 70, 30, 1, False),
-			("LC v2", 150, 150, 150, 0.4, 1.75, 208, 40, 70, 30, 1, False),
-			("Plus v1", 200, 200, 200, 0.4, 1.75, 208, 40, 70, 30, 1, False),
-			("Plus v2", 200, 200, 200, 0.4, 1.75, 208, 40, 70, 30, 1, False),
-			("Plus v2.1", 185, 220, 200, 0.4, 1.75, 208, 40, 70, 30, 1, False),
-			("Plus v2.2 (Model 1404/140422/140501/140507)", 250, 250, 250, 0.4, 1.75, 208, 40, 70, 30, 1, True),
-			("Go v2 Large", 505, 306, 310, 0.4, 1.75, 208, 35, 70, 30, 1, True),
-		]
+		super(MachineSelectPage, self).__init__(parent, _("Select your machine"))
+		
+		for n in range(0, 3):
+			self.AddHiddenSeperator()
+		self.Series1_Pro_Radio = self.AddRadioButton("Series 1 Pro", style=wx.RB_GROUP)
+		self.Series1_Pro_Radio.SetValue(True)
+		self.AddTextDescription(_("\t(serial numbers 10,000+)"))
+		for n in range(0, 3):
+			self.AddHiddenSeperator()
+		
+		self.Series1_Radio = self.AddRadioButton("Series 1")
+		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
+		self.AddTextDescription(_("\t(serial numbers 1000+)"))
+		for n in range(0, 3):
+			self.AddHiddenSeperator()
+		
+		self.Series1_Legacy = self.AddRadioButton("Legacy Series 1")
+		self.AddTextDescription(_("\t(serial numbers <1000)"))
 
-		super(PrintrbotPage, self).__init__(parent, _("Printrbot Selection"))
-		self.AddBitmap(wx.Bitmap(resources.getPathForImage('Printrbot_logo.png')))
-		self.AddText(_("Select which Printrbot machine you have:"))
-		self._items = []
-		for printer in self._printer_info:
-			if printer[0].startswith(":"):
-				self.AddSeperator()
-				self.AddText(printer[0][1:])
-			else:
-				item = self.AddRadioButton(printer[0])
-				item.data = printer[1:]
-				self._items.append(item)
+		for n in range(0, 3):
+			self.AddHiddenSeperator()
 
+		self.nonTAMRadio = self.AddRadioButton("Other")
+		for n in range(0, 2):
+			self.AddHiddenSeperator()
+			
+		self.nonTAMRadio.Bind(wx.EVT_RADIOBUTTON, self.OnNonTAM)
+		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
+		self.Series1_Pro_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1Pro)
+		self.Series1_Legacy.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1_Legacy)
+		
+	def OnNonTAM(self, e):
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().nonTAM)
+	
+	def OnSeries1(self, e):
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().selectTAMOptions)
+	
+	def OnSeries1Pro(self, e):
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
+		
+	def OnSeries1_Legacy(self, e):
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().selectTAMOptions)
+
+		
 	def StoreData(self):
-		profile.putMachineSetting('machine_name', 'Printrbot ???')
-		for item in self._items:
-			if item.GetValue():
-				data = item.data
-				profile.putMachineSetting('machine_name', 'Printrbot ' + item.GetLabel())
-				profile.putMachineSetting('machine_width', data[0])
-				profile.putMachineSetting('machine_depth', data[1])
-				profile.putMachineSetting('machine_height', data[2])
-				profile.putProfileSetting('nozzle_size', data[3])
-				profile.putProfileSetting('filament_diameter', data[4])
-				profile.putProfileSetting('print_temperature', data[5])
-				profile.putProfileSetting('print_speed', data[6])
-				profile.putProfileSetting('travel_speed', data[7])
-				profile.putProfileSetting('retraction_speed', data[8])
-				profile.putProfileSetting('retraction_amount', data[9])
-				profile.putProfileSetting('wall_thickness', float(profile.getProfileSettingFloat('nozzle_size')) * 2)
-				profile.putMachineSetting('has_heated_bed', 'False')
-				profile.putMachineSetting('machine_center_is_zero', 'False')
-				profile.putMachineSetting('extruder_head_size_min_x', '0')
-				profile.putMachineSetting('extruder_head_size_min_y', '0')
-				profile.putMachineSetting('extruder_head_size_max_x', '0')
-				profile.putMachineSetting('extruder_head_size_max_y', '0')
-				profile.putMachineSetting('extruder_head_size_height', '0')
-				if data[10]:
-					profile.setAlterationFile('start.gcode', """;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-;Print time: {print_time}
-;Filament used: {filament_amount}m {filament_weight}g
-;Filament cost: {filament_cost}
-;M190 S{print_bed_temperature} ;Uncomment to add your own bed temperature line
-;M109 S{print_temperature} ;Uncomment to add your own temperature line
-G21        ;metric values
-G90        ;absolute positioning
-M82        ;set extruder to absolute mode
-M107       ;start with the fan off
-G28 X0 Y0  ;move X/Y to min endstops
-G28 Z0     ;move Z to min endstops
-G29        ;Run the auto bed leveling
-G1 Z15.0 F{travel_speed} ;move the platform down 15mm
-G92 E0                  ;zero the extruded length
-G1 F200 E3              ;extrude 3mm of feed stock
-G92 E0                  ;zero the extruded length again
-G1 F{travel_speed}
-;Put printing message on LCD screen
-M117 Printing...
-""")
+		allMachineProfiles = resources.getDefaultMachineProfiles()
+		machSettingsToStore = {}
+		n = None
+		
+		for machineProfile in allMachineProfiles:
+			if self.Series1_Legacy.GetValue():
+				n = re.search(r'Series1Legacy', machineProfile)
+			elif self.Series1_Radio.GetValue():
+				n = re.search(r'Series1\.ini', machineProfile)
+			elif self.Series1_Pro_Radio.GetValue():
+				n = re.search(r'Series1Pro', machineProfile)
+				# also load alteration file
+				
+			if n is not None:
+				machProfile = machineProfile
+				cp = configparser.ConfigParser()
+				cp.read(machProfile)
+				if cp.has_section('machine'):
+					for setting, value in cp.items('machine'):
+						machSettingsToStore[setting] = value
+		
+		# if Series 1 Pro, load the appropriate alteration file
+		if self.Series1_Pro_Radio.GetValue():
+			alterationDirectoryList = resources.getAlterationFiles()		
+			for filename in alterationDirectoryList:
+				alterationFileExists = re.search(r'series1_hasBed', filename)
+				if alterationFileExists:
+					profile.setAlterationFileFromFilePath(filename)
+		
+		if machSettingsToStore:	
+			for setting, value in machSettingsToStore.items():
+				profile.putMachineSetting(setting, value)
 
-class OtherMachineSelectPage(InfoPage):
+
+class SelectTAMOptions(InfoPage):
 	def __init__(self, parent):
-		super(OtherMachineSelectPage, self).__init__(parent, _("Other machine information"))
-		self.AddText(_("The following pre-defined machine profiles are available"))
-		self.AddText(_("Note that these profiles are not guaranteed to give good results,\nor work at all. Extra tweaks might be required.\nIf you find issues with the predefined profiles,\nor want an extra profile.\nPlease report it at the github issue tracker."))
-		self.options = []
-		machines = resources.getDefaultMachineProfiles()
-		machines.sort()
-		for filename in machines:
-			name = os.path.splitext(os.path.basename(filename))[0]
-			item = self.AddRadioButton(name)
-			item.filename = filename
-			item.Bind(wx.EVT_RADIOBUTTON, self.OnProfileSelect)
-			self.options.append(item)
-		self.AddSeperator()
-		item = self.AddRadioButton(_('Custom...'))
-		item.SetValue(True)
-		item.Bind(wx.EVT_RADIOBUTTON, self.OnOtherSelect)
+		super(SelectTAMOptions, self).__init__(parent, _("Options and Upgrades"))
+		
+		for n in range(0,3):
+			self.AddHiddenSeperator()
+		
+		# G2 extruder
+		self.G2ExtruderCheckBox = self.AddCheckbox("G2 Extruder")
+		self.AddTextDescription("The G2 extruder is standard on all Series 1 3D Printers.\nIf you have an early 2014 Series 1 or a custom print head, please uncheck this option.")
+		self.G2ExtruderCheckBox.SetValue(True)
+		
+		# Spacer
+		for n in range(0,3):
+			self.AddHiddenSeperator()
 
-	def OnProfileSelect(self, e):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().otherMachineInfoPage)
-
-	def OnOtherSelect(self, e):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().customRepRapInfoPage)
-
+		# Heated bed
+		self.HeatedBedCheckBox = self.AddCheckbox("Heated Bed")
+		self.AddTextDescription("*The heated bed upgrade is available for purchase on our website.")
+		
+		# Spacer
+		for n in range(0,2):
+			self.AddHiddenSeperator()
+	
 	def StoreData(self):
-		for option in self.options:
-			if option.GetValue():
-				profile.loadProfile(option.filename)
-				profile.loadMachineSettings(option.filename)
+		# Print temp 185 for non-G2
+		if not self.G2ExtruderCheckBox.GetValue():
+			profile.putProfileSetting('print_temperature', 185)
+		# Heated bed item population
+		if self.HeatedBedCheckBox.GetValue():
+			profile.putProfileSetting("has_heated_bed", True)
+			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
+	;Sliced for Type A Machines Series 1
+	;Sliced at: {day} {date} {time}
+	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+	;Print Speed: {print_speed} Support: {support}
+	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
+	;Print time: {print_time}
+	;Filament used: {filament_amount}m {filament_weight}g
+	;Filament cost: {filament_cost}
+	G21        ;metric values
+	G90        ;absolute positioning
+	G28     ;move to endstops
+	G29		;allows for auto-levelling
+	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+	M140 S{print_bed_temperature} ;Prep Heat Bed
+	M109 S{print_temperature} ;Heat To temp
+	M190 S{print_bed_temperature} ;Heat Bed to temp
+	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
+	G92 E0 ;zero the extruded length
+	G1 F200 X250 E30 ;extrude 30mm of feed stock
+	G92 E0 ;zero the extruded length again
+	G1 X150 Y150  Z25 F12000 ;recenter and begin
+	G1 F{travel_speed}""")
+		if not self.HeatedBedCheckBox.GetValue():
+			profile.putProfileSetting("has_heated_bed", False)
+			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
+	;Sliced for Type A Machines Series 1
+	;Sliced at: {day} {date} {time}
+	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+	;Print Speed: {print_speed} Support: {support}
+	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
+	;Print time: {print_time}
+	;Filament used: {filament_amount}m {filament_weight}g
+	;Filament cost: {filament_cost}
+	G21        ;metric values
+	G90        ;absolute positioning
+	G28     ;move to endstops
+	G29		;allows for auto-levelling
+	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+	M109 S{print_temperature} ;Heat To temp
+	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
+	G92 E0 ;zero the extruded length
+	G1 F200 X250 E30 ;extrude 30mm of feed stock
+	G92 E0 ;zero the extruded length again
+	G1 X150 Y150  Z25 F12000 ;recenter and begin
+	G1 F{travel_speed}""")
+		profile.setAlterationFile('end.gcode', """;-- END GCODE --
+M104 S0     ;extruder heater off
+G91         ;relative positioning
+G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
+G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
+G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
+M84           ;steppers off
+G90           ;absolute positioning""")
 
-class OtherMachineInfoPage(InfoPage):
+
+class TypeAProcesses(object):
+	@staticmethod
+	def processWalkthroughValues(directory):
+		items = {}
+		for filepath in directory:
+			basename = os.path.splitext(os.path.basename(filepath))[0]
+			items[basename] = filepath
+		return items
+			
+	@staticmethod
+	def saveValuesToProfile(path):
+			cp = configparser.ConfigParser()
+			cp.read(path)
+			if cp.has_section('profile'):
+				for name, value in cp.items('profile'):
+					profile.putProfileSetting(name, value)
+
+
+class TAMReadyPage(InfoPage):
 	def __init__(self, parent):
-		super(OtherMachineInfoPage, self).__init__(parent, _("Cura Ready!"))
-		self.AddText(_("Cura is now ready to be used!"))
+		super(TAMReadyPage, self).__init__(parent, _("Configuration Complete"))
+		typeALogo = resources.getPathForImage('TypeALogo.png')
+		for x in range(0,3):
+			self.AddHiddenSeperator()		
+		self.AddImage(typeALogo)
+		for x in range(0,3):
+			self.AddHiddenSeperator()
+			
+		self.AddTextSubtitle(_("Cura for Type A Machines is now configured to get the most out of your 3D printer."))
+		
+		for x in range(0,3):
+			self.AddHiddenSeperator()
 
-class CustomRepRapInfoPage(InfoPage):
+		self.AddTextSubtitle(_("Click 'next' to tour the interface."))
+
+
+class TAMSelectMaterials(InfoPage):
 	def __init__(self, parent):
-		super(CustomRepRapInfoPage, self).__init__(parent, _("Custom RepRap information"))
-		self.AddText(_("RepRap machines can be vastly different, so here you can set your own settings."))
-		self.AddText(_("Be sure to review the default profile before running it on your machine."))
-		self.AddText(_("If you like a default profile for your machine added,\nthen make an issue on github."))
-		self.AddSeperator()
-		self.AddText(_("You will have to manually install Marlin or Sprinter firmware."))
-		self.AddSeperator()
-		self.machineName = self.AddLabelTextCtrl(_("Machine name"), "RepRap")
-		self.machineWidth = self.AddLabelTextCtrl(_("Machine width X (mm)"), "80")
-		self.machineDepth = self.AddLabelTextCtrl(_("Machine depth Y (mm)"), "80")
-		self.machineHeight = self.AddLabelTextCtrl(_("Machine height Z (mm)"), "55")
-		self.nozzleSize = self.AddLabelTextCtrl(_("Nozzle size (mm)"), "0.5")
-		self.heatedBed = self.AddCheckbox(_("Heated bed"))
-		self.HomeAtCenter = self.AddCheckbox(_("Bed center is 0,0,0 (RoStock)"))
+		super(TAMSelectMaterials, self).__init__(parent, _("Material Selection"))
 
-	def StoreData(self):
-		profile.putMachineSetting('machine_name', self.machineName.GetValue())
-		profile.putMachineSetting('machine_width', self.machineWidth.GetValue())
-		profile.putMachineSetting('machine_depth', self.machineDepth.GetValue())
-		profile.putMachineSetting('machine_height', self.machineHeight.GetValue())
-		profile.putProfileSetting('nozzle_size', self.nozzleSize.GetValue())
-		profile.putProfileSetting('wall_thickness', float(profile.getProfileSettingFloat('nozzle_size')) * 2)
-		profile.putMachineSetting('has_heated_bed', str(self.heatedBed.GetValue()))
-		profile.putMachineSetting('machine_center_is_zero', str(self.HomeAtCenter.GetValue()))
-		profile.putMachineSetting('extruder_head_size_min_x', '0')
-		profile.putMachineSetting('extruder_head_size_min_y', '0')
-		profile.putMachineSetting('extruder_head_size_max_x', '0')
-		profile.putMachineSetting('extruder_head_size_max_y', '0')
-		profile.putMachineSetting('extruder_head_size_height', '0')
-		profile.checkAndUpdateMachineName()
+		for x in range(0,3):
+			self.AddHiddenSeperator()
+	#	self.displayComboBox(materialNames=materialNames)
+		self.addText()
+	#	self.Bind(wx.EVT_COMBOBOX, self.OnSelect)
+	
+	# General informative text
+	def addText(self):
+		for x in range(0,4):
+			self.AddHiddenSeperator()
+		self.AddTextTitle("Having the right material matters")
+		self.AddTextSubtitle("Cura for Type A Machines includes presets for the majority of materials available for 3D printing.\nThe current material is displayed in the first panel.")
+		for x in range(0,3):
+			self.AddHiddenSeperator()
+
+
+class TAMSelectStrength(InfoPage):
+	def __init__(self, parent):
+		super(TAMSelectStrength, self).__init__(parent, _("Strength Selection"))
+		for x in range(0,3):
+			self.AddHiddenSeperator()	
+
+		self.addText()
+
+	
+	# General informative text
+	def addText(self):
+		for x in range(0,4):
+			self.AddHiddenSeperator()
+		self.AddTextTitle("Better, Faster, Stronger")
+		self.AddTextSubtitle("Different materials have different properties. Materails have varied properties depending on its strength settings.")
+		for x in range(0,5):
+			self.AddHiddenSeperator()
+			
+		self.AddText("Tip: Selecting low quality and high strength will result in the strongest part possible for a given material.")
+
+# Hasn't been tied into wizardry
+class TAMSelectQuality(InfoPage):
+	def __init__(self, parent):
+		super(TAMSelectQuality, self).__init__(parent, _("Quality Selection"))
+		for x in range(0,3):
+			self.AddHiddenSeperator()
+		self.addText()
+	
+	# General informative text
+	def addText(self):
+		for x in range(0,4):
+			self.AddHiddenSeperator()
+		self.AddTextTitle("Quality and Quantity")
+		self.AddTextSubtitle("Quality controls how fine the resolution of your print will be. In general, higher resolution prints take longer than lower resolution prints.")
+		for x in range(0,3):
+			self.AddHiddenSeperator()
+	
+class TAMSelectSupport(InfoPage):
+	def __init__(self, parent):
+		super(TAMSelectSupport, self).__init__(parent, _("Support Selection"))
+		
+		for x in range(0, 4):
+			self.AddHiddenSeperator()
+			
+		self.AddTextTitle("Lean On Me")
+		self.AddHiddenSeperator()
+		self.AddTextSubtitle("Many models have overhangs. In order to print these, extra material may be needed for structural support. This material can be removed after printing.\nA raft or brim helps the print adhere to the build plate.\nIf you do not want to print using support, uncheck this option.\n")
+	
+		for x in range(0, 10):
+			self.AddHiddenSeperator()
+			
+		self.AddText("Tip:\nYou can preview the support materials by selecting 'View Mode' icon located in the upper-right of the screen, and then select 'layers'.") 
+		
+class TAMFirstPrint(InfoPage):
+	def __init__(self, parent):
+		super(TAMFirstPrint, self).__init__(parent, _("Your First Print"))
+		
+		self.AddTextTitle("Get your motor running")
+		self.AddTextSubtitle("Time to start printing. When you click 'done', the example cone will automatically be loaded.\nAdjust the settings to your liking or leave the default configuration as-is. Select the 'save gcode' icon in the upper-left of to save your sliced file.")
 
 class NonTAM(InfoPage):
 	def __init__(self, parent):
@@ -615,202 +746,162 @@ class NonTAM(InfoPage):
 		else:
 			profile.putPreference('submit_slice_information', 'False')
 
-class MachineSelectPage(InfoPage):
+
+class PrintrbotPage(InfoPage):
 	def __init__(self, parent):
-		super(MachineSelectPage, self).__init__(parent, _("Select your machine"))
-		
-		for n in range(0, 3):
-			self.AddHiddenSeperator()
-		self.Series1_Pro_Radio = self.AddRadioButton("Series 1 Pro", style=wx.RB_GROUP)
-		self.Series1_Pro_Radio.SetValue(True)
-		self.AddTextDescription(_("\t(serial numbers 10,000+)"))
-		for n in range(0, 3):
-			self.AddHiddenSeperator()
-		
-		self.Series1_Radio = self.AddRadioButton("Series 1")
-		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
-		self.AddTextDescription(_("\t(serial numbers 1000+)"))
-		for n in range(0, 3):
-			self.AddHiddenSeperator()
-		
-		self.Series1_Legacy = self.AddRadioButton("Legacy Series 1")
-		self.AddTextDescription(_("\t(serial numbers <1000)"))
+		self._printer_info = [
+			# X, Y, Z, Nozzle Size, Filament Diameter, PrintTemperature, Print Speed, Travel Speed, Retract speed, Retract amount, use bed level sensor
+			("Simple Metal", 150, 150, 150, 0.4, 1.75, 208, 40, 70, 30, 1, True),
+			("Metal Plus", 250, 250, 250, 0.4, 1.75, 208, 40, 70, 30, 1, True),
+			("Simple Makers Kit", 100, 100, 100, 0.4, 1.75, 208, 40, 70, 30, 1, True),
+			(":" + _("Older models"),),
+			("Original", 130, 130, 130, 0.5, 2.95, 208, 40, 70, 30, 1, False),
+			("Simple Maker's Edition v1", 100, 100, 100, 0.4, 1.75, 208, 40, 70, 30, 1, False),
+			("Simple Maker's Edition v2 (2013 Printrbot Simple)", 100, 100, 100, 0.4, 1.75, 208, 40, 70, 30, 1, False),
+			("Simple Maker's Edition v3 (2014 Printrbot Simple)", 100, 100, 100, 0.4, 1.75, 208, 40, 70, 30, 1, False),
+			("Jr v1", 115, 120, 80, 0.4, 1.75, 208, 40, 70, 30, 1, False),
+			("Jr v2", 150, 150, 150, 0.4, 1.75, 208, 40, 70, 30, 1, False),
+			("LC v1", 150, 150, 150, 0.4, 1.75, 208, 40, 70, 30, 1, False),
+			("LC v2", 150, 150, 150, 0.4, 1.75, 208, 40, 70, 30, 1, False),
+			("Plus v1", 200, 200, 200, 0.4, 1.75, 208, 40, 70, 30, 1, False),
+			("Plus v2", 200, 200, 200, 0.4, 1.75, 208, 40, 70, 30, 1, False),
+			("Plus v2.1", 185, 220, 200, 0.4, 1.75, 208, 40, 70, 30, 1, False),
+			("Plus v2.2 (Model 1404/140422/140501/140507)", 250, 250, 250, 0.4, 1.75, 208, 40, 70, 30, 1, True),
+			("Go v2 Large", 505, 306, 310, 0.4, 1.75, 208, 35, 70, 30, 1, True),
+		]
 
-		for n in range(0, 3):
-			self.AddHiddenSeperator()
+		super(PrintrbotPage, self).__init__(parent, _("Printrbot Selection"))
+		self.AddBitmap(wx.Bitmap(resources.getPathForImage('Printrbot_logo.png')))
+		self.AddText(_("Select which Printrbot machine you have:"))
+		self._items = []
+		for printer in self._printer_info:
+			if printer[0].startswith(":"):
+				self.AddSeperator()
+				self.AddText(printer[0][1:])
+			else:
+				item = self.AddRadioButton(printer[0])
+				item.data = printer[1:]
+				self._items.append(item)
 
-		self.nonTAMRadio = self.AddRadioButton("Other")
-		for n in range(0, 2):
-			self.AddHiddenSeperator()
-			
-		self.nonTAMRadio.Bind(wx.EVT_RADIOBUTTON, self.OnNonTAM)
-		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
-		self.Series1_Legacy.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1_Legacy)
-		
-	def OnNonTAM(self, e):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().nonTAM)
-
-	def OnSeries1Pro(self, e):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
-	
-	def OnSeries1(self, e):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().selectTAMOptions)
-		
-	def OnSeries1_Legacy(self, e):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().selectTAMOptions)
-		
 	def StoreData(self):
-		allMachineProfiles = resources.getDefaultMachineProfiles()
-		machSettingsToStore = {}
-		n = None
-		
-		for machineProfile in allMachineProfiles:
-			if self.Series1_Legacy.GetValue():
-				n = re.search(r'Series1Legacy', machineProfile)
-			elif self.Series1_Radio.GetValue():
-				n = re.search(r'Series1\.ini', machineProfile)
-			elif self.Series1_Pro_Radio.GetValue():
-				n = re.search(r'Series1Pro', machineProfile)
-				# also load alteration file
-				
-			if n is not None:
-				machProfile = machineProfile
-				cp = configparser.ConfigParser()
-				cp.read(machProfile)
-				if cp.has_section('machine'):
-					for setting, value in cp.items('machine'):
-						machSettingsToStore[setting] = value
-		
-		# if Series 1 Pro, load the appropriate alteration file
-		if self.Series1_Pro_Radio.GetValue():
-			alterationDirectoryList = resources.getAlterationFiles()		
-			for filename in alterationDirectoryList:
-				alterationFileExists = re.search(r'series1_hasBed', filename)
-				if alterationFileExists:
-					print(filename)
-					profile.setAlterationFileFromFilePath(filename)
-		
-		if machSettingsToStore:	
-			for setting, value in machSettingsToStore.items():
-				profile.putMachineSetting(setting, value)
+		profile.putMachineSetting('machine_name', 'Printrbot ???')
+		for item in self._items:
+			if item.GetValue():
+				data = item.data
+				profile.putMachineSetting('machine_name', 'Printrbot ' + item.GetLabel())
+				profile.putMachineSetting('machine_width', data[0])
+				profile.putMachineSetting('machine_depth', data[1])
+				profile.putMachineSetting('machine_height', data[2])
+				profile.putProfileSetting('nozzle_size', data[3])
+				profile.putProfileSetting('filament_diameter', data[4])
+				profile.putProfileSetting('print_temperature', data[5])
+				profile.putProfileSetting('print_speed', data[6])
+				profile.putProfileSetting('travel_speed', data[7])
+				profile.putProfileSetting('retraction_speed', data[8])
+				profile.putProfileSetting('retraction_amount', data[9])
+				profile.putProfileSetting('wall_thickness', float(profile.getProfileSettingFloat('nozzle_size')) * 2)
+				profile.putMachineSetting('has_heated_bed', 'False')
+				profile.putMachineSetting('machine_center_is_zero', 'False')
+				profile.putMachineSetting('extruder_head_size_min_x', '0')
+				profile.putMachineSetting('extruder_head_size_min_y', '0')
+				profile.putMachineSetting('extruder_head_size_max_x', '0')
+				profile.putMachineSetting('extruder_head_size_max_y', '0')
+				profile.putMachineSetting('extruder_head_size_height', '0')
+				if data[10]:
+					profile.setAlterationFile('start.gcode', """;Sliced at: {day} {date} {time}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Print time: {print_time}
+;Filament used: {filament_amount}m {filament_weight}g
+;Filament cost: {filament_cost}
+;M190 S{print_bed_temperature} ;Uncomment to add your own bed temperature line
+;M109 S{print_temperature} ;Uncomment to add your own temperature line
+G21        ;metric values
+G90        ;absolute positioning
+M82        ;set extruder to absolute mode
+M107       ;start with the fan off
+G28 X0 Y0  ;move X/Y to min endstops
+G28 Z0     ;move Z to min endstops
+G29        ;Run the auto bed leveling
+G1 Z15.0 F{travel_speed} ;move the platform down 15mm
+G92 E0                  ;zero the extruded length
+G1 F200 E3              ;extrude 3mm of feed stock
+G92 E0                  ;zero the extruded length again
+G1 F{travel_speed}
+;Put printing message on LCD screen
+M117 Printing...
+""")
 
-class SelectTAMOptions(InfoPage):
-	def __init__(self, parent):
-		super(SelectTAMOptions, self).__init__(parent, _("Options and Upgrades"))
-		
-		for n in range(0,3):
-			self.AddHiddenSeperator()
-		
-		# G2 extruder
-		self.G2ExtruderCheckBox = self.AddCheckbox("G2 Extruder")
-		self.AddTextDescription("The G2 extruder is standard on all Series 1 3D Printers.\nIf you have an early 2014 Series 1 or a custom print head, please uncheck this option.")
-		self.G2ExtruderCheckBox.SetValue(True)
-		
-		# Spacer
-		for n in range(0,3):
-			self.AddHiddenSeperator()
 
-		# Heated bed
-		self.HeatedBedCheckBox = self.AddCheckbox("Heated Bed")
-		self.AddTextDescription("*The heated bed upgrade is available for purchase on our website.")
-		
-		# Spacer
-		for n in range(0,2):
-			self.AddHiddenSeperator()
-	
-	def StoreData(self):
-		# Print temp 185 for non-G2
-		if not self.G2ExtruderCheckBox.GetValue():
-			profile.putProfileSetting('print_temperature', 185)
-		# Heated bed item population
-		if self.HeatedBedCheckBox.GetValue():
-			print("Heated Bed Checked")
-			profile.putProfileSetting("has_heated_bed", True)
-			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
-	;Sliced for Type A Machines Series 1
-	;Sliced at: {day} {date} {time}
-	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-	;Print Speed: {print_speed} Support: {support}
-	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
-	;Print time: {print_time}
-	;Filament used: {filament_amount}m {filament_weight}g
-	;Filament cost: {filament_cost}
-	G21        ;metric values
-	G90        ;absolute positioning
-	G28     ;move to endstops
-	G29		;allows for auto-levelling
-	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
-	M140 S{print_bed_temperature} ;Prep Heat Bed
-	M109 S{print_temperature} ;Heat To temp
-	M190 S{print_bed_temperature} ;Heat Bed to temp
-	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
-	G92 E0 ;zero the extruded length
-	G1 F200 X250 E30 ;extrude 30mm of feed stock
-	G92 E0 ;zero the extruded length again
-	G1 X150 Y150  Z25 F12000 ;recenter and begin
-	G1 F{travel_speed}""")
-		if not self.HeatedBedCheckBox.GetValue():
-			print("No heated bed\n")
-			profile.putProfileSetting("has_heated_bed", False)
-			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
-	;Sliced for Type A Machines Series 1
-	;Sliced at: {day} {date} {time}
-	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-	;Print Speed: {print_speed} Support: {support}
-	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
-	;Print time: {print_time}
-	;Filament used: {filament_amount}m {filament_weight}g
-	;Filament cost: {filament_cost}
-	G21        ;metric values
-	G90        ;absolute positioning
-	G28     ;move to endstops
-	G29		;allows for auto-levelling
-	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
-	M109 S{print_temperature} ;Heat To temp
-	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
-	G92 E0 ;zero the extruded length
-	G1 F200 X250 E30 ;extrude 30mm of feed stock
-	G92 E0 ;zero the extruded length again
-	G1 X150 Y150  Z25 F12000 ;recenter and begin
-	G1 F{travel_speed}""")
-		profile.setAlterationFile('end.gcode', """;-- END GCODE --
-M104 S0     ;extruder heater off
-G91         ;relative positioning
-G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
-G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
-M84           ;steppers off
-G90           ;absolute positioning""")
-				
-class SelectParts(InfoPage):
+class OtherMachineSelectPage(InfoPage):
 	def __init__(self, parent):
-		super(SelectParts, self).__init__(parent, _("Select upgraded parts you have"))
-		self.AddText(_("To assist you in having better default settings for your Ultimaker\nCura would like to know which upgrades you have in your machine."))
+		super(OtherMachineSelectPage, self).__init__(parent, _("Other machine information"))
+		self.AddText(_("The following pre-defined machine profiles are available"))
+		self.AddText(_("Note that these profiles are not guaranteed to give good results,\nor work at all. Extra tweaks might be required.\nIf you find issues with the predefined profiles,\nor want an extra profile.\nPlease report it at the github issue tracker."))
+		self.options = []
+		machines = resources.getDefaultMachineProfiles()
+		machines.sort()
+		for filename in machines:
+			name = os.path.splitext(os.path.basename(filename))[0]
+			item = self.AddRadioButton(name)
+			item.filename = filename
+			item.Bind(wx.EVT_RADIOBUTTON, self.OnProfileSelect)
+			self.options.append(item)
 		self.AddSeperator()
-		self.springExtruder = self.AddCheckbox(_("Extruder drive upgrade"))
-		self.heatedBedKit = self.AddCheckbox(_("Heated printer bed (kit)"))
-		self.heatedBed = self.AddCheckbox(_("Heated printer bed (self built)"))
-		self.dualExtrusion = self.AddCheckbox(_("Dual extrusion (experimental)"))
-		self.AddSeperator()
-		self.AddText(_("If you have an Ultimaker bought after october 2012 you will have the\nExtruder drive upgrade. If you do not have this upgrade,\nit is highly recommended to improve reliability."))
-		self.AddText(_("This upgrade can be bought from the Ultimaker webshop\nor found on thingiverse as thing:26094"))
-		self.springExtruder.SetValue(True)
+		item = self.AddRadioButton(_('Custom...'))
+		item.SetValue(True)
+		item.Bind(wx.EVT_RADIOBUTTON, self.OnOtherSelect)
+
+	def OnProfileSelect(self, e):
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().otherMachineInfoPage)
+
+	def OnOtherSelect(self, e):
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().customRepRapInfoPage)
 
 	def StoreData(self):
-		profile.putMachineSetting('ultimaker_extruder_upgrade', str(self.springExtruder.GetValue()))
-		if self.heatedBed.GetValue() or self.heatedBedKit.GetValue():
-			profile.putMachineSetting('has_heated_bed', 'True')
-		else:
-			profile.putMachineSetting('has_heated_bed', 'False')
-		if self.dualExtrusion.GetValue():
-			profile.putMachineSetting('extruder_amount', '2')
-			profile.putMachineSetting('machine_depth', '195')
-		else:
-			profile.putMachineSetting('extruder_amount', '1')
-		if profile.getMachineSetting('ultimaker_extruder_upgrade') == 'True':
-			profile.putProfileSetting('retraction_enable', 'True')
-		else:
-			profile.putProfileSetting('retraction_enable', 'False')
+		for option in self.options:
+			if option.GetValue():
+				profile.loadProfile(option.filename)
+				profile.loadMachineSettings(option.filename)
+
+
+class OtherMachineInfoPage(InfoPage):
+	def __init__(self, parent):
+		super(OtherMachineInfoPage, self).__init__(parent, _("Cura Ready!"))
+		self.AddText(_("Cura is now ready to be used!"))
+
+
+class CustomRepRapInfoPage(InfoPage):
+	def __init__(self, parent):
+		super(CustomRepRapInfoPage, self).__init__(parent, _("Custom RepRap information"))
+		self.AddText(_("RepRap machines can be vastly different, so here you can set your own settings."))
+		self.AddText(_("Be sure to review the default profile before running it on your machine."))
+		self.AddText(_("If you like a default profile for your machine added,\nthen make an issue on github."))
+		self.AddSeperator()
+		self.AddText(_("You will have to manually install Marlin or Sprinter firmware."))
+		self.AddSeperator()
+		self.machineName = self.AddLabelTextCtrl(_("Machine name"), "RepRap")
+		self.machineWidth = self.AddLabelTextCtrl(_("Machine width X (mm)"), "80")
+		self.machineDepth = self.AddLabelTextCtrl(_("Machine depth Y (mm)"), "80")
+		self.machineHeight = self.AddLabelTextCtrl(_("Machine height Z (mm)"), "55")
+		self.nozzleSize = self.AddLabelTextCtrl(_("Nozzle size (mm)"), "0.5")
+		self.heatedBed = self.AddCheckbox(_("Heated bed"))
+		self.HomeAtCenter = self.AddCheckbox(_("Bed center is 0,0,0 (RoStock)"))
+
+	def StoreData(self):
+		profile.putMachineSetting('machine_name', self.machineName.GetValue())
+		profile.putMachineSetting('machine_width', self.machineWidth.GetValue())
+		profile.putMachineSetting('machine_depth', self.machineDepth.GetValue())
+		profile.putMachineSetting('machine_height', self.machineHeight.GetValue())
+		profile.putProfileSetting('nozzle_size', self.nozzleSize.GetValue())
+		profile.putProfileSetting('wall_thickness', float(profile.getProfileSettingFloat('nozzle_size')) * 2)
+		profile.putMachineSetting('has_heated_bed', str(self.heatedBed.GetValue()))
+		profile.putMachineSetting('machine_center_is_zero', str(self.HomeAtCenter.GetValue()))
+		profile.putMachineSetting('extruder_head_size_min_x', '0')
+		profile.putMachineSetting('extruder_head_size_min_y', '0')
+		profile.putMachineSetting('extruder_head_size_max_x', '0')
+		profile.putMachineSetting('extruder_head_size_max_y', '0')
+		profile.putMachineSetting('extruder_head_size_height', '0')
+		profile.checkAndUpdateMachineName()
 
 
 class UltimakerFirmwareUpgradePage(InfoPage):
@@ -846,6 +937,7 @@ class UltimakerFirmwareUpgradePage(InfoPage):
 
 	def OnUrlClick(self, e):
 		webbrowser.open('http://marlinbuilder.robotfuzz.com/')
+
 
 class UltimakerCheckupPage(InfoPage):
 	def __init__(self, parent):
@@ -1230,12 +1322,14 @@ class UltimakerCalibrateStepsPerEPage(InfoPage):
 	def StoreData(self):
 		profile.putPreference('steps_per_e', self.stepsPerEInput.GetValue())
 
+
 class Ultimaker2ReadyPage(InfoPage):
 	def __init__(self, parent):
 		super(Ultimaker2ReadyPage, self).__init__(parent, _("Ultimaker2"))
 		self.AddText(_('Congratulations on your the purchase of your brand new Ultimaker2.'))
 		self.AddText(_('Cura is now ready to be used with your Ultimaker2.'))
 		self.AddSeperator()
+
 
 class LulzbotReadyPage(InfoPage):
 	def __init__(self, parent):
@@ -1244,19 +1338,37 @@ class LulzbotReadyPage(InfoPage):
 		self.AddSeperator()
 		
 		
-class TAMReadyPage(InfoPage):
+class SelectParts(InfoPage):
 	def __init__(self, parent):
-		super(TAMReadyPage, self).__init__(parent, _("Configuration Complete"))
-		typeALogo = resources.getPathForImage('TypeALogo.png')
-		for x in range(0,3):
-			self.AddHiddenSeperator()		
-		self.AddImage(typeALogo)
-		for x in range(0,3):
-			self.AddHiddenSeperator()
-			
-		self.AddTextSubtitle(_("Cura for Type A Machines is now configured to get the most out of your 3D printer."))
-		
+		super(SelectParts, self).__init__(parent, _("Select upgraded parts you have"))
+		self.AddText(_("To assist you in having better default settings for your Ultimaker\nCura would like to know which upgrades you have in your machine."))
+		self.AddSeperator()
+		self.springExtruder = self.AddCheckbox(_("Extruder drive upgrade"))
+		self.heatedBedKit = self.AddCheckbox(_("Heated printer bed (kit)"))
+		self.heatedBed = self.AddCheckbox(_("Heated printer bed (self built)"))
+		self.dualExtrusion = self.AddCheckbox(_("Dual extrusion (experimental)"))
+		self.AddSeperator()
+		self.AddText(_("If you have an Ultimaker bought after october 2012 you will have the\nExtruder drive upgrade. If you do not have this upgrade,\nit is highly recommended to improve reliability."))
+		self.AddText(_("This upgrade can be bought from the Ultimaker webshop\nor found on thingiverse as thing:26094"))
+		self.springExtruder.SetValue(True)
 
+	def StoreData(self):
+		profile.putMachineSetting('ultimaker_extruder_upgrade', str(self.springExtruder.GetValue()))
+		if self.heatedBed.GetValue() or self.heatedBedKit.GetValue():
+			profile.putMachineSetting('has_heated_bed', 'True')
+		else:
+			profile.putMachineSetting('has_heated_bed', 'False')
+		if self.dualExtrusion.GetValue():
+			profile.putMachineSetting('extruder_amount', '2')
+			profile.putMachineSetting('machine_depth', '195')
+		else:
+			profile.putMachineSetting('extruder_amount', '1')
+		if profile.getMachineSetting('ultimaker_extruder_upgrade') == 'True':
+			profile.putProfileSetting('retraction_enable', 'True')
+		else:
+			profile.putProfileSetting('retraction_enable', 'False')
+			
+		
 class ConfigWizard(wx.wizard.Wizard):
 	def __init__(self, addNew = False):
 		super(ConfigWizard, self).__init__(None, -1, _("Configuration Wizard"))
@@ -1274,6 +1386,12 @@ class ConfigWizard(wx.wizard.Wizard):
 		self.selectTAMOptions = SelectTAMOptions(self)
 		self.nonTAM = NonTAM(self)
 		self.tamReadyPage = TAMReadyPage(self)
+		self.TAM_select_materials = TAMSelectMaterials(self)
+		self.TAM_select_strength = TAMSelectStrength(self)
+		self.TAM_select_quality = TAMSelectQuality(self)
+		self.TAM_select_support = TAMSelectSupport(self)
+		self.TAM_first_print = TAMFirstPrint(self)
+		
 		self.ultimakerSelectParts = SelectParts(self)
 		self.ultimakerFirmwareUpgradePage = UltimakerFirmwareUpgradePage(self)
 		self.ultimakerCheckupPage = UltimakerCheckupPage(self)
@@ -1285,17 +1403,23 @@ class ConfigWizard(wx.wizard.Wizard):
 		self.otherMachineSelectPage = OtherMachineSelectPage(self)
 		self.customRepRapInfoPage = CustomRepRapInfoPage(self)
 		self.otherMachineInfoPage = OtherMachineInfoPage(self)
-
 		self.ultimaker2ReadyPage = Ultimaker2ReadyPage(self)
 		self.lulzbotReadyPage = LulzbotReadyPage(self)
 
 		wx.wizard.WizardPageSimple.Chain(self.firstInfoPage, self.machineSelectPage)
+		wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.tamReadyPage)
+		wx.wizard.WizardPageSimple.Chain(self.tamReadyPage, self.TAM_select_materials)
+		wx.wizard.WizardPageSimple.Chain(self.TAM_select_materials, self.TAM_select_strength)
+		wx.wizard.WizardPageSimple.Chain(self.TAM_select_strength, self.TAM_select_quality)
+		wx.wizard.WizardPageSimple.Chain(self.TAM_select_quality, self.TAM_select_support)
+		wx.wizard.WizardPageSimple.Chain(self.TAM_select_support, self.TAM_first_print)
 		#wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)
 #		wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimakerSelectParts)
 #		wx.wizard.WizardPageSimple.Chain(self.ultimakerSelectParts, self.ultimakerFirmwareUpgradePage)
 #		wx.wizard.WizardPageSimple.Chain(self.ultimakerFirmwareUpgradePage, self.ultimakerCheckupPage)
 #		wx.wizard.WizardPageSimple.Chain(self.ultimakerCheckupPage, self.bedLevelPage)
 		#wx.wizard.WizardPageSimple.Chain(self.ultimakerCalibrationPage, self.ultimakerCalibrateStepsPerEPage)
+
 		wx.wizard.WizardPageSimple.Chain(self.printrbotSelectType, self.otherMachineInfoPage)
 		wx.wizard.WizardPageSimple.Chain(self.otherMachineSelectPage, self.customRepRapInfoPage)
 
@@ -1320,6 +1444,7 @@ class ConfigWizard(wx.wizard.Wizard):
 
 	def OnCancel(self, e):
 		profile.setActiveMachine(self._old_machine_index)
+
 
 class bedLevelWizardMain(InfoPage):
 	def __init__(self, parent):
@@ -1551,6 +1676,7 @@ class bedLevelWizardMain(InfoPage):
 	def mcZChange(self, newZ):
 		pass
 
+
 class headOffsetCalibrationPage(InfoPage):
 	def __init__(self, parent):
 		super(headOffsetCalibrationPage, self).__init__(parent, "Printer head offset calibration")
@@ -1769,6 +1895,7 @@ class headOffsetCalibrationPage(InfoPage):
 	def mcZChange(self, newZ):
 		pass
 
+
 class bedLevelWizard(wx.wizard.Wizard):
 	def __init__(self):
 		super(bedLevelWizard, self).__init__(None, -1, _("Bed leveling wizard"))
@@ -1797,6 +1924,7 @@ class bedLevelWizard(wx.wizard.Wizard):
 			self.FindWindowById(wx.ID_BACKWARD).Enable()
 		else:
 			self.FindWindowById(wx.ID_BACKWARD).Disable()
+
 
 class headOffsetWizard(wx.wizard.Wizard):
 	def __init__(self):
