@@ -209,6 +209,7 @@ class simpleModePanel(wx.Panel):
 					if cp.has_section('profile'):
 						for name, value in cp.items('profile'):
 							if name == setting:
+								profile.putProfileSetting(name, value)
 								if name == "fill_density":
 									settingsToDisplay[name].SetLabel(str(value) + "%")
 								elif name == "print_bed_temperature" or name == "bed_temperature":
@@ -223,6 +224,7 @@ class simpleModePanel(wx.Panel):
 					if cp.has_section('profile'):
 						for name, value in cp.items('profile'):
 							if name == setting:
+								profile.putProfileSetting(name, value)
 								if name == "fill_density":
 									settingsToDisplay[name].SetLabel(str(value) + "%")
 								elif name == "print_bed_temperature" or name == "bed_temperature":
@@ -251,13 +253,15 @@ class simpleModePanel(wx.Panel):
 		degree_sign= u'\N{DEGREE SIGN}'
 		for k, v in settings.items():
 			for name, textObject in self.infoPanelSettingsList.items():
-				if k == name: 
+				if k == name:
+					profile.putProfileSetting(name, v)
 					if k == "fill_density":
 						self.infoPanelSettingsList[k].SetLabel(v + "%")
 					elif k == "print_bed_temperature" or k == "bed_temperature":
 						self.infoPanelSettingsList[k].SetLabel(str(v) + degree_sign + "C")
 					else:
 						self.infoPanelSettingsList[k].SetLabel(v + "mm")
+		self._callback()
 
 	# overrides for support and adhesion
 	def updateSupportAndAdhesion(self, buttonsList):
