@@ -278,6 +278,7 @@ class simpleModePanel(wx.Panel):
 						print("Platform Adhesion: %s" % k)
 					elif k == 'brim':
 						profile.putProfileSetting('platform_adhesion', k)
+		self._callback()
 	
 	# Refreshes simple mode when the user hits select within the materials selection tool
 	def refreshSimpleMode(self, refresh=False):
