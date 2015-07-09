@@ -44,13 +44,13 @@ class simpleModePanel(wx.Panel):
 		printQualityPanel = wx.Panel(self)
 		self.quality_items = resources.getSimpleModeQualityProfiles()
 		initialQualityValue = profile.getPreference('simpleModeQuality')
-		self.quality_buttonslist = self.buttonCreator(self.quality_items, setValue=initialQualityValue, panel_name=printQualityPanel)
+		self.quality_buttonslist = self.buttonCreator(self.quality_items, panel_name=printQualityPanel)
 		
 		# Panel 4: Structural Strength
 		structuralStrengthPanel = wx.Panel(self)
 		self.structStrength_items = resources.getSimpleModeStrengthProfiles()
 		initialStrengthValue = profile.getPreference('simpleModeStrength')
-		self.structStrength_buttonslist = self.buttonCreator(self.structStrength_items, setValue=initialStrengthValue, panel_name=structuralStrengthPanel)
+		self.structStrength_buttonslist = self.buttonCreator(self.structStrength_items, panel_name=structuralStrengthPanel)
 		
 		# Panel 5: Print Support/Adhesion
 		supportSelectionPanel = wx.Panel(self)
@@ -91,20 +91,18 @@ class simpleModePanel(wx.Panel):
 		# Panel 2: Select Quality
 		sb = wx.StaticBox(printQualityPanel, label=_("Quality"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		first = None
-		second = None
-		third = None
 		for button, path in self.quality_buttonslist.items():
 			basename = os.path.splitext(os.path.basename(path))[0]
 			if basename == "Final":
-				first = button
+				final = button
 			elif basename == "Normal":
-				second = button
+				normal = button
+				normal.SetValue(True)
 			elif basename == "Draft":
-				third = button
-		boxsizer.Add(first)
-		boxsizer.Add(second)
-		boxsizer.Add(third)
+				draft = button
+		boxsizer.Add(final)
+		boxsizer.Add(normal)
+		boxsizer.Add(draft)
 		printQualityPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		printQualityPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(printQualityPanel, (2,0), flag=wx.EXPAND)
@@ -112,20 +110,18 @@ class simpleModePanel(wx.Panel):
 		# Panel 3: Structural Strength		
 		sb = wx.StaticBox(structuralStrengthPanel, label=_("Strength"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		first = None
-		second = None
-		third = None
 		for button, path in self.structStrength_buttonslist.items():
 			basename = os.path.splitext(os.path.basename(path))[0]
 			if basename == "High":
-				first = button
+				high = button
+				high.SetValue(True)
 			elif basename == "Medium":
-				second = button
+				medium = button
 			elif basename == "Low":
-				third = button
-		boxsizer.Add(first)
-		boxsizer.Add(second)
-		boxsizer.Add(third)
+				low = button
+		boxsizer.Add(high)
+		boxsizer.Add(medium)
+		boxsizer.Add(low)
 		structuralStrengthPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		structuralStrengthPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(structuralStrengthPanel, (3,0), flag=wx.EXPAND)
@@ -146,7 +142,7 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(support_disabled)
 		supportSelectionPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(supportSelectionPanel, (5,0), flag=wx.EXPAND)
-		self.supportAdhesionButtonList = {'raft': support_raft, 'brim': support_brim, 'None': support_disabled, 'Everywhere': printSupport}
+		self.supportAdhesionButtonList = {'Raft': support_raft, 'Brim': support_brim, 'None': support_disabled, 'Everywhere': printSupport}
 		
 		# Panel 6: Info Box
 		# make a list of units to add as a third column
@@ -169,9 +165,9 @@ class simpleModePanel(wx.Panel):
 		sizer.Add(infoPanel, (6,0))
 		
 		for button in self.quality_buttonslist:
-			button.Bind(wx.EVT_RADIOBUTTON,  lambda e: self.updateInfo(self.quality_buttonslist, self.quality_items),  self._callback())
+			button.Bind(wx.EVT_RADIOBUTTON,  lambda e: self.updateInfo(self.quality_buttonslist, self.quality_items, preference="quality"),  self._callback())
 		for button in self.structStrength_buttonslist:
-			button.Bind(wx.EVT_RADIOBUTTON, lambda e: self.updateInfo(self.structStrength_buttonslist, self.structStrength_items), self._callback())
+			button.Bind(wx.EVT_RADIOBUTTON, lambda e: self.updateInfo(self.structStrength_buttonslist, self.structStrength_items, preference="strength"), self._callback())
 		self.Bind(wx.EVT_BUTTON, self.OnSelectBtn, id=4)
 		for label, button in self.supportAdhesionButtonList.items():
 			if label == 'Everywhere':
@@ -180,6 +176,7 @@ class simpleModePanel(wx.Panel):
 		
 	
 	def InitializeInfoPanelList(self, infoPanel):
+		mainWindow = self.GetParent().GetParent().GetParent()
 		settingsToDisplay = {}
 		settingNames = ['layer_height', 'print_temperature', 'print_bed_temperature', 'fill_density', 'wall_thickness', 'retraction_amount']
 		newValue = None
@@ -194,9 +191,12 @@ class simpleModePanel(wx.Panel):
 			if setting == "fill_density":
 				fill_density_display = str(profile.getProfileSetting(setting) + "%")
 				settingsToDisplay[setting] = wx.StaticText(infoPanel, -1, label=fill_density_display)
-			elif setting == "print_bed_temperature" or setting == "bed_temperature":
-				temperature_display = str(profile.getProfileSetting(setting)) + degree_sign + "C"
-				settingsToDisplay[setting] =  wx.StaticText(infoPanel, -1, label=temperature_display)
+			elif setting == "print_temperature": 
+				print_temperature_display = str(profile.getProfileSetting(setting)) + degree_sign + "C"
+				settingsToDisplay[setting] =  wx.StaticText(infoPanel, -1, label=print_temperature_display)
+			elif setting == "print_bed_temperature":
+				bed_temperature_display = str(profile.getProfileSetting(setting)) + degree_sign + "C"
+				settingsToDisplay[setting] =  wx.StaticText(infoPanel, -1, label=bed_temperature_display)
 			else:
 				mm_display = str(profile.getProfileSetting(setting) + "mm")
 				settingsToDisplay[setting] = wx.StaticText(infoPanel, -1, label=mm_display)
@@ -212,7 +212,7 @@ class simpleModePanel(wx.Panel):
 								profile.putProfileSetting(name, value)
 								if name == "fill_density":
 									settingsToDisplay[name].SetLabel(str(value) + "%")
-								elif name == "print_bed_temperature" or name == "bed_temperature":
+								elif name == "print_temperature" or name == "bed_temperature":
 									settingsToDisplay[name].SetLabel(value + degree_sign + "C")
 								else:
 									settingsToDisplay[name].SetLabel(str(value) + "mm")
@@ -227,57 +227,72 @@ class simpleModePanel(wx.Panel):
 								profile.putProfileSetting(name, value)
 								if name == "fill_density":
 									settingsToDisplay[name].SetLabel(str(value) + "%")
-								elif name == "print_bed_temperature" or name == "bed_temperature":
+								elif name == "print_temperature" or name == "bed_temperature":
 									settingsToDisplay[name].SetLabel(str(value) + degree_sign + "C")
 								else:
 									settingsToDisplay[name].SetLabel(str(value) + "mm")
+									
 		self._callback()
 		return settingsToDisplay
 	
 	# Overrides particular profile settings with settings corresponding to the selected radio button
-	def updateInfo(self, buttonsList, directory):
-		toUpdate = []
+	def updateInfo(self, buttonsList, directory, preference):
+		mainWindow = self.GetParent().GetParent().GetParent()
+		toUpdate = {}
 		updatePanelValues = {}
 		for button, path in buttonsList.items():
 			if button.GetValue():
 				chosenProfile = os.path.splitext(os.path.basename(path))[0]
+				if preference == "quality":
+					profile.putPreference('simpleModeQuality', chosenProfile)
+				if preference == "strength":
+					profile.putPreference('simpleModeStrength', chosenProfile)
 				toUpdate = self.parseDirectoryItems(chosenProfile, directory, hasName=True)
 		for k, v in toUpdate.items():
-			if profile.isProfileSetting(k):
-				profile.putProfileSetting(k, v)
 				updatePanelValues[k] = v
+				profile.putProfileSetting(k, v)
 						
 		pub.sendMessage('data.update', settings=updatePanelValues)
-	
+		mainWindow.updateProfileToAllControls()
+		self._callback()
+												
 	def updateInfoPanelData(self, settings):
+		mainWindow = self.GetParent().GetParent().GetParent()
 		degree_sign= u'\N{DEGREE SIGN}'
 		for k, v in settings.items():
 			for name, textObject in self.infoPanelSettingsList.items():
 				if k == name:
-					profile.putProfileSetting(name, v)
 					if k == "fill_density":
 						self.infoPanelSettingsList[k].SetLabel(v + "%")
-					elif k == "print_bed_temperature" or k == "bed_temperature":
+					elif k == "print_temperature": 
+						self.infoPanelSettingsList[k].SetLabel(str(v) + degree_sign + "C")
+					elif k == "print_bed_temperature":
 						self.infoPanelSettingsList[k].SetLabel(str(v) + degree_sign + "C")
 					else:
 						self.infoPanelSettingsList[k].SetLabel(v + "mm")
+		mainWindow.updateProfileToAllControls()
 		self._callback()
 
 	# overrides for support and adhesion
 	def updateSupportAndAdhesion(self, buttonsList):
+		mainWindow = self.GetParent().GetParent().GetParent()
 		for k, v in buttonsList.items():
 			if k == 'Everywhere':
 				if v.IsChecked():
 					profile.putProfileSetting('support', k)
 				else:
 					profile.putProfileSetting('support', 'None')
+				mainWindow.updateProfileToAllControls()
 			else:
 				if v.GetValue():
-					if k == 'raft':
+					if k == 'Raft':
 						profile.putProfileSetting('platform_adhesion', k)
-						print("Platform Adhesion: %s" % k)
-					elif k == 'brim':
+					elif k == 'Brim':
 						profile.putProfileSetting('platform_adhesion', k)
+					elif k =='None':
+							profile.putProfileSetting('platform_adhesion', k)
+					mainWindow.updateProfileToAllControls()
+
 		self._callback()
 	
 	# Refreshes simple mode when the user hits select within the materials selection tool
@@ -309,7 +324,7 @@ class simpleModePanel(wx.Panel):
 					
 		return settingsKeyValuePairs
 		
-	def buttonCreator(self, names, setValue, panel_name):
+	def buttonCreator(self, names, panel_name):
 		buttonsList = []
 		filePaths = []
 		buttons = {}
@@ -317,10 +332,6 @@ class simpleModePanel(wx.Panel):
 		
 		for name in namesList:
 			button = wx.RadioButton(panel_name, -1, name)
-			if name == setValue:
-				button.SetValue(True)
-			else:
-				button.SetValue(False)
 			buttonsList.append(button)
 		for name in names:
 			filePaths.append(name)
@@ -363,21 +374,20 @@ class simpleModePanel(wx.Panel):
 				if setting == name: 
 					if setting == "fill_density":
 						self.infoPanelSettingsList[setting].SetLabel(value + "%")
-					elif setting == "print_bed_temperature" or setting == "bed_temperature":
+					elif setting == "print_temperature": 
+						self.infoPanelSettingsList[setting].SetLabel(value + degree_sign + "C")
+					elif setting == "print_bed_temperature":
 						self.infoPanelSettingsList[setting].SetLabel(value + degree_sign + "C")
 					else:
 						self.infoPanelSettingsList[setting].SetLabel(value + "mm")				
-					
-		
-		# make sure that the simple mode panel quality/strength overrides are applied
-		self.updateInfo(self.quality_buttonslist, self.quality_items)
-		self.updateInfo(self.structStrength_buttonslist, self.structStrength_items)
-		self.updateSupportAndAdhesion(self.supportAdhesionButtonList)
-		
 		mainWindow.updateProfileToAllControls()
-		
 		self._callback()
-		
+							
+		 # make sure that the simple mode panel quality/strength overrides are applied
+		self.updateInfo(self.quality_buttonslist, self.quality_items, preference="quality")
+		self.updateInfo(self.structStrength_buttonslist, self.structStrength_items, preference="strength")
+		self.updateSupportAndAdhesion(self.supportAdhesionButtonList)
+
 	def displayLoadedFileName(self):
 		# Displays file names as they are loaded into sceneView
 		# and references them directly from that source
@@ -394,11 +404,22 @@ class simpleModePanel(wx.Panel):
 		frame.Show()
 
 	def getSettingOverrides(self):
-		self.displayLoadedFileName()
-		chosenProfile = self.materialProfileText.GetText()
+		quality_items = resources.getSimpleModeQualityProfiles()
+		strength_items = resources.getSimpleModeStrengthProfiles()
 		materials_items = resources.getSimpleModeMaterialsProfiles()
-
+		
+		chosenProfile = self.materialProfileText.GetText()
+		chosenStrengthQuality = profile.getPreference('simpleModeStrength')
+		chosenPrintQuality = profile.getPreference('simpleModeQuality')
+		print chosenStrengthQuality
+		print chosenPrintQuality
+		
+		qualitySettings = self.parseDirectoryItems(chosenPrintQuality, quality_items)
+		strengthSettings = self.parseDirectoryItems(chosenStrengthQuality, strength_items)
 		overrideSettings = self.parseDirectoryItems(chosenProfile, materials_items)
+		overrideSettings.update(strengthSettings)
+		overrideSettings.update(qualitySettings)
+		
 		return overrideSettings
 			
 	def updateProfileToControls(self):
@@ -417,7 +438,9 @@ class MaterialSelectorFrame(wx.Frame):
 		self.materialProfile = ""
 		self.sortedMaterialsProfiles = {}
 		materialsProfilesList = []
-
+		splitList = []
+		brandsList = []
+		materialsList = []
 		for filename in list:
 			cp = configparser.ConfigParser()
 			cp.read(filename)
@@ -426,11 +449,19 @@ class MaterialSelectorFrame(wx.Frame):
 				materialsProfilesList.append(materialProfile)
 		
 		for item in materialsProfilesList:
-			profiles = item.split()
-			count =	len(profiles)									
-			floatCount = float(count)
-			self.sortedMaterialsProfiles.setdefault(profiles[0].title(), []).append(profiles[1])
-	
+			name = str(item)
+			splitList.append(name.split(None, 2))
+			# search for brand (first word in name)
+			m = re.compile(r"^\s*([a-zA-Z0-9]+)")
+			# search for material (second word in name)
+			n = re.compile(r"^(?:\S+\s){1}(\S+)")
+			
+			brand = m.match(item)
+			material = n.match(item)
+			# if matched, then sort into dictionary
+			if material and brand: 
+				self.sortedMaterialsProfiles.setdefault(brand.group(), []).append(material.group(1))
+			
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		hbox0 = wx.BoxSizer(wx.HORIZONTAL)
 		titles = wx.GridSizer(1, 2, 0, 60)
