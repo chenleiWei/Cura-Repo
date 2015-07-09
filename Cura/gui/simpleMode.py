@@ -22,7 +22,6 @@ class simpleModePanel(wx.Panel):
 		self.profileSettingsList = {}
 		self.materialProfileText = wx.TextDataObject(text=profile.getPreference("simpleModeMaterial"))
 		self.lastOpenedFileName = "No File Currently Open"
-	
 		
 		# Panel 1: Last File Loaded
 		currentFilePanel = wx.Panel(self)
@@ -32,8 +31,8 @@ class simpleModePanel(wx.Panel):
 		materialSelectorPanel = wx.Panel(self)
 		self.selectedMaterial = wx.StaticText(materialSelectorPanel, -1, label=self.materialProfileText.GetText())
 		self.materialLoadButton = wx.Button(materialSelectorPanel, 4, _("Load Material"))
-		printSupport = wx.CheckBox(self, -1, _("Print support structure"))
-		printSupport.SetValue(True)
+		self.printSupport = wx.CheckBox(self, -1, _("Print support structure"))
+		self.printSupport.SetValue(True)
 		self.returnProfile = self.selectedMaterial.GetLabel()
 
 		pub.subscribe(self.displayAndLoadMaterialData, 'settings.update')
@@ -87,7 +86,6 @@ class simpleModePanel(wx.Panel):
 		materialSelectorPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(materialSelectorPanel, (1,0), flag=wx.EXPAND)
 		
-		
 		# Panel 2: Select Quality
 		sb = wx.StaticBox(printQualityPanel, label=_("Quality"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
@@ -130,7 +128,7 @@ class simpleModePanel(wx.Panel):
 		# *temporary panel; will be combined with adhesion
 		sb = wx.StaticBox(self, label=_("Support"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		boxsizer.Add(printSupport)
+		boxsizer.Add(self.printSupport)
 		sizer.Add(boxsizer, (4,0), flag=wx.EXPAND)
 
 		# Panel 5: Adhesion
@@ -142,7 +140,8 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(support_disabled)
 		supportSelectionPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(supportSelectionPanel, (5,0), flag=wx.EXPAND)
-		self.supportAdhesionButtonList = {'Raft': support_raft, 'Brim': support_brim, 'None': support_disabled, 'Everywhere': printSupport}
+
+		self.platformAdhesionOptions = {'Raft': support_raft, 'Brim': support_brim, 'None':support_disabled}
 		
 		# Panel 6: Info Box
 		# make a list of units to add as a third column
@@ -169,10 +168,9 @@ class simpleModePanel(wx.Panel):
 		for button in self.structStrength_buttonslist:
 			button.Bind(wx.EVT_RADIOBUTTON, lambda e: self.updateInfo(self.structStrength_buttonslist, self.structStrength_items, preference="strength"), self._callback())
 		self.Bind(wx.EVT_BUTTON, self.OnSelectBtn, id=4)
-		for label, button in self.supportAdhesionButtonList.items():
-			if label == 'Everywhere':
-				button.Bind(wx.EVT_CHECKBOX, lambda e: self.updateSupportAndAdhesion(self.supportAdhesionButtonList), self._callback())
-			button.Bind(wx.EVT_RADIOBUTTON, lambda e: self.updateSupportAndAdhesion(self.supportAdhesionButtonList), self._callback())
+		for name, button in self.platformAdhesionOptions.items():
+			button.Bind(wx.EVT_RADIOBUTTON, lambda e: self.updateAdhesion(self.platformAdhesionOptions), self._callback())
+		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self.updateSupport(self.printSupport), self._callback())
 		
 	
 	def InitializeInfoPanelList(self, infoPanel):
@@ -255,6 +253,20 @@ class simpleModePanel(wx.Panel):
 		pub.sendMessage('data.update', settings=updatePanelValues)
 		mainWindow.updateProfileToAllControls()
 		self._callback()
+						
+	def updateAdhesion(self, options):
+		for name, button in options.items():
+			if button.GetValue():
+				profile.putProfileSetting('platform_adhesion', name)
+		self._callback()
+		
+	
+	def updateSupport(self, button):
+		if button.IsChecked():
+			profile.putProfileSetting('support', 'Everywhere')
+		else: 
+			profile.putProfileSetting('support', 'None')
+		self._callback()
 												
 	def updateInfoPanelData(self, settings):
 		mainWindow = self.GetParent().GetParent().GetParent()
@@ -273,6 +285,7 @@ class simpleModePanel(wx.Panel):
 		mainWindow.updateProfileToAllControls()
 		self._callback()
 
+	"""
 	# overrides for support and adhesion
 	def updateSupportAndAdhesion(self, buttonsList):
 		mainWindow = self.GetParent().GetParent().GetParent()
@@ -294,6 +307,7 @@ class simpleModePanel(wx.Panel):
 					mainWindow.updateProfileToAllControls()
 
 		self._callback()
+	"""
 	
 	# Refreshes simple mode when the user hits select within the materials selection tool
 	def refreshSimpleMode(self, refresh=False):
@@ -386,7 +400,9 @@ class simpleModePanel(wx.Panel):
 		 # make sure that the simple mode panel quality/strength overrides are applied
 		self.updateInfo(self.quality_buttonslist, self.quality_items, preference="quality")
 		self.updateInfo(self.structStrength_buttonslist, self.structStrength_items, preference="strength")
-		self.updateSupportAndAdhesion(self.supportAdhesionButtonList)
+		self.updateAdhesion(self.platformAdhesionOptions)
+		self.updateSupport(self.printSupport)
+		
 
 	def displayLoadedFileName(self):
 		# Displays file names as they are loaded into sceneView
@@ -404,6 +420,7 @@ class simpleModePanel(wx.Panel):
 		frame.Show()
 
 	def getSettingOverrides(self):
+		self.displayLoadedFileName()
 		quality_items = resources.getSimpleModeQualityProfiles()
 		strength_items = resources.getSimpleModeStrengthProfiles()
 		materials_items = resources.getSimpleModeMaterialsProfiles()
@@ -411,8 +428,6 @@ class simpleModePanel(wx.Panel):
 		chosenProfile = self.materialProfileText.GetText()
 		chosenStrengthQuality = profile.getPreference('simpleModeStrength')
 		chosenPrintQuality = profile.getPreference('simpleModeQuality')
-		print chosenStrengthQuality
-		print chosenPrintQuality
 		
 		qualitySettings = self.parseDirectoryItems(chosenPrintQuality, quality_items)
 		strengthSettings = self.parseDirectoryItems(chosenStrengthQuality, strength_items)
@@ -477,8 +492,8 @@ class MaterialSelectorFrame(wx.Frame):
 			
 		self.materialsListBox = wx.ListBox(panel, 27, wx.DefaultPosition, (110, 135), materialNames[0])			
 		self.brandsListBox = wx.ListBox(panel, 26, wx.DefaultPosition, (110, 135), self.brandNames)
-		brandsTitle = wx.StaticText(panel, 2, label = "Brands", pos=wx.DefaultPosition)
-		materialsTitle = wx.StaticText(panel, 2, label="Materials", pos=wx.DefaultPosition)
+		brandsTitle = wx.StaticText(panel, 2, label = "Supplier", pos=wx.DefaultPosition)
+		materialsTitle = wx.StaticText(panel, 2, label="Name", pos=wx.DefaultPosition)
 		brandsTitle.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.NORMAL))
 		materialsTitle.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.NORMAL))
 		# highlights first brand options upon window open
