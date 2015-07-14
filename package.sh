@@ -22,7 +22,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="2015TypeADemo"
+export BUILD_NAME="1.3.0a0_demo1"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -162,6 +162,9 @@ if [ ! -d "$ARDUINO_PATH" ]; then
   exit 1
 fi
 
+function pause(){
+   read -p "$*"
+}
 
 #############################
 # Darwin
@@ -205,13 +208,15 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	cd ..
 
 	# Create sparse image for distribution
-	hdiutil detach /Volumes/CuraTypeA/ || true
+	hdiutil detach /Volumes/Cura\ Type\ A/ || true
 	rm -rf Cura.dmg.sparseimage
 	hdiutil convert DmgTemplateCompressed.dmg -format UDSP -o Cura.dmg
 	hdiutil resize -size 500m Cura.dmg.sparseimage
 	hdiutil attach Cura.dmg.sparseimage
-	cp -a dist/Cura.app /Volumes/CuraTypeA/Cura\ Type\ A
-	hdiutil detach /Volumes/CuraTypeA
+	cp -a dist/Cura.app /Volumes/Cura\ Type\ A
+	open /Volumes/Cura\ Type\ A
+	pause 'Position disk image, and then press enter to continue'
+	hdiutil detach /Volumes/Cura\ Type\ A
 	hdiutil convert Cura.dmg.sparseimage -format UDZO -imagekey zlib-level=9 -ov -o ../../${TARGET_DIR}.dmg
 	exit
 fi
