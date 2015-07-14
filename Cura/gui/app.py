@@ -109,6 +109,7 @@ class CuraApp(wx.App):
 
 		resources.setupLocalization(profile.getPreference('language'))  # it's important to set up localization at very beginning to install _
 
+		"""
 		#If we do not have preferences yet, try to load it from a previous Cura install
 		if profile.getMachineSetting('machine_type') == 'unknown':
 			try:
@@ -125,7 +126,7 @@ class CuraApp(wx.App):
 			except:
 				import traceback
 				print traceback.print_exc()
-
+		"""
 		#If we haven't run it before, run the configuration wizard.
 		if profile.getMachineSetting('machine_type') == 'unknown':
 			#Check if we need to copy our examples
