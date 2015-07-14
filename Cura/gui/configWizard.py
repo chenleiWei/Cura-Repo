@@ -5,7 +5,6 @@ import webbrowser
 import threading
 import time
 import math
-import ConfigParser as configparser
 import wx
 import re
 import wx.wizard
@@ -169,6 +168,17 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.GetSizer().Add(wx.StaticBitmap(self, -1, image), pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return image
+		
+	def AddMachineImage(self, imagePath):
+		image = wx.Image(imagePath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+		self.GetSizer().Add(wx.StaticBitmap(self, -1, image), pos=(self.rowNr+3, 1), span=(1, 2), flag=wx.ALIGN_RIGHT)
+		return image
+
+	def AddLabelImage(self, imagePath):
+		image = wx.Image(imagePath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+		self.GetSizer().Add(wx.StaticBitmap(self, -1, image), pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return image
 
 	def AddSeperator(self):
 		self.GetSizer().Add(wx.StaticLine(self, -1), pos=(self.rowNr, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
@@ -203,8 +213,10 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return check
 
 	def AddButton(self, label):
-		button = wx.Button(self, -1, label)
-		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT)
+		button = wx.Button(self, -1, label, style=wx.ALIGN_CENTER_HORIZONTAL)
+		font = wx.Font(pointSize=16, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		button.SetFont(font)
+		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT,  border=200)
 		self.rowNr += 1
 		return button
 
@@ -312,15 +324,13 @@ class FirstInfoPage(InfoPage):
 class MachineSelectPage(InfoPage):
 	def __init__(self, parent):
 		super(MachineSelectPage, self).__init__(parent, _("Select your machine"))
-		
-		for n in range(0, 3):
+		for n in range(0, 5):
 			self.AddHiddenSeperator()
 		self.Series1_Pro_Radio = self.AddRadioButton("Series 1 Pro", style=wx.RB_GROUP)
 		self.Series1_Pro_Radio.SetValue(True)
 		self.AddTextDescription(_("\t(serial numbers 10,000+)"))
 		for n in range(0, 3):
 			self.AddHiddenSeperator()
-		
 		self.Series1_Radio = self.AddRadioButton("Series 1")
 		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
 		self.AddTextDescription(_("\t(serial numbers 1000+)"))
@@ -399,7 +409,7 @@ class TAMSelectOptions(InfoPage):
 		
 		# G2 extruder
 		self.G2ExtruderCheckBox = self.AddCheckbox("G2 Extruder")
-		self.AddTextDescription("The G2 extruder is standard on all Series 1 3D Printers.\nIf you have an early 2014 Series 1 or a custom print head, please uncheck this option.")
+		self.AddTextDescription("The G2 extruder is standard on all Series 1 3D Printers.\n\nIf you have an early 2014 Series 1 or a custom print head, please uncheck this option.")
 		self.G2ExtruderCheckBox.SetValue(True)
 		
 		# Spacer
@@ -408,7 +418,7 @@ class TAMSelectOptions(InfoPage):
 
 		# Heated bed
 		self.HeatedBedCheckBox = self.AddCheckbox("Heated Bed")
-		self.AddTextDescription("*The heated bed upgrade is available for purchase on our website.")
+		self.AddTextDescription("*The heated bed upgrade is available for purchase on www.TypeAMachines.com/products")
 		
 		# Spacer
 		for n in range(0,2):
@@ -491,22 +501,31 @@ class TAMReadyPage(InfoPage):
 		
 		self.AddTextTitle(_("Configuration Complete"))
 		self.AddTextSubtitle(_("Cura for Type A Machines is now configured to get the most out of your 3D printer."))
-		for x in range(0, 3):
+		self.AddHiddenSeperator()
+		self.AddTextSubtitle(_("Select 'Next' below for a quick overview on how to use Cura."))
+		for x in range(0, 2):
 			self.AddHiddenSeperator()
-		self.AddTextSubtitle(_("Click 'next' to tour the interface."))
-
+		self.skipTut = self.AddButton("Skip tutorial")
+		
+		self.skipTut.Bind(wx.EVT_BUTTON, self.skipTutorial)
+		
+		
+	def skipTutorial(self, e):
+		self.GetParent().Close()
+	
+	
 class TAMSelectMaterials(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectMaterials, self).__init__(parent, _("Material Selection"))
 		for x in range(0,3):
 			self.AddHiddenSeperator()
-		typeALogo = resources.getPathForImage('TypeALogo.png')
+		typeALogo = resources.getPathForImage('0mp.png')
 		self.AddImage(typeALogo)
 		self.addText()
 	
 	# General informative text
 	def addText(self):
-		for x in range(0,5):
+		for x in range(0,2):
 			self.AddHiddenSeperator()
 		self.AddTextTitle("Having The Right Material Matters")
 		self.AddTextSubtitle("Cura for Type A Machines includes presets for the majority of materials available for 3D printing. The current material is displayed in the first panel.")
@@ -516,18 +535,18 @@ class TAMSelectStrength(InfoPage):
 		super(TAMSelectStrength, self).__init__(parent, _("Strength Selection"))
 		for x in range(0,3):
 			self.AddHiddenSeperator()
-		typeALogo = resources.getPathForImage('TypeALogo.png')
+		typeALogo = resources.getPathForImage('2st.png')
 		self.AddImage(typeALogo)
 		self.addText()
 
 	
 	# General informative text
 	def addText(self):
-		for x in range(0,5):
+		for x in range(0,2):
 			self.AddHiddenSeperator()
 		self.AddTextTitle("Better, Faster, Stronger")
-		self.AddTextSubtitle("Different materials have different properties. Materails have varied properties depending on its strength settings.")
-		for x in range(0,4):
+		self.AddTextSubtitle("Different materials have different properties. Materials have varied properties depending on its strength settings.")
+		for x in range(0,2):
 			self.AddHiddenSeperator()
 			
 		self.AddText("Tip: Selecting low quality and high strength will result in the strongest part possible for a given material.")
@@ -537,26 +556,25 @@ class TAMSelectQuality(InfoPage):
 		super(TAMSelectQuality, self).__init__(parent, _("Quality Selection"))
 		for x in range(0,3):
 			self.AddHiddenSeperator()
-		typeALogo = resources.getPathForImage('TypeALogo.png')
+		typeALogo = resources.getPathForImage('1qu.png')
 		self.AddImage(typeALogo)
 		self.addText()
 	
 	# General informative text
 	def addText(self):
-		for x in range(0,5):
+		for x in range(0,2):
 			self.AddHiddenSeperator()
 		self.AddTextTitle("Quality and Quantity")
 		self.AddTextSubtitle("Quality controls how fine the resolution of your print will be. In general, higher resolution prints take longer than lower resolution prints.")
 
-	
 class TAMSelectSupport(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectSupport, self).__init__(parent, _("Support Selection"))
 		for x in range(0,3):
 			self.AddHiddenSeperator()
-		typeALogo = resources.getPathForImage('TypeALogo.png')
+		typeALogo = resources.getPathForImage('3sa.png')
 		self.AddImage(typeALogo)
-		for x in range(0,5):
+		for x in range(0,2):
 			self.AddHiddenSeperator()
 		self.AddTextTitle("Lean On Me")
 		self.AddTextSubtitle("If a 3D model has an overhang, extra material may be needed for structural support. This material can be removed after printing.")
@@ -580,9 +598,12 @@ class TAMFirstPrint(InfoPage):
 			self.AddHiddenSeperator()
 		self.AddTextTitle("Get Your Motor Running")
 		self.AddTextSubtitle("It's time to start printing.")
+		self.AddHiddenSeperator()
+		self.AddTextSubtitle("Adjust the settings to your liking or leave the default configuration as-is. Select the 'save gcode' icon in the upper-left of to save your sliced file.")
 		for x in range(0,3):
 			self.AddHiddenSeperator()
-		self.AddTextSubtitle("Select 'Finish' below to load an example model. \n\nAdjust the settings to your liking or leave the default configuration as-is. Select the 'save gcode' icon in the upper-left of to save your sliced file.")
+		self.AddTextSubtitle("Select 'Finish' below to load an example model.")
+
 
 class NonTAM(InfoPage):
 	def __init__(self, parent):
