@@ -112,11 +112,11 @@ class simpleModePanel(wx.Panel):
 			basename = os.path.splitext(os.path.basename(path))[0]
 			if basename == "High":
 				high = button
-				high.SetValue(True)
 			elif basename == "Medium":
 				medium = button
 			elif basename == "Low":
 				low = button
+				low.SetValue(True)
 		boxsizer.Add(high)
 		boxsizer.Add(medium)
 		boxsizer.Add(low)
