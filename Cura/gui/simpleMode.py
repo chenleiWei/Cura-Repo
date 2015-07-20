@@ -142,21 +142,26 @@ class simpleModePanel(wx.Panel):
 		sizer.Add(supportSelectionPanel, (5,0), flag=wx.EXPAND)
 
 		self.platformAdhesionOptions = {'Raft': support_raft, 'Brim': support_brim, 'None':support_disabled}
-		
+		settingOrder = ["Layer Height", "Print Temperature", "Print Bed Temperature", "Wall Thickness", "Fill Density"]
+		if profile.getMachineSetting('has_heated_bed') == "False":
+			settingOrder.remove("Print Bed Temperature")
 		# Panel 6: Info Box
 		# make a list of units to add as a third column
 		sb = wx.StaticBox(infoPanel, label=_("Settings Info"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		gridsizer = wx.FlexGridSizer(6,2,7,10)
-		for setting, value in self.infoPanelSettingsList.items():
-			# replaces double-underscore with a space
-			rx = '[' + re.escape(''.join(["\_\_"])) + ']'
-			settingName = re.sub(rx, ' ', setting.title())
-			displayName = wx.StaticText(infoPanel, -1, label = (settingName + ": "))
-			displayName.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.NORMAL))
-			gridsizer.Add(displayName, flag=wx.ALIGN_LEFT)
-			value.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL))
-			gridsizer.Add(value, wx.ALIGN_LEFT, wx.BOTTOM, border=0)
+		
+		for item in range(len(settingOrder)):
+			for setting, value in self.infoPanelSettingsList.items():
+				# replaces double-underscore with a space
+				rx = '[' + re.escape(''.join(["\_\_"])) + ']'
+				settingName = re.sub(rx, ' ', setting.title())
+				if settingOrder[item] == settingName:
+					displayName = wx.StaticText(infoPanel, -1, label = (settingName + ": "))
+					displayName.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.NORMAL))
+					gridsizer.Add(displayName, flag=wx.ALIGN_LEFT)
+					value.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL))
+					gridsizer.Add(value, wx.ALIGN_LEFT, wx.BOTTOM, border=0)
 
 		boxsizer.Add(gridsizer)
 		infoPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
@@ -176,12 +181,11 @@ class simpleModePanel(wx.Panel):
 	def InitializeInfoPanelList(self, infoPanel):
 		mainWindow = self.GetParent().GetParent().GetParent()
 		settingsToDisplay = {}
-		settingNames = ['layer_height', 'print_temperature', 'print_bed_temperature', 'fill_density', 'wall_thickness', 'retraction_amount']
+		settingNames = ['layer_height', 'print_temperature', 'print_bed_temperature', 'fill_density', 'wall_thickness']
 		newValue = None
 		degree_sign= u'\N{DEGREE SIGN}'
 		# Check to see if heated bed and retraction are enabled; if not, remove them from display list
-		if profile.getMachineSetting('has_heated_bed') is False: settingNames.remove('print_bed_temperature')
-		if profile.getProfileSetting('retraction_enable') is False: settingNames.remove('retraction_amount')
+		if profile.getMachineSetting('has_heated_bed') == "False": settingNames.remove('print_bed_temperature')
 		
 		# dictionary key is set to setting name, dictionary value is set to static text object with label specific to what is set in profile at that point;
 		# quality and strength panels need to override this
@@ -373,9 +377,7 @@ class simpleModePanel(wx.Panel):
 					self.materialProfileText.SetText(profile_filename)
 					self.selectedMaterial.SetLabel(profile_filename)
 					profile.putPreference('simpleModeMaterial', profile_filename)
-					print("Profile filename: %s" % profile_filename)
 					for setting, value in cp.items('profile'):
-						print("%s: %s" % (setting, value))
 						profile.putProfileSetting(setting, value)
 						settings[setting] = value
 
@@ -471,7 +473,7 @@ class simpleModePanel(wx.Panel):
 
 class MaterialSelectorFrame(wx.Frame):
 	def __init__(self):
-		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(300,230))
+		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(500,350))
 		self.list = resources.getSimpleModeMaterialsProfiles()
 		self.Brand = None
 		self.Material = None
@@ -507,7 +509,7 @@ class MaterialSelectorFrame(wx.Frame):
 			
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		hbox0 = wx.BoxSizer(wx.HORIZONTAL)
-		titles = wx.GridSizer(1, 2, 0, 60)
+		titles = wx.GridSizer(1, 2, 0, 150)
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		panel = wx.Panel(self, -1)
@@ -518,24 +520,25 @@ class MaterialSelectorFrame(wx.Frame):
 			self.brandNames.append(brands)
 			materialNames.append(materials)
 			
-		self.materialsListBox = wx.ListBox(panel, 27, wx.DefaultPosition, (110, 135), materialNames[0])			
-		self.brandsListBox = wx.ListBox(panel, 26, wx.DefaultPosition, (110, 135), self.brandNames)
+		self.materialsListBox = wx.ListBox(panel, 27, wx.DefaultPosition, (200, 200), self.sortedMaterialsProfiles['ColorFabb'], style=wx.LB_SORT)
+		self.brandsListBox = wx.ListBox(panel, 26, wx.DefaultPosition, (200, 200), self.brandNames, style=wx.LB_SORT)
 		brandsTitle = wx.StaticText(panel, 2, label = "Supplier", pos=wx.DefaultPosition)
 		materialsTitle = wx.StaticText(panel, 2, label="Name", pos=wx.DefaultPosition)
-		brandsTitle.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.NORMAL))
-		materialsTitle.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.NORMAL))
+		brandsTitle.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.NORMAL))
+		materialsTitle.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.NORMAL))
 		# highlights first brand options upon window open
 		self.brandsListBox.SetSelection(0)
-		
-		self.btn = wx.Button(panel, 25, 'Select', (150, 130), (110, -1))
+		self.btn = wx.Button(panel, 25, 'Select', pos=(150, 150), size=(110, -1))
+		self.btn.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.NORMAL))
+		self.btn.GetDefaultSize()
 		self.btn.Enable(False)
 		
-		titles.Add(brandsTitle, 2, wx.ALIGN_LEFT | wx.TOP, 5)
-		titles.Add(materialsTitle, 2, wx.TOP, 5)
-		hbox1.Add(self.brandsListBox, 26, wx.RIGHT, 10)
-		hbox1.Add(self.materialsListBox, 27, wx.LEFT, 10)
+		titles.Add(brandsTitle, 2)
+		titles.Add(materialsTitle, 2)
+		hbox1.Add(self.brandsListBox, 26, wx.RIGHT, 15)
+		hbox1.Add(self.materialsListBox, 27, wx.LEFT, 15)
 		hbox2.Add(self.btn, 26, wx.ALIGN_CENTRE)
-		vbox.Add(titles, 0, wx.ALIGN_CENTRE)
+		vbox.Add(titles, 0, wx.ALIGN_CENTER | wx.TOP, 10)
 		vbox.Add(hbox1, 0, wx.ALIGN_CENTRE)
 		vbox.Add(hbox2, 1, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, 10)
 		panel.SetSizer(vbox)
@@ -551,7 +554,6 @@ class MaterialSelectorFrame(wx.Frame):
 		if enable:
 			self.btn.Enable(True)
 	
-	# Because the file is analyzed for its 
 	def OnSelectMaterialProfile(self, event):
 		if self.Brand is None:
 			self.Brand = self.brandNames[0]
