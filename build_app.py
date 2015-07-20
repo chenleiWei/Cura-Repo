@@ -10,7 +10,7 @@ if sys.platform.startswith('darwin'):
     APP = ['Cura/cura.py']
     DATA_FILES = ['Cura/LICENSE', 'resources/images', 'resources/meshes', 'resources/example', 'resources/firmware', 'resources/locale', 'resources/machine_profiles', 'resources/quickprint', 'plugins']
     PLIST = {
-        u'CFBundleName': u'Cura',
+        u'CFBundleName': u'Cura Type A',
         u'CFBundleShortVersionString': version,
         u'CFBundleVersion': version,
         u'CFBundleIdentifier': u'com.ultimaker.Cura-'+version,
@@ -77,7 +77,7 @@ if sys.platform.startswith('darwin'):
     }
 
     setup(
-        name="Cura",
+        name="Cura Type A",
         app=APP,
         data_files=DATA_FILES,
         options={'py2app': OPTIONS},
