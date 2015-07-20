@@ -22,7 +22,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="1.3.0a0_demo1"
+export BUILD_NAME="1.3.0a0_demo3"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -37,6 +37,10 @@ if [ -z ${CURA_ENGINE_REPO_PUSHURL:-} ]; then
 fi
 if [ -z ${CURA_ENGINE_BRANCH:-} ]; then
 	CURA_ENGINE_BRANCH="legacy"
+fi
+
+if [ -z ${MATERIALS_REPO:-} ]; then
+	MATERIALS_REPO="https://Catrodigious@bitbucket.org/typeamachines/material-profiles.git"
 fi
 
 JOBS=${JOBS:-3}
@@ -184,7 +188,17 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	fi
 
     #Add cura version file (should read the version from the bundle with pyobjc, but will figure that out later)
-    echo $BUILD_NAME > scripts/darwin/dist/Cura.app/Contents/Resources/version
+    echo $BUILD_NAME > scripts/darwin/dist/Cura\ Type\ A.app/Contents/Resources/version
+    
+    # Add materials profiles
+	if test -d resources/quickprint/Materials; then
+		echo "resources/quickprint/Materials exist"
+		rm -rf resources/quickprint/Materials
+	fi
+	
+	git clone ${MATERIALS_REPO} resources/quickprint/Materials/
+	ls resources/quickprint/Materials/
+
 	rm -rf CuraEngine
 	gitClone \
 	  ${CURA_ENGINE_REPO} \
@@ -194,17 +208,17 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
     if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
 	$MAKE -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
-	cp CuraEngine/build/CuraEngine scripts/darwin/dist/Cura.app/Contents/Resources/CuraEngine
+	cp CuraEngine/build/CuraEngine scripts/darwin/dist/Cura\ Type\ A.app/Contents/Resources/CuraEngine
 
 	cd scripts/darwin
 
 	# Install QuickLook plugin
-	mkdir -p dist/Cura.app/Contents/Library/QuickLook
-	cp -a STLQuickLook.qlgenerator dist/Cura.app/Contents/Library/QuickLook/
+	mkdir -p dist/Cura\ Type\ A.app/Contents/Library/QuickLook
+	cp -a STLQuickLook.qlgenerator dist/Cura\ Type\ A.app/Contents/Library/QuickLook/
 
 	# Archive app
 	cd dist
-	$TAR cfp - Cura.app | gzip --best -c > ../../../${TARGET_DIR}.tar.gz
+	$TAR cfp - Cura\ Type\ A.app | gzip --best -c > ../../../${TARGET_DIR}.tar.gz
 	cd ..
 
 	# Create sparse image for distribution
@@ -213,7 +227,7 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	hdiutil convert DmgTemplateCompressed.dmg -format UDSP -o Cura.dmg
 	hdiutil resize -size 500m Cura.dmg.sparseimage
 	hdiutil attach Cura.dmg.sparseimage
-	cp -a dist/Cura.app /Volumes/Cura\ Type\ A
+	cp -a dist/Cura\ Type\ A.app /Volumes/Cura\ Type\ A
 	open /Volumes/Cura\ Type\ A
 	pause 'Position disk image, and then press enter to continue'
 	hdiutil detach /Volumes/Cura\ Type\ A
