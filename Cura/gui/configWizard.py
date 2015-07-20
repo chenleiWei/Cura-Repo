@@ -352,6 +352,11 @@ class MachineSelectPage(InfoPage):
 		self.Series1_Pro_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1Pro)
 		self.Series1_Legacy.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1_Legacy)
 		
+		if self.Series1_Pro_Radio.GetValue():
+			profile.putMachineSetting('has_print_bed', "True")
+		else:
+			profile.putMachineSetting('has_print_bed', "False")
+		
 	def OnNonTAM(self, e):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().nonTAM)
 	
@@ -432,7 +437,7 @@ class TAMSelectOptions(InfoPage):
 			profile.putProfileSetting('print_temperature', 185)
 		# Heated bed item population
 		if self.HeatedBedCheckBox.GetValue():
-			profile.putProfileSetting("has_heated_bed", True)
+			profile.putMachineSetting("has_heated_bed", "True")
 			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
 	;Sliced for Type A Machines Series 1
 	;Sliced at: {day} {date} {time}
@@ -456,8 +461,9 @@ class TAMSelectOptions(InfoPage):
 	G92 E0 ;zero the extruded length again
 	G1 X150 Y150  Z25 F12000 ;recenter and begin
 	G1 F{travel_speed}""")
-		if not self.HeatedBedCheckBox.GetValue():
-			profile.putProfileSetting("has_heated_bed", False)
+		else:
+			print("No heated bed")
+			profile.putMachineSetting("has_heated_bed", "False")
 			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
 	;Sliced for Type A Machines Series 1
 	;Sliced at: {day} {date} {time}
