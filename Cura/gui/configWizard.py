@@ -497,21 +497,21 @@ G90           ;absolute positioning""")
 
 class TAMReadyPage(InfoPage):
 	def __init__(self, parent):
-		super(TAMReadyPage, self).__init__(parent, _(" "))
-		typeALogo = resources.getPathForImage('TypeALogo.png')
+		super(TAMReadyPage, self).__init__(parent, _("Configuration Complete"))
+		typeALogo = resources.getPathForImage('cura_banner.png')
 		for x in range(0,3):
 			self.AddHiddenSeperator()		
 		self.AddImage(typeALogo)
-		for x in range(0,5):
+		for x in range(0,3):
 			self.AddHiddenSeperator()
-		
-		self.AddTextTitle(_("Configuration Complete"))
-		self.AddTextSubtitle(_("Cura for Type A Machines is now configured to get the most out of your 3D printer."))
-		self.AddHiddenSeperator()
+		self.AddTextTitle(_("Cura for Type A Machines is now configured"))
 		self.AddTextSubtitle(_("Select 'Next' below for a quick overview on how to use Cura."))
-		for x in range(0, 2):
-			self.AddHiddenSeperator()
+		self.AddHiddenSeperator()
 		self.skipTut = self.AddButton("Skip tutorial")
+		self.AddHiddenSeperator()
+
+
+
 		
 		self.skipTut.Bind(wx.EVT_BUTTON, self.skipTutorial)
 		
@@ -533,7 +533,7 @@ class TAMSelectMaterials(InfoPage):
 	def addText(self):
 		for x in range(0,2):
 			self.AddHiddenSeperator()
-		self.AddTextTitle("Having The Right Material Matters")
+		self.AddTextTitle("Having the right Material matters")
 		self.AddTextSubtitle("Cura for Type A Machines includes presets for the majority of materials available for 3D printing. The current material is displayed in the first panel.")
 
 class TAMSelectStrength(InfoPage):
@@ -550,7 +550,7 @@ class TAMSelectStrength(InfoPage):
 	def addText(self):
 		for x in range(0,2):
 			self.AddHiddenSeperator()
-		self.AddTextTitle("Better, Faster, Stronger")
+		self.AddTextTitle("Better, faster, stronger")
 		self.AddTextSubtitle("Different materials have different properties. Materials have varied properties depending on its strength settings.")
 		for x in range(0,2):
 			self.AddHiddenSeperator()
@@ -570,7 +570,7 @@ class TAMSelectQuality(InfoPage):
 	def addText(self):
 		for x in range(0,2):
 			self.AddHiddenSeperator()
-		self.AddTextTitle("Quality and Quantity")
+		self.AddTextTitle("Quality and quantity")
 		self.AddTextSubtitle("Quality controls how fine the resolution of your print will be. In general, higher resolution prints take longer than lower resolution prints.")
 
 class TAMSelectSupport(InfoPage):
@@ -582,7 +582,7 @@ class TAMSelectSupport(InfoPage):
 		self.AddImage(typeALogo)
 		for x in range(0,2):
 			self.AddHiddenSeperator()
-		self.AddTextTitle("Lean On Me")
+		self.AddTextTitle("Lean on me")
 		self.AddTextSubtitle("If a 3D model has an overhang, extra material may be needed for structural support. This material can be removed after printing.")
 		for x in range(0,2):
 			self.AddHiddenSeperator()		
@@ -602,7 +602,7 @@ class TAMFirstPrint(InfoPage):
 		self.AddImage(typeALogo)
 		for x in range(0,5):
 			self.AddHiddenSeperator()
-		self.AddTextTitle("Get Your Motor Running")
+		self.AddTextTitle("Get your motor running")
 		self.AddTextSubtitle("It's time to start printing.")
 		self.AddHiddenSeperator()
 		self.AddTextSubtitle("Adjust the settings to your liking or leave the default configuration as-is. Select the 'save gcode' icon in the upper-left of to save your sliced file.")
