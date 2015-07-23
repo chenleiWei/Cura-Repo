@@ -1,4 +1,4 @@
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+
 
 import wx
 import ConfigParser as configparser
@@ -7,11 +7,11 @@ import itertools
 from itertools import chain
 import os
 import re
-import os.path
+
 from Cura.util import profile
 from Cura.gui import sceneView
 from Cura.util import resources		
-from wx.lib.pubsub import pub
+from wx.lib.pubsub import Publisher as pub
 
 
 class simpleModePanel(wx.Panel):
@@ -91,12 +91,12 @@ class simpleModePanel(wx.Panel):
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		for button, path in self.quality_buttonslist.items():
 			basename = os.path.splitext(os.path.basename(path))[0]
-			if basename == "Final":
+			if basename == "final":
 				final = button
-			elif basename == "Normal":
+			elif basename == "normal":
 				normal = button
 				normal.SetValue(True)
-			elif basename == "Draft":
+			elif basename == "draft":
 				draft = button
 		boxsizer.Add(final)
 		boxsizer.Add(normal)
