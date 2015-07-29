@@ -520,8 +520,11 @@ class MaterialSelectorFrame(wx.Frame):
 			self.brandNames.append(brands)
 			materialNames.append(materials)
 			
-		self.materialsListBox = wx.ListBox(panel, 27, wx.DefaultPosition, (200, 200), self.sortedMaterialsProfiles['ColorFabb'], style=wx.LB_SORT)
-		self.brandsListBox = wx.ListBox(panel, 26, wx.DefaultPosition, (200, 200), self.brandNames, style=wx.LB_SORT)
+		self.materialsListBox = wx.ListBox(panel, 27, wx.DefaultPosition, (200, 200), style=wx.LB_SORT)
+		self.brandsListBox = wx.ListBox(panel, 26, wx.DefaultPosition, (200, 200), choices = self.brandNames, style=wx.LB_SORT)
+		self.brandsListBox.SetSelection(0)
+		self.Brand = self.brandsListBox.GetString(0)
+		self.materialsListBox.Set(self.sortedMaterialsProfiles[self.Brand])
 		brandsTitle = wx.StaticText(panel, 2, label = "Supplier", pos=wx.DefaultPosition)
 		materialsTitle = wx.StaticText(panel, 2, label="Name", pos=wx.DefaultPosition)
 		brandsTitle.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.NORMAL))
