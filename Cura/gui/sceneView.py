@@ -342,7 +342,11 @@ class SceneView(openglGui.glGuiPanel):
 			return
 		if not self._engine.getResult().isFinished():
 			return
-		dlg=wx.FileDialog(self, _("Save toolpath"), os.path.dirname(profile.getPreference('lastFile')), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+		# prevents user from saving in private resources folder
+		if profile.getPreference('lastFile') is not os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'firstPrintCone.stl')):
+			dlg=wx.FileDialog(self, _("Save GCode"), os.path.dirname(profile.getPreference('initialFile')), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+		else: 
+			dlg=wx.FileDialog(self, _("Save GCode"), os.path.dirname(profile.getPreference('lastFile')), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
 		filename = self._scene._objectList[0].getName() + profile.getGCodeExtension()
 		dlg.SetFilename(filename)
 		dlg.SetWildcard('Toolpath (*%s)|*%s;*%s' % (profile.getGCodeExtension(), profile.getGCodeExtension(), profile.getGCodeExtension()[0:2]))
