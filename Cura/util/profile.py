@@ -479,23 +479,11 @@ setting('postSwitchExtruder.gcode', """;Switch between the current extruder and 
 ;This code is added after the T(n)
 """, str, 'alteration', 'alteration')
 
-setting('startMode', 'Simple', ['Simple', 'Normal'], 'preference', 'hidden')
-setting('simpleModeProfile', '2_normal', str, 'preference', 'hidden')
-setting('simpleModeMaterial', 'Generic_PLA', str, 'preference', 'hidden')
-setting('simpleModeStrength', 'Medium', str, 'preference', 'hidden')
-setting('simpleModeQuality', 'Normal', str, 'preference', 'hidden')
-setting('oneAtATime', 'True', bool, 'preference', 'hidden')
-setting('lastFile', os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'firstPrintCone.stl')), str, 'preference', 'hidden')
-setting('save_profile', 'False', bool, 'preference', 'hidden').setLabel(_("Save profile on slice"), _("When slicing save the profile as [stl_file]_profile.ini next to the model."))
-setting('filament_cost_kg', '0', float, 'preference', 'hidden').setLabel(_("Cost (price/kg)"), _("Cost of your filament per kg, to estimate the cost of the final print."))
-setting('filament_cost_meter', '0', float, 'preference', 'hidden').setLabel(_("Cost (price/m)"), _("Cost of your filament per meter, to estimate the cost of the final print."))
-setting('auto_detect_sd', 'True', bool, 'preference', 'hidden').setLabel(_("Auto detect SD card drive"), _("Auto detect the SD card. You can disable this because on some systems external hard-drives or USB sticks are detected as SD card."))
-
 def _getMyDocumentsFolder():
 	if platform.system() == "Windows":
 		path = os.path.expanduser('~/Documents')
 	else:
-		path = os.path.expanduser('~/')
+		path = os.path.expanduser('~/Documents')
 	if not os.path.exists(path):
 		path = ''
 	try:
@@ -504,6 +492,18 @@ def _getMyDocumentsFolder():
 		path = ''
 	return path
 
+setting('startMode', 'Simple', ['Simple', 'Normal'], 'preference', 'hidden')
+setting('simpleModeProfile', '2_normal', str, 'preference', 'hidden')
+setting('simpleModeMaterial', 'Generic_PLA', str, 'preference', 'hidden')
+setting('simpleModeStrength', 'Medium', str, 'preference', 'hidden')
+setting('simpleModeQuality', 'Normal', str, 'preference', 'hidden')
+setting('oneAtATime', 'True', bool, 'preference', 'hidden')
+setting('lastFile', os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'firstPrintCone.stl')), str, 'preference', 'hidden')
+setting('initialFile', _getMyDocumentsFolder, 'str', 'preference', 'hidden')
+setting('save_profile', 'False', bool, 'preference', 'hidden').setLabel(_("Save profile on slice"), _("When slicing save the profile as [stl_file]_profile.ini next to the model."))
+setting('filament_cost_kg', '0', float, 'preference', 'hidden').setLabel(_("Cost (price/kg)"), _("Cost of your filament per kg, to estimate the cost of the final print."))
+setting('filament_cost_meter', '0', float, 'preference', 'hidden').setLabel(_("Cost (price/m)"), _("Cost of your filament per meter, to estimate the cost of the final print."))
+setting('auto_detect_sd', 'True', bool, 'preference', 'hidden').setLabel(_("Auto detect SD card drive"), _("Auto detect the SD card. You can disable this because on some systems external hard-drives or USB sticks are detected as SD card."))
 setting('sdcard_rootfolder', _getMyDocumentsFolder(), str, 'preference', 'hidden').setLabel(_("Base folder to replicate on SD card"), _("The specified folder will be used as a base path. Any gcode generated from object coming from within that folder will be automatically saved on the SD card at the same sub-folder. Any object coming from outside of this path will save the gcode on the root folder of the card."))
 setting('check_for_updates', 'True', bool, 'preference', 'hidden').setLabel(_("Check for updates"), _("Check for newer versions of Cura on startup"))
 setting('submit_slice_information', 'False', bool, 'preference', 'hidden').setLabel(_("Send usage statistics"), _("Submit anonymous usage information to improve future versions of Cura"))
