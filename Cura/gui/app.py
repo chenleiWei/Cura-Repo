@@ -137,15 +137,15 @@ class CuraApp(wx.App):
 				self.splash.Show(False)
 			configWizard.ConfigWizard()
 
-		if profile.getPreference('check_for_updates') == 'True':
-			newVersion = version.checkForNewerVersion()
-			if newVersion is not None:
-				if self.splash is not None:
-					self.splash.Show(False)
-				if wx.MessageBox(_("A new version of Cura is available, would you like to download?"), _("New version available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
-					webbrowser.open(newVersion)
-					return
-		if profile.getMachineSetting('machine_name') == '':
+	#	if profile.getPreference('check_for_updates') == 'True':
+	#		newVersion = version.checkForNewerVersion()
+	#		if newVersion is not None:
+	#			if self.splash is not None:
+	#				self.splash.Show(False)
+	#			if wx.MessageBox(_("A new version of Cura is available, would you like to download?"), _("New version available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
+	#				webbrowser.open(newVersion)
+	#				return
+	#	if profile.getMachineSetting('machine_name') == '':
 			return
 		self.mainWindow = mainWindow.mainWindow()
 		if self.splash is not None:
@@ -153,9 +153,9 @@ class CuraApp(wx.App):
 		self.SetTopWindow(self.mainWindow)
 		self.mainWindow.Show()
 		self.mainWindow.OnDropFiles(self.loadFiles)
-		if profile.getPreference('last_run_version') != version.getVersion(False):
-			profile.putPreference('last_run_version', version.getVersion(False))
-			newVersionDialog.newVersionDialog().Show()
+	#	if profile.getPreference('last_run_version') != version.getVersion(False):
+	#		profile.putPreference('last_run_version', version.getVersion(False))
+		newVersionDialog.newVersionDialog().Show()
 
 		setFullScreenCapable(self.mainWindow)
 
