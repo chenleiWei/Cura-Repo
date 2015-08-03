@@ -136,7 +136,7 @@ class CuraApp(wx.App):
 			if self.splash is not None:
 				self.splash.Show(False)
 			configWizard.ConfigWizard()
-
+		"""
 		if profile.getPreference('check_for_updates') == 'True':
 			newVersion = version.checkForNewerVersion()
 			if newVersion is not None:
@@ -145,8 +145,10 @@ class CuraApp(wx.App):
 				if wx.MessageBox(_("A new version of Cura is available, would you like to download?"), _("New version available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
 					webbrowser.open(newVersion)
 					return
+		"""
 		if profile.getMachineSetting('machine_name') == '':
 			return
+		
 		self.mainWindow = mainWindow.mainWindow()
 		if self.splash is not None:
 			self.splash.Show(False)
@@ -155,8 +157,13 @@ class CuraApp(wx.App):
 		self.mainWindow.OnDropFiles(self.loadFiles)
 		if profile.getPreference('last_run_version') != version.getVersion(False):
 			profile.putPreference('last_run_version', version.getVersion(False))
-			newVersionDialog.newVersionDialog().Show()
-
+			newVersion = newVersionDialog.newVersionDialog()
+			newVersion.Show()
+			if newVersion.ShowModal() == wx.ID_OK:
+				print 'closed'
+			newVersion.Destroy()
+			
+			
 		setFullScreenCapable(self.mainWindow)
 
 		if sys.platform.startswith('darwin'):
