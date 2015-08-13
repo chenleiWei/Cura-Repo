@@ -1,5 +1,3 @@
-
-
 import wx
 from PubSub import pub
 import ConfigParser as configparser
@@ -301,6 +299,7 @@ class simpleModePanel(wx.Panel):
 		self.infoPanelValueCheck(profileSectionData)
 		
 		
+		self._callback()
 		# profile.putPreference(file_basename)
 		
 	def infoPanelValueCheck(self, data):
@@ -347,6 +346,10 @@ class simpleModePanel(wx.Panel):
 		strengthSettings = {}
 		qualitySettings = {}
 		materialSettings = {}
+		supplier = None
+		mat = None
+		supplierToCompare = None
+		materialToCompare = None
 		
 		# Raft/Brim/None
 		for name, button in self.platformAdhesionOptions.items():
@@ -372,16 +375,29 @@ class simpleModePanel(wx.Panel):
 					qualitySettings = self.getSectionItems(path, 'profile')
 					
 		# Materials
-		selectedMat =  self.selectedMaterial.GetLabel()
-		for material in materialsDirectory:
-			basename = os.path.splitext(os.path.basename(material))[0]
-			if basename == selectedMat: 
-				materialSettings = self.getSectionItems(material, 'profile')
+		selectedMat = self.selectedMaterial.GetLabel()
+		print selectedMat
 				
+		supplier, mat = selectedMat.split()
+		print "Supplier: %s" % supplier
+		print "Material: %s" % mat
+		
+		for material in materialsDirectory:
+			cp = configparser.ConfigParser()
+			cp.read(material)
+			if cp.has_section('info'):
+				supplierToCompare = cp.get('info', 'manufacturer')
+				materialToCompare = cp.get('info', 'name')
+				if supplier is not None and mat is not None:
+					if supplier.lower() == supplierToCompare.lower() and mat.lower() == materialToCompare.lower():
+						print "Manu match"
+						materialSettings = self.getSectionItems(material, 'profile')
+		
 		materialSettings.update(supportSettings)
 		materialSettings.update(strengthSettings)
 		materialSettings.update(qualitySettings)
 		
+					
 		return materialSettings
 		
 	def updateProfileToControls(self):
@@ -392,6 +408,7 @@ class MaterialSelectorFrame(wx.Frame):
 		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(550,300))
 		materialsDirectory = resources.getSimpleModeMaterialsProfiles()
 		self.matProfsDict = self.createMaterialDict(materialsDirectory)
+		self.chosenProfilePath = None
 		self.selectedBrand = None
 		manufctrs = []
 		mats = []
@@ -449,8 +466,10 @@ class MaterialSelectorFrame(wx.Frame):
 		
 	
 	def closeWindow(self, e):
+		if self.chosenProfilePath is not None:
+			pub.sendMessage('matProf.update', path=self.chosenProfilePath)
+			pub.sendMessage('app.refresh', e=True)
 		self.Close()
-		pub.sendMessage('app.refresh', e=True)
 
 	# each profile is formated as:	manufacturer__material_base_polymer
 	def createMaterialDict(self, files):
@@ -484,12 +503,12 @@ class MaterialSelectorFrame(wx.Frame):
 					newMatsList.append(material)
 
 		# when a brand is selected, the materials listbox is updated to reflect materials under
-		# the selected brand
-		pub.sendMessage('app.refresh', e=True)		
+		# the selected brand	
 		self.matListBox.Set(newMatsList)
-		self.OnEnable(False)		
+		self.OnEnable(False)
+				
 	def materialSelected(self, event):
 		selectedMaterial = event.GetString()
-		chosenProfilePath = self.matProfsDict.setdefault(self.selectedBrand, selectedMaterial)[selectedMaterial]
-		pub.sendMessage('matProf.update', path=chosenProfilePath)
+		self.chosenProfilePath = self.matProfsDict.setdefault(self.selectedBrand, selectedMaterial)[selectedMaterial]
+		
 		self.OnEnable(True)
