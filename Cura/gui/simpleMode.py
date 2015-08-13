@@ -267,23 +267,39 @@ class simpleModePanel(wx.Panel):
 	# Communicates w/MaterialSelectorFrame via pubsub subscriptions/messages
 	def displayAndLoadMaterialData(self, path):
 		# material profile information
+		strengthSettings = {}
+		qualitySettings = {}
 		infoSection = self.getSectionItems(path, 'info')
 		matName = infoSection['name']
 		matManufacturer = infoSection['manufacturer']
 		materialLoaded = matManufacturer + " " + matName
 		# informs user in UI which profile is loaded
-		
+	
 		self.materialProfileText.SetText(materialLoaded)
 		self.selectedMaterial.SetLabel(materialLoaded)
+		profile.putPreference('simpleModeMaterial', materialLoaded)
 		
-		# profile setting information
+		# profile setting information update + info panel update
 		profileSectionData = self.getSectionItems(path, 'profile')
-		self.loadData(profileSectionData, 'profile')
 		
+
 		# also remember to load the UI info after loading the material data
+		# Strength key-value pairs
+		for button, info in self.strengthOptions.items():
+			if button.GetValue():
+				for name, path in info.items():
+					strengthSettings = self.getSectionItems(path, 'profile')
+				profileSectionData.update(strengthSettings)
+		# Quality key-value pairs 
+		for button, info in self.qualityOptions.items():
+			if button.GetValue():
+				for name, path in info.items():
+					qualitySettings = self.getSectionItems(path, 'profile')
+				profileSectionData.update(qualitySettings)
+		# Make sure that the quality and strength items override the material values
+		self.loadData(profileSectionData, profile)
+		self.infoPanelValueCheck(profileSectionData)
 		
-		base_filename = os.path.splitext(os.path.basename(path))[0]
-		profile.putPreference('simpleModeMaterial', base_filename)
 		
 		# profile.putPreference(file_basename)
 		
@@ -291,11 +307,13 @@ class simpleModePanel(wx.Panel):
 		degree_sign= u'\N{DEGREE SIGN}'
 		temperatureUnit = degree_sign + "C" 
 		infoPanelSettingsList = {"layer_height": "mm", "print_temperature": temperatureUnit, "print_bed_temperature": temperatureUnit, "wall_thickness": "mm", "fill_density":"%"}
-		
+
 		for setting, unit in infoPanelSettingsList.items():
 			for name, value in data.items():
 				if name == setting:
-					self.infoPanelSettingsList[name].SetLabel(str(value) + str(unit))
+					self.infoPanelSettingsList[name].SetLabel(str(value) + unit)
+
+
 							
 	def getSectionItems(self, path, section):
 
@@ -451,7 +469,7 @@ class MaterialSelectorFrame(wx.Frame):
 		return matProfsDict
 
 	def OnEnable(self, enable):
-			self.closeButton.Enable(enable)
+		self.closeButton.Enable(enable)
 	
 
 	def brandSelected(self, event):
@@ -469,8 +487,7 @@ class MaterialSelectorFrame(wx.Frame):
 		# the selected brand
 		pub.sendMessage('app.refresh', e=True)		
 		self.matListBox.Set(newMatsList)
-		self.OnEnable(False)
-				
+		self.OnEnable(False)		
 	def materialSelected(self, event):
 		selectedMaterial = event.GetString()
 		chosenProfilePath = self.matProfsDict.setdefault(self.selectedBrand, selectedMaterial)[selectedMaterial]
