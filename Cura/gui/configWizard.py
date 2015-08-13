@@ -145,11 +145,11 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextDescription(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=13.5, family = wx.DEFAULT,
+		font = wx.Font(pointSize=10, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(300)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_LEFT)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_LEFT | wx.EXPAND)
 		self.rowNr += 1
 		return text
 		
