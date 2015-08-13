@@ -1,6 +1,7 @@
 
 
 import wx
+from PubSub import pub
 import ConfigParser as configparser
 from collections import defaultdict
 import itertools
@@ -10,8 +11,7 @@ import re
 
 from Cura.util import profile
 from Cura.gui import sceneView
-from Cura.util import resources		
-from wx.lib.pubsub import Publisher as pub
+from Cura.util import resources
 
 
 class simpleModePanel(wx.Panel):
@@ -20,7 +20,7 @@ class simpleModePanel(wx.Panel):
 		super(simpleModePanel, self).__init__(parent)
 		self._callback = callback
 		self.profileSettingsList = {}
-		self.materialProfileText = wx.TextDataObject(text=profile.getPreference("simpleModeMaterial"))
+		self.materialProfileText = wx.TextDataObject(profile.getPreference('simpleModeMaterial'))
 		self.lastOpenedFileName = "No File Currently Open"
 		# Panel 0: Last File Loaded
 		currentFilePanel = wx.Panel(self)
@@ -36,7 +36,8 @@ class simpleModePanel(wx.Panel):
 
 		pub.subscribe(self.displayAndLoadMaterialData, 'matProf.update')
 		pub.subscribe(self.refresh, 'app.refresh')
-	#	pub.subscribe(self.updateInfoPanelData, 'data.update')
+		#	pub.subscribe(self.updateInfoPanelData, 'data.update')
+
 		
 		# Panel 2: Select Quality
 		printQualityPanel = wx.Panel(self)
@@ -179,7 +180,6 @@ class simpleModePanel(wx.Panel):
 
 		self.Bind(wx.EVT_BUTTON, self.OnSelectBtn, id=4)
 	
-	
 	def refresh(self, e):
 		self._callback()
 	
@@ -193,7 +193,6 @@ class simpleModePanel(wx.Panel):
 				name = cp.get('info', 'name')
 				button = wx.RadioButton(panel, -1, name)
 				dataDict.setdefault(button, {})[name] = filePath
-		print "\n DataDict: %s\n" % dataDict
 		return dataDict
 
 	def strengthSelected(self, e):
@@ -201,7 +200,6 @@ class simpleModePanel(wx.Panel):
 			if button == e.GetEventObject():
 				for name, path in info.items():
 					self.updateInfo(path)
-			
 	
 	def qualitySelected(self, e):
 		for button, info in self.qualityOptions.items():
@@ -209,7 +207,6 @@ class simpleModePanel(wx.Panel):
 				for name, path in info.items():
 					self.updateInfo(path)
 			
-	
 	def updateInfo(self, path):
 		settings = self.getSectionItems(path, 'profile')
 		self.loadData(settings, 'info')
@@ -217,17 +214,14 @@ class simpleModePanel(wx.Panel):
 		self.infoPanelValueCheck(settings)
 		
 		self._callback()
-
-	def closeMaterialsWindow(self, e):
-			print("Closing.")
-			self.frame.Destroy()
 		
 	def loadData(self, data, profileType):
 		for setting, value in data.items():
 			if profileType == 'preference':
 				profile.putPreference(setting, value)
 			elif profileType == 'profile':
-				profile.putProfileSetting(setting, value)		
+				profile.putProfileSetting(setting, value)
+		self._callback()
 		
 	def updateAdhesion(self, options):
 		for name, button in options.items():
@@ -276,8 +270,9 @@ class simpleModePanel(wx.Panel):
 		infoSection = self.getSectionItems(path, 'info')
 		matName = infoSection['name']
 		matManufacturer = infoSection['manufacturer']
-		materialLoaded = matManufacturer + "__" + matName
+		materialLoaded = matManufacturer + " " + matName
 		# informs user in UI which profile is loaded
+		
 		self.materialProfileText.SetText(materialLoaded)
 		self.selectedMaterial.SetLabel(materialLoaded)
 		
@@ -291,8 +286,6 @@ class simpleModePanel(wx.Panel):
 		profile.putPreference('simpleModeMaterial', base_filename)
 		
 		# profile.putPreference(file_basename)
-		
-		self._callback()
 		
 	def infoPanelValueCheck(self, data):
 		degree_sign= u'\N{DEGREE SIGN}'
@@ -326,9 +319,8 @@ class simpleModePanel(wx.Panel):
 				self.currentFileName.SetLabel(filename)
 		
 	def OnSelectBtn(self, event):
-		self.frame = MaterialSelectorFrame()
-		self.frame.Centre()
-		self.frame.Show(True)
+		frame = MaterialSelectorFrame()
+		frame.Show(True)
 
 	def getSettingOverrides(self):
 		self.displayLoadedFileName()
@@ -361,7 +353,6 @@ class simpleModePanel(wx.Panel):
 				for name, path in info.items():
 					qualitySettings = self.getSectionItems(path, 'profile')
 					
-		print("\n\nQuality Overrides: %s\n" % qualitySettings)
 		# Materials
 		selectedMat =  self.selectedMaterial.GetLabel()
 		for material in materialsDirectory:
@@ -372,18 +363,15 @@ class simpleModePanel(wx.Panel):
 		materialSettings.update(supportSettings)
 		materialSettings.update(strengthSettings)
 		materialSettings.update(qualitySettings)
-		print materialSettings
 		
 		return materialSettings
-		
 		
 	def updateProfileToControls(self):
 		pass
 		
-
 class MaterialSelectorFrame(wx.Frame):
 	def __init__(self):
-		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(500,350))
+		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(550,300))
 		materialsDirectory = resources.getSimpleModeMaterialsProfiles()
 		self.matProfsDict = self.createMaterialDict(materialsDirectory)
 		self.selectedBrand = None
@@ -399,12 +387,21 @@ class MaterialSelectorFrame(wx.Frame):
 		mainVBox = wx.BoxSizer(wx.VERTICAL)
 		listBoxes = wx.BoxSizer(wx.HORIZONTAL)
 		closeBtnBox = wx.BoxSizer(wx.HORIZONTAL)
+		titles = wx.GridSizer(1, 2, 0, 150)	
 		listBoxPanel = wx.Panel(self, -1)
-		closeButton = wx.Button(listBoxPanel, 9, 'Select', pos=(150, 150))
+		self.closeButton = wx.Button(listBoxPanel, 9, 'Select', pos=(150, 100))
+		self.closeButton.Enable(False)
 		
+
+		brandsTitle = wx.StaticText(listBoxPanel, 2, label = "Supplier", pos=wx.DefaultPosition)
+		materialsTitle = wx.StaticText(listBoxPanel, 2, label="Name", pos=wx.DefaultPosition)
+		brandsTitle.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.NORMAL))
+		materialsTitle.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.NORMAL))
+
+
 		# listboxes
-		self.manufacturerListbox = wx.ListBox(listBoxPanel, 10, wx.DefaultPosition, size=(200, 200), choices=manufctrs, style=wx.LB_SORT)
-		self.matListBox = wx.ListBox(listBoxPanel, 11, wx.DefaultPosition, size=(200, 200), style=wx.LB_SORT)
+		self.manufacturerListbox = wx.ListBox(listBoxPanel, 10, wx.DefaultPosition, size=(100, 100), choices=manufctrs, style=wx.LB_SORT)
+		self.matListBox = wx.ListBox(listBoxPanel, 11, wx.DefaultPosition, size=(100, 100), style=wx.LB_SORT)
 		self.manufacturerListbox.SetSelection(0)
 		matchingMaterials = []
 		
@@ -413,28 +410,30 @@ class MaterialSelectorFrame(wx.Frame):
 		self.selectedBrand = self.manufacturerListbox.GetString(index)
 		for manufacturer, materials in self.matProfsDict.items():
 			if manufacturer == self.selectedBrand:
-				print("Manufacturer: %s " % manufacturer)
 				for material, path in materials.items():
 					matchingMaterials.append(material)
 					
 		self.matListBox.Set(matchingMaterials)
 		
+		titles.Add(brandsTitle, 2, wx.LEFT, 20)
+		titles.Add(materialsTitle, 2, wx.LEFT, 17)
 		listBoxes.Add(self.manufacturerListbox, wx.RIGHT, 15)
-		listBoxes.Add(self.matListBox, wx.LEFT, wx.LEFT, 15)
-		closeBtnBox.Add(closeButton, 9, wx.ALIGN_CENTRE)
+		listBoxes.Add(self.matListBox, wx.LEFT, wx.LEFT, 30)
+		closeBtnBox.Add(self.closeButton, 9, wx.ALIGN_CENTRE)
+		mainVBox.Add(titles, 0, wx.ALIGN_CENTER | wx.TOP, 10)
 		mainVBox.Add(listBoxes, 0, wx.ALIGN_CENTRE)
 		mainVBox.Add(closeBtnBox, 1, wx.ALIGN_CENTRE | wx.ALL, 10)
 		listBoxPanel.SetSizer(mainVBox)
 		
 		self.manufacturerListbox.Bind(wx.EVT_LISTBOX, self.brandSelected, id=10)
 		self.matListBox.Bind(wx.EVT_LISTBOX, self.materialSelected, id=11)
-		closeButton.Bind(wx.EVT_BUTTON, self.closeWindow, id=9)
+		self.closeButton.Bind(wx.EVT_BUTTON, self.closeWindow, id=9)
 		
 	
 	def closeWindow(self, e):
-		pub.sendMessage('app.refresh', e=True)
 		self.Close()
-	
+		pub.sendMessage('app.refresh', e=True)
+
 	# each profile is formated as:	manufacturer__material_base_polymer
 	def createMaterialDict(self, files):
 		data = []
@@ -451,6 +450,10 @@ class MaterialSelectorFrame(wx.Frame):
 				
 		return matProfsDict
 
+	def OnEnable(self, enable):
+			self.closeButton.Enable(enable)
+	
+
 	def brandSelected(self, event):
 		selectedBrand = event.GetString()
 		self.selectedBrand = selectedBrand
@@ -461,14 +464,15 @@ class MaterialSelectorFrame(wx.Frame):
 			if manufacturer == selectedBrand: 
 				for material, path in materials.items():
 					newMatsList.append(material)
-					print("Material: %s" % material)
+
 		# when a brand is selected, the materials listbox is updated to reflect materials under
 		# the selected brand
 		pub.sendMessage('app.refresh', e=True)		
 		self.matListBox.Set(newMatsList)
+		self.OnEnable(False)
 				
 	def materialSelected(self, event):
 		selectedMaterial = event.GetString()
 		chosenProfilePath = self.matProfsDict.setdefault(self.selectedBrand, selectedMaterial)[selectedMaterial]
-		
 		pub.sendMessage('matProf.update', path=chosenProfilePath)
+		self.OnEnable(True)
