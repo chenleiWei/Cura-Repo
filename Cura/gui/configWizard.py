@@ -117,7 +117,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.SetSizer(sizer)
 
 		title = wx.StaticText(self, -1, title)
-		title.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.BOLD))
+		title.SetFont(wx.Font(16, wx.SWISS, wx.NORMAL, wx.BOLD))
 		sizer.Add(title, pos=(0, 0), span=(1, 2), flag=wx.ALIGN_CENTRE | wx.ALL)
 		sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 		sizer.AddGrowableCol(1)
@@ -129,13 +129,22 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=11, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(500)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT | wx.EXPAND)
+		self.rowNr += 1
+		return text
+
+	def AddTextTip(self,info):
+		text = wx.StaticText(self, -1, info)
+		font = wx.Font(pointSize=10, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
+		text.SetFont(font)
+		text.Wrap(500)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag= wx.EXPAND | wx.ALL)
 		self.rowNr += 1
 		return text
 		
 	def AddTextSubtitle(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=16, family = wx.DEFAULT,
+		font = wx.Font(pointSize=12, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(500)
@@ -145,7 +154,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextDescription(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=10, family = wx.DEFAULT,
+		font = wx.Font(pointSize=12, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(300)
@@ -155,7 +164,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTitle(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=24, family = wx.DEFAULT,
+		font = wx.Font(pointSize=18, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.BOLD)
 		text.SetFont(font)
 		text.Wrap(500)
@@ -213,10 +222,10 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return check
 
 	def AddButton(self, label):
-		button = wx.Button(self, -1, label, style=wx.ALIGN_CENTER_HORIZONTAL)
+		button = wx.Button(self, -1, label, style=wx.LEFT)
 		font = wx.Font(pointSize=16, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		button.SetFont(font)
-		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT,  border=200)
+		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT,  border=155)
 		self.rowNr += 1
 		return button
 
@@ -507,7 +516,7 @@ class TAMReadyPage(InfoPage):
 		self.AddTextTitle(_("Cura for Type A Machines is now configured"))
 		self.AddTextSubtitle(_("Select 'Next' below for a quick overview on how to use Cura."))
 		self.AddHiddenSeperator()
-		self.skipTut = self.AddButton("Skip tutorial")
+		self.skipTut = self.AddButton("Skip tutorial ")
 		self.AddHiddenSeperator()
 
 
@@ -552,10 +561,9 @@ class TAMSelectStrength(InfoPage):
 			self.AddHiddenSeperator()
 		self.AddTextTitle("Better, faster, stronger")
 		self.AddTextSubtitle("Different materials have different properties. Materials have varied properties depending on its strength settings.")
-		for x in range(0,2):
+		for x in range(0,6):
 			self.AddHiddenSeperator()
-			
-		self.AddText("Tip: Selecting low quality and high strength will result in the strongest part possible for a given material.")
+		self.AddTextTip("Tip: Selecting low quality and high strength will result in the strongest part possible for a given material.")
 
 class TAMSelectQuality(InfoPage):
 	def __init__(self, parent):
@@ -580,18 +588,14 @@ class TAMSelectSupport(InfoPage):
 			self.AddHiddenSeperator()
 		typeALogo = resources.getPathForImage('3sa.png')
 		self.AddImage(typeALogo)
-		for x in range(0,2):
-			self.AddHiddenSeperator()
+		self.AddHiddenSeperator()
 		self.AddTextTitle("Lean on me")
 		self.AddTextSubtitle("If a 3D model has an overhang, extra material may be needed for structural support. This material can be removed after printing.")
-		for x in range(0,2):
-			self.AddHiddenSeperator()		
+		self.AddHiddenSeperator()		
 		self.AddTextSubtitle("A raft or brim helps the print adhere to the build plate. If you do not wish to have print support, please uncheck this option.")
-	
-		for x in range(0,2):
-			self.AddHiddenSeperator()
-			
-		self.AddText("Tip: You can preview the support materials by selecting the 'Layers' icon within the 'View Mode' icon located in the upper-right corner of the window.")
+		for x in range(0, 2):
+			self.AddHiddenSeperator()	
+		self.AddTextTip("Tip: You can preview the support materials by selecting the 'Layers' icon within the 'View Mode' icon located in the upper-right corner of the window.")
 		
 class TAMFirstPrint(InfoPage):
 	def __init__(self, parent):
