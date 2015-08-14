@@ -17,7 +17,11 @@ class simpleModePanel(wx.Panel):
 	def __init__(self, parent, callback):
 		super(simpleModePanel, self).__init__(parent)
 		self._callback = callback
+		self.matManufacturer = profile.getPreference('simpleModeMaterialSupplier')
+		self.matName = profile.getPreference('simpleModeMaterialName')
 		self.profileSettingsList = {}
+		print(profile.getPreference('simpleModeMaterial'))
+		print(profile.getPreference('simpleModeQuality'))
 		self.materialProfileText = wx.TextDataObject(profile.getPreference('simpleModeMaterial'))
 		self.lastOpenedFileName = "No File Currently Open"
 		# Panel 0: Last File Loaded
@@ -158,11 +162,11 @@ class simpleModePanel(wx.Panel):
 				if settingOrder[item] == settingName:
 					displayName = wx.StaticText(infoPanel, -1, label = (settingName + ": "))
 					gridsizer.Add(displayName, flag=wx.ALIGN_LEFT)
-					gridsizer.Add(value, wx.ALIGN_LEFT, wx.BOTTOM, border=0)
+					gridsizer.Add(value, wx.ALIGN_LEFT, wx.RIGHT | wx.EXPAND, border=2)
 
 		boxsizer.Add(gridsizer)
 		infoPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
-		infoPanel.GetSizer().Add(boxsizer)
+		infoPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(infoPanel, (6,0))
 		
 		for name, button in strengthButtons.items():
@@ -176,7 +180,7 @@ class simpleModePanel(wx.Panel):
 			
 		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self.updateSupport(self.printSupport), self._callback())
 
-		self.Bind(wx.EVT_BUTTON, self.OnSelectBtn, id=4)
+		self.materialLoadButton.Bind(wx.EVT_BUTTON, self.OnSelectBtn, id=4)
 	
 	def refresh(self, e):
 		self._callback()
@@ -268,13 +272,15 @@ class simpleModePanel(wx.Panel):
 		strengthSettings = {}
 		qualitySettings = {}
 		infoSection = self.getSectionItems(path, 'info')
-		matName = infoSection['name']
-		matManufacturer = infoSection['manufacturer']
-		materialLoaded = matManufacturer + " " + matName
+		self.matName = infoSection['name']
+		self.matManufacturer = infoSection['manufacturer']
+		materialLoaded = self.matManufacturer + " " + self.matName
 		# informs user in UI which profile is loaded
 	
 		self.materialProfileText.SetText(materialLoaded)
 		self.selectedMaterial.SetLabel(materialLoaded)
+		profile.putPreference('simpleModeMaterialSupplier', self.matManufacturer)
+		profile.putPreference('simpleModeMaterialName', self.matName)
 		profile.putPreference('simpleModeMaterial', materialLoaded)
 		
 		# profile setting information update + info panel update
@@ -346,8 +352,6 @@ class simpleModePanel(wx.Panel):
 		strengthSettings = {}
 		qualitySettings = {}
 		materialSettings = {}
-		supplier = None
-		mat = None
 		supplierToCompare = None
 		materialToCompare = None
 		
@@ -377,10 +381,7 @@ class simpleModePanel(wx.Panel):
 		# Materials
 		selectedMat = self.selectedMaterial.GetLabel()
 		print selectedMat
-				
-		supplier, mat = selectedMat.split()
-		print "Supplier: %s" % supplier
-		print "Material: %s" % mat
+		
 		
 		for material in materialsDirectory:
 			cp = configparser.ConfigParser()
@@ -388,9 +389,8 @@ class simpleModePanel(wx.Panel):
 			if cp.has_section('info'):
 				supplierToCompare = cp.get('info', 'manufacturer')
 				materialToCompare = cp.get('info', 'name')
-				if supplier is not None and mat is not None:
-					if supplier.lower() == supplierToCompare.lower() and mat.lower() == materialToCompare.lower():
-						print "Manu match"
+				if self.matManufacturer is not None and self.matName is not None:
+					if self.matManufacturer.lower() == supplierToCompare.lower() and self.matName.lower() == materialToCompare.lower():
 						materialSettings = self.getSectionItems(material, 'profile')
 		
 		materialSettings.update(supportSettings)
@@ -405,7 +405,7 @@ class simpleModePanel(wx.Panel):
 		
 class MaterialSelectorFrame(wx.Frame):
 	def __init__(self):
-		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(550,300))
+		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(550,300), style=wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
 		materialsDirectory = resources.getSimpleModeMaterialsProfiles()
 		self.matProfsDict = self.createMaterialDict(materialsDirectory)
 		self.chosenProfilePath = None
