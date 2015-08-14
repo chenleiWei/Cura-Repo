@@ -76,7 +76,7 @@ class simpleModePanel(wx.Panel):
 		sb = wx.StaticBox(materialSelectorPanel, label=_("Material Profile"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		gridsizer = wx.FlexGridSizer(1,1,0,0)
-		gridsizer.Add(self.selectedMaterial)
+		gridsizer.Add(self.selectedMaterial, flag=wx.EXPAND)
 		gridsizer.Add(self.materialLoadButton)
 		boxsizer.Add(gridsizer)
 		materialSelectorPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
