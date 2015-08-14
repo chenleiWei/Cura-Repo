@@ -7,7 +7,7 @@ from Cura.util import profile
 
 class newVersionDialog(wx.Dialog):
 	def __init__(self):
-		super(newVersionDialog, self).__init__(None, title="Welcome to the new version!", style=wx.STAY_ON_TOP)
+		super(newVersionDialog, self).__init__(None, title="Welcome to the new version!", style=wx.STAY_ON_TOP | wx.EXPAND)
 
 		p = wx.Panel(self)
 		self.panel = p
@@ -25,10 +25,10 @@ class newVersionDialog(wx.Dialog):
 		newHere = wx.StaticText(p, -1, 'New in this version:')
 		newHere.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
 		s.Add(newHere)
-		s.Add(wx.StaticText(p, -1, '\t* Completely rebuilt Simple Mode to get better parts, faster'))
-		s.Add(wx.StaticText(p, -1, '\t* Built-in settings for  40+ materials optimized for the Series 1'))
-		s.Add(wx.StaticText(p, -1, '\t* New guided printer setup and introduction to the interface'))
-		s.Add(wx.StaticText(p, -1, '\t* Transfer settings from Simple Mode to Expert Mode'))
+		s.Add(wx.StaticText(p, -1, '* Completely rebuilt Simple Mode to get better parts, faster'), flag=wx.EXPAND | wx.ALL)
+		s.Add(wx.StaticText(p, -1, '* Built-in settings for  40+ materials optimized for the Series 1'), flag=wx.EXPAND | wx.ALL)
+		s.Add(wx.StaticText(p, -1, '* New guided printer setup and introduction to the interface'), flag=wx.EXPAND | wx.ALL)
+		s.Add(wx.StaticText(p, -1, '* Transfer settings from Simple Mode to Expert Mode'), flag=wx.EXPAND | wx.ALL)
 
 
 		self.hasUltimaker = None
@@ -39,7 +39,6 @@ class newVersionDialog(wx.Dialog):
 		button.Bind(wx.EVT_BUTTON, self.OnOk)
 		s.Add(button, flag=wx.TOP|wx.ALIGN_RIGHT, border=5)
 
-		self.Fit()
 		self.Centre()
 
 	def OnUltimakerFirmware(self, e):
