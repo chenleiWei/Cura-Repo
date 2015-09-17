@@ -4,16 +4,21 @@ import wx
 import numpy
 import time
 import os
+import subprocess
 import traceback
 import threading
 import math
 import sys
 import cStringIO as StringIO
-
+import webbrowser
 import OpenGL
+from wx.lib.pubsub import pub
 OpenGL.ERROR_CHECKING = False
 from OpenGL.GLU import *
 from OpenGL.GL import *
+
+from wx.lib.pubsub import pub
+import ConfigParser as configparser
 
 from Cura.gui import printWindow
 from Cura.util import profile
@@ -55,14 +60,19 @@ class SceneView(openglGui.glGuiPanel):
 		self._platformTexture = None
 		self._isSimpleMode = True
 		self._printerConnectionManager = printerConnectionManager.PrinterConnectionManager()
+		
+		# Both with relation to connecting to the OctoPrint API 
+		self.gcodePath = None
+		pub.subscribe(self.SendToPrinter, 'gcode.update')
 
 		self._viewport = None
 		self._modelMatrix = None
 		self._projMatrix = None
 		self.tempMatrix = None
 
-		self.openFileButton      = openglGui.glButton(self, 4, _("Load"), (0,0), self.showLoadModel)
-		self.printButton         = openglGui.glButton(self, 6, _("Print"), (1,0), self.OnPrintButton)
+		self.openFileButton        = openglGui.glButton(self, 4, _("Load"), (0,0), self.showLoadModel)
+		self.printButton           = openglGui.glButton(self, 6, _("Print"), (1,0), self.OnPrintButton)
+		self.octoPrintButton	   = openglGui.glButton(self, 6, _("Open in OctoPrint"), (2,0), self.OnOctoPrintButton)
 		self.printButton.setDisabled(True)
 
 		group = []
@@ -120,7 +130,6 @@ class SceneView(openglGui.glGuiPanel):
 		self.updateProfileToControls()
 
 
-
 	def loadGCodeFile(self, filename):
 		self.OnDeleteAll(None)
 		#Cheat the engine results to load a GCode file into it.
@@ -133,6 +142,9 @@ class SceneView(openglGui.glGuiPanel):
 		self.viewSelection.setValue(4)
 		self.printButton.setDisabled(False)
 		self.OnViewChange()
+
+	def populateOctoPrintwGCodeFile(self, gcodePath):
+		self.gcodePath = gcodePath
 
 	def loadSceneFiles(self, filenames):
 		#if self.viewSelection.getValue() == 4:
@@ -259,6 +271,27 @@ class SceneView(openglGui.glGuiPanel):
 		dlg.Destroy()
 		meshLoader.saveMeshes(filename, self._scene.objects())
 
+
+	def OnOctoPrintButton(self, button):
+		# Saves loaded file into the users Documents folder
+		
+		win = printerSelector()
+		win.Show(True)
+		
+		
+	def SendToPrinter(self, serial):
+		documentsPath = profile._getMyDocumentsFolder()
+		gcodeDirectory = "/G-code/"
+		filename = self._scene._objectList[0].getName() + profile.getGCodeExtension()
+		savePath = documentsPath + gcodeDirectory + filename
+
+		self._saveGCode(savePath)
+		
+		webbrowser.open_new('http:series1-%s.local:5000' % serial)
+		# Talks to API w/API key
+		script = "curl -H \"X-Api-Key: %s\" -H Content\ Type: \"multipart/form-data\" -F select=true -F print=false -F file=@%s -s http://series1-%s.local:5000/api/files/local" % (profile.OctoPrintConfigAPI(serial), savePath, serial)
+		os.system(script)
+		
 	def OnPrintButton(self, button):
 		if button == 1:
 			connectionGroup = self._printerConnectionManager.getAvailableGroup()
@@ -358,11 +391,16 @@ class SceneView(openglGui.glGuiPanel):
 
 		threading.Thread(target=self._saveGCode,args=(filename,)).start()
 
+	def _gcodePathUpdate(self, targetFilename):
+		self.gcodePath = targetFilename
+
 	def _saveGCode(self, targetFilename, ejectDrive = False):
+		# gets gcode from the engine
 		gcode = self._engine.getResult().getGCode()
 		try:
 			size = float(len(gcode))
 			read_pos = 0
+			# writes gcode to targetFileName
 			with open(targetFilename, 'wb') as fdst:
 				while 1:
 					buf = gcode.read(16*1024)
@@ -383,9 +421,25 @@ class SceneView(openglGui.glGuiPanel):
 				self.notification.message("Saved as %s" % (targetFilename), lambda : explorer.openExplorer(targetFilename), 4, 'Open folder')
 			else:
 				self.notification.message("Saved as %s" % (targetFilename))
+
+			#			output = os.system("$result = (dns-sd -B | grep -o 'Series\ 1.*')")
+			#			output = subprocess.check_output("dns-sd -B | grep -o 'Series\ 1.*'", shell=True)
+
+			#			print "OUTPUT: %s" % output
+			#			subprocess.check_output(["echo", "Hello World!"])
+
+			# dlg to have saved file open in OctoPrint
+
 		self.printButton.setProgressBar(None)
 		self._engine.getResult().submitInfoOnline()
-
+			
+	# What we need is a function that works the same way as _saveGCode, but auto-saves once the button is selected
+	# Once auto-saved, another function needs to be activated that actually goes about opening the browser and uploading the file to OctoPrint
+	
+	def _saveToDocuments(self):
+		targetFilename = profile._getMyDocumentsFolder() + "CuraGCode"
+		self._saveGCode(targetFilename)
+	
 	def _doEjectSD(self, drive):
 		if removableStorage.ejectDrive(drive):
 			self.notification.message('You can now eject the card.')
@@ -1439,11 +1493,11 @@ class SceneView(openglGui.glGuiPanel):
 		for n in xrange(0, len(polys[0])):
 			if not circular:
 				if n % 2 == 0:
-					glColor4ub(5, 171, 231, 96)
+					glColor4ub(233, 232, 234, 96)
 				else:
-					glColor4ub(5, 171, 231, 64)
+					glColor4ub(233, 232, 234, 64)
 			else:
-				glColor4ub(5, 171, 231, 96)
+				glColor4ub(233, 232, 234, 96)
 
 			glVertex3f(polys[0][n][0], polys[0][n][1], height)
 			glVertex3f(polys[0][n][0], polys[0][n][1], 0)
@@ -1452,7 +1506,7 @@ class SceneView(openglGui.glGuiPanel):
 		glEnd()
 
 		#Draw top of build volume.
-		glColor4ub(5, 171, 231, 128)
+		glColor4ub(233, 232, 234, 128)
 		glBegin(GL_TRIANGLE_FAN)
 		for p in polys[0][::-1]:
 			glVertex3f(p[0], p[1], height)
@@ -1537,3 +1591,149 @@ class shaderEditor(wx.Frame):
 
 	def OnText(self, e):
 		self._callback(self._vertex.GetValue(), self._fragment.GetValue())
+
+
+
+class printerSelector(wx.Frame):
+	def __init__(self):
+		wx.Frame.__init__(self, None, wx.ID_ANY, "Printer Select", size=(500,225), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
+
+		#pubsub
+		pub.subscribe(self.AddToPrinterList,'printer.add')
+
+		panel = wx.Panel(self, -1)
+		font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+		
+		printerListPath = os.path.join(profile.getBasePath(), 'octoprint_api_config.ini')
+		cp = configparser.ConfigParser()
+		cp.read(printerListPath)
+		
+		listSections = cp.sections()
+		printerList = []
+		for item in listSections:
+			printerList.append("Series 1 %s" % item)
+		
+		
+		text = wx.StaticText(panel, 26, "Upload to")
+		text.SetFont(font)
+		
+		self.availPrinters = wx.ListBox(panel, 10, wx.DefaultPosition, size=(300, 50), choices=printerList)
+		self.availPrinters.SetFont(font)
+		
+		cancel = wx.Button(panel, 1, "Cancel")
+		upload = wx.Button(panel, 10, "Upload")
+		
+		# boxsizers
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		imageBoxSizer = wx.BoxSizer(wx.HORIZONTAL)
+		addNew = wx.Button(panel, -1, "Add New")
+		remove = wx.Button(panel, -1, "Remove")
+
+		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		vbuttonBox = wx.BoxSizer(wx.VERTICAL)
+		hbox1.Add(text, wx.ALIGN_LEFT)
+		hbox1.Add(self.availPrinters, 2, wx.LEFT|wx.ALIGN_RIGHT, 20)
+		vbuttonBox.Add(addNew, flag=wx.ALIGN_TOP)
+		vbuttonBox.Add(remove, flag=wx.ALIGN_BOTTOM|wx.TOP, border=10)
+		hbox1.Add(vbuttonBox, flag=wx.LEFT, border=10) 
+		hbox2.Add(upload, 2, wx.RIGHT, 20)
+		hbox2.Add(cancel)
+		
+		# printer logo
+		vbox.Add(imageBoxSizer, 3, wx.ALIGN_CENTRE | wx.TOP, 20)
+		vbox.Add(hbox1, 0, wx.ALIGN_LEFT | wx.ALL, 30)
+		vbox.Add(hbox2, 1, wx.ALIGN_CENTRE)
+		panel.SetSizer(vbox)
+		
+		addNew.Bind(wx.EVT_BUTTON, self.OnAddNew)
+
+		self.Bind(wx.EVT_BUTTON, self.OnUpload, id=10)
+		remove.Bind(wx.EVT_BUTTON, self.OnRemove)
+		
+	def OnUpload(self, e):
+		index = self.availPrinters.GetSelection()
+		printerString = self.availPrinters.GetString(index)
+		series, one, serial = printerString.split()
+
+		pub.sendMessage('gcode.update', serial=serial)
+		
+		self.Destroy()
+		
+	def OnAddNew(self, e):
+		print("Adding new printer")
+		newPrinter = AddNewPrinter()
+		newPrinter.Show()
+		
+	def AddToPrinterList(self, serial):
+		printer = "Series 1  " + str(serial)
+		self.availPrinters.Append(printer)
+		
+	def OnRemove(self, e):
+		index = self.availPrinters.GetSelection()
+		self.availPrinters.Delete(index)
+		
+	def OnClose(self, e):
+		self.Destroy()
+		
+
+class AddNewPrinter(wx.Frame):
+	def __init__(self):
+		wx.Frame.__init__(self, None, wx.ID_ANY, "New Printer", size=(500,500), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
+
+		mainBox = wx.BoxSizer(wx.VERTICAL)
+		imageBox = wx.BoxSizer(wx.HORIZONTAL)
+		serialBox = wx.BoxSizer(wx.HORIZONTAL)
+		apiBox = wx.BoxSizer(wx.HORIZONTAL)
+		buttonsBox = wx.BoxSizer(wx.HORIZONTAL)
+		panel = wx.Panel(self, -1)
+		serialNumberText = wx.StaticText(panel, -1, "Series 1")
+		self.serialInput = wx.TextCtrl(panel, -1, "0000")
+		
+		printerLogoPath = resources.getPathForImage('series1_icon_100x105.png')
+		printerLogoConvert = wx.Image(printerLogoPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+		printerLogoImage = wx.StaticBitmap(panel, -1, printerLogoConvert)
+		
+		# API input
+		apiInputText = wx.StaticText(panel, -1, "API Key:")
+		self.apiKeyInput = wx.TextCtrl(panel, -1, "")
+		
+		# Buttons 
+		cancelButton = wx.Button(panel, -1, "Cancel")
+		addPrinterButton = wx.Button(panel, -1, "Add Printer")
+		
+		addPrinterButton.Bind(wx.EVT_BUTTON, self.OnAddPrinter)
+		cancelButton.Bind(wx.EVT_BUTTON, self.OnCancel)
+		# Adding to boxsizers
+		imageBox.Add(printerLogoImage)
+		
+		serialBox.Add(serialNumberText, 1, wx.TOP, 10)
+		serialBox.Add(self.serialInput, 1, wx.TOP, 10)
+		
+		apiBox.Add(apiInputText, 1, wx.TOP, 10)
+		apiBox.Add(self.apiKeyInput, 1, wx.TOP, 10)
+		
+		buttonsBox.Add(cancelButton, 1, wx.RIGHT, 100)
+		buttonsBox.Add(addPrinterButton)
+		
+		mainBox.Add(imageBox, flag=wx.ALIGN_CENTRE)
+		mainBox.Add(serialBox, flag=wx.ALIGN_CENTRE)
+		mainBox.Add(apiBox, flag=wx.ALIGN_CENTRE)
+		mainBox.Add(buttonsBox, flag=wx.ALIGN_CENTRE | wx.TOP, border=100)
+		
+		panel.SetSizer(mainBox)
+		
+	def OnAddPrinter(self, e):
+		if not self.serialInput.GetValue() and not self.apiKeyInput.GetValue():
+			print("No Value")
+			return
+		else:
+			serial = self.serialInput.GetValue()
+			key = self.apiKeyInput.GetValue()
+			pub.sendMessage('printer.add', serial=serial)
+			profile.initializeOctoPrintAPIConfig(serial, key)
+			profile.OctoPrintConfigAPI(serial)
+		self.Destroy()
+
+	def OnCancel(self, e):
+		self.Destroy()
