@@ -262,6 +262,7 @@ class SceneView(openglGui.glGuiPanel):
 	def OnPrintButton(self, button):
 		if button == 1:
 			connectionGroup = self._printerConnectionManager.getAvailableGroup()
+			"""
 			if len(removableStorage.getPossibleSDcardDrives()) > 0 and (connectionGroup is None or connectionGroup.getPriority() < 0):
 				drives = removableStorage.getPossibleSDcardDrives()
 				if len(drives) > 1:
@@ -305,15 +306,18 @@ class SceneView(openglGui.glGuiPanel):
 					dlg.Destroy()
 				self._openPrintWindowForConnection(connection)
 			else:
-				self.showSaveGCode()
+			"""
+			self.showSaveGCode()
 		if button == 3:
 			menu = wx.Menu()
 			connections = self._printerConnectionManager.getAvailableConnections()
 			menu.connectionMap = {}
+			"""
 			for connection in connections:
 				i = menu.Append(-1, _("Print with %s") % (connection.getName()))
 				menu.connectionMap[i.GetId()] = connection
 				self.Bind(wx.EVT_MENU, lambda e: self._openPrintWindowForConnection(e.GetEventObject().connectionMap[e.GetId()]), i)
+			"""
 			self.Bind(wx.EVT_MENU, lambda e: self.showSaveGCode(), menu.Append(-1, _("Save GCode...")))
 			self.Bind(wx.EVT_MENU, lambda e: self._showEngineLog(), menu.Append(-1, _("Slice engine log...")))
 			self.PopupMenu(menu)
@@ -342,11 +346,7 @@ class SceneView(openglGui.glGuiPanel):
 			return
 		if not self._engine.getResult().isFinished():
 			return
-		# prevents user from saving in private resources folder
-		if profile.getPreference('lastFile') is not os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'firstPrintCone.stl')):
-			dlg=wx.FileDialog(self, _("Save GCode"), os.path.dirname(profile.getPreference('initialFile')), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
-		else: 
-			dlg=wx.FileDialog(self, _("Save GCode"), os.path.dirname(profile.getPreference('lastFile')), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+		dlg=wx.FileDialog(self, _("Save toolpath"), os.path.dirname(profile.getPreference('lastFile')), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
 		filename = self._scene._objectList[0].getName() + profile.getGCodeExtension()
 		dlg.SetFilename(filename)
 		dlg.SetWildcard('Toolpath (*%s)|*%s;*%s' % (profile.getGCodeExtension(), profile.getGCodeExtension(), profile.getGCodeExtension()[0:2]))
@@ -997,6 +997,7 @@ class SceneView(openglGui.glGuiPanel):
 
 	def OnPaint(self,e):
 		connectionGroup = self._printerConnectionManager.getAvailableGroup()
+		"""
 		if len(removableStorage.getPossibleSDcardDrives()) > 0 and (connectionGroup is None or connectionGroup.getPriority() < 0):
 			self.printButton._imageID = 2
 			self.printButton._tooltip = _("Toolpath to SD")
@@ -1004,8 +1005,9 @@ class SceneView(openglGui.glGuiPanel):
 			self.printButton._imageID = connectionGroup.getIconID()
 			self.printButton._tooltip = _("Print with %s") % (connectionGroup.getName())
 		else:
-			self.printButton._imageID = 3
-			self.printButton._tooltip = _("Save toolpath")
+		"""
+		self.printButton._imageID = 3
+		self.printButton._tooltip = _("Save toolpath")
 
 		if self._animView is not None:
 			self._viewTarget = self._animView.getPosition()

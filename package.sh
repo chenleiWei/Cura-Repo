@@ -22,7 +22,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="1.3.1"
+export BUILD_NAME="1.3.3"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -547,12 +547,27 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#Get portable python for windows and extract it. (Linux and Mac need to install python themselfs)
 	downloadURL http://ftp.nluug.nl/languages/python/portablepython/v2.7/PortablePython_${WIN_PORTABLE_PY_VERSION}.exe
 	downloadURL http://sourceforge.net/projects/pyserial/files/pyserial/2.5/pyserial-2.5.win32.exe
+	downloadURL http://sourceforge.net/projects/pubsub/files/pubsub/3.3.0/PyPubSub-3.3.0.win32.exe
+	downloadURL http://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe
 	downloadURL http://sourceforge.net/projects/pyopengl/files/PyOpenGL/3.0.1/PyOpenGL-3.0.1.win32.exe
 	downloadURL http://sourceforge.net/projects/numpy/files/NumPy/1.6.2/numpy-1.6.2-win32-superpack-python2.7.exe
 	downloadURL http://videocapture.sourceforge.net/VideoCapture-0.9-5.zip
 	#downloadURL http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-20120927-git-13f0cd6-win32-static.7z
 	downloadURL http://sourceforge.net/projects/comtypes/files/comtypes/0.6.2/comtypes-0.6.2.win32.exe
 	downloadURL http://www.uwe-sieber.de/files/ejectmedia.zip
+
+	# pubsub capabilities
+
+    # Add materials profiles
+	if test -d resources/quickprint/Materials; then
+		echo "resources/quickprint/Materials exist"
+		rm -rf resources/quickprint/Materials
+	fi
+	
+	git clone ${MATERIALS_REPO} resources/quickprint/Materials/
+	ls resources/quickprint/Materials/
+
+
 	#Get the power module for python
 	gitClone \
 	  https://github.com/GreatFruitOmsk/Power \
@@ -574,17 +589,13 @@ mkdir -p ${TARGET_DIR}
 
 rm -f log.txt
 if [ $BUILD_TARGET = "win32" ]; then
-	if [ -z `which i686-w64-mingw32-g++` ]; then
-		CXX=g++
-	else
-		CXX=i686-w64-mingw32-g++
-	fi
-
 	#For windows extract portable python to include it.
 	extract PortablePython_${WIN_PORTABLE_PY_VERSION}.exe \$_OUTDIR/App
 	extract PortablePython_${WIN_PORTABLE_PY_VERSION}.exe \$_OUTDIR/Lib/site-packages
 	extract pyserial-2.5.win32.exe PURELIB
 	extract PyOpenGL-3.0.1.win32.exe PURELIB
+	extract PyPubSub-3.3.0.win32.exe PURELIB
+	extract py2exe-0.6.9.win32-py2.7.exe PURELIB
 	extract numpy-1.6.2-win32-superpack-python2.7.exe numpy-1.6.2-sse2.exe
 	extract numpy-1.6.2-sse2.exe PLATLIB
 	extract VideoCapture-0.9-5.zip VideoCapture-0.9-5/Python27/DLLs/vidcap.pyd
@@ -599,6 +610,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	mv \$_OUTDIR/Lib/site-packages/wx* ${TARGET_DIR}/python/Lib/site-packages/
 	mv PURELIB/serial ${TARGET_DIR}/python/Lib
 	mv PURELIB/OpenGL ${TARGET_DIR}/python/Lib
+	mv PURELIB/PubSub ${TARGET_DIR}/python/Lib
 	mv PURELIB/comtypes ${TARGET_DIR}/python/Lib
 	mv PLATLIB/numpy ${TARGET_DIR}/python/Lib
 	mv Power/power ${TARGET_DIR}/python/Lib
@@ -606,7 +618,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/bin/ffmpeg.exe ${TARGET_DIR}/Cura/
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/licenses ${TARGET_DIR}/Cura/ffmpeg-licenses/
 	mv Win32/EjectMedia.exe ${TARGET_DIR}/Cura/
-
+	
 	rm -rf Power/
 	rm -rf \$_OUTDIR
 	rm -rf PURELIB
@@ -628,7 +640,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	rm -rf ${TARGET_DIR}/python/Lib/OpenGL/DLLS/gle*
 
     #Build the C++ engine
-	$MAKE -C CuraEngine VERSION=${BUILD_NAME} OS=Windows_NT CXX=${CXX}
+	mingw32-make -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
 fi
 
@@ -644,9 +656,8 @@ echo $BUILD_NAME > ${TARGET_DIR}/Cura/version
 if [ $BUILD_TARGET = "win32" ]; then
     cp -a scripts/${BUILD_TARGET}/*.bat $TARGET_DIR/
     cp CuraEngine/build/CuraEngine.exe $TARGET_DIR
-	cp /usr/lib/gcc/i686-w64-mingw32/4.8/libgcc_s_sjlj-1.dll $TARGET_DIR
-    cp /usr/i686-w64-mingw32/lib/libwinpthread-1.dll $TARGET_DIR
-    cp /usr/lib/gcc/i686-w64-mingw32/4.8/libstdc++-6.dll $TARGET_DIR
+else
+    cp -a scripts/${BUILD_TARGET}/*.sh $TARGET_DIR/
 fi
 
 #package the result
@@ -661,13 +672,13 @@ if (( ${ARCHIVE_FOR_DISTRIBUTION} )); then
 			#if we have wine, try to run our nsis script.
 			rm -rf scripts/win32/dist
 			ln -sf `pwd`/${TARGET_DIR} scripts/win32/dist
-			wine ~/.wine/drive_c/Program\ Files\ \(x86\)/NSIS/makensis.exe /DVERSION=${BUILD_NAME} scripts/win32/installer.nsi
+			wine ~/.wine/drive_c/Program\ Files/NSIS/makensis.exe /DVERSION=${BUILD_NAME} scripts/win32/installer.nsi
             if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
 			mv scripts/win32/Cura_${BUILD_NAME}.exe ./
 		fi
 		if [ -f '/c/Program Files (x86)/NSIS/makensis.exe' ]; then
 			rm -rf scripts/win32/dist
-			mv "`pwd`/${TARGET_DIR}" scripts/win32/dist
+			mv `pwd`/${TARGET_DIR} scripts/win32/dist
 			'/c/Program Files (x86)/NSIS/makensis.exe' -DVERSION=${BUILD_NAME} 'scripts/win32/installer.nsi' >> log.txt
             if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
 			mv scripts/win32/Cura_${BUILD_NAME}.exe ./
