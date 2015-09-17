@@ -492,6 +492,7 @@ def _getMyDocumentsFolder():
 		path = ''
 	return path
 
+setting('serialNumber', '', str, 'preference', 'hidden')
 setting('startMode', 'Simple', ['Simple', 'Normal'], 'preference', 'hidden')
 setting('simpleModeProfile', '2_normal', str, 'preference', 'hidden')
 setting('simpleModeMaterialSupplier', 'Generic', str, 'preference', 'hidden')
@@ -513,10 +514,10 @@ setting('filament_physical_density', '1240', float, 'preference', 'hidden').setR
 setting('language', 'English', str, 'preference', 'hidden').setLabel(_('Language'), _('Change the language in which Cura runs. Switching language requires a restart of Cura'))
 setting('active_machine', '0', int, 'preference', 'hidden')
 
-setting('model_colour', '#FFC924', str, 'preference', 'hidden').setLabel(_('Model colour'), _('Display color for first extruder'))
-setting('model_colour2', '#CB3030', str, 'preference', 'hidden').setLabel(_('Model colour (2)'), _('Display color for second extruder'))
-setting('model_colour3', '#DDD93C', str, 'preference', 'hidden').setLabel(_('Model colour (3)'), _('Display color for third extruder'))
-setting('model_colour4', '#4550D3', str, 'preference', 'hidden').setLabel(_('Model colour (4)'), _('Display color for forth extruder'))
+setting('model_colour', '#aaaaaa', str, 'preference', 'hidden').setLabel(_('Model colour'), _('Display color for first extruder'))
+setting('model_colour2', 'e2e2e2', str, 'preference', 'hidden').setLabel(_('Model colour (2)'), _('Display color for second extruder'))
+setting('model_colour3', '#919191', str, 'preference', 'hidden').setLabel(_('Model colour (3)'), _('Display color for third extruder'))
+setting('model_colour4', '#b7b5b8', str, 'preference', 'hidden').setLabel(_('Model colour (4)'), _('Display color for forth extruder'))
 setting('printing_window', 'Basic', ['Basic'], 'preference', 'hidden').setLabel(_('Printing window type'), _('Select the interface used for USB printing.'))
 
 setting('window_maximized', 'True', bool, 'preference', 'hidden')
@@ -706,6 +707,31 @@ def getDefaultProfilePath():
 	"""
 	return os.path.join(getBasePath(), 'current_profile.ini')
 
+
+
+def initializeOctoPrintAPIConfig(s,k):
+	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
+	cp = ConfigParser.ConfigParser()
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError:
+		return
+	octoprintConfigFile = open(path, 'w')
+	if not cp.has_section(s):
+		cp.add_section(s.encode('utf-8'))
+	cp.set(s, 'apikey', k.encode('utf-8'))
+	cp.write(octoprintConfigFile)
+	octoprintConfigFile.close()
+		
+def OctoPrintConfigAPI(serial):
+	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
+	cp = ConfigParser.ConfigParser()
+
+	cp.read(path)
+	key = cp.get(serial, 'apikey')
+
+	return key
+
 def loadProfile(filename, allMachines = False):
 	"""
 		Read a profile file as active profile settings.
@@ -797,6 +823,27 @@ def saveProfileDifferenceFromDefault(filename):
 		profileParser.write(open(filename, 'w'))
 	except:
 		print "Failed to write profile file: %s" % (filename)
+
+def saveProfileDifferenceFromDefault(filename):
+	"""
+		Save the current profile to an ini file. Only save the profile settings that differ from the default settings.
+	:param filename:    The ini filename to save the profile in.
+	"""
+	global settingsList
+	profileParser = ConfigParser.ConfigParser()
+	profileParser.add_section('profile')
+	for set in settingsList:
+		if set.isPreference() or set.isMachineSetting() or set.isAlteration():
+			continue
+		if set.getDefault() == set.getValue():
+			continue
+		profileParser.set('profile', set.getName(), set.getValue().encode('utf-8'))
+	try:
+		profileParser.write(open(filename, 'w'))
+	except:
+		print "Failed to write profile file: %s" % (filename)
+
+
 
 def resetProfile():
 	""" Reset the profile for the current machine to default. """
