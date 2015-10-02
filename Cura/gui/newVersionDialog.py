@@ -25,10 +25,9 @@ class newVersionDialog(wx.Dialog):
 		newHere = wx.StaticText(p, -1, 'New in this version:')
 		newHere.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
 		s.Add(newHere)
-		s.Add(wx.StaticText(p, -1, '\t* Completely rebuilt Simple Mode to get better parts, faster'))
-		s.Add(wx.StaticText(p, -1, '\t* Built-in settings for  40+ materials optimized for the Series 1'))
-		s.Add(wx.StaticText(p, -1, '\t* New guided printer setup and introduction to the interface'))
-		s.Add(wx.StaticText(p, -1, '\t* Easily transfer settings from Simple Mode to Expert Mode at any time'))
+		s.Add(wx.StaticText(p, -1, '\t* More accurate time estimates (thanks Vaibhav Sharma!)'))
+		s.Add(wx.StaticText(p, -1, '\t* Machine head dimensions updated'))
+		s.Add(wx.StaticText(p, -1, '\t* Aesthetic changes to Configuration Wizard'))
 
 
 		self.hasUltimaker = None
