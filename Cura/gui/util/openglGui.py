@@ -259,7 +259,7 @@ class glGuiPanel(glcanvas.GLCanvas):
 		glEnable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 		glDisable(GL_LIGHTING)
-		glColor4ub(255,255,255,255)
+		glColor4ub(0,0,0,0)
 
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
@@ -727,7 +727,6 @@ class glNotification(glFrame):
 			super(glNotification, self).setSize(baseSize[0] / 2 - w / 2, baseSize[1] - self._anim.getPosition() - self._base._buttonSize * 0.2, 1, 1)
 		else:
 			super(glNotification, self).setSize(baseSize[0] / 2 - w / 2, baseSize[1] - self._base._buttonSize * 0.2, 1, 1)
-
 	def draw(self):
 		self.setSize(0,0,0,0)
 		self.updateLayout()
@@ -789,7 +788,7 @@ class glLabel(glGuiControl):
 #		glEnd()
 
 		glTranslate(5, h - 5, 0)
-		glColor4ub(255,255,255,255)
+		glColor4ub(0,0,0, 255)
 		openglHelpers.glDrawStringLeft(self._label)
 		glPopMatrix()
 
