@@ -22,7 +22,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="1.3.3"
+export BUILD_NAME="1.3.4a1"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -186,7 +186,22 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 		echo "Cannot build app."
 		exit 1
 	fi
-
+	
+	# Install Python-OCC
+#	cd pythonocc-core-0.16.0
+	
+#	if [ -d "./cmake-build" ]; then
+#		cd cmake-build
+#	else
+#		mkdir cmake-build
+#		cd cmake-build
+#	fi 
+	
+#	cmake ..
+#	make
+#	make install
+#	cd ..
+	
     #Add cura version file (should read the version from the bundle with pyobjc, but will figure that out later)
     echo $BUILD_NAME > scripts/darwin/dist/Cura\ Type\ A.app/Contents/Resources/version
     
@@ -199,15 +214,16 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	git clone ${MATERIALS_REPO} resources/quickprint/Materials/
 	ls resources/quickprint/Materials/
 
-	rm -rf CuraEngine
-	gitClone \
-	  ${CURA_ENGINE_REPO} \
-	  ${CURA_ENGINE_REPO_PUSHURL} \
-	  CuraEngine \
-	  ${CURA_ENGINE_BRANCH}
-    if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
-	$MAKE -C CuraEngine VERSION=${BUILD_NAME}
+#	rm -rf CuraEngine
+#	gitClone \
+#	  ${CURA_ENGINE_REPO} \
+#	  ${CURA_ENGINE_REPO_PUSHURL} \
+#	  CuraEngine \
+#	  ${CURA_ENGINE_BRANCH}
+ #   if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
+#	$MAKE -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
+    
 	cp CuraEngine/build/CuraEngine scripts/darwin/dist/Cura\ Type\ A.app/Contents/Resources/CuraEngine
 
 	cd scripts/darwin
@@ -555,6 +571,8 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#downloadURL http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-20120927-git-13f0cd6-win32-static.7z
 	downloadURL http://sourceforge.net/projects/comtypes/files/comtypes/0.6.2/comtypes-0.6.2.win32.exe
 	downloadURL http://www.uwe-sieber.de/files/ejectmedia.zip
+	#Python OCC
+#	downloadURL https://github.com/tpaviot/pythonocc-core/releases/download/0.16.0/pythonOCC-0.16.0-win32-py27.exe
 
 	# pubsub capabilities
 
@@ -596,6 +614,8 @@ if [ $BUILD_TARGET = "win32" ]; then
 	extract PyOpenGL-3.0.1.win32.exe PURELIB
 	extract PyPubSub-3.3.0.win32.exe PURELIB
 	extract py2exe-0.6.9.win32-py2.7.exe PURELIB
+	#pythonOCC
+#	extract pythonOCC-0.16.0-win32-py27.exe PURELIB	
 	extract numpy-1.6.2-win32-superpack-python2.7.exe numpy-1.6.2-sse2.exe
 	extract numpy-1.6.2-sse2.exe PLATLIB
 	extract VideoCapture-0.9-5.zip VideoCapture-0.9-5/Python27/DLLs/vidcap.pyd
@@ -603,6 +623,9 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#extract ffmpeg-20120927-git-13f0cd6-win32-static.7z ffmpeg-20120927-git-13f0cd6-win32-static/licenses
 	extract comtypes-0.6.2.win32.exe
 	extract ejectmedia.zip Win32
+	
+	
+	
 
 	mkdir -p ${TARGET_DIR}/python
 	mkdir -p ${TARGET_DIR}/Cura/
@@ -611,6 +634,8 @@ if [ $BUILD_TARGET = "win32" ]; then
 	mv PURELIB/serial ${TARGET_DIR}/python/Lib
 	mv PURELIB/OpenGL ${TARGET_DIR}/python/Lib
 	mv PURELIB/PubSub ${TARGET_DIR}/python/Lib
+	#pythonOCC
+#	mv PURELIB/pythonOCC ${TARGET_DIR}/python/Lib
 	mv PURELIB/comtypes ${TARGET_DIR}/python/Lib
 	mv PLATLIB/numpy ${TARGET_DIR}/python/Lib
 	mv Power/power ${TARGET_DIR}/python/Lib
