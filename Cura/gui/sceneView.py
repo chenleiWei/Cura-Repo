@@ -76,6 +76,7 @@ class SceneView(openglGui.glGuiPanel):
 		self.gcodePath = None
 		pub.subscribe(self.SendToPrinter, 'gcode.update')
 		pub.subscribe(self.OpenBrowser, 'browser.open')
+		pub.subscribe(self.UploadEnabled, 'upload.enabled')
 
 		self._viewport = None
 		self._modelMatrix = None
@@ -86,6 +87,8 @@ class SceneView(openglGui.glGuiPanel):
 		self.printButton           = openglGui.glButton(self, 6, _("Print"), (1,0), self.OnPrintButton)
 		self.octoPrintButton	   = openglGui.glButton(self, 6, _("Open in OctoPrint"), (2,0), self.OnOctoPrintButton)
 		self.printButton.setDisabled(True)
+		
+		self.win = middleMan()
 
 		group = []
 		self.rotateToolButton = openglGui.glRadioButton(self, 8, _("Rotate"), (0,-1), group, self.OnToolSelect)
@@ -147,6 +150,9 @@ class SceneView(openglGui.glGuiPanel):
 		else:
 			self.openOctoPrintInBrowser = False
 		
+	def UploadEnabled(self, enabled=True):
+		print "Upload Enabled event caller activated."
+		pub.sendMessage('transfer.response', enable=True)
 
 	def loadGCodeFile(self, filename):
 		self.OnDeleteAll(None)
@@ -158,6 +164,7 @@ class SceneView(openglGui.glGuiPanel):
 		self._engineResultView.setResult(self._engine._result)
 		self.printButton.setBottomText('')
 		self.viewSelection.setValue(4)
+		pub.sendMessage('upload.enabled', enable=True)
 		self.printButton.setDisabled(False)
 		self.OnViewChange()
 	#Delete if not needed
@@ -291,16 +298,16 @@ class SceneView(openglGui.glGuiPanel):
 
 	def OnOctoPrintButton(self, button):
 		# Saves loaded file into the users Documents folder
-		win = printerSelector()
-		win.Show(True)
-				
+		self.win.OpenPrinterSelector()
+		
 		
 	def SendToPrinter(self, serial):
 		#Temporary file handling
-		
 		resourceBasePath = resources.resourceBasePath
 		filename = self._scene._objectList[0].getName()
-		tempD = tempfile.mkdtemp(prefix='TempGCode', dir=resourceBasePath)
+		# Make a directory called 'temp' in ./resources
+		
+	#	self._createTempFiles(filename)
 		gcodeFile = tempfile.NamedTemporaryFile(suffix='.gcode', prefix=filename, dir=resourceBasePath, delete=True)
 		
 		tempFilePath = os.path.normpath(os.path.join(resourceBasePath, gcodeFile.name))
@@ -308,7 +315,42 @@ class SceneView(openglGui.glGuiPanel):
 		
 		threading.Thread(target=self._uploadToOctoPrint(key, serial, tempFilePath)).start()
 		gcodeFile.close()
-
+		
+	
+	def _createTempFiles(self, filename):
+		# Resources directory path
+		resourceBasePath = resources.resourceBasePath
+		# Path to temporary file
+		path = os.path.join(resourcebasePath, "%s.%s" % (filename, suffix))
+		print "line 324 \n path = %s" % path
+		# gets gcode from the engine
+		"""
+		gcode = self._engine.getResult().getGCode()
+		try:
+			size = float(len(gcode))
+			read_pos = 0
+			# writes gcode to targetFileName
+			with open(targetFilename, 'wb') as fdst:
+				while 1:
+					buf = gcode.read(16*1024)
+					if len(buf) < 1:
+						break
+					read_pos += len(buf)
+					fdst.write(buf)
+					self.printButton.setProgressBar(read_pos / size)
+					self._queueRefresh()
+		except:
+			import sys, traceback
+			traceback.print_exc()
+			self.notification.message("Failed to save")
+		else:
+			if ejectDrive:
+				self.notification.message("Saved as %s" % (targetFilename), lambda : self._doEjectSD(ejectDrive), 31, 'Eject')
+			elif explorer.hasExplorer():
+				self.notification.message("Saved as %s" % (targetFilename), lambda : explorer.openExplorer(targetFilename), 4, 'Open folder')
+			else:
+				self.notification.message("Saved as %s" % (targetFilename))
+		"""
 	def _uploadToOctoPrint(self, key, serial, tempFilePath):
 		# Notify the user that the file is attempting to be uploaded
 		self.notification.message("Uploading....")
@@ -329,6 +371,8 @@ class SceneView(openglGui.glGuiPanel):
 		# Pycurl options
 		c.setopt(c.URL, url)
 		c.setopt(c.HTTPHEADER, header)
+	#	c.setopt(c.NOPROGRESS, 0)
+	#	c.setopt(c.PROGRESSFUNCTION, progress)
 		c.setopt(c.HTTPPOST, [
 			("file",
 			(c.FORM_FILE, filepath,
@@ -775,8 +819,7 @@ class SceneView(openglGui.glGuiPanel):
 			self.printButton.setProgressBar(None)
 		self.QueueRefresh()
 		self._engineResultView.setResult(result)
-		if finished:
-			self.printButton.setProgressBar(None)
+		if finished:	
 			text = '%s' % (result.getPrintTime())
 			for e in xrange(0, int(profile.getMachineSetting('extruder_amount'))):
 				amount = result.getFilamentAmount(e)
@@ -786,7 +829,9 @@ class SceneView(openglGui.glGuiPanel):
 				cost = result.getFilamentCost(e)
 				if cost is not None:
 					text += '\n%s' % (cost)
+			self.printButton.setProgressBar(None)
 			self.printButton.setBottomText(text)
+			pub.sendMessage('upload.enabled', enabled=True)
 		self.QueueRefresh()
 
 	def loadScene(self, fileList, pms_transforms=None):
@@ -1672,63 +1717,90 @@ class shaderEditor(wx.Frame):
 	def OnText(self, e):
 		self._callback(self._vertex.GetValue(), self._fragment.GetValue())
 
+
+class middleMan(SceneView):
+	def __init__(self):
+		#--gcode upload--#
+		# Second part of data handoff: listens to and then sends response acquired from sceneView and sends it to printerSelector
+		pub.subscribe(self.AllowUpload, 'transfer.response')
+		
+	def OpenPrinterSelector(self):
+		# Opens the printer selector window
+		win = printerSelector()	
+		win.Show(True)
+
+	def AllowUpload(self, enable=True):
+		# Sends message to printerSelector window to enable the upload button
+		print "Sending message to allow enable."
+		pub.sendMessage('enable.upload', enable=True)				
+
 class printerSelector(wx.Frame):
 	def __init__(self):
 		wx.Frame.__init__(self, None, wx.ID_ANY, "Printer Select", size=(475,300), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
 
-		#Pubsub subscribe
+		# Add-New-Printer Event-listener
 		pub.subscribe(self.AddToPrinterList,'printer.add')
-		
-		#Panel
+		# Enable-Upload Event-Listener
+		pub.subscribe(self.enableUpload, 'enable.upload')
+		# wxPython container widget
 		panel = wx.Panel(self, -1)
+		# Text Related
 		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 		bigFont = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-
+		# OctoPrint API Config Path
 		printerListPath = os.path.join(profile.getBasePath(), 'octoprint_api_config.ini')
+		
+		# Reads and parses the OctoPrintAPIConfig file for:
+		#	- printers
+		#	- api keys
+		printerList = []
 		cp = configparser.ConfigParser()
 		cp.read(printerListPath)
-
 		listSections = cp.sections()
-		printerList = []
+
 		for item in listSections:
 			printerList.append("Series 1 %s" % item)
-
-
+		
+		#--wxPython Text Widgets--#
 		text = wx.StaticText(panel, 26, "Upload to")
 		text.SetFont(font)
 
-		# List box
+		#--wxPython Container Widgets--#
 		self.availPrinters = wx.ListBox(panel, 10, wx.DefaultPosition, size=(200, 65), choices=printerList)
 		self.availPrinters.SetFont(font)
 		self.openOctoPrintInBrowser = False
 		
-		# Edit button
-		editButtonPath = resources.getPathForImage('edit.png')
-		editButtonImage = wx.Image(editButtonPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
-		editButton = wx.BitmapButton(panel, -1, editButtonImage)
-		
-		# Edit button binding
-		editButton.Bind(wx.EVT_BUTTON, self.OnEdit)
-
+		#--wxPython Image/Media Widgets--#
+		# Upload Icon
 		uploadIconPath = resources.getPathForImage('uploadIcon.png')
 		uploadIconConvert = wx.Image(uploadIconPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
 		uploadIcon = wx.StaticBitmap(panel, -1, uploadIconConvert)
-
-
-		# --- Plus and Minus Buttons --- #
-
-		#Plus button 
+		# Edit
+		editButtonPath = resources.getPathForImage('edit.png')
+		editButtonImage = wx.Image(editButtonPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+		# Plus 
 		plusButtonPath = resources.getPathForImage('plus_button.png')
 		plusButtonImage = wx.Image(plusButtonPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
-		plusButton = wx.BitmapButton(panel, -1, bitmap=plusButtonImage)
-
-		#Minus button
+		# Minus
 		minusButtonPath = resources.getPathForImage('minus_button.png')
 		minusButtonImage = wx.Image(minusButtonPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+		
+		
+		#--wxPython Buttons--#
+		# Edit
+		editButton = wx.BitmapButton(panel, -1, editButtonImage)
+		# Plus
+		plusButton = wx.BitmapButton(panel, -1, bitmap=plusButtonImage)
+		# Minus
 		minusButton = wx.BitmapButton(panel, -1, bitmap=minusButtonImage)
 
-		#Binding 
+		
+		#--wxPython Button Bindings--#
+		# Edit
+		editButton.Bind(wx.EVT_BUTTON, self.OnEdit)
+		# Plus
 		plusButton.Bind(wx.EVT_BUTTON, self.OnAddNew)
+		# Minus
 		minusButton.Bind(wx.EVT_BUTTON, self.OnRemove)
 
 		#Checkbox
@@ -1739,7 +1811,7 @@ class printerSelector(wx.Frame):
 		# --- Cancel and upload buttons --- #
 		cancel = wx.Button(panel, 1, "Cancel")
 		self.upload = wx.Button(panel, 10, "Upload")
-	#	self.upload.Enable(False)
+		self.upload.Enable(False)
 		#Font-size
 		cancel.SetFont(bigFont)
 		self.upload.SetFont(bigFont)
@@ -1747,7 +1819,6 @@ class printerSelector(wx.Frame):
 		#Binding
 		cancel.Bind(wx.EVT_BUTTON, self.OnCancel)
 		self.upload.Bind(wx.EVT_BUTTON, self.OnUpload)
-		
 		
 		#Boxes
 		mainBox = wx.BoxSizer(wx.VERTICAL)
@@ -1798,6 +1869,8 @@ class printerSelector(wx.Frame):
 	#	self.Bind(wx.EVT_BUTTON, self.OnUpload, id=10)
 	#	remove.Bind(wx.EVT_BUTTON, self.OnRemove)
 			
+	def enableUpload(self, enable=True):
+		self.upload.Enable(True)	
 		
 	def OnEdit(self, e):
 		index = self.availPrinters.GetSelection()
@@ -1831,10 +1904,16 @@ class printerSelector(wx.Frame):
 	def AddToPrinterList(self, serial):
 		printer = "Series 1  " + str(serial)
 		self.availPrinters.Append(printer)
-		
+	
+	# We need to create a function in profile - or somewhere -  that goes about deleting the item from the octoprint_api.ini (or equivalently named) file.
 	def OnRemove(self, e):
 		index = self.availPrinters.GetSelection()
+		printerString = self.availPrinters.GetString(index)
+		series, one, serial = printerString.split()
+		# Remove printer from list
 		self.availPrinters.Delete(index)
+		# Remove from api config path
+		profile.OctoPrintAPIRemoveSerial(serial)
 		
 	def OnChecked(self, e):
 		self.openOctoPrintInBrowser = True
@@ -1889,7 +1968,17 @@ class AddNewPrinter(wx.Frame):
 		panel.SetSizer(mainBox)
 		
 	def OnAddPrinter(self, e):
-		if not self.serialInput.GetValue() and not self.apiKeyInput.GetValue():
+		serialNum = self.serialInput.GetValue()
+		serialNumLength = len(serialNum)
+		apiKey = self.apiKeyInput.GetValue()
+		apiKeyLength = len(apiKey)
+		
+		# check API key length
+		if apiKeyLength != 32:
+			return
+		
+		# if values are empty
+		if not serialNum.GetValue() and not apiKey.GetValue():
 			print("No Value")
 			return
 		else:
