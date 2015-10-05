@@ -729,9 +729,24 @@ def OctoPrintConfigAPI(serial):
 
 	cp.read(path)
 	key = cp.get(serial, 'apikey')
-
+	
 	return key
+	
+def OctoPrintAPIRemoveSerial(serial):
+	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
+	cp = ConfigParser.ConfigParser()
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError:
+		return
+	octoprintConfigFile = open(path, 'wb')
+	if cp.has_section(serial):
+		cp.remove_section(serial)
+		print "Removing section ", serial
+	else:
+		print "Error: section does not exist"
 
+	octoprintConfigFile.close()
 def loadProfile(filename, allMachines = False):
 	"""
 		Read a profile file as active profile settings.
