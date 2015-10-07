@@ -76,7 +76,7 @@ class SceneView(openglGui.glGuiPanel):
 		self.gcodePath = None
 		pub.subscribe(self.SendToPrinter, 'gcode.update')
 		pub.subscribe(self.OpenBrowser, 'browser.open')
-		pub.subscribe(self.UploadEnabled, 'upload.enabled')
+		pub.subscribe(self.UploadButtonStatus, 'upload.enabled')
 
 		self._viewport = None
 		self._modelMatrix = None
@@ -87,8 +87,8 @@ class SceneView(openglGui.glGuiPanel):
 		self.printButton           = openglGui.glButton(self, 6, _("Print"), (1,0), self.OnPrintButton)
 		self.octoPrintButton	   = openglGui.glButton(self, 6, _("Open in OctoPrint"), (2,0), self.OnOctoPrintButton)
 		self.printButton.setDisabled(True)
-		
-		self.win = middleMan()
+		sceneObjectQuantity = len(self._scene.objects())
+		self.win = middleMan(self.printButton, sceneObjectQuantity)
 
 		group = []
 		self.rotateToolButton = openglGui.glRadioButton(self, 8, _("Rotate"), (0,-1), group, self.OnToolSelect)
@@ -143,6 +143,7 @@ class SceneView(openglGui.glGuiPanel):
 		self.OnToolSelect(0)
 		self.updateToolButtons()
 		self.updateProfileToControls()
+		
 
 	def OpenBrowser(self, open):
 		if open == True:
@@ -150,9 +151,9 @@ class SceneView(openglGui.glGuiPanel):
 		else:
 			self.openOctoPrintInBrowser = False
 		
-	def UploadEnabled(self, enabled=True):
+	def UploadButtonStatus(self, enable):
 		print "Upload Enabled event caller activated."
-		pub.sendMessage('transfer.response', enable=True)
+		pub.sendMessage('transfer.response', enable=enable)
 
 	def loadGCodeFile(self, filename):
 		self.OnDeleteAll(None)
@@ -164,8 +165,8 @@ class SceneView(openglGui.glGuiPanel):
 		self._engineResultView.setResult(self._engine._result)
 		self.printButton.setBottomText('')
 		self.viewSelection.setValue(4)
-		pub.sendMessage('upload.enabled', enable=True)
 		self.printButton.setDisabled(False)
+		pub.sendMessage('upload.enabled', enable=True)
 		self.OnViewChange()
 	#Delete if not needed
 #	def populateOctoPrintwGCodeFile(self, gcodePath):
@@ -257,7 +258,6 @@ class SceneView(openglGui.glGuiPanel):
 		self._scene.centerAll()
 
 	def showLoadModel(self, button = 1):
-		self.notification.message("Uploaded a thing.")
 		if button == 1:
 			dlg=wx.FileDialog(self, _("Open 3D model"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST|wx.FD_MULTIPLE)
 
@@ -306,92 +306,53 @@ class SceneView(openglGui.glGuiPanel):
 		resourceBasePath = resources.resourceBasePath
 		filename = self._scene._objectList[0].getName()
 		# Make a directory called 'temp' in ./resources
-		
-	#	self._createTempFiles(filename)
-		gcodeFile = tempfile.NamedTemporaryFile(suffix='.gcode', prefix=filename, dir=resourceBasePath, delete=True)
-		
-		tempFilePath = os.path.normpath(os.path.join(resourceBasePath, gcodeFile.name))
-		key = profile.OctoPrintConfigAPI(serial)
-		
-		threading.Thread(target=self._uploadToOctoPrint(key, serial, tempFilePath)).start()
-		gcodeFile.close()
-		
-	
-	def _createTempFiles(self, filename):
-		# Resources directory path
 		resourceBasePath = resources.resourceBasePath
+		suffix = '.gcode'
+		filename = filename + suffix
 		# Path to temporary file
-		path = os.path.join(resourcebasePath, "%s.%s" % (filename, suffix))
-		print "line 324 \n path = %s" % path
+		tempFilePath = os.path.join(resourceBasePath, 'example', filename)
+		print "line 314 \n path = %s" % tempFilePath
+		self._createTempFiles(tempFilePath)
+		key = profile.OctoPrintConfigAPI(serial)
+		self._uploadToOctoPrint(key, serial, tempFilePath)
+
+	#	gcodeFile = tempfile.NamedTemporaryFile(suffix='.gcode', prefix=filename, dir=resourceBasePath, delete=True)
+	#	tempFilePath = os.path.normpath(os.path.join(resourceBasePath, gcodeFile.name))
+	
+	#	gcodeFile.close()
+		
+	def _createTempFiles(self, gcodeFile):
 		# gets gcode from the engine
-		"""
 		gcode = self._engine.getResult().getGCode()
 		try:
 			size = float(len(gcode))
 			read_pos = 0
 			# writes gcode to targetFileName
-			with open(targetFilename, 'wb') as fdst:
+			with open(gcodeFile, 'wb') as fdst:
 				while 1:
 					buf = gcode.read(16*1024)
 					if len(buf) < 1:
 						break
 					read_pos += len(buf)
 					fdst.write(buf)
-					self.printButton.setProgressBar(read_pos / size)
+					
 					self._queueRefresh()
 		except:
 			import sys, traceback
 			traceback.print_exc()
 			self.notification.message("Failed to save")
+		
+		if explorer.hasExplorer():
+			self.notification.message("Saved as %s" % (gcodeFile), lambda : explorer.openExplorer(gcodeFile), 4, 'Open folder')
 		else:
-			if ejectDrive:
-				self.notification.message("Saved as %s" % (targetFilename), lambda : self._doEjectSD(ejectDrive), 31, 'Eject')
-			elif explorer.hasExplorer():
-				self.notification.message("Saved as %s" % (targetFilename), lambda : explorer.openExplorer(targetFilename), 4, 'Open folder')
-			else:
-				self.notification.message("Saved as %s" % (targetFilename))
-		"""
+			self.notification.message("Saved as %s" % (gcodeFile))
+		
 	def _uploadToOctoPrint(self, key, serial, tempFilePath):
 		# Notify the user that the file is attempting to be uploaded
 		self.notification.message("Uploading....")
 		
-		# Pycurl
-		c = pycurl.Curl()
-		
-		# File name and path
-		filepath = tempFilePath
-		filename = os.path.basename(filepath)
-		
-		# Printer information
-		url = 'http://series1-%s.local:5000/api/files/local' % serial
-		apiKey = 'X-Api-Key: %s' % key
-		contentType = "Content-Type: multipart/form-data"
-		header = [apiKey, contentType]
-		
-		# Pycurl options
-		c.setopt(c.URL, url)
-		c.setopt(c.HTTPHEADER, header)
-	#	c.setopt(c.NOPROGRESS, 0)
-	#	c.setopt(c.PROGRESSFUNCTION, progress)
-		c.setopt(c.HTTPPOST, [
-			("file",
-			(c.FORM_FILE, filepath,
-			c.FORM_CONTENTTYPE, "multipart/form-data")),
-			("print","False")])
-		c.setopt(c.VERBOSE, True)
-		
-		try:
-			# Perform http POST request in new thread to prevent UI lag
-			threading.Thread(target=c.perform()).start()
-			c.close()
-			# Open OctoPrint in web browser if user so chooses
-			if self.openOctoPrintInBrowser == True:
-				webbrowser.open_new('http:series1-%s.local:5000' % serial)
-			self.notification.message("Successfully uploaded as %s!" % filename, lambda : webbrowser.open_new('http:series1-%s.local:5000' % serial), 6, 'Open In Browser')
-		except pycurl.error, error:
-			errno, errstr = error
-			print 'An error occured: ', errstr
-			self.notification.message("Error: %s" % errstr)	
+		upload = PostThread(self, key, serial, tempFilePath, self.openOctoPrintInBrowser, self.notification)
+		upload.start()
 			
 	def OnPrintButton(self, button):
 		if button == 1:
@@ -477,6 +438,7 @@ class SceneView(openglGui.glGuiPanel):
 
 	def showSaveGCode(self):
 		if len(self._scene._objectList) < 1:
+			self.printButton.setDisabled(True)
 			return
 		if not self._engine.getResult().isFinished():
 			return
@@ -511,10 +473,13 @@ class SceneView(openglGui.glGuiPanel):
 					fdst.write(buf)
 					self.printButton.setProgressBar(read_pos / size)
 					self._queueRefresh()
+			pub.sendMessage('upload.enabled', enable=True)
 		except:
 			import sys, traceback
 			traceback.print_exc()
 			self.notification.message("Failed to save")
+			pub.sendMessage('upload.enabled', enable=False)
+			print "Upload button disabled. Failed to save."
 		else:
 			if ejectDrive:
 				self.notification.message("Saved as %s" % (targetFilename), lambda : self._doEjectSD(ejectDrive), 31, 'Eject')
@@ -532,16 +497,13 @@ class SceneView(openglGui.glGuiPanel):
 		self.printButton.setProgressBar(None)
 		self._engine.getResult().submitInfoOnline()
 		
-
 	def _saveGCodeTemp(self, tempFilePath, ejectDrive = False):
 		# gets gcode from the engine
 		gcode = self._engine.getResult().getGCode()
 	#	fd = tempfile.NamedTemporaryFile(suffix='.gcode', prefix=filename, dir=tempD)
-
 		try:
 			size = float(len(gcode))
 			read_pos = 0
-
 			with open(tempFilePath, 'w+b') as fdst:
 				print("FDST name: %s" % fdst.name)
 				while 1:
@@ -552,10 +514,12 @@ class SceneView(openglGui.glGuiPanel):
 					fdst.write(buf)
 					self.printButton.setProgressBar(read_pos / size)
 					self._queueRefresh()
+			pub.sendMessage('upload.enabled', enable=True)
 		except:
 			import sys, traceback
 			traceback.print_exc()
 			self.notification.message("Failed to save")
+			pub.sendMessage('upload.enabled', enable=False)
 
 		# Clear progress bar
 		self.printButton.setProgressBar(None)
@@ -813,13 +777,15 @@ class SceneView(openglGui.glGuiPanel):
 			if self.printButton.getProgressBar() is not None and progressValue >= 0.0 and abs(self.printButton.getProgressBar() - progressValue) < 0.01:
 				return
 		self.printButton.setDisabled(not finished)
+		
 		if progressValue >= 0.0:
 			self.printButton.setProgressBar(progressValue)
 		else:
 			self.printButton.setProgressBar(None)
 		self.QueueRefresh()
 		self._engineResultView.setResult(result)
-		if finished:	
+		if finished:
+			pub.sendMessage('upload.enabled', enable=True)
 			text = '%s' % (result.getPrintTime())
 			for e in xrange(0, int(profile.getMachineSetting('extruder_amount'))):
 				amount = result.getFilamentAmount(e)
@@ -831,7 +797,6 @@ class SceneView(openglGui.glGuiPanel):
 					text += '\n%s' % (cost)
 			self.printButton.setProgressBar(None)
 			self.printButton.setBottomText(text)
-			pub.sendMessage('upload.enabled', enabled=True)
 		self.QueueRefresh()
 
 	def loadScene(self, fileList, pms_transforms=None):
@@ -1717,31 +1682,49 @@ class shaderEditor(wx.Frame):
 	def OnText(self, e):
 		self._callback(self._vertex.GetValue(), self._fragment.GetValue())
 
+# middleMan should inherit printButton
+# Check printButton's status
+# Then initialize printerSelector with that variable as one of its parameters
 
 class middleMan(SceneView):
-	def __init__(self):
+	def __init__(self, printButton, sceneObjectQuantity):
 		#--gcode upload--#
 		# Second part of data handoff: listens to and then sends response acquired from sceneView and sends it to printerSelector
-		pub.subscribe(self.AllowUpload, 'transfer.response')
+		pub.subscribe(self.uploadStatus, 'transfer.response')
+		self.enableUpload = True
+		self.printButtonStatus = printButton
+		self.sceneObjectQuantity = sceneObjectQuantity
+
+		print printButton
 		
+			
 	def OpenPrinterSelector(self):
 		# Opens the printer selector window
-		win = printerSelector()	
+		
+		print "_disabled:" 
+		if self.printButtonStatus.isDisabled():
+			self.enableUpload = False
+			print "Disabled."
+		else:
+			self.enableUpload = True
+		print "enableUpload: %s\n\n\n" % self.enableUpload
+		print "scene object quantity: %s" % self.sceneObjectQuantity
+		win = printerSelector(self.enableUpload)	
 		win.Show(True)
 
-	def AllowUpload(self, enable=True):
+	def uploadStatus(self, enable):
 		# Sends message to printerSelector window to enable the upload button
-		print "Sending message to allow enable."
-		pub.sendMessage('enable.upload', enable=True)				
+		print("upload status: %s" % enable)
+		pub.sendMessage('enable.upload', enable=enable)		
 
 class printerSelector(wx.Frame):
-	def __init__(self):
+	def __init__(self, enableUpload):
 		wx.Frame.__init__(self, None, wx.ID_ANY, "Printer Select", size=(475,300), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
 
 		# Add-New-Printer Event-listener
 		pub.subscribe(self.AddToPrinterList,'printer.add')
 		# Enable-Upload Event-Listener
-		pub.subscribe(self.enableUpload, 'enable.upload')
+		pub.subscribe(self.enableUploadButton, 'enable.upload')
 		# wxPython container widget
 		panel = wx.Panel(self, -1)
 		# Text Related
@@ -1767,6 +1750,7 @@ class printerSelector(wx.Frame):
 
 		#--wxPython Container Widgets--#
 		self.availPrinters = wx.ListBox(panel, 10, wx.DefaultPosition, size=(200, 65), choices=printerList)
+		self.availPrinters.SetSelection(0)
 		self.availPrinters.SetFont(font)
 		self.openOctoPrintInBrowser = False
 		
@@ -1811,7 +1795,11 @@ class printerSelector(wx.Frame):
 		# --- Cancel and upload buttons --- #
 		cancel = wx.Button(panel, 1, "Cancel")
 		self.upload = wx.Button(panel, 10, "Upload")
-		self.upload.Enable(False)
+		
+		print "enableUpload line 1839: %s" % enableUpload
+
+		self.upload.Enable(enableUpload)
+		
 		#Font-size
 		cancel.SetFont(bigFont)
 		self.upload.SetFont(bigFont)
@@ -1819,6 +1807,8 @@ class printerSelector(wx.Frame):
 		#Binding
 		cancel.Bind(wx.EVT_BUTTON, self.OnCancel)
 		self.upload.Bind(wx.EVT_BUTTON, self.OnUpload)
+		
+		wx.EVT_CLOSE(self, self.OnClose)
 		
 		#Boxes
 		mainBox = wx.BoxSizer(wx.VERTICAL)
@@ -1869,8 +1859,9 @@ class printerSelector(wx.Frame):
 	#	self.Bind(wx.EVT_BUTTON, self.OnUpload, id=10)
 	#	remove.Bind(wx.EVT_BUTTON, self.OnRemove)
 			
-	def enableUpload(self, enable=True):
-		self.upload.Enable(True)	
+	def enableUploadButton(self, enable):
+		print "enableUpload Function; enable: %s" % enable
+		self.upload.Enable(enable)
 		
 	def OnEdit(self, e):
 		index = self.availPrinters.GetSelection()
@@ -1911,6 +1902,8 @@ class printerSelector(wx.Frame):
 		printerString = self.availPrinters.GetString(index)
 		series, one, serial = printerString.split()
 		# Remove printer from list
+	
+		print "Remove:\n Serial:%s\nIndex:%s\nprinterString:%s" % (serial, index, printerString)
 		self.availPrinters.Delete(index)
 		# Remove from api config path
 		profile.OctoPrintAPIRemoveSerial(serial)
@@ -1919,6 +1912,9 @@ class printerSelector(wx.Frame):
 		self.openOctoPrintInBrowser = True
 		
 	def OnCancel(self, e):
+		self.Destroy()
+		
+	def OnClose(self, e):
 		self.Destroy()
 
 class AddNewPrinter(wx.Frame):
@@ -1930,6 +1926,8 @@ class AddNewPrinter(wx.Frame):
 		serialBox = wx.BoxSizer(wx.HORIZONTAL)
 		apiBox = wx.BoxSizer(wx.HORIZONTAL)
 		buttonsBox = wx.BoxSizer(wx.HORIZONTAL)
+		errorBox = wx.BoxSizer(wx.HORIZONTAL)
+		
 		panel = wx.Panel(self, -1)
 		serialNumberText = wx.StaticText(panel, -1, "Series 1")
 		self.serialInput = wx.TextCtrl(panel, -1, "0000")
@@ -1957,13 +1955,20 @@ class AddNewPrinter(wx.Frame):
 		apiBox.Add(apiInputText, 1, wx.TOP, 10)
 		apiBox.Add(self.apiKeyInput, 1, wx.TOP, 10)
 		
-		buttonsBox.Add(cancelButton, 1, wx.RIGHT, 100)
+		errorText = wx.StaticText(panel, -1, "ERROR: API Key must be 32 characters long")
+		errorText.SetForegroundColour('red')
+		buttonsBox.Add(cancelButton, 1, wx.RIGHT, 30)
 		buttonsBox.Add(addPrinterButton)
 		
-		mainBox.Add(imageBox, flag=wx.ALIGN_CENTRE)
+		#Errors
+		errorBox.Add(errorText)
+
+		
+		mainBox.Add(imageBox, flag=wx.ALIGN_CENTRE | wx.TOP, border=10)
 		mainBox.Add(serialBox, flag=wx.ALIGN_CENTRE)
 		mainBox.Add(apiBox, flag=wx.ALIGN_CENTRE)
-		mainBox.Add(buttonsBox, flag=wx.ALIGN_CENTRE | wx.TOP, border=100)
+		mainBox.Add(buttonsBox, flag=wx.TOP | wx.ALIGN_CENTRE, border=30)
+		mainBox.Add(errorBox, flag=wx.TOP | wx.ALIGN_CENTRE, border=50)
 		
 		panel.SetSizer(mainBox)
 		
@@ -1974,11 +1979,11 @@ class AddNewPrinter(wx.Frame):
 		apiKeyLength = len(apiKey)
 		
 		# check API key length
-		if apiKeyLength != 32:
-			return
+#		if apiKeyLength != 32:
+#			return
 		
 		# if values are empty
-		if not serialNum.GetValue() and not apiKey.GetValue():
+		if not serialNum or not apiKey:
 			print("No Value")
 			return
 		else:
@@ -2063,4 +2068,63 @@ class EditPrinter(wx.Frame):
 
 	def OnCancel(self, e):
 		self.Destroy()
+
+
+class PostThread(threading.Thread):
+	def __init__(self, parent, key, serial, tempFilePath, openBrowser, notification):
+		threading.Thread.__init__(self)
+		
+		self.key = key
+		self.serial = serial
+		self.tempFilePath = tempFilePath
+		self.openBrowser = openBrowser
+		self.notification = notification
+		
+	def run(self):
+		# Pycurl
+		c = pycurl.Curl()
+		
+		# File name and path
+		filepath = self.tempFilePath
+		filename = os.path.basename(filepath)
+		
+		# Printer information
+		url = 'http://series1-%s.local:5000/api/files/local' % self.serial
+		apiKey = 'X-Api-Key: %s' % self.key
+		contentType = "Content-Type: multipart/form-data"
+		header = [apiKey, contentType]
+		
+		# Pycurl options
+		c.setopt(c.URL, url)
+		c.setopt(c.HTTPHEADER, header)
+	#	c.setopt(c.NOPROGRESS, 0)
+	#	c.setopt(c.PROGRESSFUNCTION, progress)
+		c.setopt(c.HTTPPOST, [
+			("file",
+			(c.FORM_FILE, filepath,
+			c.FORM_CONTENTTYPE, "multipart/form-data")),
+			("print","False")])
+		c.setopt(c.VERBOSE, True)
+		
+		try:
+			# Perform http POST request in new thread to prevent UI lag
+		#	threading.Thread(target=c.perform()).start()
+			c.perform()
+			c.close()
+			# Open OctoPrint in web browser if user so chooses
+			if self.openBrowser:
+				webbrowser.open_new('http:series1-%s.local:5000' % self.serial)
+			self.notification.message("Successfully uploaded as %s!" % filename, lambda : webbrowser.open_new('http:series1-%s.local:5000' % self.serial), 6, 'Open In Browser')
+		except pycurl.error, error:
+			errno, errstr = error
+			print 'An error occured: ', errstr
+			self.notification.message("Error: %s" % errstr)
+		
+		try: 
+			os.remove(self.tempFilePath)
+			print "Removed file"
+		except:
+			print "error"		
+		
+		
 
