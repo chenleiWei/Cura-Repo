@@ -22,7 +22,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="1.3.4a1"
+export BUILD_NAME="1.3.4a2"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -144,35 +144,13 @@ else
 	TAR=gnutar
 fi
 
-#############################
-# Build the required firmwares
-#############################
-
-if [ -d "C:/arduino-1.0.3" ]; then
-	ARDUINO_PATH=C:/arduino-1.0.3
-	ARDUINO_VERSION=103
-elif [ -d "/Applications/Arduino.app/Contents/Resources/Java" ]; then
-	ARDUINO_PATH=/Applications/Arduino.app/Contents/Resources/Java
-	ARDUINO_VERSION=$(defaults read /Applications/Arduino.app/Contents/Info.plist CFBundleGetInfoString | sed -e 's/\.//g')
-	PATH=$PATH:/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/
-else
-	ARDUINO_PATH=/usr/share/arduino
-	ARDUINO_VERSION=105
-fi
-
-
-if [ ! -d "$ARDUINO_PATH" ]; then
-  echo "Arduino path '$ARDUINO_PATH' doesn't exist"
-  exit 1
-fi
-
-function pause(){
-   read -p "$*"
-}
 
 #############################
 # Darwin
 #############################
+function pause(){
+   read -p "$*"
+}
 
 if [ "$BUILD_TARGET" = "darwin" ]; then
     TARGET_DIR=Cura-${BUILD_NAME}-MacOS
