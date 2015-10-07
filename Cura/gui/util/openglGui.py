@@ -421,6 +421,10 @@ class glButton(glGuiControl):
 
 	def setHidden(self, value):
 		self._hidden = value
+		
+	def isDisabled(self):
+		print self._disabled
+		return self._disabled
 
 	def setDisabled(self, value):
 		self._disabled = value
