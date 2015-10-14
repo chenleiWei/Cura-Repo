@@ -2,6 +2,7 @@ __copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AG
 
 import os
 import webbrowser
+import pycurl
 import threading
 import time
 import math
@@ -9,6 +10,10 @@ import wx
 import re
 import wx.wizard
 import ConfigParser as configparser
+try:
+    from io import BytesIO
+except ImportError:
+    from StringIO import StringIO as BytesIO
 
 from Cura.gui import firmwareInstall
 from Cura.gui import printWindow
@@ -552,6 +557,7 @@ M84           ;steppers off
 G90           ;absolute positioning""")
 
 
+
 class TAMReadyPage(InfoPage):
 	def __init__(self, parent):
 		super(TAMReadyPage, self).__init__(parent, _("Configuration Complete"))
@@ -570,22 +576,172 @@ class TAMReadyPage(InfoPage):
 	def skipTutorial(self, e):
 		self.GetParent().Close()
 	
+
+
 class TAMOctoPrintInfo(InfoPage):
 	def __init__(self, parent):
 		super(TAMOctoPrintInfo, self).__init__(parent, _("Octoprint Configuration"))
+		
 		self.AddLogo()
+		self.validSerial = False
+		self.validKey = False
+		self.saveInfo = False
+
 		self.AddTextTitle("Printer Serial Number")
-		self.serialNumber = self.AddTextCtrl("0000")
+		self.serialNumber = self.AddTextCtrl("")
 		self.AddTextTitle("OctoPrint API Key")
-		self.APIKey = self.AddTextCtrlPrivate("")
+		self.APIKey = self.AddTextCtrlPrivate("")	
+		
+		self.skipConfig = self.AddCheckbox("Skip configuration for now", checked=False)
+		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
+		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
+		self.APIKey.Bind(wx.EVT_TEXT, self.checkKeyValidity)
+		
+	def AllowNext(self):
+		return False	
+		
+	def skipPage(self, e):
+		if self.skipConfig.GetValue():
+			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
+		else:
+			self.passCheck()
+		
+	# Input validation 	
+	def checkSerialValidity(self, e):
+		serial = self.serialNumber.GetValue()
+		serialLength = len(serial)
+		
+		"""Serial Check"""
+		# If input length is less than 4 or greater than 6
+		if serialLength < 4 or serialLength > 6: 
+			self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
+			self.validSerial = False
+		elif not serial.isdigit():
+			return
+		elif int(serial) < 1:
+			return
+		else:
+			self.validSerial = True
+			
+		self.passCheck()
+			
+	def checkKeyValidity(self, e):
+		key = self.APIKey.GetValue()
+		keyLength = len(key)
+		
+		if not keyLength == 32:
+			self.AddText("API key length is not correct.")
+			self.validKey = False
+		else:
+			self.validKey = True
+			
+		self.passCheck()
+			
+	def passCheck(self):
+		if self.validSerial == True and self.validKey == True and not self.skipConfig.GetValue():
+			self.saveInfo = True
+			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
+		else:
+			self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
+
+	def process(self):
+		c = pycurl.Curl()
+		buffer = BytesIO()
+		# File name and path
+		resourceBasePath = resources.resourceBasePath
+		filepath = os.path.join(resourceBasePath, 'example/dummy_code.gcode')
+		filename = os.path.basename(filepath)
+		
+		# Printer information
+		url = 'http://series1-%s:5000/api/files/local' % self.serialNumber.GetValue()
+		apiKey = 'X-Api-Key: %s' % self.APIKey.GetValue()
+		contentType = "Content-Type: multipart/form-data"
+		header = [apiKey, contentType]
+		
+		# Pycurl options
+		c.setopt(c.URL, url)
+		c.setopt(c.WRITEDATA, buffer)
+		c.setopt(c.HTTPHEADER, header)
+		c.setopt(c.HTTPPOST, [
+			("file",
+			(c.FORM_FILE, filepath,
+			c.FORM_CONTENTTYPE, "multipart/form-data")),
+			("print","False")])
+		c.setopt(c.VERBOSE, True)
+		
+		try:
+			c.perform()
+		except pycurl.error, error:
+			errno, errstr = error
+			print "Error"
+			return False
+		
+		status = c.getinfo(c.RESPONSE_CODE)
+		if status == 201:
+			self.removeFile()
+			print "Removing file"
+			return True
+		
+		c.close()
+		
+
+	def removeFile(self):
+		c = pycurl.Curl()
+		buffer = BytesIO()
+		# File name and path
+		resourceBasePath = resources.resourceBasePath
+		filepath = os.path.join(resourceBasePath, 'example/dummy_code.gcode')
+		filename = os.path.basename(filepath)
+		
+		# Printer information
+		url = 'http://series1-%s:5000/api/files/local/dummy_code.gcode' % self.serialNumber.GetValue()
+		apiKey = 'X-Api-Key: %s' % self.APIKey.GetValue()
+		contentType = "Content-Type: multipart/form-data"
+		header = [apiKey, contentType]
+		
+		# Pycurl options
+		c.setopt(c.URL, url)
+		c.setopt(c.WRITEDATA, buffer)
+		c.setopt(pycurl.CUSTOMREQUEST,"DELETE")
+		c.setopt(c.HTTPHEADER, header)
+		c.setopt(c.VERBOSE, True)
+		
+		try:
+			# Perform http POST request in new thread to prevent UI lag
+			c.perform()
+		except pycurl.error, error:
+			errno, errstr = error
+			return errno
+		
+		status = c.getinfo(c.RESPONSE_CODE)
+		if status == 401:
+			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ErrorPage)
+		print "STATUS: %s" % status
+		c.close()
 		
 	def StoreData(self):
 		serial = self.serialNumber.GetValue()
-		print("Serial Number: %s" % serial)
-		profile.putPreference('serialNumber', serial)
-		profile.initializeOctoPrintAPIConfig(serial, self.APIKey.GetValue())
-		profile.OctoPrintConfigAPI(serial)
-			
+		key = self.APIKey.GetValue()
+		print "Save info: %s" % self.saveInfo
+		if (self.saveInfo is True) and (not self.skipConfig.GetValue()):
+			if self.process() == False:
+				wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ErrorPage)
+			else:
+				profile.putPreference('serialNumber', serial)
+				profile.initializeOctoPrintAPIConfig(serial, key)
+				profile.OctoPrintConfigAPI(serial)			
+		elif self.skipConfig.GetValue() == True:
+			print "skipping"
+			return
+
+class ErrorPage(InfoPage):
+	def __init__(self, parent):
+		super(ErrorPage, self).__init__(parent, _("Configuring Error"))
+		
+		self.AddText("Please click back to edit your printer information.")
+		
+
+
 class TAMSelectMaterials(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectMaterials, self).__init__(parent, _("Material Selection"))
@@ -1450,6 +1606,7 @@ class ConfigWizard(wx.wizard.Wizard):
 		self.TAM_select_quality = TAMSelectQuality(self)
 		self.TAM_select_support = TAMSelectSupport(self)
 		self.TAM_first_print = TAMFirstPrint(self)
+		self.ErrorPage = ErrorPage(self)
 		
 		self.ultimakerSelectParts = SelectParts(self)
 		self.ultimakerFirmwareUpgradePage = UltimakerFirmwareUpgradePage(self)
@@ -1505,6 +1662,8 @@ class ConfigWizard(wx.wizard.Wizard):
 	def OnCancel(self, e):
 		profile.setActiveMachine(self._old_machine_index)
 
+	def disableNext(self):
+		self.FindWindowById(wx.ID_FORWARD).Disable()
 
 class bedLevelWizardMain(InfoPage):
 	def __init__(self, parent):
