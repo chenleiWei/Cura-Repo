@@ -3,6 +3,7 @@ __copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AG
 import os
 import webbrowser
 import pycurl
+from wx.lib.pubsub import pub
 import threading
 import time
 import math
@@ -17,6 +18,7 @@ except ImportError:
 
 from Cura.gui import firmwareInstall
 from Cura.gui import printWindow
+from Cura.gui import sceneView
 from Cura.util import machineCom
 from Cura.util import profile
 from Cura.util import gcodeGenerator
@@ -557,7 +559,6 @@ M84           ;steppers off
 G90           ;absolute positioning""")
 
 
-
 class TAMReadyPage(InfoPage):
 	def __init__(self, parent):
 		super(TAMReadyPage, self).__init__(parent, _("Configuration Complete"))
@@ -574,8 +575,7 @@ class TAMReadyPage(InfoPage):
 		self.skipTut.Bind(wx.EVT_BUTTON, self.skipTutorial)
 
 	def skipTutorial(self, e):
-		self.GetParent().Close()
-	
+		self.GetParent().Close()	
 
 
 class TAMOctoPrintInfo(InfoPage):
@@ -597,16 +597,18 @@ class TAMOctoPrintInfo(InfoPage):
 		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
 		self.APIKey.Bind(wx.EVT_TEXT, self.checkKeyValidity)
 		
+		pub.subscribe(self.wizardPageRedirection, 'page.redirect')
+		
 	def AllowNext(self):
-		return False	
+		return False
 		
 	def skipPage(self, e):
 		if self.skipConfig.GetValue():
 			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
 		else:
 			self.passCheck()
-		
-	# Input validation 	
+			
+	# Serial number check	
 	def checkSerialValidity(self, e):
 		serial = self.serialNumber.GetValue()
 		serialLength = len(serial)
@@ -624,11 +626,12 @@ class TAMOctoPrintInfo(InfoPage):
 			self.validSerial = True
 			
 		self.passCheck()
-			
+	
+	# Key check
 	def checkKeyValidity(self, e):
 		key = self.APIKey.GetValue()
 		keyLength = len(key)
-		
+		serial = self.serialNumber.GetValue()
 		if not keyLength == 32:
 			self.AddText("API key length is not correct.")
 			self.validKey = False
@@ -636,55 +639,17 @@ class TAMOctoPrintInfo(InfoPage):
 			self.validKey = True
 			
 		self.passCheck()
-			
+		
+		if self.saveInfo:
+			self.process(key, serial)
+
 	def passCheck(self):
 		if self.validSerial == True and self.validKey == True and not self.skipConfig.GetValue():
 			self.saveInfo = True
 			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
 		else:
-			self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
-
-	def process(self):
-		c = pycurl.Curl()
-		buffer = BytesIO()
-		# File name and path
-		resourceBasePath = resources.resourceBasePath
-		filepath = os.path.join(resourceBasePath, 'example/dummy_code.gcode')
-		filename = os.path.basename(filepath)
-		
-		# Printer information
-		url = 'http://series1-%s:5000/api/files/local' % self.serialNumber.GetValue()
-		apiKey = 'X-Api-Key: %s' % self.APIKey.GetValue()
-		contentType = "Content-Type: multipart/form-data"
-		header = [apiKey, contentType]
-		
-		# Pycurl options
-		c.setopt(c.URL, url)
-		c.setopt(c.WRITEDATA, buffer)
-		c.setopt(c.HTTPHEADER, header)
-		c.setopt(c.HTTPPOST, [
-			("file",
-			(c.FORM_FILE, filepath,
-			c.FORM_CONTENTTYPE, "multipart/form-data")),
-			("print","False")])
-		c.setopt(c.VERBOSE, True)
-		
-		try:
-			c.perform()
-		except pycurl.error, error:
-			errno, errstr = error
-			print "Error"
-			return False
-		
-		status = c.getinfo(c.RESPONSE_CODE)
-		if status == 201:
-			self.removeFile()
-			print "Removing file"
-			return True
-		
-		c.close()
-		
-
+			self.saveInfo = False
+				
 	def removeFile(self):
 		c = pycurl.Curl()
 		buffer = BytesIO()
@@ -694,7 +659,7 @@ class TAMOctoPrintInfo(InfoPage):
 		filename = os.path.basename(filepath)
 		
 		# Printer information
-		url = 'http://series1-%s:5000/api/files/local/dummy_code.gcode' % self.serialNumber.GetValue()
+		url = 'http://series1-%s.local:5000/api/files/local/dummy_code.gcode' % self.serialNumber.GetValue()
 		apiKey = 'X-Api-Key: %s' % self.APIKey.GetValue()
 		contentType = "Content-Type: multipart/form-data"
 		header = [apiKey, contentType]
@@ -714,33 +679,104 @@ class TAMOctoPrintInfo(InfoPage):
 			return errno
 		
 		status = c.getinfo(c.RESPONSE_CODE)
-		if status == 401:
-			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ErrorPage)
+#		if status == 401:
+#			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ErrorPage)
 		print "STATUS: %s" % status
 		c.close()
 		
+	def process(self, key, serial):
+		resourceBasePath = resources.resourceBasePath
+		filepath = os.path.join(resourceBasePath, 'example/dummy_code.gcode')
+		print "Save info: %s" % self.saveInfo
+		if (self.saveInfo is True) and (not self.skipConfig.GetValue()):
+			thread = PostThread(self, key, serial, filepath)
+
+			self.AddText("Configuring...")
+	#		self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
+			thread.start()
+			
+	#		wx.CallAfter(self.error())
+
+	def wizardPageRedirection(self, error):
+		if error:
+			print error
+			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ErrorPage)
+		else:
+			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
+
 	def StoreData(self):
 		serial = self.serialNumber.GetValue()
 		key = self.APIKey.GetValue()
-		print "Save info: %s" % self.saveInfo
-		if (self.saveInfo is True) and (not self.skipConfig.GetValue()):
-			if self.process() == False:
-				wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ErrorPage)
-			else:
-				profile.putPreference('serialNumber', serial)
-				profile.initializeOctoPrintAPIConfig(serial, key)
-				profile.OctoPrintConfigAPI(serial)			
-		elif self.skipConfig.GetValue() == True:
+		
+		if 	self.skipConfig.GetValue() == True:
 			print "skipping"
 			return
+		else: 
+			profile.putPreference('serialNumber', serial)
+			profile.initializeOctoPrintAPIConfig(serial, key)
+			profile.OctoPrintConfigAPI(serial)
+		
+
 
 class ErrorPage(InfoPage):
 	def __init__(self, parent):
 		super(ErrorPage, self).__init__(parent, _("Configuring Error"))
 		
+		self.AddTextTitle("ERROR").SetForegroundColour('Red')
 		self.AddText("Please click back to edit your printer information.")
 		
+	def AllowNext(self):
+		return False
 
+class PostThread(threading.Thread):
+	def __init__(self, parent, key, serial, filepath):
+		threading.Thread.__init__(self)
+		
+		self.key = key
+		self.serial = serial
+		self.success = False
+		self.filepath = filepath
+		self.parent = parent
+		
+	def run(self):
+		c = pycurl.Curl()
+		buffer = BytesIO()
+		# File name and path
+
+		filename = os.path.basename(self.filepath)
+		
+		# Printer information
+		url = 'http://series1-%s.local:5000/api/files/local' % self.serial
+		apiKey = 'X-Api-Key: %s' % self.key
+		contentType = "Content-Type: multipart/form-data"
+		header = [apiKey, contentType]
+		
+		# Pycurl options
+		c.setopt(c.URL, url)
+		c.setopt(c.WRITEDATA, buffer)
+		c.setopt(c.HTTPHEADER, header)
+		c.setopt(c.HTTPPOST, [
+			("file",
+			(c.FORM_FILE, self.filepath,
+			c.FORM_CONTENTTYPE, "multipart/form-data")),
+			("print","False")])
+		c.setopt(c.VERBOSE, True)
+		
+		try:
+			c.perform()
+			self.success = True
+		except pycurl.error, error:
+			errno, errstr = error
+		
+		status = c.getinfo(c.RESPONSE_CODE)
+		if status == 201:
+			self.parent.removeFile()
+			print "Removing file"
+			if self.success:
+				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
+		else:
+			pub.sendMessage('page.redirect', error=True)
+		c.close()
 
 class TAMSelectMaterials(InfoPage):
 	def __init__(self, parent):
@@ -960,7 +996,6 @@ class NonTAM(InfoPage):
 		else:
 			profile.putPreference('submit_slice_information', 'False')
 
-
 class PrintrbotPage(InfoPage):
 	def __init__(self, parent):
 		self._printer_info = [
@@ -1045,7 +1080,6 @@ G1 F{travel_speed}
 M117 Printing...
 """)
 
-
 class OtherMachineSelectPage(InfoPage):
 	def __init__(self, parent):
 		super(OtherMachineSelectPage, self).__init__(parent, _("Other machine information"))
@@ -1076,7 +1110,6 @@ class OtherMachineSelectPage(InfoPage):
 			if option.GetValue():
 				profile.loadProfile(option.filename)
 				profile.loadMachineSettings(option.filename)
-
 
 class OtherMachineInfoPage(InfoPage):
 	def __init__(self, parent):
@@ -2172,3 +2205,5 @@ class headOffsetWizard(wx.wizard.Wizard):
 			self.FindWindowById(wx.ID_BACKWARD).Enable()
 		else:
 			self.FindWindowById(wx.ID_BACKWARD).Disable()
+			
+
