@@ -218,6 +218,20 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.rowNr += 1
 		return text
 		
+	def AddErrorText(self, info, customFontSize, customFlag, red=False):
+		text = wx.StaticText(self, -1, info, style=customFlag)
+		font = wx.Font(pointSize=customFontSize, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		text.SetFont(font)
+		text.Wrap(400)
+		if red:
+			text.SetForegroundColour('Red')
+		else:
+			text.SetForegroundColour('Black')
+			
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.EXPAND)
+		self.rowNr += 1
+		return text
+		
 	def AddImage(self, imagePath):
 		image = wx.Image(imagePath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
 		self.GetSizer().Add(wx.StaticBitmap(self, -1, image), pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -279,10 +293,10 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return check
 
 	def AddButton(self, label):
-		button = wx.Button(self, -1, "\t" + str(label) + "\t" , style=wx.LEFT)
+		button = wx.Button(self, -1, str(label), style=wx.ALIGN_CENTRE_HORIZONTAL)
 		font = wx.Font(pointSize=16, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		button.SetFont(font)
-		self.GetSizer().Add(button, pos=(self.rowNr, 1), span=(1, 1), flag=wx.ALIGN_RIGHT)
+		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 1), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return button
 
@@ -575,7 +589,10 @@ class TAMReadyPage(InfoPage):
 		self.skipTut.Bind(wx.EVT_BUTTON, self.skipTutorial)
 
 	def skipTutorial(self, e):
-		self.GetParent().Close()	
+		self.GetParent().Close()
+		
+	def AllowBack(self):
+		return False
 
 
 class TAMOctoPrintInfo(InfoPage):
@@ -586,18 +603,26 @@ class TAMOctoPrintInfo(InfoPage):
 		self.validSerial = False
 		self.validKey = False
 		self.saveInfo = False
+		self.parent = parent
 
 		self.AddTextTitle("Printer Serial Number")
 		self.serialNumber = self.AddTextCtrl("")
 		self.AddTextTitle("OctoPrint API Key")
 		self.APIKey = self.AddTextCtrlPrivate("")	
-		
+		self.AddHiddenSeperator(3)
+		self.configurePrinterButton = self.AddButton("Configure")
 		self.skipConfig = self.AddCheckbox("Skip configuration for now", checked=False)
+		
+		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
 		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
 		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
 		self.APIKey.Bind(wx.EVT_TEXT, self.checkKeyValidity)
 		
-		pub.subscribe(self.wizardPageRedirection, 'page.redirect')
+		self.AddHiddenSeperator(1)
+		self.errorMessageln0 = self.AddErrorText(' ', customFontSize=21, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL | wx.ST_NO_AUTORESIZE), red=True)
+		self.errorMessageln1 = self.AddErrorText(' ', customFontSize=14, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL | wx.ST_NO_AUTORESIZE))
+		
+	#	pub.subscribe(self.wizardPageRedirection, 'page.redirect')
 		
 	def AllowNext(self):
 		return False
@@ -618,12 +643,17 @@ class TAMOctoPrintInfo(InfoPage):
 		if serialLength < 4 or serialLength > 6: 
 			self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
 			self.validSerial = False
+			
+			self.errorMessageln0.SetLabel("Error")
+			self.errorMessageln1.SetLabel("Serial number: Input must contain 4-6 numeric characters")
 		elif not serial.isdigit():
 			return
 		elif int(serial) < 1:
 			return
 		else:
 			self.validSerial = True
+			self.errorMessageln0.SetLabel(" ")
+			self.errorMessageln1.SetLabel(" ")
 			
 		self.passCheck()
 	
@@ -632,24 +662,31 @@ class TAMOctoPrintInfo(InfoPage):
 		key = self.APIKey.GetValue()
 		keyLength = len(key)
 		serial = self.serialNumber.GetValue()
+		
 		if not keyLength == 32:
-			self.AddText("API key length is not correct.")
 			self.validKey = False
+			if keyLength > 0 and keyLength < 32:
+				self.errorMessageln0.SetLabel("Error")
+				self.errorMessageln1.SetLabel("Must be 32 characters long")
 		else:
 			self.validKey = True
+			self.errorMessageln0.SetLabel(" ")
+			self.errorMessageln1.SetLabel(" ")
 			
 		self.passCheck()
-		
-		if self.saveInfo:
-			self.process(key, serial)
 
 	def passCheck(self):
 		if self.validSerial == True and self.validKey == True and not self.skipConfig.GetValue():
 			self.saveInfo = True
-			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
 		else:
 			self.saveInfo = False
-				
+			
+	def attemptConfiguration(self, e):
+		key = self.APIKey.GetValue()
+		serial = self.serialNumber.GetValue()
+
+		self.process(key, serial)
+						
 	def removeFile(self):
 		c = pycurl.Curl()
 		buffer = BytesIO()
@@ -691,18 +728,17 @@ class TAMOctoPrintInfo(InfoPage):
 		if (self.saveInfo is True) and (not self.skipConfig.GetValue()):
 			thread = PostThread(self, key, serial, filepath)
 
-			self.AddText("Configuring...")
 	#		self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
 			thread.start()
 			
 	#		wx.CallAfter(self.error())
 
-	def wizardPageRedirection(self, error):
-		if error:
-			print error
-			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ErrorPage)
-		else:
-			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
+#	def wizardPageRedirection(self, error):
+#		if error:
+#			print error
+#			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ErrorPage)
+#		else:
+#			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
 
 	def StoreData(self):
 		serial = self.serialNumber.GetValue()
@@ -715,18 +751,7 @@ class TAMOctoPrintInfo(InfoPage):
 			profile.putPreference('serialNumber', serial)
 			profile.initializeOctoPrintAPIConfig(serial, key)
 			profile.OctoPrintConfigAPI(serial)
-		
-
-
-class ErrorPage(InfoPage):
-	def __init__(self, parent):
-		super(ErrorPage, self).__init__(parent, _("Configuring Error"))
-		
-		self.AddTextTitle("ERROR").SetForegroundColour('Red')
-		self.AddText("Please click back to edit your printer information.")
-		
-	def AllowNext(self):
-		return False
+			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
 
 class PostThread(threading.Thread):
 	def __init__(self, parent, key, serial, filepath):
@@ -769,13 +794,23 @@ class PostThread(threading.Thread):
 			errno, errstr = error
 		
 		status = c.getinfo(c.RESPONSE_CODE)
-		if status == 201:
+		if status == 201 or status == 204:
 			self.parent.removeFile()
 			print "Removing file"
 			if self.success:
 				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
+		
+			self.parent.errorMessageln0.SetForegroundColour('Blue')
+			self.parent.errorMessageln0.SetLabel("Configured!")
+			self.parent.errorMessageln1.SetLabel("Select 'next' below to continue")
+	#		pub.sendMessage('page.redirect', error=False)
 		else:
-			pub.sendMessage('page.redirect', error=True)
+	#		pub.sendMessage('page.redirect', error=True)
+			self.parent.errorMessageln0.SetLabel("ERROR")
+			self.parent.errorMessageln1.SetLabel("Serial number or API key is incorrect. Please try again.")
+
+
+	#		pub.sendMessage('page.redirect', error=True)
 		c.close()
 
 class TAMSelectMaterials(InfoPage):
@@ -1639,7 +1674,6 @@ class ConfigWizard(wx.wizard.Wizard):
 		self.TAM_select_quality = TAMSelectQuality(self)
 		self.TAM_select_support = TAMSelectSupport(self)
 		self.TAM_first_print = TAMFirstPrint(self)
-		self.ErrorPage = ErrorPage(self)
 		
 		self.ultimakerSelectParts = SelectParts(self)
 		self.ultimakerFirmwareUpgradePage = UltimakerFirmwareUpgradePage(self)
