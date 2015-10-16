@@ -622,8 +622,6 @@ class TAMOctoPrintInfo(InfoPage):
 		self.errorMessageln0 = self.AddErrorText(' ', customFontSize=21, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL | wx.ST_NO_AUTORESIZE), red=True)
 		self.errorMessageln1 = self.AddErrorText(' ', customFontSize=14, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL | wx.ST_NO_AUTORESIZE))
 		
-	#	pub.subscribe(self.wizardPageRedirection, 'page.redirect')
-		
 	def AllowNext(self):
 		return False
 		
@@ -709,43 +707,26 @@ class TAMOctoPrintInfo(InfoPage):
 		c.setopt(c.VERBOSE, True)
 		
 		try:
-			# Perform http POST request in new thread to prevent UI lag
 			c.perform()
 		except pycurl.error, error:
 			errno, errstr = error
 			return errno
 		
 		status = c.getinfo(c.RESPONSE_CODE)
-#		if status == 401:
-#			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ErrorPage)
-		print "STATUS: %s" % status
 		c.close()
 		
 	def process(self, key, serial):
 		resourceBasePath = resources.resourceBasePath
 		filepath = os.path.join(resourceBasePath, 'example/dummy_code.gcode')
-		print "Save info: %s" % self.saveInfo
 		if (self.saveInfo is True) and (not self.skipConfig.GetValue()):
 			thread = PostThread(self, key, serial, filepath)
-
-	#		self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
 			thread.start()
-			
-	#		wx.CallAfter(self.error())
-
-#	def wizardPageRedirection(self, error):
-#		if error:
-#			print error
-#			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ErrorPage)
-#		else:
-#			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
 
 	def StoreData(self):
 		serial = self.serialNumber.GetValue()
 		key = self.APIKey.GetValue()
 		
 		if 	self.skipConfig.GetValue() == True:
-			print "skipping"
 			return
 		else: 
 			profile.putPreference('serialNumber', serial)
@@ -799,18 +780,12 @@ class PostThread(threading.Thread):
 			print "Removing file"
 			if self.success:
 				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
-		
 			self.parent.errorMessageln0.SetForegroundColour('Blue')
 			self.parent.errorMessageln0.SetLabel("Configured!")
 			self.parent.errorMessageln1.SetLabel("Select 'next' below to continue")
-	#		pub.sendMessage('page.redirect', error=False)
 		else:
-	#		pub.sendMessage('page.redirect', error=True)
 			self.parent.errorMessageln0.SetLabel("ERROR")
 			self.parent.errorMessageln1.SetLabel("Serial number or API key is incorrect. Please try again.")
-
-
-	#		pub.sendMessage('page.redirect', error=True)
 		c.close()
 
 class TAMSelectMaterials(InfoPage):
