@@ -204,7 +204,7 @@ class simpleModePanel(wx.Panel):
 			if button == e.GetEventObject():
 				for name, path in info.items():
 					self.updateInfo(path)
-			
+				
 	def updateInfo(self, path):
 		settings = self.getSectionItems(path, 'profile')
 		self.loadData(settings, 'info')
@@ -316,7 +316,6 @@ class simpleModePanel(wx.Panel):
 					self.infoPanelSettingsList[name].SetLabel(str(value) + unit)
 							
 	def getSectionItems(self, path, section):
-
 		sectionSettings = {}
 		cp = configparser.ConfigParser()
 		cp.read(path)
@@ -377,6 +376,9 @@ class simpleModePanel(wx.Panel):
 		selectedMat = self.selectedMaterial.GetLabel()
 		print selectedMat
 		
+		# Alteration
+		
+		
 		for material in materialsDirectory:
 			cp = configparser.ConfigParser()
 			cp.read(material)
@@ -386,11 +388,13 @@ class simpleModePanel(wx.Panel):
 				if self.matManufacturer is not None and self.matName is not None:
 					if self.matManufacturer.lower() == supplierToCompare.lower() and self.matName.lower() == materialToCompare.lower():
 						materialSettings = self.getSectionItems(material, 'profile')
+						materialSettings.update(supportSettings)
+						materialSettings.update(strengthSettings)
+						materialSettings.update(qualitySettings)
 		
-		materialSettings.update(supportSettings)
-		materialSettings.update(strengthSettings)
-		materialSettings.update(qualitySettings)
-		
+			# This needs to be revisited if there are multiple extruders involved
+			if cp.has_section('alterations'):
+				profile.setAlterationFileFromFilePath(material)
 					
 		return materialSettings
 		
