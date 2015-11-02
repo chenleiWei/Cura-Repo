@@ -723,6 +723,13 @@ def initializeOctoPrintAPIConfig(s,k):
 	cp.write(octoprintConfigFile)
 	octoprintConfigFile.close()
 		
+def configExists():
+	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
+	if os.path.isfile(path):
+		return True
+	else:
+		return False		
+		
 def OctoPrintConfigAPI(serial):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
 	cp = ConfigParser.ConfigParser()
@@ -1354,15 +1361,22 @@ def setAlterationFileFromFilePath(file):
 	cp.read(file)
 	if cp.has_section('Alteration'):
 		startGCode = cp.get('Alteration', 'start.gcode')
-		print ("Start Gcode:\n%s\n\n\n") % startGCode
+	#	print ("Start Gcode:\n%s\n\n\n") % startGCode
 		endGCode = cp.get('Alteration', 'end.gcode')
-		print ("End Gcode:\n%s\n\n\n") % endGCode	
-		self.setAlterationFile('start.gcode', startGCode)
-		self.setAlterationFile('end.gcode', endGCode)
+	#	print ("End Gcode:\n%s\n\n\n") % endGCode
+	elif cp.has_section('alterations'):
+		startGCode = cp.get('alterations', 'start.gcode')
+	#	print ("Start Gcode:\n%s\n\n\n") % startGCode
+		endGCode = cp.get('alterations', 'end.gcode')
+	#	print ("End Gcode:\n%s\n\n\n") % endGCode
+		
+		setAlterationFile('start.gcode', startGCode)
+		setAlterationFile('end.gcode', endGCode)
 
 def setAlterationFile(name, value):
 	#Check if we have a configuration file loaded, else load the default.
 	global settingsDictionary
+#	print value
 	if name in settingsDictionary and settingsDictionary[name].isAlteration():
 		settingsDictionary[name].setValue(value)
 	saveProfile(getDefaultProfilePath(), True)
