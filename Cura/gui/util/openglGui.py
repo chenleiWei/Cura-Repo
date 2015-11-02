@@ -719,8 +719,8 @@ class glNotification(glFrame):
 		super(glNotification, self).__init__(parent, pos)
 		glGuiLayoutGrid(self)._alignBottom = False
 		self._label = glLabel(self, "Notification", (0, 0))
-		self._buttonExtra = glButton(self, 31, "???", (1, 0), self.onExtraButton, 25)
-		self._button = glButton(self, 30, "", (2, 0), self.onClose, 25)
+		self._buttonExtra = glButton(self, 31, "???", (1, 0), self.onExtraButton, 40)
+		self._button = glButton(self, 30, "", (2, 0), self.onClose, 40)
 		self._padding = glLabel(self, "", (0, 1))
 		self.setHidden(True)
 
@@ -728,7 +728,7 @@ class glNotification(glFrame):
 		w, h = self._layout.getLayoutSize()
 		baseSize = self._base.GetSizeTuple()
 		if self._anim is not None:
-			super(glNotification, self).setSize(baseSize[0] / 2 - w / 2, baseSize[1] - self._anim.getPosition() - self._base._buttonSize * 0.2, 1, 1)
+			super(glNotification, self).setSize(baseSize[0] / 2 - w / 2, baseSize[1] - self._anim.getPosition() - self._base._buttonSize * 0.5, 1, 1)
 		else:
 			super(glNotification, self).setSize(baseSize[0] / 2 - w / 2, baseSize[1] - self._base._buttonSize * 0.2, 1, 1)
 	def draw(self):
@@ -737,7 +737,7 @@ class glNotification(glFrame):
 		super(glNotification, self).draw()
 
 	def message(self, text, extraButtonCallback = None, extraButtonIcon = None, extraButtonTooltip = None):
-		self._anim = animation(self._base, -20, 25, 1)
+		self._anim = animation(self._base, -20, 40, 1)
 		self.setHidden(False)
 		self._label.setLabel(text)
 		self._buttonExtra.setHidden(extraButtonCallback is None)
