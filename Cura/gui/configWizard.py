@@ -1,9 +1,10 @@
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura for Type A Machines) - Released under terms of the AGPLv3 License"
 
 import os
 import webbrowser
 import pycurl
 from wx.lib.pubsub import pub
+import wx.lib.agw.hyperlink as hl
 import threading
 import time
 import math
@@ -23,7 +24,7 @@ from Cura.util import machineCom
 from Cura.util import profile
 from Cura.util import gcodeGenerator
 from Cura.util import resources
-
+from Cura.util import printerConnect
 
 class InfoBox(wx.Panel):
 	def __init__(self, parent):
@@ -122,7 +123,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		sizer = wx.GridBagSizer(5, 5)
 		self.sizer = sizer
 		self.SetSizer(sizer)
-		self.rowNr = 2
+		self.rowNr = 1
 		self.sizer.AddGrowableCol(0)
 		
 	def AddLogo(self):
@@ -131,9 +132,16 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.AddHiddenSeperator(1)
 		self.AddTextTitleBold('Cura For Type A Machines')
 		self.AddTextSubtitle('v1.3.4')
-		self.AddHiddenSeperator(2)
-
 		#	sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
+
+	def AddHyperlink(self, text, url):
+		hyper1 = hl.HyperLinkCtrl(self, -1, text, URL=url)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
+               style = wx.SWISS, weight = wx.LIGHT)
+		hyper1.SetFont(font)
+		self.GetSizer().Add(hyper1, pos=(self.rowNr,0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return hyper1
 
 	def GuidedTourLogo(self):
 		curaTAMLogo = resources.getPathForImage('CuraTAMIcon.png')
@@ -141,47 +149,36 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.AddHiddenSeperator(1)
 		self.AddTextTitleBold('Cura For Type A Machines')
 		self.AddTextTagLine('Guided Tour')
-		self.AddHiddenSeperator(2)
+		self.AddHiddenSeperator(1)
 
 	def JustIconLogo(self):
 		curaTAMLogo = resources.getPathForImage('CuraTAMIconLarger.png')
 		self.AddImage(curaTAMLogo)
-		self.AddHiddenSeperator(1)
 		self.AddTextTitleBold('Cura For Type A Machines')
-		self.AddHiddenSeperator(2)
+		self.AddHiddenSeperator(1)
 		
 		
 	def AddText(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
+		font = wx.Font(pointSize=11, family = wx.DEFAULT, style=wx.SWISS, weight=wx.LIGHT)
 		text.SetFont(font)
-		text.Wrap(500)
+		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT, border=100)
 		self.rowNr += 1
 		return text
 
 	def AddTextTip(self,info):
 		text = wx.StaticText(self, -1, info)
-		font = wx.Font(pointSize=10, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
+		font = wx.Font(pointSize=12, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
 		text.SetFont(font)
-		text.Wrap(500)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag= wx.EXPAND | wx.ALL)
+		text.Wrap(400)
+		self.GetSizer().Add(text, pos=(self.rowNr,0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return text
 		
 	def AddTextTagLine(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=18, family = wx.DEFAULT,
-               style = wx.NORMAL, weight = wx.LIGHT)
-		text.SetFont(font)
-		text.Wrap(450)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
-		self.rowNr += 1
-		return text
-		
-	def AddTextSubtitle(self, info):
-		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=16, family = wx.DEFAULT,
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
@@ -189,9 +186,19 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.rowNr += 1
 		return text
 		
+	def AddTextSubtitle(self, info):
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.LIGHT)
+		text.SetFont(font)
+		text.Wrap(425)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.TOP, border=10)
+		self.rowNr += 1
+		return text
+		
 	def AddTextDescription(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=14, family = wx.DEFAULT,
+		font = wx.Font(pointSize=12, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(300)
@@ -201,7 +208,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTitle(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=20, family = wx.DEFAULT,
+		font = wx.Font(pointSize=18, family = wx.DEFAULT,
                style = wx.SWISS, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
@@ -211,7 +218,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTitleBold(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=21, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=17, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -219,16 +226,15 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return text
 		
 	def AddErrorText(self, info, customFontSize, customFlag, red=False):
-		text = wx.StaticText(self, -1, info, style=customFlag)
-		font = wx.Font(pointSize=customFontSize, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
+		font = wx.Font(pointSize=customFontSize, family = wx.DEFAULT, style = wx.SWISS, weight = wx.LIGHT)
 		text.SetFont(font)
-		text.Wrap(400)
 		if red:
 			text.SetForegroundColour('Red')
 		else:
 			text.SetForegroundColour('Black')
 			
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.EXPAND)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT, border=115)
 		self.rowNr += 1
 		return text
 		
@@ -248,6 +254,15 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.GetSizer().Add(wx.StaticBitmap(self, -1, image), pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return image
+
+	def AddGif(self, imagePath):
+		#Loading gif 
+		loadingGif = wx.animate.GIFAnimationCtrl(self, -1, imagePath)
+		loadingGif.Play()
+		
+		self.GetSizer().Add(loadingGif, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return loadingGif
 
 	def AddSeperator(self):
 		self.GetSizer().Add(wx.StaticLine(self, -1), pos=(self.rowNr, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
@@ -284,19 +299,19 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddCheckbox(self, label, checked=False):
 		check = wx.CheckBox(self, -1, label)
 	#	text = wx.StaticText(self, -1, label)
-		font = wx.Font(pointSize=20, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
 		check.SetFont(font)
 		check.SetValue(checked)
 	#	self.GetSizer().Add(text, pos=(self.rowNr, 1), span=(1, 1))
-		self.GetSizer().Add(check, pos=(self.rowNr, 0), span=(1, 1), flag= wx.LEFT, border=130)
+		self.GetSizer().Add(check, pos=(self.rowNr, 0), span=(1, 2), flag= wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return check
 
 	def AddButton(self, label):
 		button = wx.Button(self, -1, str(label), style=wx.ALIGN_CENTRE_HORIZONTAL)
-		font = wx.Font(pointSize=16, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		button.SetFont(font)
-		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 1), flag=wx.ALIGN_CENTER)
+		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return button
 
@@ -309,27 +324,21 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return button1, button2
 
 	def AddTextCtrl(self, value):
-		ret = wx.TextCtrl(self, -1, value)
+		ret = wx.TextCtrl(self, -1, value, size=(200, 25))
 		font = wx.Font(pointSize=14, family = wx.DEFAULT, style = wx.SWISS, weight = wx.LIGHT)
 		ret.SetFont(font)
 		self.GetSizer().Add(ret, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return ret
-
-	def AddTextCtrlPrivate(self, value):
-		ret = wx.TextCtrl(self, -1, value)
-		font = wx.Font(pointSize=14, family = wx.DEFAULT, style = wx.SWISS, weight = wx.LIGHT)
-		ret.SetFont(font)
-		self.GetSizer().Add(ret, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
-		self.rowNr += 1
-		return ret
-
 
 	def AddLabelTextCtrl(self, info, value):
 		text = wx.StaticText(self, -1, info)
 		ret = wx.TextCtrl(self, -1, value)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT)
-		self.GetSizer().Add(ret, pos=(self.rowNr, 1), span=(1, 1), flag=wx.LEFT)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
+		style = wx.SWISS, weight = wx.LIGHT)
+		text.SetFont(font)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,1), flag=wx.ALIGN_RIGHT | wx.LEFT, border=115)
+		self.GetSizer().Add(ret, pos=(self.rowNr, 1), span=(1, 2), )
 		self.rowNr += 1
 		return ret
 
@@ -346,6 +355,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.GetSizer().Add(bitmap, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT)
 		self.rowNr += 1
 		return bitmap
+		
 
 	def AddCheckmark(self, label, bitmap):
 		check = wx.StaticBitmap(self, -1, bitmap)
@@ -382,7 +392,6 @@ class FirstInfoPage(InfoPage):
 		typeALogo = resources.getPathForImage('TAMLogoAndText.png')
 		
 		self.AddImage(typeALogo)
-		self.AddHiddenSeperator(1)
 		
 		self.AddTextTitle(_("Cura for Type A Machines\nConfigurator"))
 		self.AddHiddenSeperator(1)
@@ -583,14 +592,17 @@ class TAMReadyPage(InfoPage):
 		self.AddTextTitle(_("Configuration Complete"))
 		self.AddTextSubtitle(_("Click Next for a guided tour of Cura for Type A Machines features."))
 		self.AddHiddenSeperator(3)
-		self.skipTut = self.AddButton("Skip tutorial")
-		self.AddHiddenSeperator(1)
-		
-		self.skipTut.Bind(wx.EVT_BUTTON, self.skipTutorial)
+		self.skipTut = self.AddCheckbox("Skip tutorial")
+
+		self.skipTut.Bind(wx.EVT_CHECKBOX, self.skipTutorial)
 
 	def skipTutorial(self, e):
-		self.GetParent().Close()
-		
+		print "Skip tutorial: %s" % e.IsChecked()
+		if e.IsChecked():
+			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_first_print)
+		else:
+			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_select_materials)
+					
 	def AllowBack(self):
 		return False
 
@@ -604,73 +616,81 @@ class TAMOctoPrintInfo(InfoPage):
 		self.validKey = False
 		self.saveInfo = False
 		self.parent = parent
+		self.configurationAttemptedOnce = False
+		self.inputCheck = printerConnect.InputValidation()
+				
+		self.AddTextSubtitle("Cura for Type A Machines allows you to send your sliced files directly to your Series 1 Printer.")
+		self.AddTextSubtitle("Enter your serial number and API key below to configure this feature. You can also choose to do this later by checking the 'skip configuration' box.")
+	#	self.AddHiddenSeperator(1)
+		apiTip = resources.getPathForImage('apiTip.png')
+		self.AddImage(apiTip)
+		self.tip = self.AddTextTip('Tip: You can find the API key in the OctoPrint web interface by going to Settings --> API')	
+	#	self.AddTextTitle("Printer Serial Number")
+	#	self.serialNumber = self.AddTextCtrl("")
+	#	self.AddTextTitle("OctoPrint API Key")
+		self.AddHiddenSeperator(1)
+		self.serialNumber = self.AddLabelTextCtrl("Serial Number", " ")
+		self.APIKey = self.AddLabelTextCtrl("API Key", " ")
+		self.AddHiddenSeperator(1)
+	#	self.errorMessageln0 = self.AddErrorText(' ', customFontSize=12, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL), red=True)
 
-		self.AddTextTitle("Printer Serial Number")
-		self.serialNumber = self.AddTextCtrl("")
-		self.AddTextTitle("OctoPrint API Key")
-		self.APIKey = self.AddTextCtrlPrivate("")	
-		self.AddHiddenSeperator(3)
+
 		self.configurePrinterButton = self.AddButton("Configure")
+		self.AddHiddenSeperator(1)
 		self.skipConfig = self.AddCheckbox("Skip configuration for now", checked=False)
-		
+		self.errorMessageln1 = self.AddErrorText(' ', customFontSize=12, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL))
 		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
 		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
 		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
 		self.APIKey.Bind(wx.EVT_TEXT, self.checkKeyValidity)
-		
-		self.AddHiddenSeperator(1)
-		self.errorMessageln0 = self.AddErrorText(' ', customFontSize=21, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL | wx.ST_NO_AUTORESIZE), red=True)
-		self.errorMessageln1 = self.AddErrorText(' ', customFontSize=14, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL | wx.ST_NO_AUTORESIZE))
-		
+
 	def AllowNext(self):
 		return False
 		
 	def skipPage(self, e):
 		if self.skipConfig.GetValue():
 			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
+			
+			# If the user decides to skip configuration, but has already attempted configuration,
+			# delete the printer from the archive
 		else:
+			self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
 			self.passCheck()
 			
-	# Serial number check	
 	def checkSerialValidity(self, e):
-		serial = self.serialNumber.GetValue()
-		serialLength = len(serial)
-		
-		"""Serial Check"""
-		# If input length is less than 4 or greater than 6
-		if serialLength < 4 or serialLength > 6: 
-			self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
-			self.validSerial = False
-			
-			self.errorMessageln0.SetLabel("Error")
-			self.errorMessageln1.SetLabel("Serial number: Input must contain 4-6 numeric characters")
-		elif not serial.isdigit():
-			return
-		elif int(serial) < 1:
-			return
-		else:
+		id = self.serialNumber.GetValue()
+		validityCheck =  self.inputCheck.verifySerial(id)
+		print "Validity check: %s" % validityCheck
+		if validityCheck == 0:
 			self.validSerial = True
-			self.errorMessageln0.SetLabel(" ")
+	#		self.errorMessageln0.SetLabel(" ")
 			self.errorMessageln1.SetLabel(" ")
+		else:
+			self.errorMessageln1.SetForegroundColour('Red')
+			self.errorMessageln1.SetLabel("Serial number is comprised of 4-6 digits")
 			
 		self.passCheck()
+
+	def unSavePrinter(self):
+		profile.OctoPrintAPIRemoveSerial(self.serialNumber)
 	
 	# Key check
 	def checkKeyValidity(self, e):
 		key = self.APIKey.GetValue()
 		keyLength = len(key)
-		serial = self.serialNumber.GetValue()
 		
-		if not keyLength == 32:
-			self.validKey = False
-			if keyLength > 0 and keyLength < 32:
-				self.errorMessageln0.SetLabel("Error")
-				self.errorMessageln1.SetLabel("Must be 32 characters long")
-		else:
+		validityCheck = self.inputCheck.verifyKey(key)
+		
+		if validityCheck == 0:
 			self.validKey = True
-			self.errorMessageln0.SetLabel(" ")
+	#		self.errorMessageln0.SetLabel(" ")
 			self.errorMessageln1.SetLabel(" ")
-			
+		else:
+			self.validKey = False
+	#		self.errorMessageln0.SetLabel("Error")
+			self.errorMessageln1.SetForegroundColour('Red')
+			self.errorMessageln1.SetLabel("API key is comprised of 32 characters")
+
 		self.passCheck()
 
 	def passCheck(self):
@@ -679,114 +699,50 @@ class TAMOctoPrintInfo(InfoPage):
 		else:
 			self.saveInfo = False
 			
+	#	validation = printerConnect.inputValidation(self.APIKey.GetValue(), self.serialNumber.GetValue())
+			
+	#	print "RESULT RETURNED: %s" % validation.checkSerialValidity()
+			
 	def attemptConfiguration(self, e):
 		key = self.APIKey.GetValue()
 		serial = self.serialNumber.GetValue()
+		saveInfo = self.saveInfo
+		self.configurationAttemptedOnce = True
+		#testConnection = printerConnect.TestConnection(serial, key, saveInfo)
+		
+		thread = printerConnect.ConfirmCredentials(self, True, key, serial, self.errorMessageln1)
+		thread.start()
+#		if not self.skipConfig.GetValue():
+#			while thread.start():
+#				self.loading.Show()
 
-		self.process(key, serial)
-						
-	def removeFile(self):
-		c = pycurl.Curl()
-		buffer = BytesIO()
-		# File name and path
-		resourceBasePath = resources.resourceBasePath
-		filepath = os.path.join(resourceBasePath, 'example/dummy_code.gcode')
-		filename = os.path.basename(filepath)
-		
-		# Printer information
-		url = 'http://series1-%s.local:5000/api/files/local/dummy_code.gcode' % self.serialNumber.GetValue()
-		apiKey = 'X-Api-Key: %s' % self.APIKey.GetValue()
-		contentType = "Content-Type: multipart/form-data"
-		header = [apiKey, contentType]
-		
-		# Pycurl options
-		c.setopt(c.URL, url)
-		c.setopt(c.WRITEDATA, buffer)
-		c.setopt(pycurl.CUSTOMREQUEST,"DELETE")
-		c.setopt(c.HTTPHEADER, header)
-		c.setopt(c.VERBOSE, True)
-		
-		try:
-			c.perform()
-		except pycurl.error, error:
-			errno, errstr = error
-			return errno
-		
-		status = c.getinfo(c.RESPONSE_CODE)
-		c.close()
-		
-	def process(self, key, serial):
-		resourceBasePath = resources.resourceBasePath
-		filepath = os.path.join(resourceBasePath, 'example/dummy_code.gcode')
-		if (self.saveInfo is True) and (not self.skipConfig.GetValue()):
-			thread = PostThread(self, key, serial, filepath)
-			thread.start()
+#			self.loading.Hide()	
+#	def process(self):
 
+#		if self.saveInfo is True:
+#			thread = ConfirmCredentials(self.key, self.serial, filepath)
+#			thread.start()
+#		print "Thread status: %s" % thread.status
+		
+			
+		
 	def StoreData(self):
 		serial = self.serialNumber.GetValue()
 		key = self.APIKey.GetValue()
 		
-		if 	self.skipConfig.GetValue() == True:
-			return
+		
+		if 	self.skipConfig.GetValue() == True and self.configurationAttemptedOnce == True:
+			if profile.configExists() and serial is None and key is not None:
+				profile.OctoPrintAPIRemoveSerial(serial)
+				print "Config does not exist yet."
+		elif self.skipConfig.GetValue():
+			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
 		else: 
 			profile.putPreference('serialNumber', serial)
 			profile.initializeOctoPrintAPIConfig(serial, key)
 			profile.OctoPrintConfigAPI(serial)
 			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
 
-class PostThread(threading.Thread):
-	def __init__(self, parent, key, serial, filepath):
-		threading.Thread.__init__(self)
-		
-		self.key = key
-		self.serial = serial
-		self.success = False
-		self.filepath = filepath
-		self.parent = parent
-		
-	def run(self):
-		c = pycurl.Curl()
-		buffer = BytesIO()
-		# File name and path
-
-		filename = os.path.basename(self.filepath)
-		
-		# Printer information
-		url = 'http://series1-%s.local:5000/api/files/local' % self.serial
-		apiKey = 'X-Api-Key: %s' % self.key
-		contentType = "Content-Type: multipart/form-data"
-		header = [apiKey, contentType]
-		
-		# Pycurl options
-		c.setopt(c.URL, url)
-		c.setopt(c.WRITEDATA, buffer)
-		c.setopt(c.HTTPHEADER, header)
-		c.setopt(c.HTTPPOST, [
-			("file",
-			(c.FORM_FILE, self.filepath,
-			c.FORM_CONTENTTYPE, "multipart/form-data")),
-			("print","False")])
-		c.setopt(c.VERBOSE, True)
-		
-		try:
-			c.perform()
-			self.success = True
-		except pycurl.error, error:
-			errno, errstr = error
-		
-		status = c.getinfo(c.RESPONSE_CODE)
-		if status == 201 or status == 204:
-			self.parent.removeFile()
-			print "Removing file"
-			if self.success:
-				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
-			self.parent.errorMessageln0.SetForegroundColour('Blue')
-			self.parent.errorMessageln0.SetLabel("Configured!")
-			self.parent.errorMessageln1.SetLabel("Select 'next' below to continue")
-		else:
-			self.parent.errorMessageln0.SetLabel("ERROR")
-			self.parent.errorMessageln1.SetLabel("Serial number or API key is incorrect. Please try again.")
-		c.close()
 
 class TAMSelectMaterials(InfoPage):
 	def __init__(self, parent):
@@ -837,19 +793,21 @@ class TAMSelectSupport(InfoPage):
 		self.GuidedTourLogo()
 		typeALogo = resources.getPathForImage('3sa.png')
 		self.AddImage(typeALogo)
-		self.AddHiddenSeperator(1)
+#		self.AddHiddenSeperator(1)
 		self.AddTextTitleBold("Support, Brims, and Rafts")
 		self.AddTextSubtitle("Support structure is material printed to hold up overhangs during printing and is then removed.\n\nA brim surrounds the first layer to prevent edges from lifting. A raft prints a platform under the print to improve adhesion, especially with complex or delicate prints.\n\nTo preview these, click the 'View Mode' icon, then click 'Layers'.")
-		
 class TAMFirstPrint(InfoPage):
 	def __init__(self, parent):
 		super(TAMFirstPrint, self).__init__(parent, _("Your First Print"))
-		self.AddHiddenSeperator(2)
 		self.JustIconLogo()
 		self.AddTextTitleBold("Ready to Go")
-		self.AddHiddenSeperator(1)
-		self.AddTextSubtitle("This concludes the guided tour. Click 'Next' and Cura for Type A Machines will open and automatically load an example model for you to use to become more familiar with the application.\n\nWhen you are ready to print, click the 'Save gcode' icon in the upper left of the window and a gcode file will be saved ready to be printed.\n\n\tFor more info, visit our Getting Started Page at:\n\thttp://www.typeamachines.com/gettingstarted")
-
+		self.AddTextSubtitle("This concludes the guided tour. Click 'Next' and Cura for Type A Machines will open and automatically load an example model for you to use to become more familiar with the application.")
+		saveAndUploadImage = resources.getPathForImage('readyToGoPage.png')
+		self.AddImage(saveAndUploadImage)
+		gettingStarted = "Getting Started Page"
+		self.AddTextSubtitle("When you are ready to print, click the 'Save gcode' icon in the upper left of the window and a gcode file will be saved ready to be printed.\n\nFor more info, visit our Getting Started Page at:")
+		self.AddHyperlink("http://www.typeamachines.com/gettingstarted", "http://www.typeamachines.com/gettingstarted")
+		
 class NonTAM(InfoPage):
 	def __init__(self, parent):
 		super(NonTAM, self).__init__(parent, _("Select Machine"))
