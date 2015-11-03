@@ -1,9 +1,8 @@
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura for the Type A Machines Series 1) - Released under terms of the AGPLv3 License"
 
 import wx
 import wx.animate
 from wx.lib.pubsub import pub
-
 import numpy
 import time
 import datetime
@@ -17,8 +16,6 @@ import sys
 import cStringIO as StringIO
 import webbrowser
 import OpenGL
-
-import pycurl
 
 OpenGL.ERROR_CHECKING = False
 from OpenGL.GLU import *
@@ -326,28 +323,9 @@ class SceneView(openglGui.glGuiPanel):
 		filename = file + suffix
 		# Path to temporary file
 		key = profile.OctoPrintConfigAPI(serial)
-		octoFilesPath = os.path.join(resources.resourceBasePath, 'example', 'files.txt')
-		getFilenames = printerConnect.getFilenames(serial, key, octoFilesPath)
-		getFilenames.start()
-		
-		with open(octoFilesPath, 'rb') as f:
-			for line in f:
-				if 'name' in line:
-					print line
-					line = line.replace(',', '')
-					line = line.replace('"', '')
-					line = line.replace(' ', '')
-					k, v = line.strip().split(':')
-					print v
-						
 		tempFilePath = os.path.join(resourceBasePath, 'example', filename)
 		self._createTempFiles(tempFilePath)
 		self._uploadToOctoPrint(key, serial, tempFilePath)
-
-	#	gcodeFile = tempfile.NamedTemporaryFile(suffix='.gcode', prefix=filename, dir=resourceBasePath, delete=True)
-	#	tempFilePath = os.path.normpath(os.path.join(resourceBasePath, gcodeFile.name))
-	
-	#	gcodeFile.close()
 		
 	def _createTempFiles(self, gcodeFile):
 		# gets gcode from the engine
@@ -379,9 +357,6 @@ class SceneView(openglGui.glGuiPanel):
 		# Notify the user that the file is attempting to be uploaded
 		self.notification.message("Uploading....")
 		
-#		upload = PostThread(self, key, serial, tempFilePath, self.openOctoPrintInBrowser, self.notification)
-#		upload.start()
-
 		print self.printGcode
 		upload = printerConnect.GcodeUpload(key, serial, tempFilePath, self.openOctoPrintInBrowser, self.notification, self.printGcode)
 		upload.start()
@@ -1815,9 +1790,7 @@ class printerSelector(wx.Frame):
 		uploadIconPath = resources.getPathForImage('uploadIcon.png')
 		uploadIconConvert = wx.Image(uploadIconPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
 		uploadIcon = wx.StaticBitmap(panel, -1, uploadIconConvert)
-		# Edit
-#		editButtonPath = resources.getPathForImage('edit.png')
-#		editButtonImage = wx.Image(editButtonPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+
 		# Plus 
 		plusButtonPath = resources.getPathForImage('plus.png')
 		plusButtonImage = wx.Image(plusButtonPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
@@ -1867,7 +1840,6 @@ class printerSelector(wx.Frame):
 		#Binding
 		self.cancel.Bind(wx.EVT_BUTTON, self.OnCancel)
 		self.upload.Bind(wx.EVT_BUTTON, self.OnUpload)
-		
 		wx.EVT_CLOSE(self, self.OnClose)
 		
 		#Boxes
@@ -1875,9 +1847,7 @@ class printerSelector(wx.Frame):
 		topMainHBox = wx.BoxSizer(wx.HORIZONTAL)
 		iconBox = wx.BoxSizer(wx.VERTICAL)
 		printerListBox = wx.BoxSizer(wx.VERTICAL)
-#		editButtonBox = wx.BoxSizer(wx.HORIZONTAL)
 		addRemoveBox = wx.BoxSizer(wx.HORIZONTAL)
-#		saveFileAsBox = wx.BoxSizer(wx.VERTICAL)
 		openBrowserBox = wx.BoxSizer(wx.VERTICAL)
 		self.optionsBox = wx.BoxSizer(wx.HORIZONTAL)
 		
@@ -1886,25 +1856,16 @@ class printerSelector(wx.Frame):
 		printerListBox.Add(text)
 		printerListBox.Add(self.availPrinters, flag=wx.EXPAND)
 		
-		# editButtonBox
-	#	editButtonBox.Add(editButton, flag=wx.EXPAND|wx.LEFT, border=10)
-		
 		#topMainHBox
 		topMainHBox.Add(iconBox, flag=wx.ALIGN_CENTER_VERTICAL|wx.RIGHT, border=50)
 		topMainHBox.Add(printerListBox, flag=wx.ALIGN_CENTER)
-	#	topMainHBox.Add(editButtonBox, flag=wx.ALIGN_CENTER_VERTICAL)
 		
 		#addRemoveBox
 		addRemoveBox.Add(minusButton)
 		addRemoveBox.Add(plusButton)
-#		addRemoveBox.Add(editButton, flag=wx.LEFT, border=125)
-		#openBrowserBox
-	#	saveFileAsBox.Add(filenameLabel, flag=wx.ALIGN_LEFT)
-	#	saveFileAsBox.Add(self.filenameInput)
-	#	openBrowserBox.Add(saveFileAsBox, flag=wx.TOP, border=15)
 		openBrowserBox.Add(openInBrowser, flag=wx.TOP, border=15)
 		openBrowserBox.Add(printAfterUpload, flag=wx.TOP, border=5)
-#		openBrowserBox.Add(loadingGif, flag=wx.ALIGN_RIGHT)
+
 		#optionsBox
 		self.optionsBox.Add(self.cancel, flag=wx.RIGHT, border=50)
 		self.optionsBox.Add(self.upload, flag=wx.LEFT, border=50)
@@ -2055,7 +2016,6 @@ class AddNewPrinter(wx.Frame):
 		#Bindings
 		self.serialInput.Bind(wx.EVT_TEXT, self.checkSerial)
 		self.keyInput.Bind(wx.EVT_TEXT, self.checkKey)
-	#	self.cancelButton.Bind(wx.EVT_BUTTON, self.OnCancel)
 		self.addPrinterButton.Bind(wx.EVT_BUTTON, self.OnAddPrinter)
 		self.addPrinterButton.Disable()
 		# Tip text
@@ -2074,22 +2034,14 @@ class AddNewPrinter(wx.Frame):
 		inputBox.Add(keyPrompt, flag=wx.TOP, border=20)
 		inputBox.Add(self.keyInput)
 		inputBox.Add(self.keyError)
-		
-		#loading buttonBox
-	#	buttonBox.Add(self.cancelButton, flag=wx.RIGHT, border=25)
 		buttonBox.Add(self.addPrinterButton, flag=wx.ALIGN_CENTER)
 		
-	#	self.successLabel = wx.StaticText(panel, -1, " ", style=wx.ALIGN_CENTER_HORIZONTAL)
 		self.successText = wx.StaticText(panel, -1, " ", style=wx.ALIGN_LEFT)
 		self.successText.Wrap(200)
 		# Loading tip box
 		tipBox.Add(self.informativeLabel, flag=wx.CENTER)
 		tipBox.Add(self.informativeText, flag=wx.CENTER)
-	#	inputFeedbackBox.Add(self.successLabel, flag=wx.CENTER)
 		inputFeedbackBox.Add(self.successText, flag=wx.wx.CENTER)
-
-		
-	#	inputBox.Add(tipBox)
 
 		# Loading main box
 		mainBox.Add(iconBox, -1, flag=wx.LEFT | wx.TOP, border=40)
@@ -2100,7 +2052,6 @@ class AddNewPrinter(wx.Frame):
 		mainmainBox.Add(buttonBox, flag=wx.CENTER)
 
 		panel.SetSizer(mainmainBox)
-	#	otherPanel.SetSizer(tipBox)
 		
 	def checkSerial(self, e):
 		inputValidation = printerConnect.InputValidation()
@@ -2164,8 +2115,6 @@ class AddNewPrinter(wx.Frame):
 				thread.start()
 			except:
 				print "Error"
-						
-	#		self.cancelButton.Hide()
 			
 	def OnClose(self, e):
 		self.Destroy()
