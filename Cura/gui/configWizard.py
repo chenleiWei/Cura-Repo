@@ -2,7 +2,6 @@ __copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura for Type A 
 
 import os
 import webbrowser
-import pycurl
 from wx.lib.pubsub import pub
 import wx.lib.agw.hyperlink as hl
 import threading
@@ -629,8 +628,8 @@ class TAMOctoPrintInfo(InfoPage):
 	#	self.serialNumber = self.AddTextCtrl("")
 	#	self.AddTextTitle("OctoPrint API Key")
 		self.AddHiddenSeperator(1)
-		self.serialNumber = self.AddLabelTextCtrl("Serial Number", " ")
-		self.APIKey = self.AddLabelTextCtrl("API Key", " ")
+		self.serialNumber = self.AddLabelTextCtrl("Serial Number", "")
+		self.APIKey = self.AddLabelTextCtrl("API Key", "")
 		self.AddHiddenSeperator(1)
 	#	self.errorMessageln0 = self.AddErrorText(' ', customFontSize=12, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL), red=True)
 
@@ -650,13 +649,16 @@ class TAMOctoPrintInfo(InfoPage):
 	def skipPage(self, e):
 		if self.skipConfig.GetValue():
 			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
-			
 			# If the user decides to skip configuration, but has already attempted configuration,
 			# delete the printer from the archive
+			serial = self.serialNumber.GetValue()
+			profile.OctoPrintAPIRemoveSerial(serial)
 		else:
 			self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
 			self.passCheck()
-			
+		self.errorMessageln1.SetLabel('')
+		
+
 	def checkSerialValidity(self, e):
 		id = self.serialNumber.GetValue()
 		validityCheck =  self.inputCheck.verifySerial(id)
@@ -667,7 +669,7 @@ class TAMOctoPrintInfo(InfoPage):
 			self.errorMessageln1.SetLabel(" ")
 		else:
 			self.errorMessageln1.SetForegroundColour('Red')
-			self.errorMessageln1.SetLabel("Serial number is comprised of 4-6 digits")
+			self.errorMessageln1.SetLabel("Serial number consists of 4-6 digits")
 			
 		self.passCheck()
 
@@ -689,7 +691,7 @@ class TAMOctoPrintInfo(InfoPage):
 			self.validKey = False
 	#		self.errorMessageln0.SetLabel("Error")
 			self.errorMessageln1.SetForegroundColour('Red')
-			self.errorMessageln1.SetLabel("API key is comprised of 32 characters")
+			self.errorMessageln1.SetLabel("API key consists of 32 characters")
 
 		self.passCheck()
 
@@ -698,10 +700,6 @@ class TAMOctoPrintInfo(InfoPage):
 			self.saveInfo = True
 		else:
 			self.saveInfo = False
-			
-	#	validation = printerConnect.inputValidation(self.APIKey.GetValue(), self.serialNumber.GetValue())
-			
-	#	print "RESULT RETURNED: %s" % validation.checkSerialValidity()
 			
 	def attemptConfiguration(self, e):
 		key = self.APIKey.GetValue()
@@ -712,19 +710,6 @@ class TAMOctoPrintInfo(InfoPage):
 		
 		thread = printerConnect.ConfirmCredentials(self, True, key, serial, self.errorMessageln1)
 		thread.start()
-#		if not self.skipConfig.GetValue():
-#			while thread.start():
-#				self.loading.Show()
-
-#			self.loading.Hide()	
-#	def process(self):
-
-#		if self.saveInfo is True:
-#			thread = ConfirmCredentials(self.key, self.serial, filepath)
-#			thread.start()
-#		print "Thread status: %s" % thread.status
-		
-			
 		
 	def StoreData(self):
 		serial = self.serialNumber.GetValue()
@@ -805,7 +790,7 @@ class TAMFirstPrint(InfoPage):
 		saveAndUploadImage = resources.getPathForImage('readyToGoPage.png')
 		self.AddImage(saveAndUploadImage)
 		gettingStarted = "Getting Started Page"
-		self.AddTextSubtitle("When you are ready to print, click the 'Save gcode' icon in the upper left of the window and a gcode file will be saved ready to be printed.\n\nFor more info, visit our Getting Started Page at:")
+		self.AddTextSubtitle("When you are ready to print, click the 'Save' or 'Upload' icons to save and start printing your 3D models.\n\nFor more info, visit our Getting Started Page at:")
 		self.AddHyperlink("http://www.typeamachines.com/gettingstarted", "http://www.typeamachines.com/gettingstarted")
 		
 class NonTAM(InfoPage):
