@@ -22,7 +22,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="1.3.4a2"
+export BUILD_NAME="1.3.4a9"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -199,7 +199,7 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 #	  CuraEngine \
 #	  ${CURA_ENGINE_BRANCH}
  #   if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
-#	$MAKE -C CuraEngine VERSION=${BUILD_NAME}
+	$MAKE -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
     
 	cp CuraEngine/build/CuraEngine scripts/darwin/dist/Cura\ Type\ A.app/Contents/Resources/CuraEngine

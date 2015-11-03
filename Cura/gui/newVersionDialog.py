@@ -25,9 +25,9 @@ class newVersionDialog(wx.Dialog):
 		newHere = wx.StaticText(p, -1, 'New in this version:')
 		newHere.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
 		s.Add(newHere)
-		s.Add(wx.StaticText(p, -1, '\t* More accurate time estimates (thanks Vaibhav Sharma!)'))
-		s.Add(wx.StaticText(p, -1, '\t* Machine head dimensions updated'))
-		s.Add(wx.StaticText(p, -1, '\t* Aesthetic changes to Configuration Wizard'))
+		s.Add(wx.StaticText(p, -1, '\t* Direct upload to Series 1'))
+		s.Add(wx.StaticText(p, -1, '\t* Improved material library (now including Polymaker PCPlus)'))
+		s.Add(wx.StaticText(p, -1, '\t* Improved time estimations'))
 
 
 		self.hasUltimaker = None
