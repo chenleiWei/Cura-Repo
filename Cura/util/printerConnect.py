@@ -3,7 +3,7 @@ import requests
 import os
 import wx
 import webbrowser
-from wx.lib.pubsub import pub
+from pubsub import pub
 from Cura.util import profile
 import json
 
@@ -56,23 +56,29 @@ class ConfirmCredentials(threading.Thread):
 		files = [('file', (filename, open(filepath, 'rb'), 'multipart/form-data'))]
 		header = {'X-Api-Key':self.key}
 		url = 'http://series1-%s.local:5000/api/files/local' % self.serial
-		
-		r = requests.post(url, headers=header, files=files)
-		print r.text
 
-		status = r.status_code
-		self.setStatusBasedText(status)
+		try:
+			r = requests.post(url, headers=header, files=files)
+		except requests.exceptions.RequestException as e:
+			wx.CallAfter(self.conveyError)
+
 				
 	def setConfigText(self):
 		if self.configWizard:
-			self.errorMessage1.SetLabel("\tConfiguring...")
+			self.errorMessage1.SetLabel("\t\tConfiguring...")
 			self.errorMessage1.SetForegroundColour('Blue')
 		else:
 			self.errorMessage1.SetLabel("Configuring...")
 			self.errorMessage1.SetForegroundColour('Blue')
-	
+
+	def conveyError(self):
+		self.errorMessage1.SetLabel("Please check that your printer is connected to the network and that your inputs are correct.")
+		self.errorMessage1.Wrap(350)
+		self.errorMessage1.SetForegroundColour('Red')
+		if self.configWizard:
+			self.parent.configurePrinterButton.Enable()
 	def setStatusBasedText(self, status):
-		# 201 - File uploaded			
+		# 201 - File uploaded
 		if status == 201:
 			if self.configWizard:
 				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
@@ -93,12 +99,13 @@ class ConfirmCredentials(threading.Thread):
 			self.errorMessage1.SetLabel("Invalid serial or API Key. Please try again.")
 			self.errorMessage1.SetForegroundColour('Red')
 		else:
-			self.errorMessage1.SetLabel("Please check that your printer is connected to the network")
-			if self.configWizard:
+			if self.configWizard:			
 				self.errorMessage1.Wrap(350)
 			else:
 				self.errorMessage1.Wrap(200)
-				
+
+			self.errorMessage1.SetLabel("Please check that your printer is connected to the network.")
+
 		if not self.configWizard:
 			self.parent.addPrinterButton.Enable()	
 	
@@ -142,9 +149,12 @@ class  GcodeUpload(threading.Thread):
 		files = {'file': (filename, open(filepath, 'rb'), 'multipart/form-data')}
 		data = {'select': 'true', 'print': self.printOnUpload}
 		
-		r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files)
-		status = r.status_code
 		
+		try:
+			r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files)
+		except requests.exceptions.RequestException as e:
+			wx.CallAfter(self.conveyStatus(e))
+
 		try:
 			os.remove(self.tempFilePath)
 			print "Removed file"

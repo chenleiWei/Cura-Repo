@@ -2,7 +2,7 @@ __copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura for the Typ
 
 import wx
 import wx.animate
-from wx.lib.pubsub import pub
+from pubsub import pub
 import numpy
 import time
 import datetime
@@ -23,7 +23,6 @@ from OpenGL.GL import *
 
 import tempfile
 
-from wx.lib.pubsub import pub
 import ConfigParser as configparser
 
 try:

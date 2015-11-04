@@ -1,5 +1,5 @@
 import wx
-from wx.lib.pubsub import pub
+from pubsub import pub
 import ConfigParser as configparser
 from collections import defaultdict
 import itertools

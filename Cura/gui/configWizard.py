@@ -2,7 +2,7 @@ __copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura for Type A 
 
 import os
 import webbrowser
-from wx.lib.pubsub import pub
+from pubsub import pub
 import wx.lib.agw.hyperlink as hl
 import threading
 import time
@@ -224,7 +224,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.rowNr += 1
 		return text
 		
-	def AddErrorText(self, info, customFontSize, customFlag, red=False):
+	def AddErrorText(self, info, customFontSize, red=False):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
 		font = wx.Font(pointSize=customFontSize, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
@@ -637,7 +637,7 @@ class TAMOctoPrintInfo(InfoPage):
 		self.configurePrinterButton = self.AddButton("Configure")
 		self.AddHiddenSeperator(1)
 		self.skipConfig = self.AddCheckbox("Skip configuration for now", checked=False)
-		self.errorMessageln1 = self.AddErrorText(' ', customFontSize=12, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL))
+		self.errorMessageln1 = self.AddErrorText('', customFontSize=11)
 		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
 		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
 		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
@@ -649,12 +649,14 @@ class TAMOctoPrintInfo(InfoPage):
 	def skipPage(self, e):
 		if self.skipConfig.GetValue():
 			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
+			self.configurePrinterButton.Disable()
 			# If the user decides to skip configuration, but has already attempted configuration,
 			# delete the printer from the archive
 			serial = self.serialNumber.GetValue()
 			profile.OctoPrintAPIRemoveSerial(serial)
 		else:
 			self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
+			self.configurePrinterButton.Enable()
 			self.passCheck()
 		self.errorMessageln1.SetLabel('')
 		
@@ -666,7 +668,7 @@ class TAMOctoPrintInfo(InfoPage):
 		if validityCheck == 0:
 			self.validSerial = True
 	#		self.errorMessageln0.SetLabel(" ")
-			self.errorMessageln1.SetLabel(" ")
+			self.errorMessageln1.SetLabel("")
 		else:
 			self.errorMessageln1.SetForegroundColour('Red')
 			self.errorMessageln1.SetLabel("Serial number consists of 4-6 digits")
@@ -707,7 +709,9 @@ class TAMOctoPrintInfo(InfoPage):
 		saveInfo = self.saveInfo
 		self.configurationAttemptedOnce = True
 		#testConnection = printerConnect.TestConnection(serial, key, saveInfo)
-		
+		self.errorMessageln1.SetLabel("Configuring....")
+		self.errorMessageln1.SetForegroundColour('Blue')
+		self.configurePrinterButton.Disable()
 		thread = printerConnect.ConfirmCredentials(self, True, key, serial, self.errorMessageln1)
 		thread.start()
 		
