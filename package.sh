@@ -30,13 +30,13 @@ WIN_PORTABLE_PY_VERSION=2.7.2.1
 
 ##Which CuraEngine to use
 if [ -z ${CURA_ENGINE_REPO:-} ]; then
-	CURA_ENGINE_REPO="https://github.com/Ultimaker/CuraEngine.git"
+	CURA_ENGINE_REPO="https://Catrodigious@bitbucket.org/Catrodigious/curaengine.git"
 fi
 if [ -z ${CURA_ENGINE_REPO_PUSHURL:-} ]; then
-	CURA_ENGINE_REPO_PUSHURL="git@github.com:Ultimaker/CuraEngine.git"
+	CURA_ENGINE_REPO_PUSHURL="git@bitbucket.org:Catrodigious/curaengine.git"
 fi
 if [ -z ${CURA_ENGINE_BRANCH:-} ]; then
-	CURA_ENGINE_BRANCH="legacy"
+	CURA_ENGINE_BRANCH="devel"
 fi
 
 if [ -z ${MATERIALS_REPO:-} ]; then
