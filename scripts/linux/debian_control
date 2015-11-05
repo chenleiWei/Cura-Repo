@@ -4,7 +4,7 @@ Section: misc
 Priority: optional
 Architecture: amd64
 Essential: no
-Depends: python-wxgtk2.8 | python-wxgtk3.0, python-opengl, python-serial, python-numpy, requests, pubsub
+Depends: python-wxgtk2.8 | python-wxgtk3.0, python-opengl, python-serial, python-numpy, python-requests, python-pubsub
 Maintainer: Cat <cura@typeamachines.com>
 Provides: cura
 Installed-Size: 10000
