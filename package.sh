@@ -26,7 +26,7 @@ export BUILD_NAME="1.3.4a9"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
-WIN_PORTABLE_PY_VERSION=2.7.2.1
+WIN_PORTABLE_PY_VERSION=2.7.3.2
 
 ##Which CuraEngine to use
 if [ -z ${CURA_ENGINE_REPO:-} ]; then
@@ -541,6 +541,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#Get portable python for windows and extract it. (Linux and Mac need to install python themselfs)
 	downloadURL http://ftp.nluug.nl/languages/python/portablepython/v2.7/PortablePython_${WIN_PORTABLE_PY_VERSION}.exe
 	downloadURL http://sourceforge.net/projects/pyserial/files/pyserial/2.5/pyserial-2.5.win32.exe
+
 	downloadURL http://sourceforge.net/projects/pubsub/files/pubsub/3.3.0/PyPubSub-3.3.0.win32.exe
 	downloadURL http://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe
 	downloadURL http://sourceforge.net/projects/pyopengl/files/PyOpenGL/3.0.1/PyOpenGL-3.0.1.win32.exe
@@ -552,7 +553,12 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#Python OCC
 #	downloadURL https://github.com/tpaviot/pythonocc-core/releases/download/0.16.0/pythonOCC-0.16.0-win32-py27.exe
 
-	# pubsub capabilities
+	#Requests
+	git clone https://github.com/kennethreitz/requests.git
+	if [ $? != 0 ]; then echo "Failed to clone requests"; exit 1; fi
+
+	#urllib3
+	git clone https://github.com/shazow/urllib3.git
 
     # Add materials profiles
 	if test -d resources/quickprint/Materials; then
@@ -566,15 +572,15 @@ if [ $BUILD_TARGET = "win32" ]; then
 
 	#Get the power module for python
 	gitClone \
-	  https://github.com/GreatFruitOmsk/Power \
-	  git@github.com:GreatFruitOmsk/Power \
-	  Power
+		https://github.com/GreatFruitOmsk/Power \
+		https://github.com/GreatFruitOmsk/Power \
+		Power
     if [ $? != 0 ]; then echo "Failed to clone Power"; exit 1; fi
-	gitClone \
-	  ${CURA_ENGINE_REPO} \
-	  ${CURA_ENGINE_REPO_PUSHURL} \
-	  CuraEngine
-    if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
+#	gitClone \
+#	  ${CURA_ENGINE_REPO} \
+#	  ${CURA_ENGINE_REPO_PUSHURL} \
+#	  CuraEngine
+ #   if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
 fi
 
 #############################
@@ -609,6 +615,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	mkdir -p ${TARGET_DIR}/Cura/
 	mv \$_OUTDIR/App/* ${TARGET_DIR}/python
 	mv \$_OUTDIR/Lib/site-packages/wx* ${TARGET_DIR}/python/Lib/site-packages/
+
 	mv PURELIB/serial ${TARGET_DIR}/python/Lib
 	mv PURELIB/OpenGL ${TARGET_DIR}/python/Lib
 	mv PURELIB/PubSub ${TARGET_DIR}/python/Lib
@@ -617,11 +624,15 @@ if [ $BUILD_TARGET = "win32" ]; then
 	mv PURELIB/comtypes ${TARGET_DIR}/python/Lib
 	mv PLATLIB/numpy ${TARGET_DIR}/python/Lib
 	mv Power/power ${TARGET_DIR}/python/Lib
+	mv requests/requests ${TARGET_DIR}/python/Lib
+	mv urllib3/urllib3 ${TARGET_DIR}/python/Lib
 	mv VideoCapture-0.9-5/Python27/DLLs/vidcap.pyd ${TARGET_DIR}/python/DLLs
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/bin/ffmpeg.exe ${TARGET_DIR}/Cura/
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/licenses ${TARGET_DIR}/Cura/ffmpeg-licenses/
 	mv Win32/EjectMedia.exe ${TARGET_DIR}/Cura/
 	
+
+
 	rm -rf Power/
 	rm -rf \$_OUTDIR
 	rm -rf PURELIB
