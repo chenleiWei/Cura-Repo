@@ -1,18 +1,14 @@
-__copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura for the Type A Machines Series 1) - Released under terms of the AGPLv3 License"
-
+__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+#encode UTF-8
 import wx
 import wx.animate
-from pubsub import pub
+from wx.lib.pubsub import pub
 import numpy
 import time
-import datetime
 import os
-import signal
-import subprocess
 import traceback
 import threading
 import math
-import sys
 import cStringIO as StringIO
 import webbrowser
 import OpenGL
@@ -20,8 +16,6 @@ import OpenGL
 OpenGL.ERROR_CHECKING = False
 from OpenGL.GLU import *
 from OpenGL.GL import *
-
-import tempfile
 
 import ConfigParser as configparser
 
@@ -75,7 +69,6 @@ class SceneView(openglGui.glGuiPanel):
 		self.openOctoPrintInBrowser = False
 		self.printGcode = "false"
 		
-		# Both with relation to connecting to the OctoPrint API 
 		self.gcodePath = None
 		pub.subscribe(self.SendToPrinter, 'gcode.update')
 		pub.subscribe(self.PrintUponUpload, 'print.gcode')
@@ -146,8 +139,7 @@ class SceneView(openglGui.glGuiPanel):
 		self.OnToolSelect(0)
 		self.updateToolButtons()
 		self.updateProfileToControls()
-		
-	
+
 	def PrintUponUpload(self, printGcode):
 		if printGcode == "true":
 			self.printGcode = "true"
@@ -178,8 +170,6 @@ class SceneView(openglGui.glGuiPanel):
 		self.printButton.setDisabled(False)
 		pub.sendMessage('upload.enabled', enable=True)
 		self.OnViewChange()
-	#Delete if not needed
-#	def populateOctoPrintwGCodeFile(self, gcodePath):
 		self.gcodePath = gcodePath
 
 	def loadSceneFiles(self, filenames):
@@ -306,11 +296,12 @@ class SceneView(openglGui.glGuiPanel):
 		dlg.Destroy()
 		meshLoader.saveMeshes(filename, self._scene.objects())
 
-	def OnOctoPrintButton(self, button):
-		# Saves loaded file into the users Documents folder
-		self.win.OpenPrinterSelector()
-		
-		
+	def OnOctoPrintButton(self, callback):
+		try: 
+			self.win.OpenPrinterSelector()
+		except Exception as e:
+			print e
+
 	def SendToPrinter(self, serial):
 		import re
 		#Temporary file handling
@@ -471,9 +462,6 @@ class SceneView(openglGui.glGuiPanel):
 
 		threading.Thread(target=self._saveGCode,args=(filename,)).start()
 
-	def _gcodePathUpdate(self, targetFilename):
-		self.gcodePath = targetFilename
-
 	def _saveGCode(self, targetFilename, ejectDrive = False):
 		# gets gcode from the engine
 		gcode = self._engine.getResult().getGCode()
@@ -504,13 +492,6 @@ class SceneView(openglGui.glGuiPanel):
 				self.notification.message("Saved as %s" % (targetFilename), lambda : explorer.openExplorer(targetFilename), 4, 'Open folder')
 			else:
 				self.notification.message("Saved as %s" % (targetFilename))
-
-
-		# loading gif
-		loadingGifPath = resources.getPathForImage('dots_process.gif')		
-		loadingGif = wx.animate.GIFAnimationCtrl(self, -1, loadingGifPath)
-		loadingGif.Play()
-
 		self.printButton.setProgressBar(None)
 		self._engine.getResult().submitInfoOnline()
 		
@@ -803,8 +784,7 @@ class SceneView(openglGui.glGuiPanel):
 		self._engineResultView.setResult(result)
 		if finished:
 			pub.sendMessage('upload.enabled', enable=True)
-		#	pub.sendMessage('update.filename', filename = self._scene._objectList[0].getName())
-			print "\n\n\nSCENE OBJECT self._scene._objectList[0].getName(): %s\n\n\n" % self._scene._objectList[0].getName()
+			self.printButton.setProgressBar(None)
 			text = '%s' % (result.getPrintTime())
 			for e in xrange(0, int(profile.getMachineSetting('extruder_amount'))):
 				amount = result.getFilamentAmount(e)
@@ -1709,7 +1689,10 @@ class middleMan(SceneView):
 	def __init__(self, printButton, sceneObjects):
 		#--gcode upload--#
 		# Second part of data handoff: listens to and then sends response acquired from sceneView and sends it to printerSelector
-		pub.subscribe(self.uploadStatus, 'transfer.response')
+		try:
+			pub.subscribe(self.uploadStatus, 'transfer.response')
+		except Exception as e:
+			print e
 	#	pub.subscribe(self.updateFilename, 'update.filename')
 		self.enableUpload = True
 		self.printButtonStatus = printButton
@@ -1743,7 +1726,7 @@ class middleMan(SceneView):
 
 class printerSelector(wx.Frame):
 	def __init__(self, enableUpload):
-		wx.Frame.__init__(self, None, wx.ID_ANY, "Printer Select", size=(475,300), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
+		wx.Frame.__init__(self, None, wx.ID_ANY, "Printer Select", size=(475,350), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
 
 		# Add-New-Printer Event-listener
 		pub.subscribe(self.AddToPrinterList,'printer.add')
@@ -1755,7 +1738,7 @@ class printerSelector(wx.Frame):
 		panel = wx.Panel(self, -1)
 		# Text Related
 		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-		bigFont = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+		bigFont = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 		# OctoPrint API Config Path
 		printerListPath = os.path.join(profile.getBasePath(), 'octoprint_api_config.ini')
 		
@@ -1780,7 +1763,9 @@ class printerSelector(wx.Frame):
 
 		#--wxPython Container Widgets--#
 		self.availPrinters = wx.ListBox(panel, 10, wx.DefaultPosition, size=(200, 65), choices=printerList)
-		self.availPrinters.SetSelection(0)
+	#	print self.availPrinters.GetCount()	
+		if self.availPrinters.GetCount() > 0:
+			self.availPrinters.SetSelection(0)
 		self.availPrinters.SetFont(font)
 
 		
@@ -1930,6 +1915,7 @@ class printerSelector(wx.Frame):
 		newPrinter.Show()
 		
 	def AddToPrinterList(self, serial):
+	
 		printer = "Series 1  " + str(serial)
 		self.availPrinters.Append(printer)
 		printerIndex = self.availPrinters.FindString(printer)
@@ -1968,7 +1954,7 @@ class printerSelector(wx.Frame):
 
 class AddNewPrinter(wx.Frame):
 	def __init__(self, parent):
-		wx.Frame.__init__(self, parent, wx.ID_ANY, "New Printer", size=(475,320), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
+		wx.Frame.__init__(self, parent, wx.ID_ANY, "New Printer", size=(475,350), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
 		
 		mainmainBox = wx.BoxSizer(wx.VERTICAL)
 		
@@ -2030,7 +2016,7 @@ class AddNewPrinter(wx.Frame):
 		inputBox.Add(serialPrompt, flag=wx.TOP, border=20)
 		inputBox.Add(self.serialInput)
 		inputBox.Add(self.serialError)
-		inputBox.Add(keyPrompt, flag=wx.TOP, border=20)
+		inputBox.Add(keyPrompt, flag=wx.TOP, border=5)
 		inputBox.Add(self.keyInput)
 		inputBox.Add(self.keyError)
 		buttonBox.Add(self.addPrinterButton, flag=wx.ALIGN_CENTER)
@@ -2043,11 +2029,11 @@ class AddNewPrinter(wx.Frame):
 		inputFeedbackBox.Add(self.successText, flag=wx.wx.CENTER)
 
 		# Loading main box
-		mainBox.Add(iconBox, -1, flag=wx.LEFT | wx.TOP, border=40)
-		mainBox.Add(inputBox, -1, flag= wx.RIGHT, border=40)
+		mainBox.Add(iconBox, -1, flag=wx.LEFT | wx.TOP, border=20)
+		mainBox.Add(inputBox, -1, flag= wx.RIGHT, border=20)
 		mainmainBox.Add(mainBox, flag=wx.EXPAND)
 		mainmainBox.Add(inputFeedbackBox, flag=wx.CENTER)
-		mainmainBox.Add(tipBox, flag= wx.CENTER | wx.EXPAND)
+		mainmainBox.Add(tipBox, flag= wx.CENTER)
 		mainmainBox.Add(buttonBox, flag=wx.CENTER)
 
 		panel.SetSizer(mainmainBox)
@@ -2059,14 +2045,14 @@ class AddNewPrinter(wx.Frame):
 		serialValResult = inputValidation.verifySerial(serial)
 
 		if serialValResult == 0:
-			self.serialError.SetLabel(" ")
+			self.serialError.SetLabel("")
 			self.validSerial = True
 		
 		if serialValResult == -1:
 			self.serialError.SetLabel("Serial number is 4-6 digits")
 			self.validSerial = False
 		else:
-			self.serialError.SetLabel(" ")
+			self.serialError.SetLabel("")
 		self.passCheck()
 			
 	def checkKey(self, e):
@@ -2075,14 +2061,14 @@ class AddNewPrinter(wx.Frame):
 		keyValResult = inputValidation.verifyKey(key)
 		
 		if keyValResult == 0:
-			self.keyError.SetLabel(" ")
+			self.keyError.SetLabel("")
 			self.validKey = True
 		
 		if keyValResult == -1:
 			self.keyError.SetLabel("API key is 32 characters")
 			self.validKey = False
 		else:
-			self.keyError.SetLabel(" ")
+			self.keyError.SetLabel("")
 			
 		self.passCheck()
 			
@@ -2106,10 +2092,10 @@ class AddNewPrinter(wx.Frame):
 		else:
 			serial = self.serialInput.GetValue()
 			key = self.keyInput.GetValue()
-	
+			self.successText.SetLabel("Configuring....")
 			thread = printerConnect.ConfirmCredentials(self, configWiz, apiKey, serialNum, self.successText)
-			self.informativeLabel.SetLabel(" ")
-			self.informativeText.SetLabel(" ")
+			self.informativeLabel.SetLabel("")
+			self.informativeText.SetLabel("")
 			try:
 				thread.start()
 			except:

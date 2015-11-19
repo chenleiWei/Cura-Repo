@@ -3,7 +3,7 @@ import requests
 import os
 import wx
 import webbrowser
-from pubsub import pub
+from wx.lib.pubsub import pub
 from Cura.util import profile
 import json
 
@@ -46,8 +46,7 @@ class ConfirmCredentials(threading.Thread):
 		self.errorMessage1 = errorMessage1		
 		self.success = False
 		self.status = None
-		
-		
+
 	def run(self):
 		r = requests.Session()
 		resourceBasePath = resources.resourceBasePath
@@ -60,9 +59,14 @@ class ConfirmCredentials(threading.Thread):
 		try:
 			r = requests.post(url, headers=header, files=files)
 		except requests.exceptions.RequestException as e:
+			print e
 			wx.CallAfter(self.conveyError)
 
-				
+		print r.text
+		status = r.status_code
+		
+		wx.CallAfter(self.setStatusBasedText(status))
+
 	def setConfigText(self):
 		if self.configWizard:
 			self.errorMessage1.SetLabel("\t\tConfiguring...")
@@ -77,12 +81,14 @@ class ConfirmCredentials(threading.Thread):
 		self.errorMessage1.SetForegroundColour('Red')
 		if self.configWizard:
 			self.parent.configurePrinterButton.Enable()
+
 	def setStatusBasedText(self, status):
 		# 201 - File uploaded
+		print "Status line 86", status
 		if status == 201:
 			if self.configWizard:
 				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
-				self.errorMessage1.SetLabel("\tYour printer is configured")
+				self.errorMessage1.SetLabel("\tYour printer is configured.")
 			else:
 				self.parent.addPrinterButton.SetLabel('Done')
 				self.parent.addPrinterButton.Bind(wx.EVT_BUTTON, self.parent.OnClose)
@@ -112,8 +118,8 @@ class ConfirmCredentials(threading.Thread):
 	# For removing the dummy file used in configuring connection to printer
 	def removeFile(self):
 		r = requests.Session()
-		url = 'http://series1-1212.local:5000/api/files/local/dummy_code.gcode' 
-		header = {"X-Api-Key":"F7351DCF892847D9A404ED9A8DF41B5D"}
+		url = 'http://series1-%s.local:5000/api/files/local/dummy_code.gcode' % self.serial
+		header = {"X-Api-Key":"%s"% self.key}
 		r = requests.delete(url=url, headers=header)
 		print r.text
 		status = r.status_code
@@ -131,8 +137,7 @@ class  GcodeUpload(threading.Thread):
 		self.notification = notification
 		self.printOnUpload = printOnUpload
 		self.filename = os.path.basename(tempFilePath)
-		print self.printOnUpload
-		
+
 	def run(self):
 		r = requests.Session()
 		resourceBasePath = resources.resourceBasePath
@@ -143,9 +148,7 @@ class  GcodeUpload(threading.Thread):
 		
 		# Printer information
 		url = 'http://series1-%s.local:5000/api/files/local'  % self.serial
-		apiKey = 'X-Api-Key: %s' % self.key
-		print "self.printOnUpload: ", self.printOnUpload
-		header = {'X-Api-Key':self.key, 'print':'true'}
+		header = {'X-Api-Key':self.key}
 		files = {'file': (filename, open(filepath, 'rb'), 'multipart/form-data')}
 		data = {'select': 'true', 'print': self.printOnUpload}
 		
