@@ -2,7 +2,7 @@ __copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura for Type A 
 
 import os
 import webbrowser
-from pubsub import pub
+from wx.lib.pubsub import pub
 import wx.lib.agw.hyperlink as hl
 import threading
 import time
@@ -624,9 +624,6 @@ class TAMOctoPrintInfo(InfoPage):
 		apiTip = resources.getPathForImage('apiTip.png')
 		self.AddImage(apiTip)
 		self.tip = self.AddTextTip('Tip: You can find the API key in the OctoPrint web interface by going to Settings --> API')	
-	#	self.AddTextTitle("Printer Serial Number")
-	#	self.serialNumber = self.AddTextCtrl("")
-	#	self.AddTextTitle("OctoPrint API Key")
 		self.AddHiddenSeperator(1)
 		self.serialNumber = self.AddLabelTextCtrl("Serial Number", "")
 		self.APIKey = self.AddLabelTextCtrl("API Key", "")
@@ -667,13 +664,10 @@ class TAMOctoPrintInfo(InfoPage):
 		print "Validity check: %s" % validityCheck
 		if validityCheck == 0:
 			self.validSerial = True
-	#		self.errorMessageln0.SetLabel(" ")
 			self.errorMessageln1.SetLabel("")
 		else:
 			self.errorMessageln1.SetForegroundColour('Red')
 			self.errorMessageln1.SetLabel("Serial number consists of 4-6 digits")
-			
-		self.passCheck()
 
 	def unSavePrinter(self):
 		profile.OctoPrintAPIRemoveSerial(self.serialNumber)
@@ -687,8 +681,7 @@ class TAMOctoPrintInfo(InfoPage):
 		
 		if validityCheck == 0:
 			self.validKey = True
-	#		self.errorMessageln0.SetLabel(" ")
-			self.errorMessageln1.SetLabel(" ")
+			self.errorMessageln1.SetLabel("")
 		else:
 			self.validKey = False
 	#		self.errorMessageln0.SetLabel("Error")
@@ -709,9 +702,10 @@ class TAMOctoPrintInfo(InfoPage):
 		saveInfo = self.saveInfo
 		self.configurationAttemptedOnce = True
 		#testConnection = printerConnect.TestConnection(serial, key, saveInfo)
-		self.errorMessageln1.SetLabel("Configuring....")
+		self.errorMessageln1.SetLabel("Configuring...")
 		self.errorMessageln1.SetForegroundColour('Blue')
 		self.configurePrinterButton.Disable()
+
 		thread = printerConnect.ConfirmCredentials(self, True, key, serial, self.errorMessageln1)
 		thread.start()
 		
