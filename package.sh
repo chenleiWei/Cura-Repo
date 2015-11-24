@@ -541,7 +541,6 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#Get portable python for windows and extract it. (Linux and Mac need to install python themselfs)
 	downloadURL http://ftp.nluug.nl/languages/python/portablepython/v2.7/PortablePython_${WIN_PORTABLE_PY_VERSION}.exe
 	downloadURL http://sourceforge.net/projects/pyserial/files/pyserial/2.5/pyserial-2.5.win32.exe
-
 	downloadURL http://sourceforge.net/projects/pubsub/files/pubsub/3.3.0/PyPubSub-3.3.0.win32.exe
 	downloadURL http://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe
 	downloadURL http://sourceforge.net/projects/pyopengl/files/PyOpenGL/3.0.1/PyOpenGL-3.0.1.win32.exe
@@ -616,6 +615,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	mv \$_OUTDIR/App/* ${TARGET_DIR}/python
 	mv \$_OUTDIR/Lib/site-packages/wx* ${TARGET_DIR}/python/Lib/site-packages/
 
+
 	mv PURELIB/serial ${TARGET_DIR}/python/Lib
 	mv PURELIB/OpenGL ${TARGET_DIR}/python/Lib
 	mv PURELIB/PubSub ${TARGET_DIR}/python/Lib
@@ -631,7 +631,9 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/licenses ${TARGET_DIR}/Cura/ffmpeg-licenses/
 	mv Win32/EjectMedia.exe ${TARGET_DIR}/Cura/
 	
-
+	# replace email init
+	rm -rf ${TARGET_DIR}/python/Lib/email/__init__.py
+	cp __init__.py ${TARGET_DIR}/python/Lib/email/__init__.py
 
 	rm -rf Power/
 	rm -rf \$_OUTDIR
@@ -673,6 +675,8 @@ if [ $BUILD_TARGET = "win32" ]; then
 else
     cp -a scripts/${BUILD_TARGET}/*.sh $TARGET_DIR/
 fi
+
+echo "location is: ", $TARGET_DIR
 
 #package the result
 if (( ${ARCHIVE_FOR_DISTRIBUTION} )); then
