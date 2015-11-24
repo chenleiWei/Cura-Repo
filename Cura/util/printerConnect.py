@@ -163,8 +163,10 @@ class  GcodeUpload(threading.Thread):
 			print "Removed file"
 		except:
 			print "error"
+
+		status = r.status_code
 			
-		self.conveyStatus(status)
+		wx.CallAfter(self.conveyStatus(status))
 	
 	def conveyStatus(self, status):
 		if status == 201: 
