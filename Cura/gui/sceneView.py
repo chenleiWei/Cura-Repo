@@ -1980,7 +1980,7 @@ class AddNewPrinter(wx.Frame):
 		
 		# Input box variables
 		serialPrompt = wx.StaticText(panel, -1, "Serial Number:")
-		self.serialInput = wx.TextCtrl(panel, -1, " ", size=(200, 25))
+		self.serialInput = wx.TextCtrl(panel, -1, "", size=(200, 25))
 		
 		self.serialError = wx.StaticText(panel, -1, " ")
 		self.serialError.SetFont(font)
@@ -1990,7 +1990,7 @@ class AddNewPrinter(wx.Frame):
 		self.keyError.SetFont(font)
 		self.keyError.SetForegroundColour('Red')
 		keyPrompt = wx.StaticText(panel, -1, "API Key:")
-		self.keyInput = wx.TextCtrl(panel, -1, " ", size=(200, 25))
+		self.keyInput = wx.TextCtrl(panel, -1, "", size=(200, 25))
 		
 
 		

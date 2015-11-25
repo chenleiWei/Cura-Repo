@@ -68,12 +68,8 @@ class ConfirmCredentials(threading.Thread):
 		wx.CallAfter(self.setStatusBasedText(status))
 
 	def setConfigText(self):
-		if self.configWizard:
-			self.errorMessage1.SetLabel("\t\tConfiguring...")
-			self.errorMessage1.SetForegroundColour('Blue')
-		else:
-			self.errorMessage1.SetLabel("Configuring...")
-			self.errorMessage1.SetForegroundColour('Blue')
+		self.errorMessage1.SetLabel("Configuring...")
+		self.errorMessage1.SetForegroundColour('Blue')
 
 	def conveyError(self):
 		self.errorMessage1.SetLabel("Please check that your printer is connected to the network and that your inputs are correct.")
@@ -88,18 +84,20 @@ class ConfirmCredentials(threading.Thread):
 		if status == 201:
 			if self.configWizard:
 				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
-				self.errorMessage1.SetLabel("\tYour printer is configured.")
+				self.errorMessage1.SetLabel("Your printer is configured.")
 			else:
 				self.parent.addPrinterButton.SetLabel('Done')
 				self.parent.addPrinterButton.Bind(wx.EVT_BUTTON, self.parent.OnClose)
 				self.errorMessage1.SetLabel("Your printer is configured")
-			
+				self.parent.addPrinterButton.Enable()
+				
 			self.errorMessage1.SetForegroundColour('Blue')
 			pub.sendMessage('printer.add', serial=self.serial)
 			profile.initializeOctoPrintAPIConfig(self.serial, self.key)
 				
 			self.removeFile()
 			print "Removing file"
+
 		# 401 - Authentication error
 		elif status == 401: 
 			self.errorMessage1.SetLabel("Invalid serial or API Key. Please try again.")
@@ -112,8 +110,6 @@ class ConfirmCredentials(threading.Thread):
 
 			self.errorMessage1.SetLabel("Please check that your printer is connected to the network.")
 
-		if not self.configWizard:
-			self.parent.addPrinterButton.Enable()	
 	
 	# For removing the dummy file used in configuring connection to printer
 	def removeFile(self):
