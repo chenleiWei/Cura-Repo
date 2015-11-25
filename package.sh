@@ -22,7 +22,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="1.3.4a9"
+export BUILD_NAME="1.3.4a10"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -553,11 +553,18 @@ if [ $BUILD_TARGET = "win32" ]; then
 #	downloadURL https://github.com/tpaviot/pythonocc-core/releases/download/0.16.0/pythonOCC-0.16.0-win32-py27.exe
 
 	#Requests
+	if test -d requests; then 
+			echo "exist"
+			rm -rf requests
+	fi 
+	
 	git clone https://github.com/kennethreitz/requests.git
-	if [ $? != 0 ]; then echo "Failed to clone requests"; exit 1; fi
+	if [ $? != 0 ]; then 
+		echo "Failed to clone requests"; exit 1; 
+	fi
 
 	#urllib3
-	git clone https://github.com/shazow/urllib3.git
+#	git clone https://github.com/shazow/urllib3.git
 
     # Add materials profiles
 	if test -d resources/quickprint/Materials; then
@@ -625,7 +632,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	mv PLATLIB/numpy ${TARGET_DIR}/python/Lib
 	mv Power/power ${TARGET_DIR}/python/Lib
 	mv requests/requests ${TARGET_DIR}/python/Lib
-	mv urllib3/urllib3 ${TARGET_DIR}/python/Lib
+#	mv urllib3/urllib3 ${TARGET_DIR}/python/Lib
 	mv VideoCapture-0.9-5/Python27/DLLs/vidcap.pyd ${TARGET_DIR}/python/DLLs
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/bin/ffmpeg.exe ${TARGET_DIR}/Cura/
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/licenses ${TARGET_DIR}/Cura/ffmpeg-licenses/
