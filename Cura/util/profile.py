@@ -514,7 +514,7 @@ setting('filament_physical_density', '1240', float, 'preference', 'hidden').setR
 setting('language', 'English', str, 'preference', 'hidden').setLabel(_('Language'), _('Change the language in which Cura runs. Switching language requires a restart of Cura'))
 setting('active_machine', '0', int, 'preference', 'hidden')
 
-setting('model_colour', '#e2e2e2', str, 'preference', 'hidden').setLabel(_('Model colour'), _('Display color for first extruder'))
+setting('model_colour', '#ff5900', str, 'preference', 'hidden').setLabel(_('Model colour'), _('Display color for first extruder'))
 setting('model_colour2', 'e2e2e2', str, 'preference', 'hidden').setLabel(_('Model colour (2)'), _('Display color for second extruder'))
 setting('model_colour3', '#919191', str, 'preference', 'hidden').setLabel(_('Model colour (3)'), _('Display color for third extruder'))
 setting('model_colour4', '#b7b5b8', str, 'preference', 'hidden').setLabel(_('Model colour (4)'), _('Display color for forth extruder'))
@@ -714,11 +714,12 @@ def initializeOctoPrintAPIConfig(s,k):
 	cp = ConfigParser.ConfigParser()
 
 	# Check if the file exists
-	if os.path.exists(path):
-		# Parse file
-		cp.read(path)
-
+	if not os.path.exists(path):
 		octoprintConfigFile = open(path, 'w+')
+	# Parse file
+	cp.read(path)
+
+	
 	# If the section hasn't been defined,
 	# create a section (serial number) with the api key as the section item
 	if not cp.has_section(s):
