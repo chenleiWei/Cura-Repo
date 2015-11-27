@@ -714,8 +714,8 @@ def initializeOctoPrintAPIConfig(s,k):
 	cp = ConfigParser.ConfigParser()
 
 	# Check if the file exists
-	if not os.path.exists(path):
-		octoprintConfigFile = open(path, 'w+')
+
+	octoprintConfigFile = open(path, 'w+')
 	# Parse file
 	cp.read(path)
 
