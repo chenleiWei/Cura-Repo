@@ -1968,8 +1968,6 @@ class AddNewPrinter(wx.Frame):
 		self.validSerial = False
 		self.validKey = False
 		
-		font = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-		
 
 		panel = wx.Panel(self, -1)
 	#	otherPanel = wx.Panel(self, -2)
@@ -1982,17 +1980,13 @@ class AddNewPrinter(wx.Frame):
 		serialPrompt = wx.StaticText(panel, -1, "Serial Number:")
 		self.serialInput = wx.TextCtrl(panel, -1, "", size=(200, 25))
 		
-		self.serialError = wx.StaticText(panel, -1, " ")
-		self.serialError.SetFont(font)
+		self.serialError = wx.StaticText(panel, -1, "")
 		self.serialError.SetForegroundColour('Red')
 		
-		self.keyError = wx.StaticText(panel, -1, " ")
-		self.keyError.SetFont(font)
+		self.keyError = wx.StaticText(panel, -1, "")
 		self.keyError.SetForegroundColour('Red')
 		keyPrompt = wx.StaticText(panel, -1, "API Key:")
 		self.keyInput = wx.TextCtrl(panel, -1, "", size=(200, 25))
-		
-
 		
 		#buttons
 	#	self.cancelButton = wx.Button(panel, -1, "Cancel")
@@ -2021,12 +2015,13 @@ class AddNewPrinter(wx.Frame):
 		inputBox.Add(self.keyError)
 		buttonBox.Add(self.addPrinterButton, flag=wx.ALIGN_CENTER)
 		
-		self.successText = wx.StaticText(panel, -1, " ", style=wx.ALIGN_LEFT)
-		self.successText.Wrap(200)
+		self.successText = wx.StaticText(panel, -1, "", style=wx.ALIGN_LEFT)
+		self.successText.Wrap(100)
+		self.successText.SetForegroundColour('blue')
 		# Loading tip box
 		tipBox.Add(self.informativeLabel, flag=wx.CENTER)
 		tipBox.Add(self.informativeText, flag=wx.CENTER)
-		inputFeedbackBox.Add(self.successText, flag=wx.wx.CENTER)
+		inputFeedbackBox.Add(self.successText)
 
 		# Loading main box
 		mainBox.Add(iconBox, -1, flag=wx.LEFT | wx.TOP, border=20)
@@ -2093,14 +2088,18 @@ class AddNewPrinter(wx.Frame):
 			serial = self.serialInput.GetValue()
 			key = self.keyInput.GetValue()
 			self.successText.SetLabel("Configuring....")
-			thread = printerConnect.ConfirmCredentials(self, configWiz, apiKey, serialNum, self.successText)
-			self.informativeLabel.SetLabel("")
+	#		self.informativeLabel.SetLabel("Configuring...")
 			self.informativeText.SetLabel("")
+			self.informativeLabel.SetLabel("")
+			thread = printerConnect.ConfirmCredentials(self, configWiz, apiKey, serialNum, self.informativeText)
+
 			try:
 				thread.start()
+		#		self.informativeLabel.SetLabel("")
 			except:
 				print "Error"
-			
+	#			self.successText.SetLabel("")
+	#		self.informativeLabel.SetLabel("")
 	def OnClose(self, e):
 		self.Destroy()
 

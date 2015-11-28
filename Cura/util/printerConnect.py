@@ -73,10 +73,12 @@ class ConfirmCredentials(threading.Thread):
 
 	def conveyError(self):
 		self.errorMessage1.SetLabel("Please check that your printer is connected to the network and that your inputs are correct.")
-		self.errorMessage1.Wrap(350)
+		self.errorMessage1.Wrap(420)
 		self.errorMessage1.SetForegroundColour('Red')
 		if self.configWizard:
 			self.parent.configurePrinterButton.Enable()
+		else:
+			self.parent.successText.SetLabel("")
 
 	def setStatusBasedText(self, status):
 		# 201 - File uploaded
@@ -84,14 +86,14 @@ class ConfirmCredentials(threading.Thread):
 		if status == 201:
 			if self.configWizard:
 				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
-				self.errorMessage1.SetLabel("Your printer is configured.")
+				self.errorMessage1.SetForegroundColour('Blue')
+				self.errorMessage1.SetLabel("Your Series 1 is now configured.")
 			else:
+				self.parent.successText.SetLabel("Your Series 1 is now configured.")
 				self.parent.addPrinterButton.SetLabel('Done')
 				self.parent.addPrinterButton.Bind(wx.EVT_BUTTON, self.parent.OnClose)
-				self.errorMessage1.SetLabel("Your printer is configured")
 				self.parent.addPrinterButton.Enable()
 				
-			self.errorMessage1.SetForegroundColour('Blue')
 			pub.sendMessage('printer.add', serial=self.serial)
 			profile.initializeOctoPrintAPIConfig(self.serial, self.key)
 				
@@ -99,14 +101,18 @@ class ConfirmCredentials(threading.Thread):
 			print "Removing file"
 
 		# 401 - Authentication error
-		elif status == 401: 
+		elif status == 401:
 			self.errorMessage1.SetLabel("Invalid serial or API Key. Please try again.")
 			self.errorMessage1.SetForegroundColour('Red')
+
+			if not self.configWizard:
+				self.parent.successText.SetLabel("")
 		else:
 			if self.configWizard:			
-				self.errorMessage1.Wrap(350)
+				self.errorMessage1.Wrap(200)
 			else:
 				self.errorMessage1.Wrap(200)
+				self.parent.successText.SetLabel("")
 
 			self.errorMessage1.SetLabel("Please check that your printer is connected to the network.")
 
