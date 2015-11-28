@@ -224,10 +224,8 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.rowNr += 1
 		return text
 		
-	def AddErrorText(self, info, customFontSize, red=False):
+	def AddErrorText(self, info, red=False):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=customFontSize, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.LIGHT)
-		text.SetFont(font)
 		if red:
 			text.SetForegroundColour('Red')
 		else:
@@ -307,7 +305,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return check
 
 	def AddButton(self, label):
-		button = wx.Button(self, -1, str(label), style=wx.ALIGN_CENTRE_HORIZONTAL)
+		button = wx.Button(self, -1, str(label))
 		font = wx.Font(pointSize=12, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		button.SetFont(font)
 		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -634,7 +632,7 @@ class TAMOctoPrintInfo(InfoPage):
 		self.configurePrinterButton = self.AddButton("Configure")
 		self.AddHiddenSeperator(1)
 		self.skipConfig = self.AddCheckbox("Skip configuration for now", checked=False)
-		self.errorMessageln1 = self.AddErrorText('', customFontSize=11)
+		self.errorMessageln1 = self.AddErrorText('')
 		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
 		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
 		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
