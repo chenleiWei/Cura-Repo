@@ -22,7 +22,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="1.3.4a10"
+export BUILD_NAME="1.3.4a12"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -36,7 +36,7 @@ if [ -z ${CURA_ENGINE_REPO_PUSHURL:-} ]; then
 	CURA_ENGINE_REPO_PUSHURL="git@bitbucket.org:Catrodigious/curaengine.git"
 fi
 if [ -z ${CURA_ENGINE_BRANCH:-} ]; then
-	CURA_ENGINE_BRANCH="devel"
+	CURA_ENGINE_BRANCH="legacy"
 fi
 
 if [ -z ${MATERIALS_REPO:-} ]; then
@@ -192,13 +192,13 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	git clone ${MATERIALS_REPO} resources/quickprint/Materials/
 	ls resources/quickprint/Materials/
 
-#	rm -rf CuraEngine
-#	gitClone \
-#	  ${CURA_ENGINE_REPO} \
-#	  ${CURA_ENGINE_REPO_PUSHURL} \
-#	  CuraEngine \
-#	  ${CURA_ENGINE_BRANCH}
- #   if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
+	rm -rf CuraEngine
+	gitClone \
+	  ${CURA_ENGINE_REPO} \
+	  ${CURA_ENGINE_REPO_PUSHURL} \
+	  CuraEngine \
+	  ${CURA_ENGINE_BRANCH}
+    if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
 	$MAKE -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
     
@@ -582,11 +582,11 @@ if [ $BUILD_TARGET = "win32" ]; then
 		https://github.com/GreatFruitOmsk/Power \
 		Power
     if [ $? != 0 ]; then echo "Failed to clone Power"; exit 1; fi
-#	gitClone \
-#	  ${CURA_ENGINE_REPO} \
-#	  ${CURA_ENGINE_REPO_PUSHURL} \
-#	  CuraEngine
- #   if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
+	gitClone \
+	  ${CURA_ENGINE_REPO} \
+	  ${CURA_ENGINE_REPO_PUSHURL} \
+	  CuraEngine
+    if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
 fi
 
 #############################
