@@ -231,7 +231,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		else:
 			text.SetForegroundColour('Black')
 			
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT, border=115)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT, border=105)
 		self.rowNr += 1
 		return text
 		
@@ -635,8 +635,8 @@ class TAMOctoPrintInfo(InfoPage):
 		self.errorMessageln1 = self.AddErrorText('')
 		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
 		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
-		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
-		self.APIKey.Bind(wx.EVT_TEXT, self.checkKeyValidity)
+#		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
+#		self.APIKey.Bind(wx.EVT_TEXT, self.checkKeyValidity)
 
 	def AllowNext(self):
 		return False
