@@ -72,9 +72,14 @@ class ConfirmCredentials(threading.Thread):
 		self.errorMessage1.SetForegroundColour('Blue')
 
 	def conveyError(self):
-		self.errorMessage1.SetLabel("Please check that your printer is connected to the network and that your inputs are correct.")
-		self.errorMessage1.Wrap(420)
 		self.errorMessage1.SetForegroundColour('Red')
+		self.errorMessage1.SetLabel("Please check that your printer is connected to the network and that your inputs are correct.")
+		if self.configWizard: 
+			self.errorMessage1.Wrap(300)
+		else:
+			self.errorMessage1.Wrap(420)
+		
+
 		if self.configWizard:
 			self.parent.configurePrinterButton.Enable()
 		else:
