@@ -530,9 +530,9 @@ setting('last_run_version', '', str, 'preference', 'hidden')
 
 setting('machine_name', '', str, 'machine', 'hidden')
 setting('machine_type', 'unknown', str, 'machine', 'hidden') #Ultimaker, Ultimaker2, RepRap
-setting('machine_width', '205', float, 'machine', 'hidden').setLabel(_("Maximum width (mm)"), _("Size of the machine in mm"))
-setting('machine_depth', '205', float, 'machine', 'hidden').setLabel(_("Maximum depth (mm)"), _("Size of the machine in mm"))
-setting('machine_height', '200', float, 'machine', 'hidden').setLabel(_("Maximum height (mm)"), _("Size of the machine in mm"))
+setting('machine_width', '305', float, 'machine', 'hidden').setLabel(_("Maximum width (mm)"), _("Size of the machine in mm"))
+setting('machine_depth', '305', float, 'machine', 'hidden').setLabel(_("Maximum depth (mm)"), _("Size of the machine in mm"))
+setting('machine_height', '305', float, 'machine', 'hidden').setLabel(_("Maximum height (mm)"), _("Size of the machine in mm"))
 setting('machine_center_is_zero', 'False', bool, 'machine', 'hidden').setLabel(_("Machine center 0,0"), _("Machines firmware defines the center of the bed as 0,0 instead of the front left corner."))
 setting('machine_shape', 'Square', ['Square','Circular'], 'machine', 'hidden').setLabel(_("Build area shape"), _("The shape of machine build area."))
 setting('ultimaker_extruder_upgrade', 'False', bool, 'machine', 'hidden')
@@ -712,22 +712,18 @@ def getDefaultProfilePath():
 def initializeOctoPrintAPIConfig(s,k):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
 	cp = ConfigParser.ConfigParser()
-
-	# Check if the file exists
-
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError:
+		return
 	octoprintConfigFile = open(path, 'w+')
-	# Parse file
-	cp.read(path)
-
-	
-	# If the section hasn't been defined,
-	# create a section (serial number) with the api key as the section item
 	if not cp.has_section(s):
 		cp.add_section(s.encode('utf-8'))
-		cp.set(s, 'apikey', k.encode('utf-8'))
-		cp.write(octoprintConfigFile)
+	cp.set(s, 'apikey', k.encode('utf-8'))
+	cp.write(octoprintConfigFile)
 	octoprintConfigFile.close()
-		
+
+
 def configExists():
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
 	if os.path.isfile(path):
