@@ -113,13 +113,11 @@ class ConfirmCredentials(threading.Thread):
 			if not self.configWizard:
 				self.parent.successText.SetLabel("")
 		else:
-			if self.configWizard:			
-				self.errorMessage1.Wrap(200)
-			else:
-				self.errorMessage1.Wrap(200)
+			self.errorMessage1.SetLabel("Check that your printer is connected to the network")
+			if not self.configWizard:			
 				self.parent.successText.SetLabel("")
 
-			self.errorMessage1.SetLabel("Please check that your printer is connected to the network.")
+			self.errorMessage1.Wrap(200)
 
 	
 	# For removing the dummy file used in configuring connection to printer
