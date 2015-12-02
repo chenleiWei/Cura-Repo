@@ -135,7 +135,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddHyperlink(self, text, url):
 		hyper1 = hl.HyperLinkCtrl(self, -1, text, URL=url)
-		font = wx.Font(pointSize=12, family = wx.DEFAULT,
+		font = wx.Font(pointSize=10, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		hyper1.SetFont(font)
 		self.GetSizer().Add(hyper1, pos=(self.rowNr,0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -159,7 +159,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddText(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=12, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
+		font = wx.Font(pointSize=10, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT, border=100)
@@ -168,7 +168,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddTextTip(self,info):
 		text = wx.StaticText(self, -1, info)
-		font = wx.Font(pointSize=12, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
+		font = wx.Font(pointSize=10, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr,0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -177,7 +177,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTagLine(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=12, family = wx.DEFAULT,
+		font = wx.Font(pointSize=10, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
@@ -187,7 +187,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextSubtitle(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=12, family = wx.DEFAULT,
+		font = wx.Font(pointSize=10, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(425)
@@ -197,7 +197,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextDescription(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=12, family = wx.DEFAULT,
+		font = wx.Font(pointSize=10, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(300)
@@ -207,7 +207,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTitle(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=16, family = wx.DEFAULT,
+		font = wx.Font(pointSize=11, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
@@ -217,7 +217,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTitleBold(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=16, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=11, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -231,7 +231,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		else:
 			text.SetForegroundColour('Black')
 			
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT, border=105)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT | wx.EXPAND, border=125)
 		self.rowNr += 1
 		return text
 		
@@ -279,7 +279,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddRadioButton(self, label, style=0):
 		radio = wx.RadioButton(self, -1, label)
-		font = wx.Font(pointSize=12, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
+		font = wx.Font(pointSize=10, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
 		radio.SetFont(font)
 		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT, border=135)
 		self.rowNr += 1
@@ -296,7 +296,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddCheckbox(self, label, checked=False):
 		check = wx.CheckBox(self, -1, label)
 	#	text = wx.StaticText(self, -1, label)
-		font = wx.Font(pointSize=12, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
+		font = wx.Font(pointSize=10, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
 		check.SetFont(font)
 		check.SetValue(checked)
 	#	self.GetSizer().Add(text, pos=(self.rowNr, 1), span=(1, 1))
@@ -306,7 +306,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddButton(self, label):
 		button = wx.Button(self, -1, str(label))
-		font = wx.Font(pointSize=12, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=10, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		button.SetFont(font)
 		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
@@ -625,12 +625,10 @@ class TAMOctoPrintInfo(InfoPage):
 		self.AddHiddenSeperator(1)
 		self.serialNumber = self.AddLabelTextCtrl("Serial Number", "")
 		self.APIKey = self.AddLabelTextCtrl("API Key", "")
-		self.AddHiddenSeperator(1)
 	#	self.errorMessageln0 = self.AddErrorText(' ', customFontSize=12, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL), red=True)
 
 
 		self.configurePrinterButton = self.AddButton("Configure")
-		self.AddHiddenSeperator(1)
 		self.skipConfig = self.AddCheckbox("Skip configuration for now", checked=False)
 		self.errorMessageln1 = self.AddErrorText('')
 		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
