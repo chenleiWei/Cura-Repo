@@ -441,7 +441,7 @@ class SceneView(openglGui.glGuiPanel):
 		if not self._engine.getResult().isFinished():
 			return
 		firstPrintPath = os.path.join('resources', 'example', 'FirstPrintCone.stl')
-		normalizedPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'firstPrintCone.stl'))
+		normalizedPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'FirstPrintCone.stl'))
 		print profile.getPreference('lastFile')
 		print "firstPrintPath: %s" % firstPrintPath
 		print "normalizedPath: %s" % normalizedPath
@@ -492,8 +492,14 @@ class SceneView(openglGui.glGuiPanel):
 				self.notification.message("Saved as %s" % (targetFilename), lambda : explorer.openExplorer(targetFilename), 4, 'Open folder')
 			else:
 				self.notification.message("Saved as %s" % (targetFilename))
+		t = threading.Timer(2, self.closeNotification)
+		t.start()
 		self.printButton.setProgressBar(None)
 		self._engine.getResult().submitInfoOnline()
+
+
+	def closeNotification(self):
+			self.notification.onClose(True)
 		
 	def _saveGCodeTemp(self, tempFilePath, ejectDrive = False):
 		# gets gcode from the engine
