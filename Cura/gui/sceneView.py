@@ -1921,13 +1921,17 @@ class printerSelector(wx.Frame):
 		newPrinter.Show()
 		
 	def AddToPrinterList(self, serial):
-	
-		printer = "Series 1  " + str(serial)
-		self.availPrinters.Append(printer)
-		printerIndex = self.availPrinters.FindString(printer)
-		print "Printer index: ", printerIndex
-		self.availPrinters.SetSelection(printerIndex)
-	
+		if profile.sectionExists(serial) is False:
+			printer = "Series 1  " + str(serial)
+			self.availPrinters.Append(printer)
+			printerIndex = self.availPrinters.FindString(printer)
+			print "Printer index: ", printerIndex
+			self.availPrinters.SetSelection(printerIndex)
+		elif profile.sectionExists(serial) is True:
+			return
+		else:
+			return
+
 	# We need to create a function in profile - or somewhere -  that goes about deleting the item from the octoprint_api.ini (or equivalently named) file.
 	def OnRemove(self, e):
 
