@@ -245,7 +245,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		else:
 			text.SetForegroundColour('Black')
 			
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT | wx.EXPAND, border=145)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT | wx.EXPAND, border=115)
 		self.rowNr += 1
 		return text
 		
