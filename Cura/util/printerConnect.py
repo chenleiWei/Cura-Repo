@@ -117,9 +117,11 @@ class ConfirmCredentials(threading.Thread):
 			self.parent.enableConfigButton()
 			if not self.configWizard:			
 				self.parent.successText.SetLabel("")
+			else:
+				self.parent.configurePrinterButton.Enable()
 			self.errorMessage1.Wrap(200)
 
-		self.parent.configurePrinterButton.Enable()
+			
 
 	
 	# For removing the dummy file used in configuring connection to printer
