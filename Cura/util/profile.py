@@ -709,27 +709,31 @@ def getDefaultProfilePath():
 
 
 
-def initializeOctoPrintAPIConfig(s,k):
+def initializeOctoPrintAPIConfig(s,k):	
+	if sectionExists(s):
+		octoprintConfigFile = open(path, 'w+')
+		cp.add_section(s.encode('utf-8'))
+		cp.set(s, 'apikey', k.encode('utf-8'))
+		cp.write(octoprintConfigFile)
+		octoprintConfigFile.close()
+	else:
+		return
+
+
+def sectionExists(s):
+	# get path to OctoPrint API config file
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
 	cp = ConfigParser.ConfigParser()
 	try:
 		cp.read(path)
 	except ConfigParser.ParsingError:
-		return
-	octoprintConfigFile = open(path, 'w+')
-	if not cp.has_section(s):
-		cp.add_section(s.encode('utf-8'))
-	cp.set(s, 'apikey', k.encode('utf-8'))
-	cp.write(octoprintConfigFile)
-	octoprintConfigFile.close()
+		return "error"
 
-
-def configExists():
-	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
-	if os.path.isfile(path):
+	if cp.has_section(s):
 		return True
 	else:
-		return False		
+		return False
+	
 		
 def OctoPrintConfigAPI(serial):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
