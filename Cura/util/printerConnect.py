@@ -97,9 +97,9 @@ class ConfirmCredentials(threading.Thread):
 				self.parent.successText.SetLabel("Your Series 1 is now configured.")
 				self.parent.addPrinterButton.SetLabel('Done')
 				self.parent.addPrinterButton.Bind(wx.EVT_BUTTON, self.parent.OnClose)
-				self.parent.addPrinterButton.Enable()
-				
-			pub.sendMessage('printer.add', serial=self.serial)
+				self.parent.addPrinterButton.Enable()	
+				pub.sendMessage('printer.add', serial=self.serial)
+
 			profile.initializeOctoPrintAPIConfig(self.serial, self.key)
 				
 			self.removeFile()
@@ -112,6 +112,8 @@ class ConfirmCredentials(threading.Thread):
 
 			if not self.configWizard:
 				self.parent.successText.SetLabel("")
+			else:
+				self.parent.configurePrinterButton.Enable()
 		else:
 			self.errorMessage1.SetLabel("Check that your printer is connected to the network")
 			self.parent.enableConfigButton()
