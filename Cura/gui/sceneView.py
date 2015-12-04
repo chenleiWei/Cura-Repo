@@ -1930,20 +1930,14 @@ class printerSelector(wx.Frame):
 	
 	# We need to create a function in profile - or somewhere -  that goes about deleting the item from the octoprint_api.ini (or equivalently named) file.
 	def OnRemove(self, e):
-		if not self.availPrinters.GetSelection():
-			return
-		else:
-			index = self.availPrinters.GetSelection()
-			if index < 0:
-				return
-			else:
-				# Remove printer from list and from .ini
-				print index
-				printerString = self.availPrinters.GetString(index)
-				series, one, serial = printerString.split()
-				print "Index true: %s" % index
-				profile.OctoPrintAPIRemoveSerial(serial)
-				self.availPrinters.Delete(index)
+
+		index = self.availPrinters.GetSelection()
+		if index >= 0:
+			printerString = self.availPrinters.GetString(index)
+			series, one, serial = printerString.split()
+			print "Index true: %s" % index
+			profile.OctoPrintAPIRemoveSerial(serial)
+			self.availPrinters.Delete(index)
 
 
 		
