@@ -1923,26 +1923,30 @@ class printerSelector(wx.Frame):
 		total = self.availPrinters.GetCount()
 		
 		# put items in a list if there is more than 1 printer
-		if total > 0:
+		if total >= 0:
 			for x in range(0,total):
 				printerList.append(self.availPrinters.GetString(x))
 
+		printer = "Series 1 " + str(serial)
+
+		if printer in printerList:
+			return
+
+		
+
 		# if there are no items in the list or the serial isn't already in the list
 		# add it and save it
-		if not printerList or not serial in printerList:
-			printer = "Series 1 " + str(serial)
+		if len(printerList) == 0 or not printer in printerList:
 			print "printer: ", printer
 			self.availPrinters.Append(printer)
 			printerIndex = self.availPrinters.FindString(printer)
 			print "Printer index: ", printerIndex
 			self.availPrinters.SetSelection(printerIndex)
-			
-		if profile.printerExists(serial) is True:
-			pass
-		else:
 			key = profile.OctoPrintConfigAPI(serial)
 			profile.initializeOctoPrintAPIConfig(serial, key)
 			
+		if profile.printerExists(serial) is True and serial in printerList:
+			return
 
 	# We need to create a function in profile - or somewhere -  that goes about deleting the item from the octoprint_api.ini (or equivalently named) file.
 	def OnRemove(self, e):
