@@ -65,7 +65,7 @@ class ConfirmCredentials(threading.Thread):
 		print r.text
 		status = r.status_code
 		
-		self.setStatusBasedText(status)
+		wx.CallAfter(self.setStatusBasedText(status))
 
 	def setConfigText(self):
 		self.errorMessage1.SetLabel("Configuring...")
@@ -98,8 +98,12 @@ class ConfirmCredentials(threading.Thread):
 				self.parent.successText.SetLabel("Your Series 1 is now configured.")
 				self.parent.addPrinterButton.SetLabel('Done')
 				self.parent.addPrinterButton.Bind(wx.EVT_BUTTON, self.parent.OnClose)
-				self.parent.addPrinterButton.Enable()				
+				self.parent.addPrinterButton.Enable()	
 				pub.sendMessage('printer.add', serial=self.serial)
+#				self.parent.openOctoPrintInBrowser == True:
+#				webbrowser.open_new('http:series1-%s.local:5000' % self.serial)
+#				self.parent.openOctoPrintInBrowser = False
+
 				
 			self.removeFile()
 			print "Removing file"
@@ -111,14 +115,20 @@ class ConfirmCredentials(threading.Thread):
 
 			if not self.configWizard:
 				self.parent.successText.SetLabel("")
+			else:
+				self.parent.configurePrinterButton.Enable()
 		else:
 			self.errorMessage1.SetLabel("Check that your printer is connected to the network")
 			self.parent.enableConfigButton()
 			if not self.configWizard:			
 				self.parent.successText.SetLabel("")
+			else:
+				self.parent.configurePrinterButton.Enable()
 			self.errorMessage1.Wrap(200)
 			self.parent.configurePrinterButton.Enable()
 		
+
+			
 
 	
 	# For removing the dummy file used in configuring connection to printer

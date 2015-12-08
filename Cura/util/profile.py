@@ -184,11 +184,11 @@ setting('solid_layer_thickness',     0.8, float, 'basic',    _('Fill')).setRange
 setting('fill_density',               12, float, 'basic',    _('Fill')).setExpertSubCategory(_('Infill')).setRange(0, 100).setLabel(_("Fill Density (%)"), _("This controls how densely filled the insides of your print will be. For a solid part use 100%, for an empty part use 0%. A value around 20% is usually enough.\nThis won't affect the outside of the print and only adjusts how strong the part becomes."))
 setting('nozzle_size',               0.4, float, 'advanced', _('Machine')).setRange(0.1,10).setLabel(_("Nozzle size (mm)"), _("The nozzle size is very important, this is used to calculate the line width of the infill, and used to calculate the amount of outside wall lines and thickness for the wall thickness you entered in the print settings."))
 setting('print_speed',                100, float, 'basic',    _('Speed and Temperature')).setRange(1).setLabel(_("Print speed (mm/s)"), _("Speed at which printing happens. Printing speed depends on a lot of factors. So you will be experimenting with optimal settings for this."))
-setting('print_temperature',         220, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("Printing temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 210-220C is usually used.\nFor ABS a value of 230C or higher is required."))
-setting('print_temperature2',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("2nd nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 210-220C is usually used.\nFor ABS a value of 230C or higher is required."))
-setting('print_temperature3',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("3th nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 210-220C is usually used.\nFor ABS a value of 230C or higher is required."))
-setting('print_temperature4',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("4th nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 210-220C is usually used.\nFor ABS a value of 230C or higher is required."))
-setting('print_temperature5',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("5th nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 210-220C is usually used.\nFor ABS a value of 230C or higher is required."))
+setting('print_temperature',         220, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("Printing temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself."))
+setting('print_temperature2',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("2nd nozzle temperature (C)"), _("Temperature used for printing with a second nozzle. Set at 0 to pre-heat yourself."))
+setting('print_temperature3',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("3th nozzle temperature (C)"), _("Temperature used for printing with a third nozzle. Set at 0 to pre-heat yourself."))
+setting('print_temperature4',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("4th nozzle temperature (C)"), _("Temperature used for printing with a fourth nozzle. Set at 0 to pre-heat yourself."))
+setting('print_temperature5',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("5th nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself."))
 setting('print_bed_temperature',      85, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("Bed temperature (C)"), _("Temperature used for the heated printer bed. Set at 0 to manually preheat."))
 setting('support',                'Everywhere', [_('None'), _('Touching buildplate'), _('Everywhere')], 'basic', _('Support')).setExpertSubCategory(_('Support')).setLabel(_("Support type"), _("Type of support structure build.\n\"Touching buildplate\" is the most commonly used support setting.\n\nNone does not do any support.\nTouching buildplate only creates support where the support structure will touch the build platform.\nEverywhere creates support even on top of parts of the model."))
 setting('platform_adhesion',      'Raft', [_('None'), _('Brim'), _('Raft')], 'basic', _('Support')).setExpertSubCategory([_('Skirt'), _('Brim'), _('Raft')]).setLabel(_("Platform adhesion type"), _("Different options that help in preventing corners from lifting due to warping.\nBrim adds a single layer thick flat area around your object which is easy to cut off afterwards, and it is the recommended option.\nRaft adds a thick raster below the object and a thin interface between this and your object.\n(Note that enabling the brim or raft disables the skirt)"))
@@ -553,11 +553,11 @@ setting('serial_port_auto', '', str, 'machine', 'hidden')
 setting('serial_baud', 'AUTO', str, 'machine', 'hidden').setLabel(_("Baudrate"), _("Speed of the serial port communication\nNeeds to match your firmware settings\nCommon values are 250000, 115200, 57600"))
 setting('serial_baud_auto', '', int, 'machine', 'hidden')
 
-setting('extruder_head_size_min_x', '28.37', float, 'machine', 'hidden').setLabel(_("Head size towards X min (mm)"), _("The head size when printing multiple objects, measured from the tip of the nozzle towards the outer part of the head."))
-setting('extruder_head_size_min_y', '53.05', float, 'machine', 'hidden').setLabel(_("Head size towards Y min (mm)"), _("The head size when printing multiple objects, measured from the tip of the nozzle towards the outer part of the head."))
-setting('extruder_head_size_max_x', '15.63', float, 'machine', 'hidden').setLabel(_("Head size towards X max (mm)"), _("The head size when printing multiple objects, measured from the tip of the nozzle towards the outer part of the head."))
-setting('extruder_head_size_max_y', '53.6', float, 'machine', 'hidden').setLabel(_("Head size towards Y max (mm)"), _("The head size when printing multiple objects, measured from the tip of the nozzle towards the outer part of the head."))
-setting('extruder_head_size_height', '108.02', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
+setting('extruder_head_size_min_x', '30', float, 'machine', 'hidden').setLabel(_("Head size towards X min (mm)"), _("The distance between left side of the print head to the nozzle."))
+setting('extruder_head_size_min_y', '55', float, 'machine', 'hidden').setLabel(_("Head size towards Y min (mm)"), _("The distance between the nozzle and right-most part of the print head."))
+setting('extruder_head_size_max_x', '30', float, 'machine', 'hidden').setLabel(_("Head size towards X max (mm)"), _("The distance between the the front (closest to you) fan and the nozzle."))
+setting('extruder_head_size_max_y', '60', float, 'machine', 'hidden').setLabel(_("Head size towards Y max (mm)"), _("The distance between the nozzle and the back-end (farthest from you) of the print head."))
+setting('extruder_head_size_height', '110', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
 
 validators.warningAbove(settingsDictionary['filament_flow'], 150, _("More flow than 150% is rare and usually not recommended."))
 validators.warningBelow(settingsDictionary['filament_flow'], 50, _("Less flow than 50% is rare and usually not recommended."))
@@ -570,11 +570,11 @@ validators.printSpeedValidator(settingsDictionary['infill_speed'])
 validators.printSpeedValidator(settingsDictionary['solidarea_speed'])
 validators.printSpeedValidator(settingsDictionary['inset0_speed'])
 validators.printSpeedValidator(settingsDictionary['insetx_speed'])
-validators.warningAbove(settingsDictionary['print_temperature'], 260.0, _("Temperatures above 260C could damage your machine, be careful!"))
-validators.warningAbove(settingsDictionary['print_temperature2'], 260.0, _("Temperatures above 260C could damage your machine, be careful!"))
-validators.warningAbove(settingsDictionary['print_temperature3'], 260.0, _("Temperatures above 260C could damage your machine, be careful!"))
-validators.warningAbove(settingsDictionary['print_temperature4'], 260.0, _("Temperatures above 260C could damage your machine, be careful!"))
-validators.warningAbove(settingsDictionary['print_temperature5'], 260.0, _("Temperatures above 260C could damage your machine, be careful!"))
+validators.warningAbove(settingsDictionary['print_temperature'], 300.0, _("Temperatures above 300C could damage your machine, be careful!"))
+validators.warningAbove(settingsDictionary['print_temperature2'], 300.0, _("Temperatures above 300C could damage your machine, be careful!"))
+validators.warningAbove(settingsDictionary['print_temperature3'], 300.0, _("Temperatures above 300C could damage your machine, be careful!"))
+validators.warningAbove(settingsDictionary['print_temperature4'], 300.0, _("Temperatures above 300C could damage your machine, be careful!"))
+validators.warningAbove(settingsDictionary['print_temperature5'], 300.0, _("Temperatures above 300C could damage your machine, be careful!"))
 validators.warningAbove(settingsDictionary['filament_diameter'], 3.5, _("Are you sure your filament is that thick? Normal filament is around 3mm or 1.75mm."))
 validators.warningAbove(settingsDictionary['filament_diameter2'], 3.5, _("Are you sure your filament is that thick? Normal filament is around 3mm or 1.75mm."))
 validators.warningAbove(settingsDictionary['filament_diameter3'], 3.5, _("Are you sure your filament is that thick? Normal filament is around 3mm or 1.75mm."))
@@ -709,6 +709,7 @@ def getDefaultProfilePath():
 
 
 
+# 
 def initializeOctoPrintAPIConfig(s,k):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
 	cp = ConfigParser.ConfigParser()
@@ -731,6 +732,7 @@ def initializeOctoPrintAPIConfig(s,k):
 		cp.write(octoprintConfigFile)		
 		octoprintConfigFile.close()
 
+	
 def printerExists(s):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
 	cp = ConfigParser.ConfigParser()
@@ -744,13 +746,6 @@ def printerExists(s):
 	else:
 		return False
 		
-
-def configExists():
-	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
-	if os.path.isfile(path):
-		return True
-	else:
-		return False		
 		
 def OctoPrintConfigAPI(serial):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
