@@ -732,7 +732,6 @@ def initializeOctoPrintAPIConfig(s,k):
 		cp.write(octoprintConfigFile)		
 		octoprintConfigFile.close()
 
-
 	
 def printerExists(s):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
