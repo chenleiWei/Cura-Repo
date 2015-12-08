@@ -711,69 +711,49 @@ def getDefaultProfilePath():
 
 # 
 def initializeOctoPrintAPIConfig(s,k):
-	# define path
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
+	cp = ConfigParser.ConfigParser()
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError:
+		return
 
-	# if file doesn't exist, write data to it
-	if not os.path.exists(path):
+	if cp.has_section(s):
+		pass
+	
+	if len(cp.sections()) == 0 or not cp.has_section(s):
 		octoprintConfigFile = open(path, 'w+')
-		cp = ConfigParser.ConfigParser()
-		cp.set(s, 'apikey', k.encode('utf-8'))
-		cp.write(octoprintConfigFile)
+		# create a section
+		cp.add_section(s)
+		# now that the section exists, give it a value
+		cp.set(s, 'apiKey', k.encode('utf-8'))
+		# write to file object
+
+		cp.write(octoprintConfigFile)		
 		octoprintConfigFile.close()
-	# if printer exists, run check to see if the printer has previously been added
-	else:
-		addNewPrinter(s, k)
 
 
 	
-
-def addNewPrinter(s, k):
-	# initialize config parser
-	cp = ConfigParser.ConfigParser()
-	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
-	octoprintConfigFile = open(path, 'w+')
-	try:
-		cp.read(path)
-	except ConfigParser.ParsingError:
-		# if not successful, return
-		return
-
-	# if section doesn't exist, add new section
-	if sectionExists(s) is False:
-		cp.add_section(s.encode('utf-8'))
-		cp.set(s, 'apikey', k.encode('utf-8'))
-		cp.write(octoprintConfigFile)
-	# if the section already exists, don't add it again
-	elif self.sectionExists(s) is True:
-		return
-	# if error, do nothing
-	else:
-		return
-	# close octoprint config file after writing
-	octoprintConfigFile.close()
-
-def sectionExists(s):
-	# get path to OctoPrint API config file
+def printerExists(s):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
 	cp = ConfigParser.ConfigParser()
 	try:
 		cp.read(path)
 	except ConfigParser.ParsingError:
-		return "error"
-
+		return
+		
 	if cp.has_section(s):
 		return True
 	else:
 		return False
-	
+		
 		
 def OctoPrintConfigAPI(serial):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
 	cp = ConfigParser.ConfigParser()
 
 	cp.read(path)
-	key = cp.get(serial, 'apikey')
+	key = cp.get(serial, 'apiKey')
 	
 	return key
 	
