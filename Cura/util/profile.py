@@ -716,13 +716,34 @@ def initializeOctoPrintAPIConfig(s,k):
 		cp.read(path)
 	except ConfigParser.ParsingError:
 		return
-	octoprintConfigFile = open(path, 'w+')
-	if not cp.has_section(s):
-		cp.add_section(s.encode('utf-8'))
-	cp.set(s, 'apikey', k.encode('utf-8'))
-	cp.write(octoprintConfigFile)
-	octoprintConfigFile.close()
 
+	if cp.has_section(s):
+		pass
+	
+	if len(cp.sections()) == 0 or not cp.has_section(s):
+		octoprintConfigFile = open(path, 'w+')
+		# create a section
+		cp.add_section(s)
+		# now that the section exists, give it a value
+		cp.set(s, 'apiKey', k.encode('utf-8'))
+		# write to file object
+
+		cp.write(octoprintConfigFile)		
+		octoprintConfigFile.close()
+
+def printerExists(s):
+	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
+	cp = ConfigParser.ConfigParser()
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError:
+		return
+		
+	if cp.has_section(s):
+		return True
+	else:
+		return False
+		
 
 def configExists():
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
@@ -736,7 +757,7 @@ def OctoPrintConfigAPI(serial):
 	cp = ConfigParser.ConfigParser()
 
 	cp.read(path)
-	key = cp.get(serial, 'apikey')
+	key = cp.get(serial, 'apiKey')
 	
 	return key
 	

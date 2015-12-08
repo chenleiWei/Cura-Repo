@@ -65,7 +65,7 @@ class ConfirmCredentials(threading.Thread):
 		print r.text
 		status = r.status_code
 		
-		wx.CallAfter(self.setStatusBasedText(status))
+		self.setStatusBasedText(status)
 
 	def setConfigText(self):
 		self.errorMessage1.SetLabel("Configuring...")
@@ -89,6 +89,7 @@ class ConfirmCredentials(threading.Thread):
 		# 201 - File uploaded
 		print "Status line 86", status
 		if status == 201:
+			profile.initializeOctoPrintAPIConfig(self.serial, self.key)
 			if self.configWizard:
 				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
 				self.errorMessage1.SetForegroundColour('Blue')
@@ -97,10 +98,8 @@ class ConfirmCredentials(threading.Thread):
 				self.parent.successText.SetLabel("Your Series 1 is now configured.")
 				self.parent.addPrinterButton.SetLabel('Done')
 				self.parent.addPrinterButton.Bind(wx.EVT_BUTTON, self.parent.OnClose)
-				self.parent.addPrinterButton.Enable()
-				
-			pub.sendMessage('printer.add', serial=self.serial)
-			profile.initializeOctoPrintAPIConfig(self.serial, self.key)
+				self.parent.addPrinterButton.Enable()				
+				pub.sendMessage('printer.add', serial=self.serial)
 				
 			self.removeFile()
 			print "Removing file"
@@ -118,8 +117,8 @@ class ConfirmCredentials(threading.Thread):
 			if not self.configWizard:			
 				self.parent.successText.SetLabel("")
 			self.errorMessage1.Wrap(200)
-
-		self.parent.configurePrinterButton.Enable()
+			self.parent.configurePrinterButton.Enable()
+		
 
 	
 	# For removing the dummy file used in configuring connection to printer
