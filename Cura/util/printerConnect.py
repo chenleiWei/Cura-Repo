@@ -46,8 +46,7 @@ class ConfirmCredentials(threading.Thread):
 		self.errorMessage1 = errorMessage1		
 		self.success = False
 		self.status = None
-		
-		
+
 	def run(self):
 		r = requests.Session()
 		resourceBasePath = resources.resourceBasePath
@@ -56,57 +55,78 @@ class ConfirmCredentials(threading.Thread):
 		files = [('file', (filename, open(filepath, 'rb'), 'multipart/form-data'))]
 		header = {'X-Api-Key':self.key}
 		url = 'http://series1-%s.local:5000/api/files/local' % self.serial
-		
-		r = requests.post(url, headers=header, files=files)
-		print r.text
 
+		try:
+			r = requests.post(url, headers=header, files=files)
+		except requests.exceptions.RequestException as e:
+			print e
+			wx.CallAfter(self.conveyError)
+
+		print r.text
 		status = r.status_code
-		self.setStatusBasedText(status)
-				
+		
+		wx.CallAfter(self.setStatusBasedText(status))
+
 	def setConfigText(self):
-		if self.configWizard:
-			self.errorMessage1.SetLabel("\tConfiguring...")
-			self.errorMessage1.SetForegroundColour('Blue')
+		self.errorMessage1.SetLabel("Configuring...")
+		self.errorMessage1.SetForegroundColour('Blue')
+
+	def conveyError(self):
+		self.errorMessage1.SetForegroundColour('Red')
+		self.errorMessage1.SetLabel("Please check that your printer is connected to the network and that your inputs are correct.")
+		if self.configWizard: 
+			self.errorMessage1.Wrap(275)
 		else:
-			self.errorMessage1.SetLabel("Configuring...")
-			self.errorMessage1.SetForegroundColour('Blue')
-	
+			self.errorMessage1.Wrap(420)
+		
+
+		if self.configWizard:
+			self.parent.configurePrinterButton.Enable()
+		else:
+			self.parent.successText.SetLabel("")
+
 	def setStatusBasedText(self, status):
-		# 201 - File uploaded			
+		# 201 - File uploaded
+		print "Status line 86", status
 		if status == 201:
 			if self.configWizard:
 				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
-				self.errorMessage1.SetLabel("\tYour printer is configured")
+				self.errorMessage1.SetForegroundColour('Blue')
+				self.errorMessage1.SetLabel("Your Series 1 is now configured.")
 			else:
+				self.parent.successText.SetLabel("Your Series 1 is now configured.")
 				self.parent.addPrinterButton.SetLabel('Done')
 				self.parent.addPrinterButton.Bind(wx.EVT_BUTTON, self.parent.OnClose)
-				self.errorMessage1.SetLabel("Your printer is configured")
-			
-			self.errorMessage1.SetForegroundColour('Blue')
+				self.parent.addPrinterButton.Enable()
+				
 			pub.sendMessage('printer.add', serial=self.serial)
 			profile.initializeOctoPrintAPIConfig(self.serial, self.key)
 				
 			self.removeFile()
 			print "Removing file"
+
 		# 401 - Authentication error
-		elif status == 401: 
+		elif status == 401:
 			self.errorMessage1.SetLabel("Invalid serial or API Key. Please try again.")
 			self.errorMessage1.SetForegroundColour('Red')
+
+			if not self.configWizard:
+				self.parent.successText.SetLabel("")
 		else:
-			self.errorMessage1.SetLabel("Please check that your printer is connected to the network")
-			if self.configWizard:
-				self.errorMessage1.Wrap(350)
-			else:
-				self.errorMessage1.Wrap(200)
-				
-		if not self.configWizard:
-			self.parent.addPrinterButton.Enable()	
+			self.errorMessage1.SetLabel("Check that your printer is connected to the network")
+			self.parent.enableConfigButton()
+			if not self.configWizard:			
+				self.parent.successText.SetLabel("")
+			self.errorMessage1.Wrap(200)
+
+		self.parent.configurePrinterButton.Enable()
+
 	
 	# For removing the dummy file used in configuring connection to printer
 	def removeFile(self):
 		r = requests.Session()
-		url = 'http://series1-1212.local:5000/api/files/local/dummy_code.gcode' 
-		header = {"X-Api-Key":"F7351DCF892847D9A404ED9A8DF41B5D"}
+		url = 'http://series1-%s.local:5000/api/files/local/dummy_code.gcode' % self.serial
+		header = {"X-Api-Key":"%s"% self.key}
 		r = requests.delete(url=url, headers=header)
 		print r.text
 		status = r.status_code
@@ -124,8 +144,7 @@ class  GcodeUpload(threading.Thread):
 		self.notification = notification
 		self.printOnUpload = printOnUpload
 		self.filename = os.path.basename(tempFilePath)
-		print self.printOnUpload
-		
+
 	def run(self):
 		r = requests.Session()
 		resourceBasePath = resources.resourceBasePath
@@ -136,22 +155,25 @@ class  GcodeUpload(threading.Thread):
 		
 		# Printer information
 		url = 'http://series1-%s.local:5000/api/files/local'  % self.serial
-		apiKey = 'X-Api-Key: %s' % self.key
-		print "self.printOnUpload: ", self.printOnUpload
-		header = {'X-Api-Key':self.key, 'print':'true'}
+		header = {'X-Api-Key':self.key}
 		files = {'file': (filename, open(filepath, 'rb'), 'multipart/form-data')}
 		data = {'select': 'true', 'print': self.printOnUpload}
 		
-		r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files)
-		status = r.status_code
 		
+		try:
+			r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files)
+		except requests.exceptions.RequestException as e:
+			wx.CallAfter(self.conveyStatus(e))
+
 		try:
 			os.remove(self.tempFilePath)
 			print "Removed file"
 		except:
 			print "error"
+
+		status = r.status_code
 			
-		self.conveyStatus(status)
+		wx.CallAfter(self.conveyStatus(status))
 	
 	def conveyStatus(self, status):
 		if status == 201: 

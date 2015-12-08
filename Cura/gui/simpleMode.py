@@ -8,7 +8,6 @@ import os
 import re
 
 from Cura.util import profile
-from Cura.gui import sceneView
 from Cura.util import resources
 
 
@@ -75,7 +74,7 @@ class simpleModePanel(wx.Panel):
 		# Panel 1: Material Profile Select
 		sb = wx.StaticBox(materialSelectorPanel, label=_("Material Profile"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-		gridsizer = wx.FlexGridSizer(1,1,0,0)
+		gridsizer = wx.FlexGridSizer(2,1,1,1)
 		gridsizer.Add(self.selectedMaterial, flag=wx.EXPAND)
 		gridsizer.Add(self.materialLoadButton)
 		boxsizer.Add(gridsizer)

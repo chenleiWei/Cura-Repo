@@ -479,6 +479,8 @@ class mainWindow(wx.Frame):
 			self.Bind(wx.EVT_MENU, lambda e: self.OnSelectMachine(e.GetId() - 0x1000), i)
 
 		self.machineMenu.AppendSeparator()
+		i = self.machineMenu.Append(-1, _("Direct upload settings..."))
+		self.Bind(wx.EVT_MENU, self.OnDirectUploadSettings, i)
 		i = self.machineMenu.Append(-1, _("Add new machine..."))
 		self.Bind(wx.EVT_MENU, self.OnAddNewMachine, i)
 		i = self.machineMenu.Append(-1, _("Machine settings..."))
@@ -493,6 +495,19 @@ class mainWindow(wx.Frame):
 		i = self.machineMenu.Append(-1, _("Install custom firmware..."))
 		self.Bind(wx.EVT_MENU, self.OnCustomFirmware, i)
 
+	def OnDirectUploadSettings(self, e):
+	
+		if self.scene.printButton.isDisabled():
+			enableUploadButton = False
+		else:
+			enableUploadButton = True
+		
+		print "Enable upload button: %s" % enableUploadButton
+	#	self.scene.reloadScene(e)
+		newPrinter = sceneView.printerSelector(enableUploadButton)
+		newPrinter.Show()
+		
+		
 	def OnLoadProfile(self, e):
 		dlg=wx.FileDialog(self, _("Select profile file to load"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
 		dlg.SetWildcard("ini files (*.ini)|*.ini")

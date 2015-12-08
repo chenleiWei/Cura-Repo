@@ -17,10 +17,18 @@ except ImportError:
 class CuraApp(wx.App):
 	def __init__(self, files):
 		if platform.system() == "Windows" and not 'PYCHARM_HOSTED' in os.environ:
-			from Cura.util import profile
-			super(CuraApp, self).__init__(redirect=True, filename=os.path.join(profile.getBasePath(), 'output_log.txt'))
+	
+			try:
+				from Cura.util import profile
+			except Exception as e:
+				print e
+			try:	
+				super(CuraApp, self).__init__(redirect=True, filename=os.path.join(profile.getBasePath(), 'output_log.txt'))
+			except Exception as e:
+				print e
 		else:
 			super(CuraApp, self).__init__(redirect=False)
+
 
 		self.mainWindow = None
 		self.splash = None
@@ -53,12 +61,23 @@ class CuraApp(wx.App):
 			socketListener.daemon = True
 			socketListener.start()
 
+
+
 		if sys.platform.startswith('darwin'):
 			#Do not show a splashscreen on OSX, as by Apple guidelines
 			self.afterSplashCallback()
 		else:
-			from Cura.gui import splashScreen
-			self.splash = splashScreen.splashScreen(self.afterSplashCallback)
+			from Cura.util.resources import getPathForImage
+	#		from Cura.gui import splashScreen
+	#		self.splash = splashScreen.splashScreen(self.afterSplashCallback)
+			splashBitmap = wx.Image(getPathForImage('splash.png')).ConvertToBitmap()
+			splashStyle = wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT
+			splashDuration = 500
+
+			splash = wx.SplashScreen(splashBitmap, splashStyle, splashDuration, None)
+			splash.Show()
+
+			self.afterSplashCallback()
 
 	def MacOpenFile(self, path):
 		try:
@@ -133,19 +152,45 @@ class CuraApp(wx.App):
 			exampleFile = os.path.normpath(os.path.join(resources.resourceBasePath, 'example', 'FirstPrintCone.stl'))
 
 			self.loadFiles = [exampleFile]
-			if self.splash is not None:
-				self.splash.Show(False)
-			configWizard.ConfigWizard()
+	#		if self.splash is not None:
+	#			self.splash.Show(False)
+			
 
-		if self.splash is not None:
-			self.splash.Show(False)
-		
-		if profile.getMachineSetting('machine_name') == '':
-			return
-		
-		self.mainWindow = mainWindow.mainWindow()
-		if self.splash is not None:
-			self.splash.Show(False)
+			if self.splash is not None:
+				try:
+					self.splash.Show(False)
+				except Exception as e:
+					print e
+
+			configWizard.ConfigWizard()
+	#		if self.splash is not None:
+	#			print "Splash is none"
+	#			try:
+	#				from Cura.gui import splashScreen
+	#			#	self.splash()
+	#				self.splash = splashScreen.splashScreen(self.afterSplashCallback)
+	#				self.splash(self.afterSplashCallback)
+				#	self.splash.Show(False)
+	#			except Exception as e:
+	#				print e
+
+
+#					try:
+#						from Cura.gui import splashScreen
+#						self.splash = splashScreen.splashScreen(self.afterSplashCallback)
+#						self.splash.Show(False)
+#					except Exception as e:
+#						print e
+
+	#	if profile.getMachineSetting('machine_name') == '':
+	#		return
+		try:
+			self.mainWindow = mainWindow.mainWindow()
+		except Exception as e:
+			print e
+	#	if self.splash is not None:
+	#		self.splash.Show(False)
+	#		"print line 179 in app.py"
 		self.SetTopWindow(self.mainWindow)
 		self.mainWindow.Show()
 		self.mainWindow.OnDropFiles(self.loadFiles)
