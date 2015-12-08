@@ -89,6 +89,7 @@ class ConfirmCredentials(threading.Thread):
 		# 201 - File uploaded
 		print "Status line 86", status
 		if status == 201:
+			profile.initializeOctoPrintAPIConfig(self.serial, self.key)
 			if self.configWizard:
 				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
 				self.errorMessage1.SetForegroundColour('Blue')
@@ -99,8 +100,10 @@ class ConfirmCredentials(threading.Thread):
 				self.parent.addPrinterButton.Bind(wx.EVT_BUTTON, self.parent.OnClose)
 				self.parent.addPrinterButton.Enable()	
 				pub.sendMessage('printer.add', serial=self.serial)
+#				self.parent.openOctoPrintInBrowser == True:
+#				webbrowser.open_new('http:series1-%s.local:5000' % self.serial)
+#				self.parent.openOctoPrintInBrowser = False
 
-			profile.initializeOctoPrintAPIConfig(self.serial, self.key)
 				
 			self.removeFile()
 			print "Removing file"

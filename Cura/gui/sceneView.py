@@ -6,11 +6,11 @@ from wx.lib.pubsub import pub
 import numpy
 import time
 import os
+import webbrowser
 import traceback
 import threading
 import math
 import cStringIO as StringIO
-import webbrowser
 import OpenGL
 
 OpenGL.ERROR_CHECKING = False
@@ -66,14 +66,13 @@ class SceneView(openglGui.glGuiPanel):
 		self._isSimpleMode = True
 		self._printerConnectionManager = printerConnectionManager.PrinterConnectionManager()
 		
-		self.openOctoPrintInBrowser = False
 		self.printGcode = "false"
-		
+		self.openBrowser = False
 		self.gcodePath = None
 		pub.subscribe(self.SendToPrinter, 'gcode.update')
 		pub.subscribe(self.PrintUponUpload, 'print.gcode')
-		pub.subscribe(self.OpenBrowser, 'browser.open')
 		pub.subscribe(self.UploadButtonStatus, 'upload.enabled')
+		pub.subscribe(self.browserOpenOption, 'browser.open')
 
 		self._viewport = None
 		self._modelMatrix = None
@@ -147,11 +146,12 @@ class SceneView(openglGui.glGuiPanel):
 			self.printGcode = "false"
 		
 
-	def OpenBrowser(self, open):
-		if open == True:
-			self.openOctoPrintInBrowser = True
-		else:
-			self.openOctoPrintInBrowser = False
+	def browserOpenOption(self, openBrowser):
+		self.openBrowser = openBrowser
+#		if b == True:
+#			self.openOctoPrintInBrowser = True
+#		else:
+#			self.openOctoPrintInBrowser = False
 		
 	def UploadButtonStatus(self, enable):
 		print "Upload Enabled event caller activated."
@@ -347,9 +347,11 @@ class SceneView(openglGui.glGuiPanel):
 		# Notify the user that the file is attempting to be uploaded
 		self.notification.message("Uploading....")
 		
-		print self.printGcode
-		upload = printerConnect.GcodeUpload(key, serial, tempFilePath, self.openOctoPrintInBrowser, self.notification, self.printGcode)
+
+		upload = printerConnect.GcodeUpload(key, serial, tempFilePath, self.openBrowser, self.notification, self.printGcode)
 		upload.start()
+#		if self.openOctoPrintInBrowser == True:
+#			self.openOctoPrintInBrowser = False
 		
 					
 	def OnPrintButton(self, button):
@@ -357,7 +359,7 @@ class SceneView(openglGui.glGuiPanel):
 			connectionGroup = self._printerConnectionManager.getAvailableGroup()
 			"""
 			if len(removableStorage.getPossibleSDcardDrives()) > 0 and (connectionGroup is None or connectionGroup.getPriority() < 0):
-				drives = removableStorage.getPossibleSDcardDrives()
+				drives = removableStorage.getPossibleSDcardDrives() 
 				if len(drives) > 1:
 					dlg = wx.SingleChoiceDialog(self, "Select SD drive", "Multiple removable drives have been found,\nplease select your SD card drive", map(lambda n: n[0], drives))
 					if dlg.ShowModal() != wx.ID_OK:
@@ -1754,7 +1756,7 @@ class printerSelector(wx.Frame):
 		printerList = []
 		cp = configparser.ConfigParser()
 		
-		self.openOctoPrintInBrowser = False
+	#	self.openOctoPrintInBrowser = False
 		self.startPrintOnUpload = "false"
 		
 		if os.path.lexists(printerListPath):
@@ -1907,10 +1909,6 @@ class printerSelector(wx.Frame):
 		series, one, serial = printerString.split()
 		# this sends the selected serial number to the octoPrint setup
 		
-		if self.openOctoPrintInBrowser == True:
-			webbrowser.open_new('http:series1-%s.local:5000' % serial)
-			self.openOctoPrintInBrowser = False
-		pub.sendMessage('browser.open', open = self.openOctoPrintInBrowser)
 		self.Destroy()
 		
 		pub.sendMessage('gcode.update', serial=serial)
@@ -1919,18 +1917,32 @@ class printerSelector(wx.Frame):
 		print("Adding new printer")
 		newPrinter = AddNewPrinter(self)
 		newPrinter.Show()
-		
+
 	def AddToPrinterList(self, serial):
-		if profile.sectionExists(serial) is False:
-			printer = "Series 1  " + str(serial)
+		printerList = []
+		total = self.availPrinters.GetCount()
+		
+		# put items in a list if there is more than 1 printer
+		if total > 0:
+			for x in range(0,total):
+				printerList.append(self.availPrinters.GetString(x))
+
+		# if there are no items in the list or the serial isn't already in the list
+		# add it and save it
+		if not printerList or not serial in printerList:
+			printer = "Series 1 " + str(serial)
+			print "printer: ", printer
 			self.availPrinters.Append(printer)
 			printerIndex = self.availPrinters.FindString(printer)
 			print "Printer index: ", printerIndex
 			self.availPrinters.SetSelection(printerIndex)
-		elif profile.sectionExists(serial) is True:
-			return
+			
+		if profile.printerExists(serial) is True:
+			pass
 		else:
-			return
+			key = profile.OctoPrintConfigAPI(serial)
+			profile.initializeOctoPrintAPIConfig(serial, key)
+			
 
 	# We need to create a function in profile - or somewhere -  that goes about deleting the item from the octoprint_api.ini (or equivalently named) file.
 	def OnRemove(self, e):
@@ -1942,14 +1954,15 @@ class printerSelector(wx.Frame):
 			print "Index true: %s" % index
 			profile.OctoPrintAPIRemoveSerial(serial)
 			self.availPrinters.Delete(index)
-
-
 		
 	def OnChecked(self, e):
 		if e.IsChecked():
-			self.openOctoPrintInBrowser = True
+			openBrowser = True
 		else:
-			self.openOctoPrintInBrowser = False		
+			openBrowser = False
+
+		pub.sendMessage('browser.open', openBrowser=openBrowser)
+
 	def OnCancel(self, e):
 		self.Destroy()
 		
