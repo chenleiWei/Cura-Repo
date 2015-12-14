@@ -12,7 +12,7 @@ import threading
 import math
 import cStringIO as StringIO
 import OpenGL
-
+import sys
 OpenGL.ERROR_CHECKING = False
 from OpenGL.GLU import *
 from OpenGL.GL import *
@@ -1919,6 +1919,7 @@ class printerSelector(wx.Frame):
 		newPrinter.Show()
 
 	def AddToPrinterList(self, serial):
+		printer = "Series 1 " + str(serial)
 		printerList = []
 		total = self.availPrinters.GetCount()
 		
@@ -1929,8 +1930,7 @@ class printerSelector(wx.Frame):
 
 		# if there are no items in the list or the serial isn't already in the list
 		# add it and save it
-		if not printerList or not serial in printerList:
-			printer = "Series 1 " + str(serial)
+		if not printerList or not printer in printerList:
 			print "printer: ", printer
 			self.availPrinters.Append(printer)
 			printerIndex = self.availPrinters.FindString(printer)
