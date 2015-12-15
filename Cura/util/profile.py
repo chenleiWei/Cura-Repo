@@ -277,7 +277,8 @@ G21        ;metric values
 G90        ;absolute positioning
 G28     ;move to endstops
 G29		;allows for auto-levelling
-G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+G1 Z15.0 F12000 ;move the platform down 15mm
+G1 X150 Y5 F{travel_speed} ;center
 M140 S{print_bed_temperature} ;Prep Heat Bed
 M109 S{print_temperature} ;Heat To temp
 M190 S{print_bed_temperature} ;Heat Bed to temp
@@ -314,7 +315,8 @@ setting('start2.gcode', """;-- START GCODE --
 				G90        ;absolute positioning
 				G28     ;move to endstops
 				G29		;allows for auto-levelling
-				G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+				G1 Z15.0 F12000 ;move the platform down 15mm
+				G1 X150 Y5 F{travel_speed} ;center
 				M109 S{print_temperature} ;Heat To temp
 				G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
 				G92 E0 ;zero the extruded length
