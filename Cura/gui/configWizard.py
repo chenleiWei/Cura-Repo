@@ -136,7 +136,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddHyperlink(self, text, url):
 		hyper1 = hl.HyperLinkCtrl(self, -1, text, URL=url)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT,
+		font = wx.Font(pointSize=14, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		hyper1.SetFont(font)
 		self.GetSizer().Add(hyper1, pos=(self.rowNr,0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -160,7 +160,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddText(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.EXPAND, border=100)
@@ -169,7 +169,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddTextTip(self,info):
 		text = wx.StaticText(self, -1, info)
-		font = wx.Font(pointSize=10, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
+		font = wx.Font(pointSize=12, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr,0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -178,7 +178,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTagLine(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT,
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
@@ -188,7 +188,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextSubtitle(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=10, family = wx.DEFAULT,
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(425)
@@ -198,7 +198,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextDescription(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT,
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(300)
@@ -208,7 +208,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddSeries1OptionsDescription(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT,
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(300)
@@ -218,7 +218,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddTextTitle(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=12, family = wx.DEFAULT,
+		font = wx.Font(pointSize=15, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
@@ -228,7 +228,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTitleBold(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=12, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=15, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -237,7 +237,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddErrorText(self, info, red=False):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=10, family = wx.DEFAULT,
+		font = wx.Font(pointSize=12, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		if red:
@@ -245,7 +245,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		else:
 			text.SetForegroundColour('Black')
 			
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT | wx.EXPAND, border=115)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT | wx.EXPAND, border=140)
 		self.rowNr += 1
 		return text
 		
@@ -293,7 +293,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddRadioButton(self, label, style=0):
 		radio = wx.RadioButton(self, -1, label)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
 		radio.SetFont(font)
 		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT, border=135)
 		self.rowNr += 1
@@ -301,7 +301,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddRadioButtonThin(self, label, style=0):
 		radio = wx.RadioButton(self, -1, label)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		radio.SetFont(font)
 		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT, border=135)
 		self.rowNr += 1
@@ -310,7 +310,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddCheckbox(self, label, checked=False):
 		check = wx.CheckBox(self, -1, label)
 	#	text = wx.StaticText(self, -1, label)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
 		check.SetFont(font)
 		check.SetValue(checked)
 	#	self.GetSizer().Add(text, pos=(self.rowNr, 1), span=(1, 1))
@@ -321,7 +321,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddMachineOptionCheckbox(self, label, checked=False):
 		check = wx.CheckBox(self, -1, label)
 	#	text = wx.StaticText(self, -1, label)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
 		check.SetFont(font)
 		check.SetValue(checked)
 	#	self.GetSizer().Add(text, pos=(self.rowNr, 1), span=(1, 1))
@@ -331,7 +331,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddButton(self, label):
 		button = wx.Button(self, -1, str(label))
-		font = wx.Font(pointSize=10, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		button.SetFont(font)
 		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
@@ -347,7 +347,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddTextCtrl(self, value):
 		ret = wx.TextCtrl(self, -1, value, size=(200, 25))
-		font = wx.Font(pointSize=10, family = wx.DEFAULT, style=wx.NORMAL, weight = wx.LIGHT)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style=wx.NORMAL, weight = wx.LIGHT)
 		ret.SetFont(font)
 		self.GetSizer().Add(ret, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
@@ -356,7 +356,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddLabelTextCtrl(self, info, value):
 		text = wx.StaticText(self, -1, info)
 		ret = wx.TextCtrl(self, -1, value)
-		font = wx.Font(pointSize=10, family = wx.DEFAULT,
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
 		style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,1), flag=wx.ALIGN_RIGHT | wx.LEFT, border=115)
@@ -461,11 +461,6 @@ class MachineSelectPage(InfoPage):
 		self.Series1_Pro_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1Pro)
 		self.Series1_Legacy.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1_Legacy)
 		
-		if self.Series1_Pro_Radio.GetValue():
-			profile.putMachineSetting('has_print_bed', "True")
-		else:
-			profile.putMachineSetting('has_print_bed', "False")
-		
 	def OnNonTAM(self, e):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().nonTAM)
 	
@@ -473,6 +468,39 @@ class MachineSelectPage(InfoPage):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_select_options)
 	
 	def OnSeries1Pro(self, e):
+		profile.putMachineSetting('has_print_bed', "True")
+		profile.setAlterationFile('start.gcode',  """;-- START GCODE --
+	;Sliced for Type A Machines Series 1
+	;Sliced at: {day} {date} {time}
+	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+	;Print Speed: {print_speed} Support: {support}
+	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
+	;Print time: {print_time}
+	;Filament used: {filament_amount}m {filament_weight}g
+	;Filament cost: {filament_cost}
+	G21        ;metric values
+	G90        ;absolute positioning
+	G28     ;move to endstops
+	G29		;allows for auto-levelling
+	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+	M140 S{print_bed_temperature} ;Prep Heat Bed
+	M109 S{print_temperature} ;Heat To temp
+	M190 S{print_bed_temperature} ;Heat Bed to temp
+	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
+	G92 E0 ;zero the extruded length
+	G1 F200 X250 E30 ;extrude 30mm of feed stock
+	G92 E0 ;zero the extruded length again
+	G1 X150 Y150  Z25 F12000 ;recenter and begin
+	G1 F{travel_speed}""")
+		profile.setAlterationFile('end.gcode', """;-- END GCODE --
+	M104 S0     ;extruder heater off
+	G91         ;relative positioning
+	M109 S0			;heated bed off
+	G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
+	G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
+	G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
+	M84           ;steppers off
+	G90           ;absolute positioning""")
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
 		
 	def OnSeries1_Legacy(self, e):
@@ -533,7 +561,7 @@ class TAMSelectOptions(InfoPage):
 
 		# Heated bed
 		self.HeatedBedCheckBox = self.AddMachineOptionCheckbox("Heated Bed")
-		self.AddSeries1OptionsDescription("*The heated bed upgrade is available for purchase on www.typeamachine.com/products")
+		self.AddSeries1OptionsDescription("The heated bed is available as an upgrade. Contact sales@typeamachines.com for more information.")
 		
 		# Spacer
 		for n in range(0,2):
@@ -571,6 +599,15 @@ class TAMSelectOptions(InfoPage):
 	G92 E0 ;zero the extruded length again
 	G1 X150 Y150  Z25 F12000 ;recenter and begin
 	G1 F{travel_speed}""")
+			profile.setAlterationFile('end.gcode', """;-- END GCODE --
+	M104 S0     ;extruder heater off
+	G91         ;relative positioning
+	M109 S0			;heated bed off
+	G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
+	G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
+	G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
+	M84           ;steppers off
+	G90           ;absolute positioning""")
 		else:
 			print("No heated bed")
 			profile.putMachineSetting("has_heated_bed", "False")
@@ -663,6 +700,9 @@ class TAMOctoPrintInfo(InfoPage):
 #		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
 #		self.APIKey.Bind(wx.EVT_TEXT, self.checkKeyValidity)
 
+	def AllowBack(self):
+		return True
+		
 	def AllowNext(self):
 		return False
 		
@@ -741,12 +781,7 @@ class TAMOctoPrintInfo(InfoPage):
 			if profile.configExists() and serial is None and key is not None:
 				profile.OctoPrintAPIRemoveSerial(serial)
 				print "Config does not exist yet."
-		elif self.skipConfig.GetValue():
-			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
-		else: 
-			profile.putPreference('serialNumber', serial)
-			profile.initializeOctoPrintAPIConfig(serial, key)
-			profile.OctoPrintConfigAPI(serial)
+		else:
 			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
 
 
@@ -760,7 +795,6 @@ class TAMSelectMaterials(InfoPage):
 	
 	# General informative text
 	def addText(self):
-		self.AddHiddenSeperator(1)
 		self.AddTextTitleBold("Over 40 Materials Settings")
 		self.AddTextSubtitle("Select from over 40 material profiles in just two clicks from our rapidly growing portfolio of material profiles.\n\nEvery material profile is tested and optimized for the Series 1 and Series 1 Pro, eliminating the time and effort necessary for you to to determine optimal settings from scratch.")
 
@@ -774,9 +808,8 @@ class TAMSelectStrength(InfoPage):
 	
 	# General informative text
 	def addText(self):
-		self.AddHiddenSeperator(1)
-		self.AddTextTitleBold("Material Strengths")
-		self.AddTextSubtitle("Different materials have widely varying properties: flexibility, elasticity, and even conductivity.\n\nUsing the Strength setting provides a simple way to select easily change the settings needed to increase or decrease the strength of a print.")
+		self.AddTextTitleBold("Strength")
+		self.AddTextSubtitle("Changing Strength settings changes the Wall Thickness and the Fill Density of the print. Selecting High Strength will result in a print that is much stronger, and for some designs it will also result in a smoother and higher quality print, but it will also use more filament and will require a longer print time. Selecting Low Strength will use less filament and result in a faster print, but the strength will be reduced as well.")
 
 class TAMSelectQuality(InfoPage):
 	def __init__(self, parent):
@@ -789,9 +822,8 @@ class TAMSelectQuality(InfoPage):
 	
 	# General informative text
 	def addText(self):
-		self.AddHiddenSeperator(1)
 		self.AddTextTitleBold("Quality and Speed")
-		self.AddTextSubtitle("Changing Quality changes the surface finish smoothness of the print. In general, a higher resolution, and therefore longer print, results in a smoother and more detailed print.\n\nYou may want to reserve higher resolutions for final prints where the final surface will matter more. Lower resolutions can deliver significantly shorter print times.")
+		self.AddTextSubtitle("Changing Quality settings changes the layer height of the print which changes the surface finish or smoothness of the print. A higher Quality print results in a smoother and more detailed print, but will also require a longer print time.\n\nYou may want to reserve higher Quality settings for final prints where the final surface will matter more. Draft quality can deliver significantly shorter print times.")
 
 class TAMSelectSupport(InfoPage):
 	def __init__(self, parent):
@@ -801,13 +833,13 @@ class TAMSelectSupport(InfoPage):
 		self.AddImage(typeALogo)
 #		self.AddHiddenSeperator(1)
 		self.AddTextTitleBold("Support, Brims, and Rafts")
-		self.AddTextSubtitle("Support structure is material printed to hold up overhangs during printing and is then removed.\n\nA brim surrounds the first layer to prevent edges from lifting. A raft prints a platform under the print to improve adhesion, especially with complex or delicate prints.\n\nTo preview these, click the 'View Mode' icon, then click 'Layers'.")
+		self.AddTextSubtitle("Support structures are built during printing and are manually removed after printing is complete. \n\nA brim surrounds the first layer to prevent edges from lifting. A raft prints a platform under the print to improve adhesion, especially with complex or delicate prints.\n\nTo preview these, click the 'View Mode' icon, then click 'Layers'.")
 class TAMFirstPrint(InfoPage):
 	def __init__(self, parent):
 		super(TAMFirstPrint, self).__init__(parent, _("Your First Print"))
 		self.JustIconLogo()
 		self.AddTextTitleBold("Ready to Go")
-		self.AddTextSubtitle("This concludes the guided tour. Click 'Next' and Cura for Type A Machines will open and automatically load an example model for you to use to become more familiar with the application.")
+		self.AddTextSubtitle("This concludes the guided tour. Click 'Finish' and Cura for Type A Machines will open and automatically load an example model for you to use to become more familiar with the application.")
 		saveAndUploadImage = resources.getPathForImage('readyToGoPage.png')
 		self.AddImage(saveAndUploadImage)
 		gettingStarted = "Getting Started Page"
@@ -1593,7 +1625,8 @@ class SelectParts(InfoPage):
 class ConfigWizard(wx.wizard.Wizard):
 	def __init__(self, addNew = False):
 		super(ConfigWizard, self).__init__(None, -1, _("Configuration Wizard"))
-
+		
+		# Get the number of the current machine and label it as the old index
 		self._old_machine_index = int(profile.getPreferenceFloat('active_machine'))
 		if addNew:
 			profile.setActiveMachine(profile.getMachineCount())
@@ -1632,9 +1665,9 @@ class ConfigWizard(wx.wizard.Wizard):
 		wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.TAM_octoprint_config)
 		wx.wizard.WizardPageSimple.Chain(self.TAM_octoprint_config, self.tamReadyPage)
 		wx.wizard.WizardPageSimple.Chain(self.tamReadyPage, self.TAM_select_materials)
-		wx.wizard.WizardPageSimple.Chain(self.TAM_select_materials, self.TAM_select_strength)
-		wx.wizard.WizardPageSimple.Chain(self.TAM_select_strength, self.TAM_select_quality)
-		wx.wizard.WizardPageSimple.Chain(self.TAM_select_quality, self.TAM_select_support)
+		wx.wizard.WizardPageSimple.Chain(self.TAM_select_materials, self.TAM_select_quality)
+		wx.wizard.WizardPageSimple.Chain(self.TAM_select_quality, self.TAM_select_strength)
+		wx.wizard.WizardPageSimple.Chain(self.TAM_select_strength, self.TAM_select_support)
 		wx.wizard.WizardPageSimple.Chain(self.TAM_select_support, self.TAM_first_print)
 		#wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)
 #		wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimakerSelectParts)

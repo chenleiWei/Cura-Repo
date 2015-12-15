@@ -125,6 +125,8 @@ class ConfirmCredentials(threading.Thread):
 			else:
 				self.parent.configurePrinterButton.Enable()
 			self.errorMessage1.Wrap(200)
+			self.parent.configurePrinterButton.Enable()
+		
 
 			
 
