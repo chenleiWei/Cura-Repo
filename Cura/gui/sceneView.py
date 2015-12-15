@@ -12,7 +12,7 @@ import threading
 import math
 import cStringIO as StringIO
 import OpenGL
-
+import sys
 OpenGL.ERROR_CHECKING = False
 from OpenGL.GLU import *
 from OpenGL.GL import *
@@ -1942,6 +1942,10 @@ class printerSelector(wx.Frame):
 			printerIndex = self.availPrinters.FindString(printer)
 			print "Printer index: ", printerIndex
 			self.availPrinters.SetSelection(printerIndex)
+			
+		if profile.printerExists(serial) is True:
+			pass
+		else:
 			key = profile.OctoPrintConfigAPI(serial)
 			profile.initializeOctoPrintAPIConfig(serial, key)
 			
