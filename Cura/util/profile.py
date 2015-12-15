@@ -202,8 +202,8 @@ setting('filament_diameter3',          0, float, 'basic',    _('Filament')).setR
 setting('filament_diameter4',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter4 (mm)"), _("Diameter of your filament for the 4th nozzle. Use 0 to use the same diameter as for nozzle 1."))
 setting('filament_diameter5',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter5 (mm)"), _("Diameter of your filament for the 5th nozzle. Use 0 to use the same diameter as for nozzle 1."))
 setting('filament_flow',            100., float, 'basic',    _('Filament')).setRange(5,300).setLabel(_("Flow (%)"), _("Flow compensation, the amount of material extruded is multiplied by this value"))
-setting('retraction_speed',         60.0, float, 'advanced', _('Retraction')).setRange(0.1).setLabel(_("Speed (mm/s)"), _("Speed at which the filament is retracted, a higher retraction speed works better. But a very high retraction speed can lead to filament grinding."))
-setting('retraction_amount',         1.4, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Distance (mm)"), _("Amount of retraction, set at 0 for no retraction at all. A value of 4.5mm seems to generate good results."))
+setting('retraction_speed',         40.0, float, 'advanced', _('Retraction')).setRange(0.1).setLabel(_("Speed (mm/s)"), _("Speed at which the filament is retracted, a higher retraction speed works better. But a very high retraction speed can lead to filament grinding."))
+setting('retraction_amount',         0.4, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Distance (mm)"), _("Amount of retraction, set at 0 for no retraction at all. A value of 4.5mm seems to generate good results."))
 setting('retraction_dual_amount',   16.5, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Dual extrusion switch amount (mm)"), _("Amount of retraction when switching nozzle with dual-extrusion, set at 0 for no retraction at all. A value of 16.0mm seems to generate good results."))
 setting('retraction_min_travel',     1.5, float, 'expert',   _('Retraction')).setRange(0).setLabel(_("Minimum travel (mm)"), _("Minimum amount of travel needed for a retraction to happen at all. To make sure you do not get a lot of retractions in a small area."))
 setting('retraction_combing',      'All',  [_('Off'),_('All'),_('No Skin')], 'expert', _('Retraction')).setLabel(_("Enable combing"), _("Combing is the act of avoiding holes in the print for the head to travel over. If combing is \'Off\' the printer head moves straight from the start point to the end point and it will always retract.  If \'All\', enable combing on all surfaces.  If \'No Skin\', enable combing on all except skin surfaces."))
@@ -301,53 +301,38 @@ G90           ;absolute positioning
 ;{profile_string}
 """, str, 'alteration', 'alteration')
 #######################################################################################
-setting('start2.gcode', """;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-;Print time: {print_time}
-;Filament used: {filament_amount}m {filament_weight}g
-;Filament cost: {filament_cost}
-;M190 S{print_bed_temperature} ;Uncomment to add your own bed temperature line
-;M104 S{print_temperature} ;Uncomment to add your own temperature line
-;M109 T1 S{print_temperature2} ;Uncomment to add your own temperature line
-;M109 T0 S{print_temperature} ;Uncomment to add your own temperature line
-G21        ;metric values
-G90        ;absolute positioning
-M107       ;start with the fan off
-
-G28 X0 Y0  ;move X/Y to min endstops
-G28 Z0     ;move Z to min endstops
-
-G1 Z15.0 F{travel_speed} ;move the platform down 15mm
-
-T1                      ;Switch to the 2nd extruder
-G92 E0                  ;zero the extruded length
-G1 F200 E10             ;extrude 10mm of feed stock
-G92 E0                  ;zero the extruded length again
-G1 F200 E-{retraction_dual_amount}
-
-T0                      ;Switch to the first extruder
-G92 E0                  ;zero the extruded length
-G1 F200 E10             ;extrude 10mm of feed stock
-G92 E0                  ;zero the extruded length again
-G1 F{travel_speed}
-;Put printing message on LCD screen
-M117 Printing...
+setting('start2.gcode', """;-- START GCODE --
+				;Sliced for Type A Machines Series 1
+				;Sliced at: {day} {date} {time}
+				;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+				;Print Speed: {print_speed} Support: {support}
+				;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
+				;Print time: {print_time}
+				;Filament used: {filament_amount}m {filament_weight}g
+				;Filament cost: {filament_cost}
+				G21        ;metric values
+				G90        ;absolute positioning
+				G28     ;move to endstops
+				G29		;allows for auto-levelling
+				G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+				M109 S{print_temperature} ;Heat To temp
+				G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
+				G92 E0 ;zero the extruded length
+				G1 F200 X250 E30 ;extrude 30mm of feed stock
+				G92 E0 ;zero the extruded length again
+				G1 X150 Y150  Z25 F12000 ;recenter and begin
+				G1 F{travel_speed}
 """, str, 'alteration', 'alteration')
 #######################################################################################
-setting('end2.gcode', """;End GCode
-M104 T0 S0                     ;extruder heater off
-M104 T1 S0                     ;extruder heater off
-M140 S0                     ;heated bed heater off (if you have it)
-
-G91                                    ;relative positioning
-G1 E-1 F300                            ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-G1 Z+0.5 E-5 X-20 Y-20 F{travel_speed} ;move Z up a bit and retract filament even more
-G28 X0 Y0                              ;move X/Y to min endstops, so the head is out of the way
-
-M84                         ;steppers off
-G90                         ;absolute positioning
-;{profile_string}
-""", str, 'alteration', 'alteration')
+setting('end2.gcode',  """;-- END GCODE --
+			M104 S0     ;extruder heater off
+			G91         ;relative positioning
+			G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
+			G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
+			G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
+			M84           ;steppers off
+			G90           ;absolute positioning
+""", str, 'alteration', 'alteration')	
 #######################################################################################
 setting('start3.gcode', """;Sliced at: {day} {date} {time}
 ;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
@@ -536,7 +521,7 @@ setting('machine_height', '305', float, 'machine', 'hidden').setLabel(_("Maximum
 setting('machine_center_is_zero', 'False', bool, 'machine', 'hidden').setLabel(_("Machine center 0,0"), _("Machines firmware defines the center of the bed as 0,0 instead of the front left corner."))
 setting('machine_shape', 'Square', ['Square','Circular'], 'machine', 'hidden').setLabel(_("Build area shape"), _("The shape of machine build area."))
 setting('ultimaker_extruder_upgrade', 'False', bool, 'machine', 'hidden')
-setting('has_heated_bed', 'False', bool, 'machine', 'hidden').setLabel(_("Heated bed"), _("If you have an heated bed, this enabled heated bed settings (requires restart)"))
+setting('has_heated_bed', 'False', bool, 'machine', 'hidden').setLabel(_("Heated bed"), _("Heated bed support on/off."))
 setting('gcode_flavor', 'RepRap (Marlin/Sprinter)', ['RepRap (Marlin/Sprinter)', 'RepRap (Volumetric)', 'UltiGCode', 'MakerBot', 'BFB', 'Mach3/LinuxCNC'], 'machine', 'hidden').setLabel(_("GCode Flavor"), _("Flavor of generated GCode.\nRepRap is normal 5D GCode which works on Marlin/Sprinter based firmwares.\nUltiGCode is a variation of the RepRap GCode which puts more settings in the machine instead of the slicer.\nMakerBot GCode has a few changes in the way GCode is generated, but still requires MakerWare to generate to X3G.\nBFB style generates RPM based code.\nMach3 uses A,B,C instead of E for extruders."))
 setting('extruder_amount', '1', ['1','2','3','4','5'], 'machine', 'hidden').setLabel(_("Extruder count"), _("Amount of extruders in your machine."))
 setting('extruder_offset_x1', '0.0', float, 'machine', 'hidden').setLabel(_("Offset X"), _("The offset of your secondary extruder compared to the primary."))
@@ -895,19 +880,8 @@ def resetProfile():
 			continue
 		set.setValue(set.getDefault())
 
-	if getMachineSetting('machine_type') == 'ultimaker':
-		putProfileSetting('nozzle_size', '0.4')
-		if getMachineSetting('ultimaker_extruder_upgrade') == 'True':
-			putProfileSetting('retraction_enable', 'True')
-	elif getMachineSetting('machine_type') == 'ultimaker_plus':
-		putProfileSetting('nozzle_size', '0.4')
-		putProfileSetting('retraction_enable', 'True')
-	elif getMachineSetting('machine_type').startswith('ultimaker2'):
-		putProfileSetting('nozzle_size', '0.4')
-		putProfileSetting('retraction_enable', 'True')
-	else:
-		putProfileSetting('nozzle_size', '0.5')
-		putProfileSetting('retraction_enable', 'True')
+	putProfileSetting('nozzle_size', '0.4')
+	putProfileSetting('retraction_enable', 'True')
 
 def setProfileFromString(options):
 	"""
@@ -1085,6 +1059,7 @@ def savePreferences(filename):
 			parser.set('preference', set.getName(), set.getValue().encode('utf-8'))
 
 	n = 0
+	
 	while getMachineSetting('machine_name', n) != '':
 		parser.add_section('machine_%d' % (n))
 		for set in settingsList:
