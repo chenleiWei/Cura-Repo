@@ -299,7 +299,6 @@ class simpleModePanel(wx.Panel):
 		self.loadData(profileSectionData, profile)
 		self.infoPanelValueCheck(profileSectionData)
 		
-		
 		self._callback()
 		# profile.putPreference(file_basename)
 		
@@ -430,76 +429,135 @@ class simpleModePanel(wx.Panel):
 		
 class MaterialSelectorFrame(wx.Frame):
 	def __init__(self):
-		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(550,300), style=wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
-		materialsDirectory = resources.getSimpleModeMaterialsProfiles()
-		self.matProfsDict = self.createMaterialDict(materialsDirectory)
-		self.chosenProfilePath = None
-		self.selectedBrand = None
-		manufctrs = []
-		mats = []
+		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(500,400), style=wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
 		
-		for manufacturer, materials in self.matProfsDict.items():
-			manufctrs.append(manufacturer)
-			for material, path in materials.items():
-				mats.append(material)
+		# boxsizer initializations 
+		mainBox = wx.BoxSizer(wx.VERTICAL)
+		topBox = wx.BoxSizer(wx.VERTICAL)
+		middleBox = wx.BoxSizer(wx.HORIZONTAL)
+		listbox_Box1 = wx.BoxSizer(wx.VERTICAL)
+		listbox_Box2 = wx.BoxSizer(wx.VERTICAL)
+		bottomBox = wx.BoxSizer(wx.HORIZONTAL)
 		
-		# pop-up window layout management initialization	
-		mainVBox = wx.BoxSizer(wx.VERTICAL)
-		listBoxes = wx.BoxSizer(wx.HORIZONTAL)
-		closeBtnBox = wx.BoxSizer(wx.HORIZONTAL)
-		titles = wx.GridSizer(1, 2, 0, 150)	
+		
+		
+		# panel initialization
 		listBoxPanel = wx.Panel(self, -1)
-		self.closeButton = wx.Button(listBoxPanel, 9, 'Select', pos=(150, 100))
-		self.closeButton.Enable(False)
 		
-
-		brandsTitle = wx.StaticText(listBoxPanel, 2, label = "Supplier", pos=wx.DefaultPosition)
-		materialsTitle = wx.StaticText(listBoxPanel, 2, label="Name", pos=wx.DefaultPosition)
-		brandsTitle.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.NORMAL))
-		materialsTitle.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.NORMAL))
-
-
-		# listboxes
-		self.manufacturerListbox = wx.ListBox(listBoxPanel, 10, wx.DefaultPosition, size=(100, 100), choices=manufctrs, style=wx.LB_SORT)
-		self.matListBox = wx.ListBox(listBoxPanel, 11, wx.DefaultPosition, size=(100, 100), style=wx.LB_SORT)
-		self.manufacturerListbox.SetSelection(0)
+		# dict and option list initializations 
+		materialsDirectory = resources.getSimpleModeMaterialsProfiles()
+		self.materialsDict = self.createMaterialDict(materialsDirectory)
+		brandsList = []
+		materialsList = []
+		
+		# sort manufacturers and materials in their own lists
+		for brand, materials in self.materialsDict.items():
+			brandsList.append(brand)
+			for material, path in materials.items():
+				materialsList.append(material)
+		
+		brandsList = sorted(brandsList)
+		# listbox initializations
+		self.brandsBox = wx.ComboBox(listBoxPanel, -1, choices=sorted(brandsList), style=wx.LB_SORT)
+		self.matsBox = wx.ComboBox(listBoxPanel, -1, size=(150,-1), choices=sorted(materialsList), style=wx.LB_SORT)
+		
+		self.brandsBox.SetSelection(0)
+		
 		matchingMaterials = []
 		
-		# get matching materials to consequent brand
-		index = self.manufacturerListbox.GetSelection()
-		self.selectedBrand = self.manufacturerListbox.GetString(index)
-		for manufacturer, materials in self.matProfsDict.items():
-			if manufacturer == self.selectedBrand:
+		# manufacturer/mat matching logic
+		index = self.brandsBox.GetSelection()
+		matIndex = self.matsBox.GetSelection()
+		
+		if profile.getPreference('simpleModeMaterialSupplier') is None:
+			self.selectedBrand = self.brandsBox.GetString(index)
+		else:
+			self.selectedBrand = profile.getPreference('simpleModeMaterialSupplier')
+			newIndex = self.brandsBox.FindString(self.selectedBrand)
+			print "new index: ", newIndex
+			self.brandsBox.SetSelection(newIndex)
+				
+		for brand, materials in self.materialsDict.items():
+			if brand == self.selectedBrand:
 				for material, path in materials.items():
 					matchingMaterials.append(material)
-					
-		self.matListBox.Set(matchingMaterials)
 		
-		titles.Add(brandsTitle, 2, wx.LEFT, 20)
-		titles.Add(materialsTitle, 2, wx.LEFT, 17)
-		listBoxes.Add(self.manufacturerListbox, wx.RIGHT, 15)
-		listBoxes.Add(self.matListBox, wx.LEFT, wx.LEFT, 30)
-		closeBtnBox.Add(self.closeButton, 9, wx.ALIGN_CENTRE)
-		mainVBox.Add(titles, 0, wx.ALIGN_CENTER | wx.TOP, 10)
-		mainVBox.Add(listBoxes, 0, wx.ALIGN_CENTRE)
-		mainVBox.Add(closeBtnBox, 1, wx.ALIGN_CENTRE | wx.ALL, 10)
-		listBoxPanel.SetSizer(mainVBox)
+
+		self.matsBox.Set(matchingMaterials)
+		self.matsBox.SetSelection(0)
 		
-		self.manufacturerListbox.Bind(wx.EVT_LISTBOX, self.brandSelected, id=10)
-		self.matListBox.Bind(wx.EVT_LISTBOX, self.materialSelected, id=11)
-		self.closeButton.Bind(wx.EVT_BUTTON, self.closeWindow, id=9)
+		if profile.getPreference('simpleModeMaterialName') is None:
+			self.selectedMaterial = self.matsBox.GetString(0)
+		else:
+			self.selectedMaterial = profile.getPreference('simpleModeMaterialName')
+			newIndex = self.matsBox.FindString(self.selectedMaterial)
+			self.matsBox.SetSelection(newIndex)
+			
+		font = wx.Font(15, family=wx.SWISS, style=wx.NORMAL, weight=wx.NORMAL)
 		
+		
+
+		
+		# brand/title labels
+		brandsLabel = wx.StaticText(listBoxPanel, -1, "Manufacturer")
+		brandsLabel.SetFont(font)
+		materialLabel = wx.StaticText(listBoxPanel, -2, "Material")
+		materialLabel.SetFont(font)
+		
+		# select button
+		self.selectButton = wx.Button(listBoxPanel, -1, 'Select')
+		
+		# load topBox
+		logoPath = resources.getPathForImage('TypeALogo_125x125.png')
+		logoBitmap = wx.Image(logoPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+		logo = wx.StaticBitmap(listBoxPanel, -1, logoBitmap)
+		titleText = wx.StaticText(listBoxPanel, -1, "Material Profile Selector")
+		font = wx.Font(20, family=wx.SWISS, style=wx.NORMAL, weight=wx.NORMAL)
+		titleText.SetFont(font)
+		
+		topBox.Add(logo, flag= wx.ALIGN_CENTER| wx.TOP, border=20)
+		topBox.Add(titleText, flag=wx.BOTTOM | wx.TOP, border=10)
+
+		
+		# load listbox_Box1 with labels
+		listbox_Box1.Add(brandsLabel, flag=wx.ALIGN_RIGHT)
+		listbox_Box1.Add(materialLabel, flag=wx.TOP | wx.ALIGN_RIGHT, border=15)
+		
+		# load listBox2
+		listbox_Box2.Add(self.brandsBox)
+		listbox_Box2.Add(self.matsBox, flag=wx.TOP, border=10)
+		
+		# load bottomBox with 'Select' button
+		bottomBox.Add(self.selectButton, flag=wx.ALIGN_CENTER)
+
+		# load mainBox with all loaded boxsizers
+		mainBox.Add(topBox, flag=wx.ALIGN_CENTER)
+		middleBox.Add(listbox_Box1, flag=wx.LEFT)
+		middleBox.Add(listbox_Box2, flag=wx.LEFT, border=10)
+		mainBox.Add(middleBox, flag=wx.ALIGN_CENTER | wx.TOP, border=20)
+		mainBox.Add(bottomBox, flag=wx.ALIGN_CENTER | wx.TOP, border=50)
+		listBoxPanel.SetSizer(mainBox)
+		
+		# bindings
+		self.brandsBox.Bind(wx.EVT_COMBOBOX, self.brandSelected)
+		self.matsBox.Bind(wx.EVT_COMBOBOX, self.materialSelected)
+		self.selectButton.Bind(wx.EVT_BUTTON, self.closeWindow)
 	
 	def closeWindow(self, e):
-		if self.chosenProfilePath is not None:
+		try:
+			self.chosenProfilePath = self.materialsDict.setdefault(self.selectedBrand, self.selectedMaterial)[self.selectedMaterial]
 			pub.sendMessage('matProf.update', path=self.chosenProfilePath)
 			pub.sendMessage('app.refresh', e=True)
-		self.Close()
+		except:
+			print "lolerror"
+#		if self.chosenProfilePath is not None:
+
+		self.Destroy()
 
 	# each profile is formated as:	manufacturer__material_base_polymer
 	def createMaterialDict(self, files):
 		data = []
-		matProfsDict = {}
+		materialsDict = {}
 		for file in files:
 			cp = configparser.ConfigParser()
 			cp.read(file)
@@ -508,32 +566,35 @@ class MaterialSelectorFrame(wx.Frame):
 				manufacturer = cp.get('info', 'manufacturer')
 				data.append((name, manufacturer, file))
 		for name, manufacturer, path in data:
-			matProfsDict.setdefault(manufacturer, {})[name] = path
+			materialsDict.setdefault(manufacturer, {})[name] = path
 				
-		return matProfsDict
+		return materialsDict
 
 	def OnEnable(self, enable):
-		self.closeButton.Enable(enable)
+		self.selectButton.Enable(enable)
 	
 
 	def brandSelected(self, event):
 		selectedBrand = event.GetString()
 		self.selectedBrand = selectedBrand
 		newMatsList = []
-				
+		
+		print "selected brand: ", selectedBrand
 		# finds materials associated with the selected brand and adds them to newMatsList
-		for manufacturer, materials, in self.matProfsDict.items():
-			if manufacturer == selectedBrand: 
+		for brand, materials, in self.materialsDict.items():
+			if brand == selectedBrand: 
 				for material, path in materials.items():
 					newMatsList.append(material)
 
 		# when a brand is selected, the materials listbox is updated to reflect materials under
-		# the selected brand	
-		self.matListBox.Set(newMatsList)
-		self.OnEnable(False)
+		# the selected brand
+		self.matsBox.Set(sorted(newMatsList))
+		self.matsBox.SetSelection(0)
+		index = self.matsBox.GetSelection()
+		self.selectedMaterial = self.matsBox.GetString(index)
+#		if self.selectedMaterial
+#		self.OnEnable(False)
 				
 	def materialSelected(self, event):
 		selectedMaterial = event.GetString()
-		self.chosenProfilePath = self.matProfsDict.setdefault(self.selectedBrand, selectedMaterial)[selectedMaterial]
-		
-		self.OnEnable(True)
+		self.selectedMaterial = selectedMaterial
