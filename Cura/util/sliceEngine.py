@@ -507,8 +507,8 @@ class Engine(object):
 			'minimalLayerTime': int(profile.getProfileSettingFloat('cool_min_layer_time')),
 			'minimalFeedrate': int(profile.getProfileSettingFloat('cool_min_feedrate')),
 			'coolHeadLift': 1 if profile.getProfileSetting('cool_head_lift') == 'True' else 0,
-			'startCode': profile.getAlterationFileContents('start.gcode', extruderCount),
-			'endCode': profile.getAlterationFileContents('end.gcode', extruderCount),
+			'startCode': profile.getStartGCode(),
+			'endCode': profile.getEndGCode(),
 			'preSwitchExtruderCode': profile.getAlterationFileContents('preSwitchExtruder.gcode', extruderCount),
 			'postSwitchExtruderCode': profile.getAlterationFileContents('postSwitchExtruder.gcode', extruderCount),
 

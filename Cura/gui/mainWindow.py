@@ -289,7 +289,7 @@ class mainWindow(wx.Frame):
 
 		if pluginCount > 1:
 			self.scene.notification.message("Warning: %i plugins from the previous session are still active." % pluginCount)
-
+			
 	def onPluginUpdate(self,msg): #receives commands from the plugin thread
 		cmd = str(msg.data).split(";")
 		if cmd[0] == "OpenPluginProgressWindow":
@@ -408,73 +408,7 @@ class mainWindow(wx.Frame):
 		prefDialog.Centre()
 		prefDialog.Show()
 		prefDialog.Raise()
-		
-		if profile.getMachineSetting('has_heated_bed') is False:
-			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
-	;Sliced for Type A Machines Series 1
-	;Sliced at: {day} {date} {time}
-	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-	;Print Speed: {print_speed} Support: {support}
-	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
-	;Print time: {print_time}
-	;Filament used: {filament_amount}m {filament_weight}g
-	;Filament cost: {filament_cost}
-	G21        ;metric values
-	G90        ;absolute positioning
-	G28     ;move to endstops
-	G29		;allows for auto-levelling
-	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
-	M109 S{print_temperature} ;Heat To temp
-	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
-	G92 E0 ;zero the extruded length
-	G1 F200 X250 E30 ;extrude 30mm of feed stock
-	G92 E0 ;zero the extruded length again
-	G1 X150 Y150  Z25 F12000 ;recenter and begin
-	G1 F{travel_speed}""")
-			profile.setAlterationFile('end.gcode', """;-- END GCODE --
-	M104 S0     ;extruder heater off
-	G91         ;relative positioning
-	G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-	G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
-	G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
-	M84           ;steppers off
-	G90           ;absolute positioning""")
-		elif profile.getMachineSetting('has_heated_bed') is True:
-			
-		
-			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
-				;Sliced for Type A Machines Series 1
-				;Sliced at: {day} {date} {time}
-				;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-				;Print Speed: {print_speed} Support: {support}
-				;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
-				;Print time: {print_time}
-				;Filament used: {filament_amount}m {filament_weight}g
-				;Filament cost: {filament_cost}
-				G21        ;metric values
-				G90        ;absolute positioning
-				G28     ;move to endstops
-				G29		;allows for auto-levelling
-				G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
-				M140 S{print_bed_temperature} ;Prep Heat Bed
-				M109 S{print_temperature} ;Heat To temp
-				M190 S{print_bed_temperature} ;Heat Bed to temp
-				G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
-				G92 E0 ;zero the extruded length
-				G1 F200 X250 E30 ;extrude 30mm of feed stock
-				G92 E0 ;zero the extruded length again
-				G1 X150 Y150  Z25 F12000 ;recenter and begin
-				G1 F{travel_speed}""")
-			profile.setAlterationFile('end.gcode', """;-- END GCODE --
-				M104 S0     ;extruder heater off
-				G91         ;relative positioning
-				M109 S0			;heated bed off
-				G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-				G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
-				G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
-				M84           ;steppers off
-				G90           ;absolute positioning""")
-
+				
 	def OnDropFiles(self, files):
 		self.scene.loadFiles(files)
 
@@ -790,7 +724,6 @@ class normalSettingsPanel(configBase.configPanelBase):
 		else:
 			self.alterationPanel = alterationPanel.alterationPanel(self.nb, callback)
 			self.nb.AddPage(self.alterationPanel, "Start/End-GCode")
-
 		self.Bind(wx.EVT_SIZE, self.OnSize)
 
 		self.nb.SetSize(self.GetSize())
