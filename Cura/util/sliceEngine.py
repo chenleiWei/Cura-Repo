@@ -466,8 +466,10 @@ class Engine(object):
 			else:
 				self._result.addLog(line)
 			line = stderr.readline()
+			
 
 	def _engineSettings(self, extruderCount):
+		profile.setHeatedBedGCode()
 		settings = {
 			'layerThickness': int(profile.getProfileSettingFloat('layer_height') * 1000),
 			'initialLayerThickness': int(profile.getProfileSettingFloat('bottom_thickness') * 1000) if profile.getProfileSettingFloat('bottom_thickness') > 0.0 else int(profile.getProfileSettingFloat('layer_height') * 1000),
@@ -507,8 +509,8 @@ class Engine(object):
 			'minimalLayerTime': int(profile.getProfileSettingFloat('cool_min_layer_time')),
 			'minimalFeedrate': int(profile.getProfileSettingFloat('cool_min_feedrate')),
 			'coolHeadLift': 1 if profile.getProfileSetting('cool_head_lift') == 'True' else 0,
-			'startCode': profile.getStartGCode(),
-			'endCode': profile.getEndGCode(),
+			'startCode': profile.getAlterationFileContents('start.gcode', extruderCount),
+			'endCode': profile.getAlterationFileContents('end.gcode', extruderCount),
 			'preSwitchExtruderCode': profile.getAlterationFileContents('preSwitchExtruder.gcode', extruderCount),
 			'postSwitchExtruderCode': profile.getAlterationFileContents('postSwitchExtruder.gcode', extruderCount),
 

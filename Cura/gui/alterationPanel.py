@@ -48,7 +48,7 @@ class alterationPanel(wx.Panel):
 		self.currentFile = self.list.GetSelection()
 
 	def loadFile(self, filename):
-		self.textArea.SetValue(profile.getAlterationFile(filename))
+		self.textArea.SetValue(profile.getAlterationFileContents(filename, 1))
 
 	def OnFocusLost(self, e):
 		if self.currentFile == self.list.GetSelection():
