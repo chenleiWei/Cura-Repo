@@ -5,6 +5,7 @@ import os
 import webbrowser
 import sys
 
+from wx.lib.pubsub import pub
 
 from Cura.gui import configBase
 from Cura.gui import expertConfig
@@ -24,6 +25,7 @@ from Cura.util import profile
 from Cura.util import version
 import platform
 from Cura.util import meshLoader
+from Cura.gui import materialProfileSelector
 
 try:
 	#MacOS release currently lacks some wx components, like the Publisher.
@@ -36,7 +38,8 @@ class mainWindow(wx.Frame):
 		super(mainWindow, self).__init__(None, title='Cura - ' + version.getVersion())
 
 		wx.EVT_CLOSE(self, self.OnClose)
-
+		
+	
 		# allow dropping any file, restrict later
 		self.SetDropTarget(dropTarget.FileDropTarget(self.OnDropFiles))
 
@@ -108,8 +111,6 @@ class mainWindow(wx.Frame):
 		self.fileMenu.AppendSeparator()
 		i = self.fileMenu.Append(-1, _("Preferences...\tCTRL+,"))
 		self.Bind(wx.EVT_MENU, self.OnPreferences, i)
-		i = self.fileMenu.Append(-1, _("Machine settings..."))
-		self.Bind(wx.EVT_MENU, self.OnMachineSettings, i)
 		self.fileMenu.AppendSeparator()
 
 		# Model MRU list
@@ -161,6 +162,9 @@ class mainWindow(wx.Frame):
 
 		self.menubar.Append(toolsMenu, _("Tools"))
 
+		# material profile event caller		
+		self.materialProfileUpdate = pub.subscribe(self.loadMaterialData, 'matProf.update')
+
 		#Machine menu for machine configuration/tooling
 		self.machineMenu = wx.Menu()
 		self.updateMachineMenu()
@@ -171,10 +175,14 @@ class mainWindow(wx.Frame):
 		i = expertMenu.Append(-1, _("Switch to quickprint..."), kind=wx.ITEM_RADIO)
 		self.switchToQuickprintMenuItem = i
 		self.Bind(wx.EVT_MENU, self.OnSimpleSwitch, i)
-
 		i = expertMenu.Append(-1, _("Switch to full settings..."), kind=wx.ITEM_RADIO)
 		self.switchToNormalMenuItem = i
 		self.Bind(wx.EVT_MENU, self.OnNormalSwitch, i)
+		expertMenu.AppendSeparator()
+		
+		i = expertMenu.Append(-1, _("Load Material Profile"), kind=wx.ITEM_RADIO)
+		self.switchToNormalMenuItem = i
+		self.Bind(wx.EVT_MENU, self.OnMaterialProfileSelect, i)
 		expertMenu.AppendSeparator()
 
 		i = expertMenu.Append(-1, _("Open expert settings...\tCTRL+E"))
@@ -577,6 +585,53 @@ class mainWindow(wx.Frame):
 		profile.putPreference('startMode', 'Simple')
 		self.updateSliceMode()
 
+	def OnMaterialProfileSelect(self, e):
+
+		materialSelector = materialProfileSelector.MaterialProfileSelector()
+		materialSelector.Show()
+		
+	def loadData(self, data, profileType):
+		for setting, value in data.items():
+			if profileType == 'preference':
+				profile.putPreference(setting, value)
+			elif profileType == 'profile':
+				profile.putProfileSetting(setting, value)
+		self.normalSettingsPanel.updateProfileToControls()
+	#	self._callback()
+		
+	def loadMaterialData(self, path):
+		import ConfigParser as ConfigParser
+		
+		sectionSettings = {}
+		manufacturer = None
+		name = None
+		materialLoaded = None
+		
+		materialSettings = []
+		cp = ConfigParser.ConfigParser()
+		cp.read(path)
+		
+		# get the manufacturer and the name of the material
+		if cp.has_section('info'):
+			manufacturer = cp.get('info', 'manufacturer')
+			name = cp.get('info', 'name')
+			materialLoaded = manufacturer + " " + name
+			
+			
+		# load the material profile settings
+		if cp.has_section('profile'):
+			for setting, value in cp.items('profile'):
+				sectionSettings[setting] = value
+
+		# update manufacturer and material names saved
+		if manufacturer is not None and name is not None: 
+			profile.putPreference('simpleModeMaterialSupplier', manufacturer)
+			profile.putPreference('simpleModeMaterialName', name)
+			profile.putPreference('simpleModeMaterial', materialLoaded)
+
+		# profile setting information update + info panel update
+		self.loadData(sectionSettings, 'profile')
+				
 	def OnNormalSwitch(self, e):
 		profile.putPreference('startMode', 'Normal')
 		dlg = wx.MessageDialog(self, _("Copy the settings from quickprint to your full settings?\n(This will overwrite any full setting modifications you have)"), _("Profile copy"), wx.YES_NO | wx.ICON_QUESTION)
