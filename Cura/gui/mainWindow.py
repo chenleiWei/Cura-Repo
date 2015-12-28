@@ -13,7 +13,7 @@ from Cura.gui import alterationPanel
 from Cura.gui import pluginPanel
 from Cura.gui import preferencesDialog
 from Cura.gui import configWizard
-from Cura.gui import firmwareInstall
+#from Cura.gui import firmwareInstall
 from Cura.gui import simpleMode
 from Cura.gui import sceneView
 from Cura.gui import aboutWindow
@@ -144,8 +144,8 @@ class mainWindow(wx.Frame):
 		if version.isDevVersion():
 			i = toolsMenu.Append(-1, _("PID Debugger..."))
 			self.Bind(wx.EVT_MENU, self.OnPIDDebugger, i)
-			i = toolsMenu.Append(-1, _("Auto Firmware Update..."))
-			self.Bind(wx.EVT_MENU, self.OnAutoFirmwareUpdate, i)
+#			i = toolsMenu.Append(-1, _("Auto Firmware Update..."))
+#			self.Bind(wx.EVT_MENU, self.OnAutoFirmwareUpdate, i)
 
 		#i = toolsMenu.Append(-1, _("Copy profile to clipboard"))
 		#self.Bind(wx.EVT_MENU, self.onCopyProfileClipboard,i)
@@ -388,7 +388,7 @@ class mainWindow(wx.Frame):
 			self.splitter.SetSashPosition(self.normalSashPos, True)
 			# Enabled sash
 			self.splitter.SetSashSize(4)
-		self.defaultFirmwareInstallMenuItem.Enable(firmwareInstall.getDefaultFirmware() is not None)
+#		self.defaultFirmwareInstallMenuItem.Enable(firmwareInstall.getDefaultFirmware() is not None)
 		if profile.getMachineSetting('machine_type').startswith('ultimaker2'):
 			pass
 		if int(profile.getMachineSetting('extruder_amount')) < 2:
@@ -500,8 +500,8 @@ class mainWindow(wx.Frame):
 		#Add tools for machines.
 		self.machineMenu.AppendSeparator()
 
-		self.defaultFirmwareInstallMenuItem = self.machineMenu.Append(-1, _("Install default firmware..."))
-		self.Bind(wx.EVT_MENU, self.OnDefaultMarlinFirmware, self.defaultFirmwareInstallMenuItem)
+#		self.defaultFirmwareInstallMenuItem = self.machineMenu.Append(-1, _("Install default firmware..."))
+#		self.Bind(wx.EVT_MENU, self.OnDefaultMarlinFirmware, self.defaultFirmwareInstallMenuItem)
 
 		i = self.machineMenu.Append(-1, _("Install custom firmware..."))
 		self.Bind(wx.EVT_MENU, self.OnCustomFirmware, i)
@@ -649,8 +649,8 @@ class mainWindow(wx.Frame):
 			self.updateProfileToAllControls()
 		self.updateSliceMode()
 
-	def OnDefaultMarlinFirmware(self, e):
-		firmwareInstall.InstallFirmware(self)
+#	def OnDefaultMarlinFirmware(self, e):
+#		firmwareInstall.InstallFirmware(self)
 
 	def OnCustomFirmware(self, e):
 		if profile.getMachineSetting('machine_type').startswith('ultimaker'):
