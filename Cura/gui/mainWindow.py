@@ -180,7 +180,7 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnNormalSwitch, i)
 		expertMenu.AppendSeparator()
 		
-		i = expertMenu.Append(-1, _("Load Material Profile"), kind=wx.ITEM_RADIO)
+		i = expertMenu.Append(-1, _("Load Material Profile"))
 		self.switchToNormalMenuItem = i
 		self.Bind(wx.EVT_MENU, self.OnMaterialProfileSelect, i)
 		expertMenu.AppendSeparator()
@@ -591,11 +591,17 @@ class mainWindow(wx.Frame):
 		materialSelector.Show()
 		
 	def loadData(self, data, profileType):
+		# Get the support settings user has set
+		raft = profile.getProfileSetting('platform_adhesion')
+		support = profile.getProfileSetting('support')
 		for setting, value in data.items():
 			if profileType == 'preference':
 				profile.putPreference(setting, value)
 			elif profileType == 'profile':
 				profile.putProfileSetting(setting, value)
+		# Add support preferences at the end to make sure they're not written over to 'None'
+		profile.putProfileSetting('platform_adhesion', raft)
+		profile.putProfileSetting('support', support)
 		self.normalSettingsPanel.updateProfileToControls()
 	#	self._callback()
 		
@@ -616,8 +622,7 @@ class mainWindow(wx.Frame):
 			manufacturer = cp.get('info', 'manufacturer')
 			name = cp.get('info', 'name')
 			materialLoaded = manufacturer + " " + name
-			
-			
+		
 		# load the material profile settings
 		if cp.has_section('profile'):
 			for setting, value in cp.items('profile'):
