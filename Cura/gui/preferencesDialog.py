@@ -176,7 +176,7 @@ class machineSettingsDialog(wx.Dialog):
 		prefDialog.Centre()
 		prefDialog.Show()
 		wx.CallAfter(self.Close)
-
+		
 	def OnRemoveMachine(self, e):
 		if profile.getMachineCount() < 2:
 			wx.MessageBox(_("Cannot remove the last machine configuration in Cura"), _("Machine remove error"), wx.OK | wx.ICON_ERROR)
@@ -201,5 +201,7 @@ class machineSettingsDialog(wx.Dialog):
 		self.parent.updateMachineMenu()
 
 	def OnClose(self, e):
+		profile.setHeatedBedGCode()
 		self.parent.reloadSettingPanels()
+		
 		self.Destroy()

@@ -9,7 +9,7 @@ import re
 
 from Cura.util import profile
 from Cura.util import resources
-
+from Cura.gui import materialProfileSelector
 
 class simpleModePanel(wx.Panel):
 	"Main user interface window for Quickprint mode"
@@ -24,7 +24,6 @@ class simpleModePanel(wx.Panel):
 		self.lastOpenedFileName = "No File Currently Open"
 
 		pub.subscribe(self.displayAndLoadMaterialData, 'matProf.update')
-		pub.subscribe(self.refresh, 'app.refresh')
 		
 		# Panel 0: Last File Loaded
 		currentFilePanel = wx.Panel(self)
@@ -177,9 +176,7 @@ class simpleModePanel(wx.Panel):
 
 		self.materialLoadButton.Bind(wx.EVT_BUTTON, self.OnSelectBtn)
 	
-	def refresh(self, e):
-		self._callback()
-	
+
 	def createDataDict(self, filePaths, panel):
 		data = []
 		dataDict = {}
@@ -299,10 +296,6 @@ class simpleModePanel(wx.Panel):
 		self.loadData(profileSectionData, profile)
 		self.infoPanelValueCheck(profileSectionData)
 		
-		
-		self._callback()
-		# profile.putPreference(file_basename)
-		
 	def infoPanelValueCheck(self, data):
 		degree_sign= u'\N{DEGREE SIGN}'
 		temperatureUnit = degree_sign + "C" 
@@ -335,7 +328,7 @@ class simpleModePanel(wx.Panel):
 				self.currentFileName.SetLabel(filename)
 		
 	def OnSelectBtn(self, event):
-		frame = MaterialSelectorFrame()
+		frame = materialProfileSelector.MaterialProfileSelector()
 		frame.Show(True)
 
 	def getSettingOverrides(self):
@@ -390,205 +383,10 @@ class simpleModePanel(wx.Panel):
 						materialSettings.update(supportSettings)
 						materialSettings.update(strengthSettings)
 						materialSettings.update(qualitySettings)
+						
 		
-		if profile.getMachineSetting('has_heated_bed') is False:
-			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
-		;Sliced for Type A Machines Series 1
-		;Sliced at: {day} {date} {time}
-		;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-		;Print Speed: {print_speed} Support: {support}
-		;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
-		;Print time: {print_time}
-		;Filament used: {filament_amount}m {filament_weight}g
-		;Filament cost: {filament_cost}
-		G21        ;metric values
-		G90        ;absolute positioning
-		G28     ;move to endstops
-		G29		;allows for auto-levelling
-		G1 Z15.0 F12000 ;move the platform down 15mm
-		G1 X150 Y5 F{travel_speed} ;center
-		M109 S{print_temperature} ;Heat To temp
-		G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
-		G92 E0 ;zero the extruded length
-		G1 F200 X250 E30 ;extrude 30mm of feed stock
-		G92 E0 ;zero the extruded length again
-		G1 X150 Y150  Z25 F12000 ;recenter and begin
-		G1 F{travel_speed}""")
-			profile.setAlterationFile('end.gcode', """;-- END GCODE --
-		M104 S0     ;extruder heater off
-		G91         ;relative positioning
-		G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-		G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
-		G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
-		M84           ;steppers off
-		G90           ;absolute positioning""")	
-
-					
 		return materialSettings
 		
 	def updateProfileToControls(self):
 		pass
 
-
-class MaterialSelectorFrame(wx.Frame):
-	def __init__(self):
-		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(500,400), style=wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
-		
-		mainBox = wx.BoxSizer(wx.VERTICAL)
-		topBox = wx.BoxSizer(wx.VERTICAL)
-		middleBox = wx.BoxSizer(wx.HORIZONTAL)
-		listbox_Box1 = wx.BoxSizer(wx.VERTICAL)
-		listbox_Box2 = wx.BoxSizer(wx.VERTICAL)
-		bottomBox = wx.BoxSizer(wx.HORIZONTAL)
-
-		# panel initialization
-		listBoxPanel = wx.Panel(self, -1)
-		
-		# dict and option list initializations
-		materialsDirectory = resources.getSimpleModeMaterialsProfiles()
-		self.materialsDict = self.createMaterialDict(materialsDirectory)
-		brandsList = []
-		materialsList = []
-		matchingMaterials = []
-
-		# select button
-		self.selectButton = wx.Button(listBoxPanel, -1, 'Select')
-		
-		# brand/title labels
-		brandsLabel = wx.StaticText(listBoxPanel, -1, "Manufacturer")
-		materialsLabel = wx.StaticText(listBoxPanel, -1, "Material")
-		
-		# sort manufacturers and materials in their own lists
-		for brand, materials in self.materialsDict.items():
-			brandsList.append(brand)
-			for material, path in materials.items():
-				materialsList.append(material)
-
-		# listbox initializations
-		self.brandsBox = wx.ComboBox(listBoxPanel, -1, choices=brandsList, style=wx.LB_SORT)
-		self.brandsBox.SetSelection(0)
-		self.matsBox = wx.ComboBox(listBoxPanel, -1, size=(150,-1), choices=materialsList, style=wx.LB_SORT)
-
-
-		# manufacturer/mat matching logic
-		index = self.brandsBox.GetSelection()
-		matIndex = self.matsBox.GetSelection()
-
-
-		if profile.getPreference('simpleModeMaterialSupplier') is None:
-			self.selectedBrand = self.brandsBox.GetString(index)
-		else:
-			self.selectedBrand = profile.getPreference('simpleModeMaterialSupplier')
-			newIndex = self.brandsBox.FindString(self.selectedBrand)
-			print "new index: ", newIndex
-			self.brandsBox.SetSelection(newIndex)
-				
-
-		for brand, materials in self.materialsDict.items():
-			if brand == self.selectedBrand:
-				for material, path in materials.items():
-					matchingMaterials.append(material)
-
-		self.matsBox.Set(matchingMaterials)
-		self.matsBox.SetSelection(0)
-
-		if profile.getPreference('simpleModeMaterialName') is None:
-			self.selectedMaterial = self.matsBox.GetString(0)
-		else:
-			self.selectedMaterial = profile.getPreference('simpleModeMaterialName')
-			newIndex = self.matsBox.FindString(self.selectedMaterial)
-			self.matsBox.SetSelection(newIndex)
-
-		# load topBox
-		logoPath = resources.getPathForImage('TypeALogo_125x125.png')
-		logoBitmap = wx.Image(logoPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
-		logo = wx.StaticBitmap(listBoxPanel, -1, logoBitmap)	
-			
-		font = wx.Font(15, family=wx.SWISS, style=wx.NORMAL, weight=wx.NORMAL)
-
-
-		self.matsBox.Set(matchingMaterials)
-		self.matsBox.SetSelection(0)
-
-		topBox.Add(logo, flag= wx.ALIGN_CENTER| wx.TOP, border=20)
-		titleText = wx.StaticText(listBoxPanel, -1, "Material Profile Selector")
-		topBox.Add(titleText, flag=wx.BOTTOM | wx.TOP, border=10)
-
-		# load listbox_Box1 with labels
-		listbox_Box1.Add(brandsLabel, flag=wx.ALIGN_RIGHT)
-		listbox_Box1.Add(materialsLabel, flag=wx.TOP | wx.ALIGN_RIGHT, border=15)
-
-		# load listBox2
-		listbox_Box2.Add(self.brandsBox)
-		listbox_Box2.Add(self.matsBox, flag=wx.TOP, border=10)
-		
-		# load bottomBox with 'Select' button
-		bottomBox.Add(self.selectButton, flag=wx.ALIGN_CENTER)
-
-		# load mainBox with all loaded boxsizers
-		mainBox.Add(topBox, flag=wx.ALIGN_CENTER)
-		middleBox.Add(listbox_Box1, flag=wx.LEFT)
-		middleBox.Add(listbox_Box2, flag=wx.LEFT, border=10)
-		mainBox.Add(middleBox, flag=wx.ALIGN_CENTER | wx.TOP, border=20)
-		mainBox.Add(bottomBox, flag=wx.ALIGN_CENTER | wx.TOP, border=50)
-		listBoxPanel.SetSizer(mainBox)
-
-		# bindings
-		self.brandsBox.Bind(wx.EVT_COMBOBOX, self.brandSelected)
-		self.matsBox.Bind(wx.EVT_COMBOBOX, self.materialSelected)
-		self.selectButton.Bind(wx.EVT_BUTTON, self.closeWindow)
-		
-	def createMaterialDict(self, files):
-		data = []
-		materialsDict = {}
-		for file in files:
-			cp = configparser.ConfigParser()
-			cp.read(file)
-			if cp.has_section('info'):
-				name = cp.get('info', 'name')
-				manufacturer = cp.get('info', 'manufacturer')
-				data.append((name, manufacturer, file))
-		for name, manufacturer, path in data:
-			materialsDict.setdefault(manufacturer, {})[name] = path
-				
-		return materialsDict
-
-
-	def OnEnable(self, enable):
-		self.selectButton.Enable(enable)
-	
-
-	def brandSelected(self, event):
-		selectedBrand = event.GetString()
-		self.selectedBrand = selectedBrand
-		newMatsList = []
-		
-		print "selected brand: ", selectedBrand
-		# finds materials associated with the selected brand and adds them to newMatsList
-		for brand, materials, in self.materialsDict.items():
-			if brand == selectedBrand: 
-				for material, path in materials.items():
-					newMatsList.append(material)
-
-		# when a brand is selected, the materials listbox is updated to reflect materials under
-		# the selected brand
-		self.matsBox.Set(sorted(newMatsList))
-		self.matsBox.SetSelection(0)
-		index = self.matsBox.GetSelection()
-		self.selectedMaterial = self.matsBox.GetString(index)
-#		if self.selectedMaterial
-#		self.OnEnable(False)
-				
-	def materialSelected(self, event):
-		selectedMaterial = event.GetString()
-		self.selectedMaterial = selectedMaterial
-
-	def closeWindow(self, e):
-		try:
-			self.chosenProfilePath = self.materialsDict.setdefault(self.selectedBrand, self.selectedMaterial)[self.selectedMaterial]
-			pub.sendMessage('matProf.update', path=self.chosenProfilePath)
-			pub.sendMessage('app.refresh', e=True)
-		except Exception as e:
-			print e
-
-		self.Destroy()

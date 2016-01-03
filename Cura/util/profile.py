@@ -28,6 +28,7 @@ else:
 	import configparser as ConfigParser
 
 from Cura.util import version
+from Cura.util import resources
 from Cura.util import validators
 
 #The settings dictionary contains a key/value reference to all possible settings. With the setting name as key.
@@ -720,6 +721,70 @@ def initializeOctoPrintAPIConfig(s,k):
 		octoprintConfigFile.close()
 
 	
+def getHeatedBedAlterationPath():
+		if tempOverride:
+			print tempOverride
+		else:
+			print "No temp override"
+		
+		alterationFileOptions = resources.getAlterationFiles()
+		print "Alteration file options: ", alterationFileOptions
+		altFile = None
+		startGCode = None
+		endGCode = None
+		
+		if getMachineSetting('has_heated_bed') == 'True':
+			heatedBed = True
+		else:
+			heatedBed = False
+			
+		for item in alterationFileOptions:
+			if os.path.basename(item) == 'series1_hasBed.ini' and heatedBed is True:
+				altFile = item
+			elif os.path.basename(item) == 'series1_noBed.ini' and heatedBed is False:
+				altFile = item
+		if altFile is not None: 		
+			return altFile
+		
+def setHeatedBedGCode():
+	path = getHeatedBedAlterationPath()
+	cp = ConfigParser.ConfigParser()
+		
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError as e:
+		print e
+			
+#	GCode = cp.get('alterations', sequence)
+#	setAlterationFile(sequence, GCode)
+	setAlterationFileFromFilePath(path)
+	
+	
+def getStartGCode():
+	path = getHeatedBedAlterationPath()
+	print "Start gcode path: ", path 
+	cp = ConfigParser.ConfigParser()
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError as e:
+		print e
+		
+	startGCode = cp.get('alterations', 'start.gcode')
+	
+	return startGCode
+	
+def getEndGCode():
+	path = getHeatedBedAlterationPath()
+	print "End gcode path: ", path
+	cp = ConfigParser.ConfigParser()
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError as e:
+		print e
+		
+	endGCode = cp.get('alterations', 'end.gcode')
+	return endGCode
+	
 def printerExists(s):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
 	cp = ConfigParser.ConfigParser()
@@ -1345,7 +1410,7 @@ def getAlterationFile(filename):
 		return tempOverride[filename]
 	global settingsDictionary
 	if filename in settingsDictionary and settingsDictionary[filename].isAlteration():
-		return settingsDictionary[filename].getValue()
+			return settingsDictionary[filename].getValue()
 	traceback.print_stack()
 	sys.stderr.write('Error: "%s" not found in alteration settings\n' % (filename))
 	return ''
@@ -1364,8 +1429,8 @@ def setAlterationFileFromFilePath(file):
 		endGCode = cp.get('alterations', 'end.gcode')
 	#	print ("End Gcode:\n%s\n\n\n") % endGCode
 		
-		setAlterationFile('start.gcode', startGCode)
-		setAlterationFile('end.gcode', endGCode)
+	setAlterationFile('start.gcode', startGCode)
+	setAlterationFile('end.gcode', endGCode)
 
 def setAlterationFile(name, value):
 	#Check if we have a configuration file loaded, else load the default.

@@ -5,6 +5,7 @@ import os
 import webbrowser
 import sys
 
+from wx.lib.pubsub import pub
 
 from Cura.gui import configBase
 from Cura.gui import expertConfig
@@ -12,7 +13,7 @@ from Cura.gui import alterationPanel
 from Cura.gui import pluginPanel
 from Cura.gui import preferencesDialog
 from Cura.gui import configWizard
-from Cura.gui import firmwareInstall
+#from Cura.gui import firmwareInstall
 from Cura.gui import simpleMode
 from Cura.gui import sceneView
 from Cura.gui import aboutWindow
@@ -24,6 +25,7 @@ from Cura.util import profile
 from Cura.util import version
 import platform
 from Cura.util import meshLoader
+from Cura.gui import materialProfileSelector
 
 try:
 	#MacOS release currently lacks some wx components, like the Publisher.
@@ -36,7 +38,8 @@ class mainWindow(wx.Frame):
 		super(mainWindow, self).__init__(None, title='Cura - ' + version.getVersion())
 
 		wx.EVT_CLOSE(self, self.OnClose)
-
+		
+	
 		# allow dropping any file, restrict later
 		self.SetDropTarget(dropTarget.FileDropTarget(self.OnDropFiles))
 
@@ -108,8 +111,6 @@ class mainWindow(wx.Frame):
 		self.fileMenu.AppendSeparator()
 		i = self.fileMenu.Append(-1, _("Preferences...\tCTRL+,"))
 		self.Bind(wx.EVT_MENU, self.OnPreferences, i)
-		i = self.fileMenu.Append(-1, _("Machine settings..."))
-		self.Bind(wx.EVT_MENU, self.OnMachineSettings, i)
 		self.fileMenu.AppendSeparator()
 
 		# Model MRU list
@@ -143,8 +144,8 @@ class mainWindow(wx.Frame):
 		if version.isDevVersion():
 			i = toolsMenu.Append(-1, _("PID Debugger..."))
 			self.Bind(wx.EVT_MENU, self.OnPIDDebugger, i)
-			i = toolsMenu.Append(-1, _("Auto Firmware Update..."))
-			self.Bind(wx.EVT_MENU, self.OnAutoFirmwareUpdate, i)
+#			i = toolsMenu.Append(-1, _("Auto Firmware Update..."))
+#			self.Bind(wx.EVT_MENU, self.OnAutoFirmwareUpdate, i)
 
 		#i = toolsMenu.Append(-1, _("Copy profile to clipboard"))
 		#self.Bind(wx.EVT_MENU, self.onCopyProfileClipboard,i)
@@ -161,6 +162,9 @@ class mainWindow(wx.Frame):
 
 		self.menubar.Append(toolsMenu, _("Tools"))
 
+		# material profile event caller		
+		self.materialProfileUpdate = pub.subscribe(self.loadMaterialData, 'matProf.update')
+
 		#Machine menu for machine configuration/tooling
 		self.machineMenu = wx.Menu()
 		self.updateMachineMenu()
@@ -171,10 +175,14 @@ class mainWindow(wx.Frame):
 		i = expertMenu.Append(-1, _("Switch to quickprint..."), kind=wx.ITEM_RADIO)
 		self.switchToQuickprintMenuItem = i
 		self.Bind(wx.EVT_MENU, self.OnSimpleSwitch, i)
-
 		i = expertMenu.Append(-1, _("Switch to full settings..."), kind=wx.ITEM_RADIO)
 		self.switchToNormalMenuItem = i
 		self.Bind(wx.EVT_MENU, self.OnNormalSwitch, i)
+		expertMenu.AppendSeparator()
+		
+		i = expertMenu.Append(-1, _("Load Material Profile"))
+		self.switchToNormalMenuItem = i
+		self.Bind(wx.EVT_MENU, self.OnMaterialProfileSelect, i)
 		expertMenu.AppendSeparator()
 
 		i = expertMenu.Append(-1, _("Open expert settings...\tCTRL+E"))
@@ -289,7 +297,7 @@ class mainWindow(wx.Frame):
 
 		if pluginCount > 1:
 			self.scene.notification.message("Warning: %i plugins from the previous session are still active." % pluginCount)
-
+			
 	def onPluginUpdate(self,msg): #receives commands from the plugin thread
 		cmd = str(msg.data).split(";")
 		if cmd[0] == "OpenPluginProgressWindow":
@@ -380,7 +388,7 @@ class mainWindow(wx.Frame):
 			self.splitter.SetSashPosition(self.normalSashPos, True)
 			# Enabled sash
 			self.splitter.SetSashSize(4)
-		self.defaultFirmwareInstallMenuItem.Enable(firmwareInstall.getDefaultFirmware() is not None)
+#		self.defaultFirmwareInstallMenuItem.Enable(firmwareInstall.getDefaultFirmware() is not None)
 		if profile.getMachineSetting('machine_type').startswith('ultimaker2'):
 			pass
 		if int(profile.getMachineSetting('extruder_amount')) < 2:
@@ -408,73 +416,7 @@ class mainWindow(wx.Frame):
 		prefDialog.Centre()
 		prefDialog.Show()
 		prefDialog.Raise()
-		
-		if profile.getMachineSetting('has_heated_bed') is False:
-			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
-	;Sliced for Type A Machines Series 1
-	;Sliced at: {day} {date} {time}
-	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-	;Print Speed: {print_speed} Support: {support}
-	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
-	;Print time: {print_time}
-	;Filament used: {filament_amount}m {filament_weight}g
-	;Filament cost: {filament_cost}
-	G21        ;metric values
-	G90        ;absolute positioning
-	G28     ;move to endstops
-	G29		;allows for auto-levelling
-	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
-	M109 S{print_temperature} ;Heat To temp
-	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
-	G92 E0 ;zero the extruded length
-	G1 F200 X250 E30 ;extrude 30mm of feed stock
-	G92 E0 ;zero the extruded length again
-	G1 X150 Y150  Z25 F12000 ;recenter and begin
-	G1 F{travel_speed}""")
-			profile.setAlterationFile('end.gcode', """;-- END GCODE --
-	M104 S0     ;extruder heater off
-	G91         ;relative positioning
-	G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-	G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
-	G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
-	M84           ;steppers off
-	G90           ;absolute positioning""")
-		elif profile.getMachineSetting('has_heated_bed') is True:
-			
-		
-			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
-				;Sliced for Type A Machines Series 1
-				;Sliced at: {day} {date} {time}
-				;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-				;Print Speed: {print_speed} Support: {support}
-				;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
-				;Print time: {print_time}
-				;Filament used: {filament_amount}m {filament_weight}g
-				;Filament cost: {filament_cost}
-				G21        ;metric values
-				G90        ;absolute positioning
-				G28     ;move to endstops
-				G29		;allows for auto-levelling
-				G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
-				M140 S{print_bed_temperature} ;Prep Heat Bed
-				M109 S{print_temperature} ;Heat To temp
-				M190 S{print_bed_temperature} ;Heat Bed to temp
-				G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
-				G92 E0 ;zero the extruded length
-				G1 F200 X250 E30 ;extrude 30mm of feed stock
-				G92 E0 ;zero the extruded length again
-				G1 X150 Y150  Z25 F12000 ;recenter and begin
-				G1 F{travel_speed}""")
-			profile.setAlterationFile('end.gcode', """;-- END GCODE --
-				M104 S0     ;extruder heater off
-				G91         ;relative positioning
-				M109 S0			;heated bed off
-				G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-				G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
-				G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
-				M84           ;steppers off
-				G90           ;absolute positioning""")
-
+				
 	def OnDropFiles(self, files):
 		self.scene.loadFiles(files)
 
@@ -558,8 +500,8 @@ class mainWindow(wx.Frame):
 		#Add tools for machines.
 		self.machineMenu.AppendSeparator()
 
-		self.defaultFirmwareInstallMenuItem = self.machineMenu.Append(-1, _("Install default firmware..."))
-		self.Bind(wx.EVT_MENU, self.OnDefaultMarlinFirmware, self.defaultFirmwareInstallMenuItem)
+#		self.defaultFirmwareInstallMenuItem = self.machineMenu.Append(-1, _("Install default firmware..."))
+#		self.Bind(wx.EVT_MENU, self.OnDefaultMarlinFirmware, self.defaultFirmwareInstallMenuItem)
 
 		i = self.machineMenu.Append(-1, _("Install custom firmware..."))
 		self.Bind(wx.EVT_MENU, self.OnCustomFirmware, i)
@@ -643,6 +585,58 @@ class mainWindow(wx.Frame):
 		profile.putPreference('startMode', 'Simple')
 		self.updateSliceMode()
 
+	def OnMaterialProfileSelect(self, e):
+
+		materialSelector = materialProfileSelector.MaterialProfileSelector()
+		materialSelector.Show()
+		
+	def loadData(self, data, profileType):
+		# Get the support settings user has set
+		raft = profile.getProfileSetting('platform_adhesion')
+		support = profile.getProfileSetting('support')
+		for setting, value in data.items():
+			if profileType == 'preference':
+				profile.putPreference(setting, value)
+			elif profileType == 'profile':
+				profile.putProfileSetting(setting, value)
+		# Add support preferences at the end to make sure they're not written over to 'None'
+		profile.putProfileSetting('platform_adhesion', raft)
+		profile.putProfileSetting('support', support)
+		self.normalSettingsPanel.updateProfileToControls()
+	#	self._callback()
+		
+	def loadMaterialData(self, path):
+		import ConfigParser as ConfigParser
+		
+		sectionSettings = {}
+		manufacturer = None
+		name = None
+		materialLoaded = None
+		
+		materialSettings = []
+		cp = ConfigParser.ConfigParser()
+		cp.read(path)
+		
+		# get the manufacturer and the name of the material
+		if cp.has_section('info'):
+			manufacturer = cp.get('info', 'manufacturer')
+			name = cp.get('info', 'name')
+			materialLoaded = manufacturer + " " + name
+		
+		# load the material profile settings
+		if cp.has_section('profile'):
+			for setting, value in cp.items('profile'):
+				sectionSettings[setting] = value
+
+		# update manufacturer and material names saved
+		if manufacturer is not None and name is not None: 
+			profile.putPreference('simpleModeMaterialSupplier', manufacturer)
+			profile.putPreference('simpleModeMaterialName', name)
+			profile.putPreference('simpleModeMaterial', materialLoaded)
+
+		# profile setting information update + info panel update
+		self.loadData(sectionSettings, 'profile')
+				
 	def OnNormalSwitch(self, e):
 		profile.putPreference('startMode', 'Normal')
 		dlg = wx.MessageDialog(self, _("Copy the settings from quickprint to your full settings?\n(This will overwrite any full setting modifications you have)"), _("Profile copy"), wx.YES_NO | wx.ICON_QUESTION)
@@ -655,8 +649,8 @@ class mainWindow(wx.Frame):
 			self.updateProfileToAllControls()
 		self.updateSliceMode()
 
-	def OnDefaultMarlinFirmware(self, e):
-		firmwareInstall.InstallFirmware(self)
+#	def OnDefaultMarlinFirmware(self, e):
+#		firmwareInstall.InstallFirmware(self)
 
 	def OnCustomFirmware(self, e):
 		if profile.getMachineSetting('machine_type').startswith('ultimaker'):
@@ -790,7 +784,6 @@ class normalSettingsPanel(configBase.configPanelBase):
 		else:
 			self.alterationPanel = alterationPanel.alterationPanel(self.nb, callback)
 			self.nb.AddPage(self.alterationPanel, "Start/End-GCode")
-
 		self.Bind(wx.EVT_SIZE, self.OnSize)
 
 		self.nb.SetSize(self.GetSize())

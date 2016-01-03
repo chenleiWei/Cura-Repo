@@ -4,6 +4,7 @@ import wx, wx.stc
 
 from Cura.gui.util import gcodeTextArea
 from Cura.util import profile
+
 #Panel to change the start & endcode of the gcode.
 class alterationPanel(wx.Panel):
 	def __init__(self, parent, callback):
@@ -21,7 +22,7 @@ class alterationPanel(wx.Panel):
 		if int(profile.getMachineSetting('extruder_amount')) > 4:
 			self.alterationFileList += ['start5.gcode', 'end5.gcode']
 		self.currentFile = None
-
+		
 		self.textArea = gcodeTextArea.GcodeTextArea(self)
 		self.list = wx.ListBox(self, choices=self.alterationFileList, style=wx.LB_SINGLE)
 		self.list.SetSelection(0)
@@ -47,12 +48,11 @@ class alterationPanel(wx.Panel):
 		self.currentFile = self.list.GetSelection()
 
 	def loadFile(self, filename):
-		self.textArea.SetValue(profile.getAlterationFile(filename))
+		self.textArea.SetValue(profile.getAlterationFileContents(filename, 1))
 
 	def OnFocusLost(self, e):
 		if self.currentFile == self.list.GetSelection():
-			profile.setAlterationFile(self.alterationFileList[self.list.GetSelection()], self.textArea.GetValue())
-			self.callback()
-
+			selected = self.alterationFileList[self.list.GetSelection()]
+			
 	def updateProfileToControls(self):
 		self.OnSelect(None)
