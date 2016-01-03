@@ -13,7 +13,7 @@ from Cura.util import resources
 
 class MaterialProfileSelector(wx.Frame):
 	def __init__(self):
-		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(500,400), style=wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
+		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(500,450), style=wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
 		
 		# boxsizer initializations 
 		mainBox = wx.BoxSizer(wx.VERTICAL)
@@ -86,7 +86,7 @@ class MaterialProfileSelector(wx.Frame):
 		# brand/title labels
 		brandsLabel = wx.StaticText(listBoxPanel, -1, "Manufacturer")
 		brandsLabel.SetFont(font)
-		materialLabel = wx.StaticText(listBoxPanel, -2, "Material")
+		materialLabel = wx.StaticText(listBoxPanel, -1, "Material")
 		materialLabel.SetFont(font)
 		
 		# select button
