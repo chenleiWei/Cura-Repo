@@ -135,7 +135,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddHyperlink(self, text, url):
 		hyper1 = hl.HyperLinkCtrl(self, -1, text, URL=url)
-		font = wx.Font(pointSize=14, family = wx.DEFAULT,
+		font = wx.Font(pointSize=12, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		hyper1.SetFont(font)
 		self.GetSizer().Add(hyper1, pos=(self.rowNr,0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -157,7 +157,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddText(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=13, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
+		font = wx.Font(pointSize=12, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.EXPAND, border=100)
@@ -166,7 +166,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddTextTip(self,info):
 		text = wx.StaticText(self, -1, info)
-		font = wx.Font(pointSize=12, family = wx.SWISS, style=wx.NORMAL, weight=wx.NORMAL)
+		font = wx.Font(pointSize=9, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr,0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -175,7 +175,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTagLine(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=18, family = wx.DEFAULT,
+		font = wx.Font(pointSize=12, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
@@ -184,8 +184,8 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return text
 		
 	def AddTextSubtitle(self, info):
-		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=16, family = wx.SWISS,
+		text = wx.StaticText(self, -1, info)
+		font = wx.Font(pointSize=11, family = wx.SWISS,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(425)
@@ -199,13 +199,13 @@ class InfoPage(wx.wizard.WizardPageSimple):
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(300)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT, border=160)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT, border=155)
 		self.rowNr += 1
 		return text
-		
+
 	def AddSeries1OptionsDescription(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=13, family = wx.SWISS,
+		font = wx.Font(pointSize=12, family = wx.SWISS,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(300)
@@ -215,17 +215,18 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddTextLarge(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=20, family = wx.SWISS,
+		font = wx.Font(pointSize=13, family = wx.SWISS,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.BOTTOM, border=7)
 		self.rowNr += 1
 		return text
-
+		
 	def AddTextTitle(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=20, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.BOTTOM, border=7)
@@ -234,7 +235,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTitleBold(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=20, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
@@ -243,15 +244,12 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddErrorText(self, info, red=False):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=12, family = wx.DEFAULT,
-               style = wx.NORMAL, weight = wx.NORMAL)
-		text.SetFont(font)
 		if red:
 			text.SetForegroundColour('Red')
 		else:
 			text.SetForegroundColour('Black')
 			
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT | wx.EXPAND, border=140)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT, border=115)
 		self.rowNr += 1
 		return text
 		
@@ -289,8 +287,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		if count < 1: 
 			count = 1
 		for x in range(0, count):
-			spacer = self.AddText("")
-		spacer.SetFont(wx.Font(pointSize=5, family=wx.NORMAL, style=wx.NORMAL, weight=wx.NORMAL))
+			self.AddText("")
 
 	def AddInfoBox(self):
 		infoBox = InfoBox(self)
@@ -300,15 +297,15 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddRadioButton(self, label, style=0):
 		radio = wx.RadioButton(self, -1, label)
-		font = wx.Font(pointSize=18, family = wx.SWISS, style = wx.NORMAL | wx.LEFT, weight=wx.NORMAL)
+		font = wx.Font(pointSize=12, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
 		radio.SetFont(font)
-		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag= wx.LEFT, border=150)
+		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT, border=135)
 		self.rowNr += 1
 		return radio
 		
 	def AddRadioButtonThin(self, label, style=0):
 		radio = wx.RadioButton(self, -1, label)
-		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=12, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.LIGHT)
 		radio.SetFont(font)
 		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
@@ -317,7 +314,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddCheckbox(self, label, checked=False):
 		check = wx.CheckBox(self, -1, label)
 	#	text = wx.StaticText(self, -1, label)
-		font = wx.Font(pointSize=18, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=11, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
 		check.SetFont(font)
 		check.SetValue(checked)
 	#	self.GetSizer().Add(text, pos=(self.rowNr, 1), span=(1, 1))
@@ -328,7 +325,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddMachineOptionCheckbox(self, label, checked=False):
 		check = wx.CheckBox(self, -1, label)
 	#	text = wx.StaticText(self, -1, label)
-		font = wx.Font(pointSize=18, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=11, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
 		check.SetFont(font)
 		check.SetValue(checked)
 	#	self.GetSizer().Add(text, pos=(self.rowNr, 1), span=(1, 1))
@@ -338,7 +335,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddButton(self, label):
 		button = wx.Button(self, -1, str(label))
-		font = wx.Font(pointSize=14, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=11, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		button.SetFont(font)
 		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
@@ -354,7 +351,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddTextCtrl(self, value):
 		ret = wx.TextCtrl(self, -1, value, size=(200, 25))
-		font = wx.Font(pointSize=13, family = wx.DEFAULT, style=wx.NORMAL, weight = wx.LIGHT)
+		font = wx.Font(pointSize=11, family = wx.DEFAULT, style=wx.NORMAL, weight = wx.LIGHT)
 		ret.SetFont(font)
 		self.GetSizer().Add(ret, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
@@ -363,7 +360,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddLabelTextCtrl(self, info, value):
 		text = wx.StaticText(self, -1, info)
 		ret = wx.TextCtrl(self, -1, value)
-		font = wx.Font(pointSize=18, family = wx.SWISS,
+		font = wx.Font(pointSize=13, family = wx.SWISS,
 		style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,1), flag=wx.ALIGN_RIGHT | wx.LEFT, border=115)
@@ -449,7 +446,7 @@ class MachineSelectPage(InfoPage):
 		self.AddLogo()
 		
 		self.AddHiddenSeperator(1)
-		self.AddTextTitle('Select Series 1 Model')
+		self.AddTextTitle('Select a Series 1 Model')
 		self.AddHiddenSeperator(1)
 		self.Series1_Pro_Radio = self.AddRadioButton("Series 1 Pro", style=wx.RB_SINGLE)
 		self.Series1_Pro_Radio.SetValue(True)
@@ -476,39 +473,6 @@ class MachineSelectPage(InfoPage):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_select_options)
 	
 	def OnSeries1Pro(self, e):
-		profile.putMachineSetting('has_print_bed', "True")
-		profile.setAlterationFile('start.gcode',  """;-- START GCODE --
-	;Sliced for Type A Machines Series 1
-	;Sliced at: {day} {date} {time}
-	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-	;Print Speed: {print_speed} Support: {support}
-	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
-	;Print time: {print_time}
-	;Filament used: {filament_amount}m {filament_weight}g
-	;Filament cost: {filament_cost}
-	G21        ;metric values
-	G90        ;absolute positioning
-	G28     ;move to endstops
-	G29		;allows for auto-levelling
-	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
-	M140 S{print_bed_temperature} ;Prep Heat Bed
-	M109 S{print_temperature} ;Heat To temp
-	M190 S{print_bed_temperature} ;Heat Bed to temp
-	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
-	G92 E0 ;zero the extruded length
-	G1 F200 X250 E30 ;extrude 30mm of feed stock
-	G92 E0 ;zero the extruded length again
-	G1 X150 Y150  Z25 F12000 ;recenter and begin
-	G1 F{travel_speed}""")
-		profile.setAlterationFile('end.gcode', """;-- END GCODE --
-	M104 S0     ;extruder heater off
-	G91         ;relative positioning
-	M109 S0			;heated bed off
-	G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-	G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
-	G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
-	M84           ;steppers off
-	G90           ;absolute positioning""")
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
 		
 	def OnSeries1_Legacy(self, e):
@@ -1630,8 +1594,7 @@ class SelectParts(InfoPage):
 class ConfigWizard(wx.wizard.Wizard):
 	def __init__(self, addNew = False):
 		super(ConfigWizard, self).__init__(None, -1, _("Configuration Wizard"))
-		
-		# Get the number of the current machine and label it as the old index
+
 		self._old_machine_index = int(profile.getPreferenceFloat('active_machine'))
 		if addNew:
 			profile.setActiveMachine(profile.getMachineCount())
