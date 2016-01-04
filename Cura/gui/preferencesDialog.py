@@ -61,7 +61,7 @@ class preferencesDialog(wx.Dialog):
 
 		self.okButton = wx.Button(right, -1, 'Ok')
 		right.GetSizer().Add(self.okButton, (right.GetSizer().GetRows(), 0), flag=wx.BOTTOM, border=5)
-		self.okButton.Bind(wx.EVT_BUTTON, lambda e: self.Close())
+		self.okButton.Bind(wx.EVT_BUTTON, lambda e: self.OnClose())
 
 		main.Fit()
 		self.Fit()
@@ -200,8 +200,11 @@ class machineSettingsDialog(wx.Dialog):
 		profile.putMachineSetting('machine_name', dialog.GetValue(), self.nb.GetSelection())
 		self.parent.updateMachineMenu()
 
-	def OnClose(self, e):
-		profile.setHeatedBedGCode()
-		self.parent.reloadSettingPanels()
-		
+	def OnClose(self, e):		
 		self.Destroy()
+		wx.CallAfter(self.updateProfile)
+
+	def updateProfile(self):
+		profile.setHeatedBedGCode()
+		self.parent.updateProfileToAllControls()
+		self.parent.reloadSettingPanels()
