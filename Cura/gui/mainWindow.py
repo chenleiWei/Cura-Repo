@@ -548,6 +548,7 @@ class mainWindow(wx.Frame):
 						profile.setAlterationFile('end.gcode', profile.getAlterationFile('end.gcode') + '\n;{profile_string}')
 					hasProfile = True
 			if hasProfile:
+				wx.MessageBox(_("The profile has been loaded from the selected GCode file."), _("Success"), wx.OK)
 				self.updateProfileToAllControls()
 			else:
 				wx.MessageBox(_("No profile found in GCode file.\nThis feature only works with GCode files made by Cura 12.07 or newer."), _("Profile load error"), wx.OK | wx.ICON_INFORMATION)
