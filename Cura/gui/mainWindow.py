@@ -180,8 +180,8 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnNormalSwitch, i)
 		expertMenu.AppendSeparator()
 		
-		i = expertMenu.Append(-1, _("Load Material Profile"))
-		self.switchToNormalMenuItem = i
+		i = expertMenu.Append(-1, _("Load Material Profile Override"), kind=wx.ITEM_NORMAL)
+		self.loadMaterialProfile= i
 		self.Bind(wx.EVT_MENU, self.OnMaterialProfileSelect, i)
 		expertMenu.AppendSeparator()
 
