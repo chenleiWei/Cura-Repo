@@ -580,6 +580,7 @@ class mainWindow(wx.Frame):
 		if result:
 			profile.resetProfile()
 			self.updateProfileToAllControls()
+			self.scene.notification.message("Profile settings have been reset to Default.")
 
 	def OnSimpleSwitch(self, e):
 		profile.putPreference('startMode', 'Simple')
