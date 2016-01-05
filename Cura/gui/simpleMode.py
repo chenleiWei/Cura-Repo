@@ -32,7 +32,7 @@ class simpleModePanel(wx.Panel):
 		# Panel 1: Material Profile Select
 		materialSelectorPanel = wx.Panel(self)
 		self.selectedMaterial = wx.StaticText(materialSelectorPanel, -1, label=self.materialProfileText.GetText())
-		self.materialLoadButton = wx.Button(materialSelectorPanel, 4, _("Load Material"))
+		self.materialLoadButton = wx.Button(materialSelectorPanel, 4, _("Load Material Profile"))
 		self.printSupport = wx.CheckBox(self, 6, _("Print support structure"))
 		self.printSupport.SetValue(True)
 		self.returnProfile = self.selectedMaterial.GetLabel()
