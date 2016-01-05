@@ -306,32 +306,20 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.rowNr += 1
 		return radio
 		
-	def AddRadioButtonThin(self, label, style=0):
-		radio = wx.RadioButton(self, -1, label)
-		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
-		radio.SetFont(font)
-		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
-		self.rowNr += 1
-		return radio
-
 	def AddCheckbox(self, label, checked=False):
 		check = wx.CheckBox(self, -1, label)
-	#	text = wx.StaticText(self, -1, label)
-		font = wx.Font(pointSize=18, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=14, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
 		check.SetFont(font)
 		check.SetValue(checked)
-	#	self.GetSizer().Add(text, pos=(self.rowNr, 1), span=(1, 1))
 		self.GetSizer().Add(check, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return check
 
 	def AddMachineOptionCheckbox(self, label, checked=False):
 		check = wx.CheckBox(self, -1, label)
-	#	text = wx.StaticText(self, -1, label)
-		font = wx.Font(pointSize=18, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=14, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
 		check.SetFont(font)
 		check.SetValue(checked)
-	#	self.GetSizer().Add(text, pos=(self.rowNr, 1), span=(1, 1))
 		self.GetSizer().Add(check, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.RIGHT, border=150)
 		self.rowNr += 1
 		return check
@@ -363,7 +351,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddLabelTextCtrl(self, info, value):
 		text = wx.StaticText(self, -1, info)
 		ret = wx.TextCtrl(self, -1, value)
-		font = wx.Font(pointSize=18, family = wx.SWISS,
+		font = wx.Font(pointSize=16, family = wx.SWISS,
 		style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,1), flag=wx.ALIGN_RIGHT | wx.LEFT, border=115)
@@ -689,10 +677,9 @@ class TAMOctoPrintInfo(InfoPage):
 		self.AddHiddenSeperator(1)
 		self.AddTextTitle("Enable Saving Directly to Series 1")	
 		apiTip = resources.getPathForImage('apiTip.png')
-		self.AddImage(apiTip)	
+		self.AddImage(apiTip)
 		self.AddTextSubtitle("Enter serial number and API key to enable saving files directly to your Series 1.")
 		self.AddHiddenSeperator(1)
-
 		tip = self.AddTextTip('Tip: You can find the API key in the OctoPrint web interface by going to Settings --> API')	
 		tip.SetForegroundColour('Blue')
 		self.serialNumber = self.AddLabelTextCtrl("Serial Number", "")
@@ -702,8 +689,6 @@ class TAMOctoPrintInfo(InfoPage):
 		self.errorMessageln1 = self.AddErrorText('\n\n')
 		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
 		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
-#		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
-#		self.APIKey.Bind(wx.EVT_TEXT, self.checkKeyValidity)
 
 	def AllowBack(self):
 		return True
