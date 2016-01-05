@@ -693,7 +693,7 @@ class mainWindow(wx.Frame):
 		debugger.Show(True)
 
 	def OnAutoFirmwareUpdate(self, e):
-		dlg=wx.FileDialog(self, _("Open firmware to upload"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
+		dlg=wx.FileDialog(self, _("Open Firmware to Upload"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
 		dlg.SetWildcard("HEX file (*.hex)|*.hex;*.HEX")
 		if dlg.ShowModal() == wx.ID_OK:
 			filename = dlg.GetPath()

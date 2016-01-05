@@ -728,7 +728,6 @@ def getHeatedBedAlterationPath():
 			print "No temp override"
 		
 		alterationFileOptions = resources.getAlterationFiles()
-		print "Alteration file options: ", alterationFileOptions
 		altFile = None
 		startGCode = None
 		endGCode = None
@@ -762,7 +761,6 @@ def setHeatedBedGCode():
 	
 def getStartGCode():
 	path = getHeatedBedAlterationPath()
-	print "Start gcode path: ", path 
 	cp = ConfigParser.ConfigParser()
 	try:
 		cp.read(path)
@@ -775,7 +773,6 @@ def getStartGCode():
 	
 def getEndGCode():
 	path = getHeatedBedAlterationPath()
-	print "End gcode path: ", path
 	cp = ConfigParser.ConfigParser()
 	try:
 		cp.read(path)
@@ -821,7 +818,7 @@ def OctoPrintAPIRemoveSerial(serial):
 		print "Removing section ", serial
 		cp.write(octoprintConfigFile)
 	else:
-		print "Error: section does not exist"
+		print "TAM - Error: Serial cannot be removed because it does not exist"
 		return
 		
 	octoprintConfigFile.close()

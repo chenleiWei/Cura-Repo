@@ -444,12 +444,8 @@ class SceneView(openglGui.glGuiPanel):
 			return
 		firstPrintPath = os.path.join('resources', 'example', 'FirstPrintCone.stl')
 		normalizedPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'FirstPrintCone.stl'))
-		print profile.getPreference('lastFile')
-		print "firstPrintPath: %s" % firstPrintPath
-		print "normalizedPath: %s" % normalizedPath
 		# Don't save in resources folder if this is the user's first run
 		if profile.getPreference('lastFile') == firstPrintPath:
-			print "True!"
 			dlg=wx.FileDialog(self, _("Save GCode"), os.path.dirname('~/Documents'), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
 		else:
 			dlg=wx.FileDialog(self, _("Save GCode"), os.path.dirname(profile.getPreference('lastFile')), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
@@ -1704,28 +1700,19 @@ class middleMan(SceneView):
 	#	pub.subscribe(self.updateFilename, 'update.filename')
 		self.enableUpload = True
 		self.printButtonStatus = printButton
-		self.sceneObjects = sceneObjects
-
-		print printButton
-		
+		self.sceneObjects = sceneObjects		
 			
 	def OpenPrinterSelector(self):
-		# Opens the printer selector window
-		
-		print "_disabled:" 
 		if self.printButtonStatus.isDisabled():
 			self.enableUpload = False
-			print "Disabled."
 		else:
 			self.enableUpload = True
-		print "enableUpload: %s\n\n\n" % self.enableUpload
 	#	print "scene object quantity: %s" % self.sceneObjectQuantity
 		win = printerSelector(self.enableUpload)
 		win.Show(True)
 
 	def uploadStatus(self, enable):
 		# Sends message to printerSelector window to enable the upload button
-		print("upload status: %s" % enable)		
 		pub.sendMessage('enable.upload', enable=enable)		
 		
 	def updateFilename(self, filename):
@@ -2093,8 +2080,6 @@ class AddNewPrinter(wx.Frame):
 		self.passCheck()
 			
 	def passCheck(self):
-		print "Serial: %s" % self.validSerial
-		print "Key: %s" % self.validKey
 		if self.validSerial and self.validKey:
 			self.addPrinterButton.Enable()
 		
@@ -2107,24 +2092,21 @@ class AddNewPrinter(wx.Frame):
 		configWiz = False
 		
 		if not serialNum or not apiKey:
-			print("No Value")
+			print("TAM - No serial number or API Key (sceneView line 2095).")
 			return
 		else:
 			serial = self.serialInput.GetValue()
 			key = self.keyInput.GetValue()
 			self.successText.SetLabel("Configuring....")
-	#		self.informativeLabel.SetLabel("Configuring...")
 			self.informativeText.SetLabel("")
 			self.informativeLabel.SetLabel("")
 			thread = printerConnect.ConfirmCredentials(self, configWiz, apiKey, serialNum, self.informativeText)
 
 			try:
 				thread.start()
-		#		self.informativeLabel.SetLabel("")
 			except:
 				print "Error"
-	#			self.successText.SetLabel("")
-	#		self.informativeLabel.SetLabel("")
+				
 	def OnClose(self, e):
 		self.Destroy()
 
