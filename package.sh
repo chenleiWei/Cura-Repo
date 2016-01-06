@@ -22,7 +22,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="1.4.0a0"
+export BUILD_NAME="1.4.0a1"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -41,6 +41,10 @@ fi
 
 if [ -z ${MATERIALS_REPO:-} ]; then
 	MATERIALS_REPO="https://Catrodigious@bitbucket.org/typeamachines/material-profiles.git"
+fi
+
+if [ -z ${MATERIALS_BRANCH:-} ]; then
+	MATERIALS_BRANCH="Testing"
 fi
 
 JOBS=${JOBS:-3}
@@ -572,7 +576,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 		rm -rf resources/quickprint/Materials
 	fi
 	
-	git clone ${MATERIALS_REPO} resources/quickprint/Materials/
+	git clone -b ${MATERIALS_BRANCH} ${MATERIALS_REPO} resources/quickprint/Materials/
 	ls resources/quickprint/Materials/
 
 
