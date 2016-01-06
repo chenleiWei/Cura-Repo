@@ -138,7 +138,7 @@ class MaterialProfileSelector(wx.Frame):
 			except Exception as e:
 				print "ERROR: ", e
 
-	# each profile is formated as:	manufacturer__material_base_polymer
+	# each profile is formated as:	manufacturer__material__base_polymer
 	def createMaterialDict(self, files):
 		data = []
 		materialsDict = {}
