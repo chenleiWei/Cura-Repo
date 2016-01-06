@@ -1924,10 +1924,8 @@ class printerSelector(wx.Frame):
 		# if there are no items in the list or the serial isn't already in the list
 		# add it and save it
 		if len(printerList) == 0 or not printer in printerList:
-			print "printer: ", printer
 			self.availPrinters.Append(printer)
 			printerIndex = self.availPrinters.FindString(printer)
-			print "Printer index: ", printerIndex
 			self.availPrinters.SetSelection(printerIndex)
 			
 		if profile.printerExists(serial) is True:
@@ -1946,7 +1944,6 @@ class printerSelector(wx.Frame):
 		if index >= 0:
 			printerString = self.availPrinters.GetString(index)
 			series, one, serial = printerString.split()
-			print "Index true: %s" % index
 			profile.OctoPrintAPIRemoveSerial(serial)
 			self.availPrinters.Delete(index)
 		
@@ -2092,7 +2089,6 @@ class AddNewPrinter(wx.Frame):
 		configWiz = False
 		
 		if not serialNum or not apiKey:
-			print("TAM - No serial number or API Key (sceneView line 2095).")
 			return
 		else:
 			serial = self.serialInput.GetValue()
@@ -2101,11 +2097,11 @@ class AddNewPrinter(wx.Frame):
 			self.informativeText.SetLabel("")
 			self.informativeLabel.SetLabel("")
 			thread = printerConnect.ConfirmCredentials(self, configWiz, apiKey, serialNum, self.informativeText)
-
+			
 			try:
 				thread.start()
-			except:
-				print "Error"
+			except Exception as e:
+				"Cura/gui/sceneView: ", e
 				
 	def OnClose(self, e):
 		self.Destroy()
