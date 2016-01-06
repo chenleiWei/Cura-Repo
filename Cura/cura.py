@@ -39,7 +39,6 @@ def main():
 		return
 
 	try:
-		print "load preferences from " + profile.getPreferencePath()
 		profile.loadPreferences(profile.getPreferencePath())
 	except Exception as e:
 		print e
