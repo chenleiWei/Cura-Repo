@@ -6,19 +6,16 @@ import webbrowser
 import sys
 
 from wx.lib.pubsub import pub
-
 from Cura.gui import configBase
 from Cura.gui import expertConfig
 from Cura.gui import alterationPanel
 from Cura.gui import pluginPanel
 from Cura.gui import preferencesDialog
 from Cura.gui import configWizard
-#from Cura.gui import firmwareInstall
 from Cura.gui import simpleMode
 from Cura.gui import sceneView
 from Cura.gui import aboutWindow
 from Cura.gui.util import dropTarget
-#from Cura.gui.tools import batchRun
 from Cura.gui.tools import pidDebugger
 from Cura.gui.tools import minecraftImport
 from Cura.util import profile
@@ -27,19 +24,11 @@ import platform
 from Cura.util import meshLoader
 from Cura.gui import materialProfileSelector
 
-try:
-	#MacOS release currently lacks some wx components, like the Publisher.
-	from wx.lib.pubsub import Publisher
-except:
-	Publisher = None
-
 class mainWindow(wx.Frame):
 	def __init__(self):
 		super(mainWindow, self).__init__(None, title='Cura - ' + version.getVersion())
-
 		wx.EVT_CLOSE(self, self.OnClose)
 		
-	
 		# allow dropping any file, restrict later
 		self.SetDropTarget(dropTarget.FileDropTarget(self.OnDropFiles))
 
@@ -147,8 +136,8 @@ class mainWindow(wx.Frame):
 #			i = toolsMenu.Append(-1, _("Auto Firmware Update..."))
 #			self.Bind(wx.EVT_MENU, self.OnAutoFirmwareUpdate, i)
 
-		#i = toolsMenu.Append(-1, _("Copy profile to clipboard"))
-		#self.Bind(wx.EVT_MENU, self.onCopyProfileClipboard,i)
+		i = toolsMenu.Append(-1, _("Copy profile to clipboard"))
+		self.Bind(wx.EVT_MENU, self.onCopyProfileClipboard,i)
 
 		toolsMenu.AppendSeparator()
 		self.allAtOnceItem = toolsMenu.Append(-1, _("Print All at Once"), kind=wx.ITEM_RADIO)
@@ -288,8 +277,8 @@ class mainWindow(wx.Frame):
 		self.updateSliceMode()
 		self.scene.SetFocus()
 		self.dialogframe = None
-		if Publisher is not None:
-			Publisher().subscribe(self.onPluginUpdate, "pluginupdate")
+	
+		pub.subscribe(self.onPluginUpdate, "pluginupdate")
 
 		pluginCount = self.normalSettingsPanel.pluginPanel.GetActivePluginCount()
 		if pluginCount == 1:
