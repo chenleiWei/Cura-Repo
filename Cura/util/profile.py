@@ -705,10 +705,9 @@ def initializeOctoPrintAPIConfig(s,k):
 		cp.read(path)
 	except ConfigParser.ParsingError:
 		return
-
+		
 	if cp.has_section(s):
 		pass
-	
 	if len(cp.sections()) == 0 or not cp.has_section(s):
 		octoprintConfigFile = open(path, 'w+')
 		# create a section
@@ -716,7 +715,6 @@ def initializeOctoPrintAPIConfig(s,k):
 		# now that the section exists, give it a value
 		cp.set(s, 'apiKey', k.encode('utf-8'))
 		# write to file object
-
 		cp.write(octoprintConfigFile)		
 		octoprintConfigFile.close()
 
@@ -754,10 +752,7 @@ def setHeatedBedGCode():
 	except ConfigParser.ParsingError as e:
 		print e
 			
-#	GCode = cp.get('alterations', sequence)
-#	setAlterationFile(sequence, GCode)
 	setAlterationFileFromFilePath(path)
-	
 	
 def getStartGCode():
 	path = getHeatedBedAlterationPath()
@@ -815,10 +810,10 @@ def OctoPrintAPIRemoveSerial(serial):
 	octoprintConfigFile = open(path, 'wb+')
 	if cp.has_section(serial):
 		cp.remove_section(serial)
-		print "Removing section ", serial
+		print "Removing serial ", serial
 		cp.write(octoprintConfigFile)
 	else:
-		print "TAM - Error: Serial cannot be removed because it does not exist"
+		print "(Cura/util/profile.py) No serial"
 		return
 		
 	octoprintConfigFile.close()
@@ -863,7 +858,7 @@ def loadProfile(filename, allMachines = False):
 def saveProfile(filename, allMachines = False):
 	"""
 		Save the current profile to an ini file.
-	:param filename:    The ini filename to save the profile in.
+	:param filename: The ini filename to save the profile in.
 	:param allMachines: When False only the current active profile is saved. If True all profiles for all machines are saved.
 	"""
 	global settingsList

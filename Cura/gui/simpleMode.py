@@ -17,6 +17,7 @@ class simpleModePanel(wx.Panel):
 		super(simpleModePanel, self).__init__(parent)
 		self._callback = callback
 
+		# Load current values into objects for comparison
 		self.matManufacturer = profile.getPreference('simpleModeMaterialSupplier')
 		self.matName = profile.getPreference('simpleModeMaterialName')
 		self.profileSettingsList = {}
@@ -42,7 +43,7 @@ class simpleModePanel(wx.Panel):
 		qualityDirectory = resources.getSimpleModeQualityProfiles()
 		self.qualityOptions = self.createDataDict(qualityDirectory, panel=printQualityPanel)
 
-		# Panel 3: Structural Strength
+		# Panel 3: Strength
 		strengthPanel = wx.Panel(self)
 		strengthDirectory = resources.getSimpleModeStrengthProfiles()
 		self.strengthOptions = self.createDataDict(strengthDirectory, panel=strengthPanel)
@@ -143,11 +144,11 @@ class simpleModePanel(wx.Panel):
 			settingOrder.remove("Print Bed Temperature")
 			
 		# Panel 6: Info Box
-		# make a list of units to add as a third column
 		sb = wx.StaticBox(infoPanel, label=_("Settings Info"))
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		gridsizer = wx.FlexGridSizer(6,2,7,10)
 		
+		# loads setting names and values for display
 		for item in range(len(settingOrder)):
 			for setting, value in self.infoPanelSettingsList.items():
 				# replaces double-underscore with a space
@@ -163,20 +164,16 @@ class simpleModePanel(wx.Panel):
 		infoPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(infoPanel, (6,0))
 		
+		# Button and checkbox bindings
 		for name, button in strengthButtons.items():
 			button.Bind(wx.EVT_RADIOBUTTON, self.strengthSelected)
-
 		for name, button in qualityButtons.items():
 			button.Bind(wx.EVT_RADIOBUTTON, self.qualitySelected)
-		
 		for name, button in self.platformAdhesionOptions.items():
 			button.Bind(wx.EVT_RADIOBUTTON, lambda e: self.updateAdhesion(self.platformAdhesionOptions), self._callback())
-			
 		self.printSupport.Bind(wx.EVT_CHECKBOX, lambda e: self.updateSupport(self.printSupport), self._callback())
-
 		self.materialLoadButton.Bind(wx.EVT_BUTTON, self.OnSelectBtn)
 	
-
 	def createDataDict(self, filePaths, panel):
 		data = []
 		dataDict = {}
@@ -189,17 +186,20 @@ class simpleModePanel(wx.Panel):
 				dataDict.setdefault(button, {})[name] = filePath
 		return dataDict
 
+	# Radio button event handler for strength
 	def strengthSelected(self, e):
 		for button, info in self.strengthOptions.items():
 			if button == e.GetEventObject():
 				for name, path in info.items():
 					self.updateInfo(path)
 	
+	# Radio button event handler for quality
 	def qualitySelected(self, e):
 		for button, info in self.qualityOptions.items():
 			if button == e.GetEventObject():
 				for name, path in info.items():
 					self.updateInfo(path)
+				
 				
 	def updateInfo(self, path):
 		settings = self.getSectionItems(path, 'profile')
@@ -306,7 +306,8 @@ class simpleModePanel(wx.Panel):
 			for name, value in data.items():
 				if name == setting:
 					self.infoPanelSettingsList[name].SetLabel(str(value) + unit)
-							
+	
+	# Parses the material profiles and returns either profile or preference settings
 	def getSectionItems(self, path, section):
 		sectionSettings = {}
 		cp = configparser.ConfigParser()
@@ -316,9 +317,9 @@ class simpleModePanel(wx.Panel):
 				sectionSettings[setting] = value
 			return sectionSettings
 
+	# Displays file names as they are loaded into sceneView
+	# and references them directly from that source
 	def displayLoadedFileName(self):
-		# Displays file names as they are loaded into sceneView
-		# and references them directly from that source
 		mainWindow = self.GetParent().GetParent().GetParent()
 		sceneView = mainWindow.scene
 		filename = str(os.path.basename(str(sceneView.filename)))
@@ -330,7 +331,11 @@ class simpleModePanel(wx.Panel):
 	def OnSelectBtn(self, event):
 		frame = materialProfileSelector.MaterialProfileSelector()
 		frame.Show(True)
-
+	
+	# This function is called in mainWindow and sceneView to acquire
+	# all settings changed in Simple Mode. They override values in an 
+	# already existing profile, whether its your current profile or one
+	# that's loaded via the material profile selector
 	def getSettingOverrides(self):
 		self.displayLoadedFileName()
 		materialsDirectory = resources.getSimpleModeMaterialsProfiles()
@@ -364,9 +369,13 @@ class simpleModePanel(wx.Panel):
 				for name, path in info.items():
 					qualitySettings = self.getSectionItems(path, 'profile')
 					
-		# Materials
+		# Material selection
 		selectedMat = self.selectedMaterial.GetLabel()
-				
+		
+		# Takes all settings parameters declared in Simple Mode. 
+		# Because Simple Mode only alters a  fraction of the parameters; 
+		# these settings are loaded as override values to the user's currently 
+		# loaded profile.
 		for material in materialsDirectory:
 			cp = configparser.ConfigParser()
 			cp.read(material)

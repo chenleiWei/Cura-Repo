@@ -313,7 +313,6 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddCheckbox(self, label, checked=False):
 		check = wx.CheckBox(self, -1, label)
-	#	text = wx.StaticText(self, -1, label)
 		font = wx.Font(pointSize=11, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
 		check.SetFont(font)
 		check.SetValue(checked)
@@ -653,7 +652,7 @@ class TAMOctoPrintInfo(InfoPage):
 		self.AddHiddenSeperator(1)
 		self.AddTextTitle("Enable Saving Directly to Series 1")	
 		apiTip = resources.getPathForImage('apiTip.png')
-		self.AddImage(apiTip)	
+		self.AddImage(apiTip)
 		self.AddTextSubtitle("Enter serial number and API key to enable saving files directly to your Series 1.")
 		self.AddHiddenSeperator(1)
 
@@ -666,8 +665,6 @@ class TAMOctoPrintInfo(InfoPage):
 		self.errorMessageln1 = self.AddErrorText('\n\n')
 		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
 		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
-#		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
-#		self.APIKey.Bind(wx.EVT_TEXT, self.checkKeyValidity)
 
 	def AllowBack(self):
 		return True
@@ -1594,7 +1591,8 @@ class SelectParts(InfoPage):
 class ConfigWizard(wx.wizard.Wizard):
 	def __init__(self, addNew = False):
 		super(ConfigWizard, self).__init__(None, -1, _("Configuration Wizard"))
-
+		
+		# Get the number of the current machine and label it as the old index
 		self._old_machine_index = int(profile.getPreferenceFloat('active_machine'))
 		if addNew:
 			profile.setActiveMachine(profile.getMachineCount())
