@@ -12,7 +12,7 @@ from Cura.util import resources
 from Cura.gui import materialProfileSelector
 
 class simpleModePanel(wx.Panel):
-	"Main user interface window for Quickprint mode"
+	"Main user interface window for Simple Mode"
 	def __init__(self, parent, callback):
 		super(simpleModePanel, self).__init__(parent)
 		self._callback = callback
@@ -32,8 +32,8 @@ class simpleModePanel(wx.Panel):
 		# Panel 1: Material Profile Select
 		materialSelectorPanel = wx.Panel(self)
 		self.selectedMaterial = wx.StaticText(materialSelectorPanel, -1, label=self.materialProfileText.GetText())
-		self.materialLoadButton = wx.Button(materialSelectorPanel, 4, _("Load Material"))
-		self.printSupport = wx.CheckBox(self, 6, _("Print support structure"))
+		self.materialLoadButton = wx.Button(materialSelectorPanel, 4, _("Load Material Profile"))
+		self.printSupport = wx.CheckBox(self, 6, _("Print Support Structure"))
 		self.printSupport.SetValue(True)
 		self.returnProfile = self.selectedMaterial.GetLabel()
 		
@@ -366,11 +366,7 @@ class simpleModePanel(wx.Panel):
 					
 		# Materials
 		selectedMat = self.selectedMaterial.GetLabel()
-		print selectedMat
-		
-		# Alteration
-		
-		
+				
 		for material in materialsDirectory:
 			cp = configparser.ConfigParser()
 			cp.read(material)

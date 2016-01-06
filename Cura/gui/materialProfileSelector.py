@@ -56,7 +56,6 @@ class MaterialProfileSelector(wx.Frame):
 		else:
 			self.selectedBrand = profile.getPreference('simpleModeMaterialSupplier')
 			newIndex = self.brandsBox.FindString(self.selectedBrand)
-			print "new index: ", newIndex
 			self.brandsBox.SetSelection(newIndex)
 				
 		for brand, materials in self.materialsDict.items():
@@ -64,8 +63,6 @@ class MaterialProfileSelector(wx.Frame):
 				for material, path in materials.items():
 					matchingMaterials.append(material)
 					
-
-		print matchingMaterials
 		self.matsBox.Clear()
 
 		for n in range(0, len(matchingMaterials)):
@@ -134,11 +131,9 @@ class MaterialProfileSelector(wx.Frame):
 		self.Destroy()
 
 	def relayEvent(self):
-		print "Brand: %s\nMaterial: %s" % (self.selectedBrand, self.selectedMaterial)
 		if self.selectedBrand and self.selectedMaterial is not None:
 			self.chosenProfilePath = self.materialsDict.setdefault(self.selectedBrand, self.selectedMaterial)[self.selectedMaterial]
 			try:
-				print self.chosenProfilePath
 				pub.sendMessage('matProf.update', path=self.chosenProfilePath)
 			except Exception as e:
 				print "ERROR: ", e
@@ -167,7 +162,6 @@ class MaterialProfileSelector(wx.Frame):
 		self.selectedBrand = selectedBrand
 		newMatsList = []
 		
-		print "selected brand: ", selectedBrand
 		# finds materials associated with the selected brand and adds them to newMatsList
 		for brand, materials, in self.materialsDict.items():
 			if brand == selectedBrand: 

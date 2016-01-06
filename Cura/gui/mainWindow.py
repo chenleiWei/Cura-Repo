@@ -72,13 +72,13 @@ class mainWindow(wx.Frame):
 
 		self.menubar = wx.MenuBar()
 		self.fileMenu = wx.Menu()
-		i = self.fileMenu.Append(-1, _("Load model file...\tCTRL+L"))
+		i = self.fileMenu.Append(-1, _("Load Model File...\tCTRL+L"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.showLoadModel(), i)
-		i = self.fileMenu.Append(-1, _("Save model...\tCTRL+S"))
+		i = self.fileMenu.Append(-1, _("Save Model...\tCTRL+S"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.showSaveModel(), i)
-		i = self.fileMenu.Append(-1, _("Reload platform\tF5"))
+		i = self.fileMenu.Append(-1, _("Reload Platform\tF5"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.reloadScene(e), i)
-		i = self.fileMenu.Append(-1, _("Clear platform"))
+		i = self.fileMenu.Append(-1, _("Clear Platform"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.OnDeleteAll(e), i)
 
 		self.fileMenu.AppendSeparator()
@@ -86,7 +86,7 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.OnPrintButton(1), i)
 		i = self.fileMenu.Append(-1, _("Save GCode...\tCTRL+G"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.showSaveGCode(), i)
-		i = self.fileMenu.Append(-1, _("Show slice engine log..."))
+		i = self.fileMenu.Append(-1, _("Show Slice Engine Log..."))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene._showEngineLog(), i)
 
 		self.fileMenu.AppendSeparator()
@@ -97,14 +97,14 @@ class mainWindow(wx.Frame):
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnSaveProfile, i)
 		if version.isDevVersion():
-			i = self.fileMenu.Append(-1, "Save difference from default...")
+			i = self.fileMenu.Append(-1, "Save Difference From Default...")
 			self.normalModeOnlyItems.append(i)
 			self.Bind(wx.EVT_MENU, self.OnSaveDifferences, i)
-		i = self.fileMenu.Append(-1, _("Load Profile from GCode..."))
+		i = self.fileMenu.Append(-1, _("Load Profile From GCode..."))
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnLoadProfileFromGcode, i)
 		self.fileMenu.AppendSeparator()
-		i = self.fileMenu.Append(-1, _("Reset Profile to default"))
+		i = self.fileMenu.Append(-1, _("Reset Profile to Default"))
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnResetProfile, i)
 
@@ -151,9 +151,9 @@ class mainWindow(wx.Frame):
 		#self.Bind(wx.EVT_MENU, self.onCopyProfileClipboard,i)
 
 		toolsMenu.AppendSeparator()
-		self.allAtOnceItem = toolsMenu.Append(-1, _("Print all at once"), kind=wx.ITEM_RADIO)
+		self.allAtOnceItem = toolsMenu.Append(-1, _("Print All at Once"), kind=wx.ITEM_RADIO)
 		self.Bind(wx.EVT_MENU, self.onOneAtATimeSwitch, self.allAtOnceItem)
-		self.oneAtATime = toolsMenu.Append(-1, _("Print one at a time"), kind=wx.ITEM_RADIO)
+		self.oneAtATime = toolsMenu.Append(-1, _("Print One at a Time"), kind=wx.ITEM_RADIO)
 		self.Bind(wx.EVT_MENU, self.onOneAtATimeSwitch, self.oneAtATime)
 		if profile.getPreference('oneAtATime') == 'True':
 			self.oneAtATime.Check(True)
@@ -172,10 +172,10 @@ class mainWindow(wx.Frame):
 		self.menubar.Append(self.machineMenu, _("Machine"))
 
 		expertMenu = wx.Menu()
-		i = expertMenu.Append(-1, _("Switch to quickprint..."), kind=wx.ITEM_RADIO)
+		i = expertMenu.Append(-1, _("Switch to Simple Mode..."), kind=wx.ITEM_RADIO)
 		self.switchToQuickprintMenuItem = i
 		self.Bind(wx.EVT_MENU, self.OnSimpleSwitch, i)
-		i = expertMenu.Append(-1, _("Switch to full settings..."), kind=wx.ITEM_RADIO)
+		i = expertMenu.Append(-1, _("Switch to Expert Mode..."), kind=wx.ITEM_RADIO)
 		self.switchToNormalMenuItem = i
 		self.Bind(wx.EVT_MENU, self.OnNormalSwitch, i)
 		expertMenu.AppendSeparator()
@@ -185,7 +185,7 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnMaterialProfileSelect, i)
 		expertMenu.AppendSeparator()
 
-		i = expertMenu.Append(-1, _("Open expert settings...\tCTRL+E"))
+		i = expertMenu.Append(-1, _("Open Expert Settings...\tCTRL+E"))
 		self.normalModeOnlyItems.append(i)
 		self.Bind(wx.EVT_MENU, self.OnExpertOpen, i)
 		expertMenu.AppendSeparator()
@@ -193,15 +193,15 @@ class mainWindow(wx.Frame):
 		self.menubar.Append(expertMenu, _("Expert"))
 
 		helpMenu = wx.Menu()
-		i = helpMenu.Append(-1, _("Online documentation..."))
+		i = helpMenu.Append(-1, _("Online Documentation..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://support.typeamachines.com/hc/en-us'), i)
-		i = helpMenu.Append(-1, _("Report a problem..."))
+		i = helpMenu.Append(-1, _("Report a Problem..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://support.typeamachines.com/hc/en-us/requests/new'), i)
 		#i = helpMenu.Append(-1, _("Check for update..."))
 		#self.Bind(wx.EVT_MENU, self.OnCheckForUpdate, i)
-		i = helpMenu.Append(-1, _("Check for update..."))
+		i = helpMenu.Append(-1, _("Check for Update..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://www.typeamachines.com/pages/downloads'), i)
-		i = helpMenu.Append(-1, _("Open Type A Machines website..."))
+		i = helpMenu.Append(-1, _("Open Type A Machines Website..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://www.typeamachines.com/'), i)
 		i = helpMenu.Append(-1, _("About Cura..."))
 		self.Bind(wx.EVT_MENU, self.OnAbout, i)
@@ -487,14 +487,14 @@ class mainWindow(wx.Frame):
 			self.Bind(wx.EVT_MENU, lambda e: self.OnSelectMachine(e.GetId() - 0x1000), i)
 
 		self.machineMenu.AppendSeparator()
-		i = self.machineMenu.Append(-1, _("Add new printer (direct upload)..."))
+		i = self.machineMenu.Append(-1, _("Add Printer (Direct Upload)..."))
 		self.Bind(wx.EVT_MENU, self.OnAddNewPrinter, i)
-		i = self.machineMenu.Append(-1, _("Direct upload settings..."))
+		i = self.machineMenu.Append(-1, _("Select Printer (Direct Upload)..."))
 		self.Bind(wx.EVT_MENU, self.OnDirectUploadSettings, i)
 		self.machineMenu.AppendSeparator()
-		i = self.machineMenu.Append(-1, _("Add new machine profile..."))
+		i = self.machineMenu.Append(-1, _("Add New Machine Profile..."))
 		self.Bind(wx.EVT_MENU, self.OnAddNewMachine, i)
-		i = self.machineMenu.Append(-1, _("Machine settings..."))
+		i = self.machineMenu.Append(-1, _("Machine Settings..."))
 		self.Bind(wx.EVT_MENU, self.OnMachineSettings, i)
 
 		#Add tools for machines.
@@ -503,7 +503,7 @@ class mainWindow(wx.Frame):
 #		self.defaultFirmwareInstallMenuItem = self.machineMenu.Append(-1, _("Install default firmware..."))
 #		self.Bind(wx.EVT_MENU, self.OnDefaultMarlinFirmware, self.defaultFirmwareInstallMenuItem)
 
-		i = self.machineMenu.Append(-1, _("Install custom firmware..."))
+		i = self.machineMenu.Append(-1, _("Install Custom Firmware..."))
 		self.Bind(wx.EVT_MENU, self.OnCustomFirmware, i)
 	
 	def OnAddNewPrinter(self, e):
@@ -581,6 +581,7 @@ class mainWindow(wx.Frame):
 		if result:
 			profile.resetProfile()
 			self.updateProfileToAllControls()
+			self.scene.notification.message("Profile settings have been reset to Default.")
 
 	def OnSimpleSwitch(self, e):
 		profile.putPreference('startMode', 'Simple')
@@ -693,7 +694,7 @@ class mainWindow(wx.Frame):
 		debugger.Show(True)
 
 	def OnAutoFirmwareUpdate(self, e):
-		dlg=wx.FileDialog(self, _("Open firmware to upload"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
+		dlg=wx.FileDialog(self, _("Open Firmware to Upload"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
 		dlg.SetWildcard("HEX file (*.hex)|*.hex;*.HEX")
 		if dlg.ShowModal() == wx.ID_OK:
 			filename = dlg.GetPath()
