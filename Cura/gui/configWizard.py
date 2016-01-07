@@ -126,10 +126,10 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.sizer.AddGrowableCol(0)
 		
 	def AddLogo(self):
-		curaTAMLogo = resources.getPathForImage('CuraHeaderLogo.png')
+		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
 	#	self.AddHiddenSeperator(1)
-		self.AddTextSubtitle('v1.3.4')
+		self.AddTextSubtitle('v1.4.0')
 		#	sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 		self.AddHiddenSeperator(1)
 
@@ -143,7 +143,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return hyper1
 
 	def GuidedTourLogo(self):
-		curaTAMLogo = resources.getPathForImage('CuraHeaderLogo.png')
+		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
 	#	self.AddHiddenSeperator(1)
 		self.AddTextTagLine('Guided Tour')
@@ -153,7 +153,6 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		curaTAMLogo = resources.getPathForImage('CuraTAMIconLarger.png')
 		self.AddImage(curaTAMLogo)
 	#	self.AddHiddenSeperator(1)
-		
 		
 	def AddText(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
@@ -225,7 +224,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddTextTitle(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=20, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=21, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.BOTTOM, border=7)
@@ -354,8 +353,8 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=16, family = wx.SWISS,
 		style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,1), flag=wx.ALIGN_RIGHT | wx.LEFT, border=115)
-		self.GetSizer().Add(ret, pos=(self.rowNr, 1), span=(1, 2))
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.ALIGN_RIGHT | wx.LEFT, border=90)
+		self.GetSizer().Add(ret, pos=(self.rowNr, 1), span=(1, 1), flag=wx.CENTER)
 		self.rowNr += 1
 		return ret
 
@@ -405,24 +404,10 @@ class FirstInfoPage(InfoPage):
 			
 		else:
 			super(FirstInfoPage, self).__init__(parent, _("Welcome"))
-	
+			
 		self.AddLogo()
-
 		self.AddHiddenSeperator(5)
-		
 		self.AddTextLarge("Select 'Next' to begin configuration.")		
-#		self.AddHiddenSeperator(1)
-#		self.AddHiddenSeperator(1)
-#		self.AddTextSubtitle(_("Continue to select your model of 3D printer, install material profiles, and tour the core features of Cura for Type A v1.3.4."))
-#		self.AddHiddenSeperator(2)
-		# self.AddText(_("This wizard will help you with the following steps:"))
-		# self.AddText(_("* Configure Cura for your machine"))
-		# self.AddText(_("* Optionally upgrade your firmware"))
-		# self.AddText(_("* Optionally check if your machine is working safely"))
-		# self.AddText(_("* Optionally level your printer bed"))
-
-		#self.AddText('* Calibrate your machine')
-		#self.AddText('* Do your first print')
 
 	def AllowBack(self):
 		return False
@@ -448,7 +433,7 @@ class MachineSelectPage(InfoPage):
 		self.AddTextDescription(_("#1000-9999"))
 		self.AddHiddenSeperator(1)
 		self.Series1_Legacy = self.AddRadioButton("Legacy Series 1")
-		self.AddTextDescription(_("#001-999 (wooden frame)"))
+		self.AddTextDescription(_("#001-500 (wooden frame)"))
 		self.AddHiddenSeperator(1)
 		self.nonTAMRadio = self.AddRadioButton("All other 3D printers")
 			
