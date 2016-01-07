@@ -185,7 +185,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextSubtitle(self, info):
 		text = wx.StaticText(self, -1, info)
-		font = wx.Font(pointSize=11, family = wx.SWISS,
+		font = wx.Font(pointSize=10, family = wx.SWISS,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(425)
@@ -249,7 +249,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		else:
 			text.SetForegroundColour('Black')
 			
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT, border=115)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT, border=138)
 		self.rowNr += 1
 		return text
 		
@@ -775,7 +775,7 @@ class TAMSelectStrength(InfoPage):
 	# General informative text
 	def addText(self):
 		self.AddTextTitle("Strength")
-		self.AddTextSubtitle("Changing Strength settings changes the Wall Thickness and the Fill Density of the print. Selecting High Strength will result in a print that is much stronger, and for some designs it will also result in a smoother and higher quality print, but it will also use more filament and will require a longer print time. Selecting Low Strength will use less filament and result in a faster print, but the strength will be reduced as well.")
+		self.AddTextSubtitle("Changing Strength settings changes the Wall Thickness and the Fill Density of the print.\n\nSelecting High Strength will result in a print that is much stronger, and for some designs it will also result in a smoother and higher quality print, but it will also use more filament and will require a longer print time. \n\nSelecting Low Strength will use less filament and result in a faster print, but the strength will be reduced as well.")
 
 class TAMSelectQuality(InfoPage):
 	def __init__(self, parent):
