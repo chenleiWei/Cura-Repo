@@ -18,9 +18,9 @@ class newVersionDialog(wx.Dialog):
 		p.SetSizer(s)
 		
 		# Fonts
-		titleFont = wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD)
-		headerFont = wx.Font(17, wx.SWISS, wx.NORMAL, wx.BOLD)
-		textFont = wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL)
+		titleFont = wx.Font(13, wx.SWISS, wx.NORMAL, wx.BOLD)
+		headerFont = wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD)
+		textFont = wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL)
 
 		# Title text
 		title = wx.StaticText(p, -1, 'Cura - ' + version.getVersion())
