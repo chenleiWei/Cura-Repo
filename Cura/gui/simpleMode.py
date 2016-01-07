@@ -331,6 +331,7 @@ class simpleModePanel(wx.Panel):
 	def OnSelectBtn(self, event):
 		frame = materialProfileSelector.MaterialProfileSelector()
 		frame.Show(True)
+		frame.Raise()
 	
 	# This function is called in mainWindow and sceneView to acquire
 	# all settings changed in Simple Mode. They override values in an 

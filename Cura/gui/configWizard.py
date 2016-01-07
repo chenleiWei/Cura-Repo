@@ -126,10 +126,10 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.sizer.AddGrowableCol(0)
 		
 	def AddLogo(self):
-		curaTAMLogo = resources.getPathForImage('CuraHeaderLogo.png')
+		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
 	#	self.AddHiddenSeperator(1)
-		self.AddTextSubtitle('v1.3.4')
+		self.AddTextSubtitle('v1.4.0')
 		#	sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 		self.AddHiddenSeperator(1)
 
@@ -143,7 +143,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return hyper1
 
 	def GuidedTourLogo(self):
-		curaTAMLogo = resources.getPathForImage('CuraHeaderLogo.png')
+		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
 	#	self.AddHiddenSeperator(1)
 		self.AddTextTagLine('Guided Tour')
