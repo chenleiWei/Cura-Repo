@@ -39,10 +39,10 @@ class newVersionDialog(wx.Dialog):
 		# Bullet point list
 		# Add or remove static text objects as needed
 		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Users can now upload sliced files directly to a Series 1 Printer."),
-			wx.StaticText(p, -1, "* Material profiles can be loaded in Simple and Expert Mode."),
-			wx.StaticText(p, -1, "* Selecting/unselecting Heated Bed in machine profiles are loaded instantly (no need to restart the app)."),
-			wx.StaticText(p, -1, "* New material profiles: Polymaker PC Plus and 3Dom PLA."),
+			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing, all with a single click"),
+			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu."),
+			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching"),
+			wx.StaticText(p, -1, "* New optimized material profiles added: PolyMaker PC Plus, 3DOM PLA."),
 		]
 			
 	
