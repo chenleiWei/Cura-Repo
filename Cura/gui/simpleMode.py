@@ -1,5 +1,4 @@
 import wx
-from wx.lib.pubsub import pub
 import ConfigParser as configparser
 from collections import defaultdict
 import itertools
@@ -10,6 +9,11 @@ import re
 from Cura.util import profile
 from Cura.util import resources
 from Cura.gui import materialProfileSelector
+
+try: 
+	from wx.lib.pubsub import pub
+except ImportError:
+	from wx.lib.pubsub import Publisher as pub
 
 class simpleModePanel(wx.Panel):
 	"Main user interface window for Simple Mode"

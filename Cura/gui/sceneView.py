@@ -2,7 +2,6 @@ __copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AG
 #encode UTF-8
 import wx
 import wx.animate
-from wx.lib.pubsub import pub
 import numpy
 import time
 import os
@@ -23,6 +22,11 @@ try:
     from io import BytesIO
 except ImportError:
     from StringIO import StringIO as BytesIO
+    
+try: 
+	from wx.lib.pubsub import pub
+except ImportError:
+	from wx.lib.pubsub import Publisher as pub
 
 from Cura.gui import printWindow
 from Cura.util import printerConnect

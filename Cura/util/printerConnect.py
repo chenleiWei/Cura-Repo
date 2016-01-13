@@ -3,9 +3,14 @@ import requests
 import os
 import wx
 import webbrowser
-from wx.lib.pubsub import pub
+
 from Cura.util import profile
 import json
+
+try: 
+	from wx.lib.pubsub import pub
+except ImportError:
+	from wx.lib.pubsub import Publisher as pub
 
 try:
     from io import BytesIO
@@ -60,12 +65,12 @@ class ConfirmCredentials(threading.Thread):
 			r = requests.post(url, headers=header, files=files)
 		except requests.exceptions.RequestException as e:
 			print e
-			wx.CallAfter(self.conveyError)
+			self.conveyError
 
 		print r.text
 		status = r.status_code
 		
-		wx.CallAfter(self.setStatusBasedText(status))
+		self.setStatusBasedText(status)
 
 	def setConfigText(self):
 		self.errorMessage1.SetLabel("Configuring...")
@@ -119,16 +124,11 @@ class ConfirmCredentials(threading.Thread):
 				self.parent.configurePrinterButton.Enable()
 		else:
 			self.errorMessage1.SetLabel("Check that your printer is connected to the network")
-			self.parent.enableConfigButton()
 			if not self.configWizard:			
 				self.parent.successText.SetLabel("")
 			else:
 				self.parent.configurePrinterButton.Enable()
 			self.errorMessage1.Wrap(200)
-			self.parent.configurePrinterButton.Enable()
-		
-
-			
 
 	
 	# For removing the dummy file used in configuring connection to printer
@@ -168,11 +168,10 @@ class  GcodeUpload(threading.Thread):
 		files = {'file': (filename, open(filepath, 'rb'), 'multipart/form-data')}
 		data = {'select': 'true', 'print': self.printOnUpload}
 		
-		
 		try:
 			r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files)
 		except requests.exceptions.RequestException as e:
-			wx.CallAfter(self.conveyStatus(e))
+			self.conveyStatus(e)
 
 		try:
 			os.remove(self.tempFilePath)
@@ -182,7 +181,7 @@ class  GcodeUpload(threading.Thread):
 
 		status = r.status_code
 			
-		wx.CallAfter(self.conveyStatus(status))
+		self.conveyStatus(status)
 	
 	def conveyStatus(self, status):
 		if status == 201: 
@@ -190,5 +189,6 @@ class  GcodeUpload(threading.Thread):
 				webbrowser.open_new('http://series1-%s.local:5000' % self.serial)
 			self.notification.message("Successfully uploaded as %s!" % self.filename, lambda : webbrowser.open_new('http://series1-%s.local:5000' % self.serial), 6, 'Open In Browser')
 		else:
+		
 			self.notification.message("Error: Please check that your Series 1 is connected to the internet")
 			

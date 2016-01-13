@@ -5,7 +5,6 @@ import os
 import webbrowser
 import sys
 
-from wx.lib.pubsub import pub
 from Cura.gui import configBase
 from Cura.gui import expertConfig
 from Cura.gui import alterationPanel
@@ -23,6 +22,11 @@ from Cura.util import version
 import platform
 from Cura.util import meshLoader
 from Cura.gui import materialProfileSelector
+
+try: 
+	from wx.lib.pubsub import pub
+except ImportError:
+	from wx.lib.pubsub import Publisher as pub
 
 class mainWindow(wx.Frame):
 	def __init__(self):
