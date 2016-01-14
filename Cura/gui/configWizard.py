@@ -936,14 +936,14 @@ class NonTAM(InfoPage):
 			profile.putMachineSetting('extruder_head_size_max_y', '0.0')
 			profile.putMachineSetting('extruder_head_size_height', '0.0')
 		else:
-			profile.putMachineSetting('machine_width', '80')
-			profile.putMachineSetting('machine_depth', '80')
-			profile.putMachineSetting('machine_height', '60')
+			profile.putMachineSetting('machine_width', '305')
+			profile.putMachineSetting('machine_depth', '305')
+			profile.putMachineSetting('machine_height', '305')
 			profile.putMachineSetting('machine_name', 'reprap')
 			profile.putMachineSetting('machine_type', 'reprap')
 			profile.putMachineSetting('gcode_flavor', 'RepRap (Marlin/Sprinter)')
 			profile.putPreference('startMode', 'Normal')
-			profile.putProfileSetting('nozzle_size', '0.5')
+			profile.putProfileSetting('nozzle_size', '0.4')
 		profile.checkAndUpdateMachineName()
 		profile.putProfileSetting('wall_thickness', float(profile.getProfileSetting('nozzle_size')) * 2)
 		if self.SubmitUserStats.GetValue():

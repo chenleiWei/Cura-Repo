@@ -939,6 +939,8 @@ def resetProfile():
 			continue
 		set.setValue(set.getDefault())
 
+	putProfileSetting('nozzle_size', '0.4')    #Changed from 0.5 to 0.4
+	putProfileSetting('retraction_enable', 'True')
 
 def setProfileFromString(options):
 	"""
