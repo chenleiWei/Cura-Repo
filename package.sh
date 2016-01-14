@@ -22,18 +22,18 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="1.3.1"
+export BUILD_NAME="1.3.4"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
-WIN_PORTABLE_PY_VERSION=2.7.2.1
+WIN_PORTABLE_PY_VERSION=2.7.3.2
 
 ##Which CuraEngine to use
 if [ -z ${CURA_ENGINE_REPO:-} ]; then
-	CURA_ENGINE_REPO="https://github.com/Ultimaker/CuraEngine.git"
+	CURA_ENGINE_REPO="https://Catrodigious@bitbucket.org/Catrodigious/curaengine.git"
 fi
 if [ -z ${CURA_ENGINE_REPO_PUSHURL:-} ]; then
-	CURA_ENGINE_REPO_PUSHURL="git@github.com:Ultimaker/CuraEngine.git"
+	CURA_ENGINE_REPO_PUSHURL="git@bitbucket.org:Catrodigious/curaengine.git"
 fi
 if [ -z ${CURA_ENGINE_BRANCH:-} ]; then
 	CURA_ENGINE_BRANCH="legacy"
@@ -144,35 +144,13 @@ else
 	TAR=gnutar
 fi
 
-#############################
-# Build the required firmwares
-#############################
-
-if [ -d "C:/arduino-1.0.3" ]; then
-	ARDUINO_PATH=C:/arduino-1.0.3
-	ARDUINO_VERSION=103
-elif [ -d "/Applications/Arduino.app/Contents/Resources/Java" ]; then
-	ARDUINO_PATH=/Applications/Arduino.app/Contents/Resources/Java
-	ARDUINO_VERSION=$(defaults read /Applications/Arduino.app/Contents/Info.plist CFBundleGetInfoString | sed -e 's/\.//g')
-	PATH=$PATH:/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/
-else
-	ARDUINO_PATH=/usr/share/arduino
-	ARDUINO_VERSION=105
-fi
-
-
-if [ ! -d "$ARDUINO_PATH" ]; then
-  echo "Arduino path '$ARDUINO_PATH' doesn't exist"
-  exit 1
-fi
-
-function pause(){
-   read -p "$*"
-}
 
 #############################
 # Darwin
 #############################
+function pause(){
+   read -p "$*"
+}
 
 if [ "$BUILD_TARGET" = "darwin" ]; then
     TARGET_DIR=Cura-${BUILD_NAME}-MacOS
@@ -186,7 +164,22 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 		echo "Cannot build app."
 		exit 1
 	fi
-
+	
+	# Install Python-OCC
+#	cd pythonocc-core-0.16.0
+	
+#	if [ -d "./cmake-build" ]; then
+#		cd cmake-build
+#	else
+#		mkdir cmake-build
+#		cd cmake-build
+#	fi 
+	
+#	cmake ..
+#	make
+#	make install
+#	cd ..
+	
     #Add cura version file (should read the version from the bundle with pyobjc, but will figure that out later)
     echo $BUILD_NAME > scripts/darwin/dist/Cura\ Type\ A.app/Contents/Resources/version
     
@@ -208,6 +201,7 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
     if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
 	$MAKE -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
+    
 	cp CuraEngine/build/CuraEngine scripts/darwin/dist/Cura\ Type\ A.app/Contents/Resources/CuraEngine
 
 	cd scripts/darwin
@@ -547,17 +541,46 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#Get portable python for windows and extract it. (Linux and Mac need to install python themselfs)
 	downloadURL http://ftp.nluug.nl/languages/python/portablepython/v2.7/PortablePython_${WIN_PORTABLE_PY_VERSION}.exe
 	downloadURL http://sourceforge.net/projects/pyserial/files/pyserial/2.5/pyserial-2.5.win32.exe
+	downloadURL http://sourceforge.net/projects/pubsub/files/pubsub/3.3.0/PyPubSub-3.3.0.win32.exe
+	downloadURL http://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe
 	downloadURL http://sourceforge.net/projects/pyopengl/files/PyOpenGL/3.0.1/PyOpenGL-3.0.1.win32.exe
 	downloadURL http://sourceforge.net/projects/numpy/files/NumPy/1.6.2/numpy-1.6.2-win32-superpack-python2.7.exe
 	downloadURL http://videocapture.sourceforge.net/VideoCapture-0.9-5.zip
 	#downloadURL http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-20120927-git-13f0cd6-win32-static.7z
 	downloadURL http://sourceforge.net/projects/comtypes/files/comtypes/0.6.2/comtypes-0.6.2.win32.exe
 	downloadURL http://www.uwe-sieber.de/files/ejectmedia.zip
+	#Python OCC
+#	downloadURL https://github.com/tpaviot/pythonocc-core/releases/download/0.16.0/pythonOCC-0.16.0-win32-py27.exe
+
+	#Requests
+	if test -d requests; then 
+			echo "exist"
+			rm -rf requests
+	fi 
+	
+	git clone https://github.com/kennethreitz/requests.git
+	if [ $? != 0 ]; then 
+		echo "Failed to clone requests"; exit 1; 
+	fi
+
+	#urllib3
+#	git clone https://github.com/shazow/urllib3.git
+
+    # Add materials profiles
+	if test -d resources/quickprint/Materials; then
+		echo "resources/quickprint/Materials exist"
+		rm -rf resources/quickprint/Materials
+	fi
+	
+	git clone ${MATERIALS_REPO} resources/quickprint/Materials/
+	ls resources/quickprint/Materials/
+
+
 	#Get the power module for python
 	gitClone \
-	  https://github.com/GreatFruitOmsk/Power \
-	  git@github.com:GreatFruitOmsk/Power \
-	  Power
+		https://github.com/GreatFruitOmsk/Power \
+		https://github.com/GreatFruitOmsk/Power \
+		Power
     if [ $? != 0 ]; then echo "Failed to clone Power"; exit 1; fi
 	gitClone \
 	  ${CURA_ENGINE_REPO} \
@@ -574,17 +597,15 @@ mkdir -p ${TARGET_DIR}
 
 rm -f log.txt
 if [ $BUILD_TARGET = "win32" ]; then
-	if [ -z `which i686-w64-mingw32-g++` ]; then
-		CXX=g++
-	else
-		CXX=i686-w64-mingw32-g++
-	fi
-
 	#For windows extract portable python to include it.
 	extract PortablePython_${WIN_PORTABLE_PY_VERSION}.exe \$_OUTDIR/App
 	extract PortablePython_${WIN_PORTABLE_PY_VERSION}.exe \$_OUTDIR/Lib/site-packages
 	extract pyserial-2.5.win32.exe PURELIB
 	extract PyOpenGL-3.0.1.win32.exe PURELIB
+	extract PyPubSub-3.3.0.win32.exe PURELIB
+	extract py2exe-0.6.9.win32-py2.7.exe PURELIB
+	#pythonOCC
+#	extract pythonOCC-0.16.0-win32-py27.exe PURELIB	
 	extract numpy-1.6.2-win32-superpack-python2.7.exe numpy-1.6.2-sse2.exe
 	extract numpy-1.6.2-sse2.exe PLATLIB
 	extract VideoCapture-0.9-5.zip VideoCapture-0.9-5/Python27/DLLs/vidcap.pyd
@@ -592,20 +613,34 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#extract ffmpeg-20120927-git-13f0cd6-win32-static.7z ffmpeg-20120927-git-13f0cd6-win32-static/licenses
 	extract comtypes-0.6.2.win32.exe
 	extract ejectmedia.zip Win32
+	
+	
+	
 
 	mkdir -p ${TARGET_DIR}/python
 	mkdir -p ${TARGET_DIR}/Cura/
 	mv \$_OUTDIR/App/* ${TARGET_DIR}/python
 	mv \$_OUTDIR/Lib/site-packages/wx* ${TARGET_DIR}/python/Lib/site-packages/
+
+
 	mv PURELIB/serial ${TARGET_DIR}/python/Lib
 	mv PURELIB/OpenGL ${TARGET_DIR}/python/Lib
+	mv PURELIB/PubSub ${TARGET_DIR}/python/Lib
+	#pythonOCC
+#	mv PURELIB/pythonOCC ${TARGET_DIR}/python/Lib
 	mv PURELIB/comtypes ${TARGET_DIR}/python/Lib
 	mv PLATLIB/numpy ${TARGET_DIR}/python/Lib
 	mv Power/power ${TARGET_DIR}/python/Lib
+	mv requests/requests ${TARGET_DIR}/python/Lib
+#	mv urllib3/urllib3 ${TARGET_DIR}/python/Lib
 	mv VideoCapture-0.9-5/Python27/DLLs/vidcap.pyd ${TARGET_DIR}/python/DLLs
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/bin/ffmpeg.exe ${TARGET_DIR}/Cura/
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/licenses ${TARGET_DIR}/Cura/ffmpeg-licenses/
 	mv Win32/EjectMedia.exe ${TARGET_DIR}/Cura/
+	
+	# replace email init
+	rm -rf ${TARGET_DIR}/python/Lib/email/__init__.py
+	cp __init__.py ${TARGET_DIR}/python/Lib/email/__init__.py
 
 	rm -rf Power/
 	rm -rf \$_OUTDIR
@@ -628,7 +663,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	rm -rf ${TARGET_DIR}/python/Lib/OpenGL/DLLS/gle*
 
     #Build the C++ engine
-	$MAKE -C CuraEngine VERSION=${BUILD_NAME} OS=Windows_NT CXX=${CXX}
+	mingw32-make -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
 fi
 
@@ -644,10 +679,11 @@ echo $BUILD_NAME > ${TARGET_DIR}/Cura/version
 if [ $BUILD_TARGET = "win32" ]; then
     cp -a scripts/${BUILD_TARGET}/*.bat $TARGET_DIR/
     cp CuraEngine/build/CuraEngine.exe $TARGET_DIR
-	cp /usr/lib/gcc/i686-w64-mingw32/4.8/libgcc_s_sjlj-1.dll $TARGET_DIR
-    cp /usr/i686-w64-mingw32/lib/libwinpthread-1.dll $TARGET_DIR
-    cp /usr/lib/gcc/i686-w64-mingw32/4.8/libstdc++-6.dll $TARGET_DIR
+else
+    cp -a scripts/${BUILD_TARGET}/*.sh $TARGET_DIR/
 fi
+
+echo "location is: ", $TARGET_DIR
 
 #package the result
 if (( ${ARCHIVE_FOR_DISTRIBUTION} )); then
@@ -661,13 +697,13 @@ if (( ${ARCHIVE_FOR_DISTRIBUTION} )); then
 			#if we have wine, try to run our nsis script.
 			rm -rf scripts/win32/dist
 			ln -sf `pwd`/${TARGET_DIR} scripts/win32/dist
-			wine ~/.wine/drive_c/Program\ Files\ \(x86\)/NSIS/makensis.exe /DVERSION=${BUILD_NAME} scripts/win32/installer.nsi
+			wine ~/.wine/drive_c/Program\ Files/NSIS/makensis.exe /DVERSION=${BUILD_NAME} scripts/win32/installer.nsi
             if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
 			mv scripts/win32/Cura_${BUILD_NAME}.exe ./
 		fi
 		if [ -f '/c/Program Files (x86)/NSIS/makensis.exe' ]; then
 			rm -rf scripts/win32/dist
-			mv "`pwd`/${TARGET_DIR}" scripts/win32/dist
+			mv `pwd`/${TARGET_DIR} scripts/win32/dist
 			'/c/Program Files (x86)/NSIS/makensis.exe' -DVERSION=${BUILD_NAME} 'scripts/win32/installer.nsi' >> log.txt
             if [ $? != 0 ]; then echo "Failed to package NSIS installer"; exit 1; fi
 			mv scripts/win32/Cura_${BUILD_NAME}.exe ./

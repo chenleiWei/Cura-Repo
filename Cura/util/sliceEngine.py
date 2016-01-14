@@ -36,6 +36,8 @@ def getEngineFilename():
 		search_filename += '.exe'
 		if version.isDevVersion() and os.path.exists('C:/Software/Cura_SteamEngine/_bin/Release/Cura_SteamEngine.exe'):
 			return 'C:/Software/Cura_SteamEngine/_bin/Release/Cura_SteamEngine.exe'
+		else:
+			return 'CuraEngine.exe'
 	for n in xrange(0, 10):
 		full_filename = os.path.abspath(os.path.join(base_search_path, '/'.join(['..'] * n), search_filename))
 		if os.path.isfile(full_filename):
@@ -505,8 +507,8 @@ class Engine(object):
 			'minimalLayerTime': int(profile.getProfileSettingFloat('cool_min_layer_time')),
 			'minimalFeedrate': int(profile.getProfileSettingFloat('cool_min_feedrate')),
 			'coolHeadLift': 1 if profile.getProfileSetting('cool_head_lift') == 'True' else 0,
-			'startCode': profile.getAlterationFileContents('start.gcode', extruderCount),
-			'endCode': profile.getAlterationFileContents('end.gcode', extruderCount),
+			'startCode': profile.getStartGCode(),
+			'endCode': profile.getEndGCode(),
 			'preSwitchExtruderCode': profile.getAlterationFileContents('preSwitchExtruder.gcode', extruderCount),
 			'postSwitchExtruderCode': profile.getAlterationFileContents('postSwitchExtruder.gcode', extruderCount),
 
@@ -607,4 +609,5 @@ class Engine(object):
 			su.wShowWindow = subprocess.SW_HIDE
 			kwargs['startupinfo'] = su
 			kwargs['creationflags'] = 0x00004000 #BELOW_NORMAL_PRIORITY_CLASS
+	
 		return subprocess.Popen(cmdList, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)

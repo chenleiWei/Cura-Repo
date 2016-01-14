@@ -289,7 +289,7 @@ class mainWindow(wx.Frame):
 
 		if pluginCount > 1:
 			self.scene.notification.message("Warning: %i plugins from the previous session are still active." % pluginCount)
-
+			
 	def onPluginUpdate(self,msg): #receives commands from the plugin thread
 		cmd = str(msg.data).split(";")
 		if cmd[0] == "OpenPluginProgressWindow":
@@ -408,7 +408,7 @@ class mainWindow(wx.Frame):
 		prefDialog.Centre()
 		prefDialog.Show()
 		prefDialog.Raise()
-
+				
 	def OnDropFiles(self, files):
 		self.scene.loadFiles(files)
 
@@ -479,7 +479,12 @@ class mainWindow(wx.Frame):
 			self.Bind(wx.EVT_MENU, lambda e: self.OnSelectMachine(e.GetId() - 0x1000), i)
 
 		self.machineMenu.AppendSeparator()
-		i = self.machineMenu.Append(-1, _("Add new machine..."))
+		i = self.machineMenu.Append(-1, _("Add new printer (direct upload)..."))
+		self.Bind(wx.EVT_MENU, self.OnAddNewPrinter, i)
+		i = self.machineMenu.Append(-1, _("Direct upload settings..."))
+		self.Bind(wx.EVT_MENU, self.OnDirectUploadSettings, i)
+		self.machineMenu.AppendSeparator()
+		i = self.machineMenu.Append(-1, _("Add new machine profile..."))
 		self.Bind(wx.EVT_MENU, self.OnAddNewMachine, i)
 		i = self.machineMenu.Append(-1, _("Machine settings..."))
 		self.Bind(wx.EVT_MENU, self.OnMachineSettings, i)
@@ -492,7 +497,23 @@ class mainWindow(wx.Frame):
 
 		i = self.machineMenu.Append(-1, _("Install custom firmware..."))
 		self.Bind(wx.EVT_MENU, self.OnCustomFirmware, i)
-
+	
+	def OnAddNewPrinter(self, e):
+		scene = sceneView.AddNewPrinter(self)
+		scene.Show()
+		
+	def OnDirectUploadSettings(self, e):
+		if self.scene.printButton.isDisabled():
+			enableUploadButton = False
+		else:
+			enableUploadButton = True
+		
+		print "Enable upload button: %s" % enableUploadButton
+	#	self.scene.reloadScene(e)
+		newPrinter = sceneView.printerSelector(enableUploadButton)
+		newPrinter.Show()
+		
+		
 	def OnLoadProfile(self, e):
 		dlg=wx.FileDialog(self, _("Select profile file to load"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
 		dlg.SetWildcard("ini files (*.ini)|*.ini")
@@ -703,7 +724,6 @@ class normalSettingsPanel(configBase.configPanelBase):
 		else:
 			self.alterationPanel = alterationPanel.alterationPanel(self.nb, callback)
 			self.nb.AddPage(self.alterationPanel, "Start/End-GCode")
-
 		self.Bind(wx.EVT_SIZE, self.OnSize)
 
 		self.nb.SetSize(self.GetSize())

@@ -38,9 +38,13 @@ def main():
 		serialCommunication.startMonitor(port, baud)
 		return
 
-	print "load preferences from " + profile.getPreferencePath()
-	profile.loadPreferences(profile.getPreferencePath())
+	try:
+		print "load preferences from " + profile.getPreferencePath()
+		profile.loadPreferences(profile.getPreferencePath())
+	except Exception as e:
+		print e
 
+		
 	if options.profile is not None:
 		profile.setProfileFromString(options.profile)
 	elif options.profileini is not None:

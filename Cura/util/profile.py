@@ -28,6 +28,7 @@ else:
 	import configparser as ConfigParser
 
 from Cura.util import version
+from Cura.util import resources
 from Cura.util import validators
 
 #The settings dictionary contains a key/value reference to all possible settings. With the setting name as key.
@@ -177,21 +178,21 @@ class setting(object):
 def _(n):
 	return n
 
-setting('layer_height',              0.2, float, 'basic',    _('Quality')).setRange(0.0001).setLabel(_("Layer height (mm)"), _("Layer height in millimeters.\nThis setting determines the quality of your print."))
-setting('wall_thickness',            1.2, float, 'basic',    _('Quality')).setRange(0.0).setLabel(_("Shell thickness (mm)"), _("Thickness of the outside shell in the horizontal direction.\nThis is used in combination with the nozzle size to define the number\nof perimeter lines and the thickness of those perimeter lines."))
+setting('layer_height',              0.15, float, 'basic',    _('Quality')).setRange(0.0001).setLabel(_("Layer height (mm)"), _("Layer height in millimeters.\nThis setting determines the quality of your print."))
+setting('wall_thickness',            0.8, float, 'basic',    _('Quality')).setRange(0.0).setLabel(_("Shell thickness (mm)"), _("Thickness of the outside shell in the horizontal direction.\nThis is used in combination with the nozzle size to define the number\nof perimeter lines and the thickness of those perimeter lines."))
 setting('retraction_enable',        True, bool,  'basic',    _('Quality')).setExpertSubCategory(_('Retraction')).setLabel(_("Enable retraction"), _("Retract the filament when the nozzle is moving over a none-printed area. Details about the retraction can be configured in the advanced tab."))
 setting('solid_layer_thickness',     0.8, float, 'basic',    _('Fill')).setRange(0).setLabel(_("Bottom/Top thickness (mm)"), _("This controls the thickness of the bottom and top layers, the amount of solid layers put down is calculated by the layer thickness and this value.\nHaving this value a multiple of the layer thickness makes sense. And keep it near your wall thickness to make an evenly strong part."))
-setting('fill_density',               50, float, 'basic',    _('Fill')).setExpertSubCategory(_('Infill')).setRange(0, 100).setLabel(_("Fill Density (%)"), _("This controls how densely filled the insides of your print will be. For a solid part use 100%, for an empty part use 0%. A value around 20% is usually enough.\nThis won't affect the outside of the print and only adjusts how strong the part becomes."))
+setting('fill_density',               12, float, 'basic',    _('Fill')).setExpertSubCategory(_('Infill')).setRange(0, 100).setLabel(_("Fill Density (%)"), _("This controls how densely filled the insides of your print will be. For a solid part use 100%, for an empty part use 0%. A value around 20% is usually enough.\nThis won't affect the outside of the print and only adjusts how strong the part becomes."))
 setting('nozzle_size',               0.4, float, 'advanced', _('Machine')).setRange(0.1,10).setLabel(_("Nozzle size (mm)"), _("The nozzle size is very important, this is used to calculate the line width of the infill, and used to calculate the amount of outside wall lines and thickness for the wall thickness you entered in the print settings."))
 setting('print_speed',                100, float, 'basic',    _('Speed and Temperature')).setRange(1).setLabel(_("Print speed (mm/s)"), _("Speed at which printing happens. Printing speed depends on a lot of factors. So you will be experimenting with optimal settings for this."))
-setting('print_temperature',         220, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("Printing temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 210-220C is usually used.\nFor ABS a value of 230C or higher is required."))
-setting('print_temperature2',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("2nd nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 210-220C is usually used.\nFor ABS a value of 230C or higher is required."))
-setting('print_temperature3',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("3th nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 210-220C is usually used.\nFor ABS a value of 230C or higher is required."))
-setting('print_temperature4',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("4th nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 210-220C is usually used.\nFor ABS a value of 230C or higher is required."))
-setting('print_temperature5',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("5th nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself.\nFor PLA a value of 210-220C is usually used.\nFor ABS a value of 230C or higher is required."))
-setting('print_bed_temperature',      70, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("Bed temperature (C)"), _("Temperature used for the heated printer bed. Set at 0 to manually preheat."))
-setting('support',                'None', [_('None'), _('Touching buildplate'), _('Everywhere')], 'basic', _('Support')).setExpertSubCategory(_('Support')).setLabel(_("Support type"), _("Type of support structure build.\n\"Touching buildplate\" is the most commonly used support setting.\n\nNone does not do any support.\nTouching buildplate only creates support where the support structure will touch the build platform.\nEverywhere creates support even on top of parts of the model."))
-setting('platform_adhesion',      'None', [_('None'), _('Brim'), _('Raft')], 'basic', _('Support')).setExpertSubCategory([_('Skirt'), _('Brim'), _('Raft')]).setLabel(_("Platform adhesion type"), _("Different options that help in preventing corners from lifting due to warping.\nBrim adds a single layer thick flat area around your object which is easy to cut off afterwards, and it is the recommended option.\nRaft adds a thick raster below the object and a thin interface between this and your object.\n(Note that enabling the brim or raft disables the skirt)"))
+setting('print_temperature',         220, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("Printing temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself."))
+setting('print_temperature2',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("2nd nozzle temperature (C)"), _("Temperature used for printing with a second nozzle. Set at 0 to pre-heat yourself."))
+setting('print_temperature3',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("3th nozzle temperature (C)"), _("Temperature used for printing with a third nozzle. Set at 0 to pre-heat yourself."))
+setting('print_temperature4',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("4th nozzle temperature (C)"), _("Temperature used for printing with a fourth nozzle. Set at 0 to pre-heat yourself."))
+setting('print_temperature5',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("5th nozzle temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself."))
+setting('print_bed_temperature',      85, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("Bed temperature (C)"), _("Temperature used for the heated printer bed. Set at 0 to manually preheat."))
+setting('support',                'Everywhere', [_('None'), _('Touching buildplate'), _('Everywhere')], 'basic', _('Support')).setExpertSubCategory(_('Support')).setLabel(_("Support type"), _("Type of support structure build.\n\"Touching buildplate\" is the most commonly used support setting.\n\nNone does not do any support.\nTouching buildplate only creates support where the support structure will touch the build platform.\nEverywhere creates support even on top of parts of the model."))
+setting('platform_adhesion',      'Raft', [_('None'), _('Brim'), _('Raft')], 'basic', _('Support')).setExpertSubCategory([_('Skirt'), _('Brim'), _('Raft')]).setLabel(_("Platform adhesion type"), _("Different options that help in preventing corners from lifting due to warping.\nBrim adds a single layer thick flat area around your object which is easy to cut off afterwards, and it is the recommended option.\nRaft adds a thick raster below the object and a thin interface between this and your object.\n(Note that enabling the brim or raft disables the skirt)"))
 setting('support_dual_extrusion',  'Both', [_('Both'), _('First extruder'), _('Second extruder')], 'basic', _('Support')).setLabel(_("Support dual extrusion"), _("Which extruder to use for support material, for break-away support you can use both extruders.\nBut if one of the materials is more expensive then the other you could select an extruder to use for support material. This causes more extruder switches.\nYou can also use the 2nd extruder for soluble support materials."))
 setting('wipe_tower',              False, bool,  'basic',    _('Dual extrusion')).setLabel(_("Wipe&prime tower"), _("The wipe-tower is a tower printed on every layer when switching between nozzles.\nThe old nozzle is wiped off on the tower before the new nozzle is used to print the 2nd color."))
 setting('wipe_tower_volume',          15, float, 'expert',   _('Dual extrusion')).setLabel(_("Wipe&prime tower volume per layer (mm3)"), _("The amount of material put in the wipe/prime tower.\nThis is done in volume because in general you want to extrude a\ncertain amount of volume to get the extruder going, independent on the layer height.\nThis means that with thinner layers, your tower gets bigger."))
@@ -202,8 +203,8 @@ setting('filament_diameter3',          0, float, 'basic',    _('Filament')).setR
 setting('filament_diameter4',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter4 (mm)"), _("Diameter of your filament for the 4th nozzle. Use 0 to use the same diameter as for nozzle 1."))
 setting('filament_diameter5',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter5 (mm)"), _("Diameter of your filament for the 5th nozzle. Use 0 to use the same diameter as for nozzle 1."))
 setting('filament_flow',            100., float, 'basic',    _('Filament')).setRange(5,300).setLabel(_("Flow (%)"), _("Flow compensation, the amount of material extruded is multiplied by this value"))
-setting('retraction_speed',         60.0, float, 'advanced', _('Retraction')).setRange(0.1).setLabel(_("Speed (mm/s)"), _("Speed at which the filament is retracted, a higher retraction speed works better. But a very high retraction speed can lead to filament grinding."))
-setting('retraction_amount',         1.4, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Distance (mm)"), _("Amount of retraction, set at 0 for no retraction at all. A value of 4.5mm seems to generate good results."))
+setting('retraction_speed',         40.0, float, 'advanced', _('Retraction')).setRange(0.1).setLabel(_("Speed (mm/s)"), _("Speed at which the filament is retracted, a higher retraction speed works better. But a very high retraction speed can lead to filament grinding."))
+setting('retraction_amount',         0.4, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Distance (mm)"), _("Amount of retraction, set at 0 for no retraction at all. A value of 4.5mm seems to generate good results."))
 setting('retraction_dual_amount',   16.5, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Dual extrusion switch amount (mm)"), _("Amount of retraction when switching nozzle with dual-extrusion, set at 0 for no retraction at all. A value of 16.0mm seems to generate good results."))
 setting('retraction_min_travel',     1.5, float, 'expert',   _('Retraction')).setRange(0).setLabel(_("Minimum travel (mm)"), _("Minimum amount of travel needed for a retraction to happen at all. To make sure you do not get a lot of retractions in a small area."))
 setting('retraction_combing',      'All',  [_('Off'),_('All'),_('No Skin')], 'expert', _('Retraction')).setLabel(_("Enable combing"), _("Combing is the act of avoiding holes in the print for the head to travel over. If combing is \'Off\' the printer head moves straight from the start point to the end point and it will always retract.  If \'All\', enable combing on all surfaces.  If \'No Skin\', enable combing on all except skin surfaces."))
@@ -237,7 +238,7 @@ setting('fill_overlap', 15, int, 'expert', _('Infill')).setRange(0,100).setLabel
 setting('perimeter_before_infill', False, bool, 'expert', _('Infill')).setLabel(_("Infill prints after perimeters"), _("Print infill after perimeter lines. This can reduce infill from showing through the surface. If not checked, infill will print before perimeter lines."))
 setting('support_type', 'Lines', ['Grid', 'Lines'], 'expert', _('Support')).setLabel(_("Structure type"), _("The type of support structure.\nGrid is very strong and can come off in 1 piece, however, sometimes it is too strong.\nLines are single walled lines that break off one at a time. Which is more work to remove, but as it is less strong it does work better on tricky prints."))
 setting('support_angle', 30, float, 'expert', _('Support')).setRange(0,90).setLabel(_("Overhang angle for support (deg)"), _("The minimal angle that overhangs need to have to get support. With 90 degree being horizontal and 0 degree being vertical."))
-setting('support_fill_rate', 15, int, 'expert', _('Support')).setRange(0,100).setLabel(_("Fill amount (%)"), _("Amount of infill structure in the support material, less material gives weaker support which is easier to remove. 15% seems to be a good average."))
+setting('support_fill_rate', 25, int, 'expert', _('Support')).setRange(0,100).setLabel(_("Fill amount (%)"), _("Amount of infill structure in the support material, less material gives weaker support which is easier to remove. 15% seems to be a good average."))
 setting('support_xy_distance', 0.7, float, 'expert', _('Support')).setRange(0,10).setLabel(_("Distance X/Y (mm)"), _("Distance of the support material from the print, in the X/Y directions.\n0.7mm gives a nice distance from the print so the support does not stick to the print."))
 setting('support_z_distance', 0.15, float, 'expert', _('Support')).setRange(0,10).setLabel(_("Distance Z (mm)"), _("Distance from the top/bottom of the support to the print. A small gap here makes it easier to remove the support but makes the print a bit uglier.\n0.15mm gives a good seperation of the support material."))
 setting('spiralize', False, bool, 'expert', _('Black Magic')).setLabel(_("Spiralize the outer contour"), _("Spiralize is smoothing out the Z move of the outer edge. This will create a steady Z increase over the whole print. This feature turns a solid object into a single walled print with a solid bottom.\nThis feature used to be called Joris in older versions."))
@@ -250,8 +251,8 @@ setting('raft_base_thickness', 0.3, float, 'expert', _('Raft')).setRange(0).setL
 setting('raft_base_linewidth', 0.7, float, 'expert', _('Raft')).setRange(0).setLabel(_("Base line width (mm)"), _("When you are using the raft this is the width of the base layer lines which are put down."))
 setting('raft_interface_thickness', 0.2, float, 'expert', _('Raft')).setRange(0).setLabel(_("Interface thickness (mm)"), _("When you are using the raft this is the thickness of the interface layer which is put down."))
 setting('raft_interface_linewidth', 0.2, float, 'expert', _('Raft')).setRange(0).setLabel(_("Interface line width (mm)"), _("When you are using the raft this is the width of the interface layer lines which are put down."))
-setting('raft_airgap_all', 0.22, float, 'expert', _('Raft')).setRange(0).setLabel(_("Airgap"), _("Gap between the last layer of the raft the whole print."))
-setting('raft_airgap', 0.22, float, 'expert', _('Raft')).setRange(0).setLabel(_("First Layer Airgap"), _("Gap between the last layer of the raft and the first printing layer. A small gap of 0.2mm works wonders on PLA and makes the raft easy to remove. This value is added on top of the 'Airgap' setting."))
+setting('raft_airgap_all', 0, float, 'expert', _('Raft')).setRange(0).setLabel(_("Airgap"), _("Gap between the last layer of the raft the whole print."))
+setting('raft_airgap', 0.2, float, 'expert', _('Raft')).setRange(0).setLabel(_("First Layer Airgap"), _("Gap between the last layer of the raft and the first printing layer. A small gap of 0.2mm works wonders on PLA and makes the raft easy to remove. This value is added on top of the 'Airgap' setting."))
 setting('raft_surface_layers', 2, int, 'expert', _('Raft')).setRange(0).setLabel(_("Surface layers"), _("Amount of surface layers put on top of the raft, these are fully filled layers on which the model is printed."))
 setting('raft_surface_thickness', 0.27, float, 'expert', _('Raft')).setRange(0).setLabel(_("Surface layer thickness (mm)"), _("Thickness of each surface layer."))
 setting('raft_surface_linewidth', 0.4, float, 'expert', _('Raft')).setRange(0).setLabel(_("Surface layer line width (mm)"), _("Width of the lines for each surface layer."))
@@ -277,7 +278,8 @@ G21        ;metric values
 G90        ;absolute positioning
 G28     ;move to endstops
 G29		;allows for auto-levelling
-G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+G1 Z15.0 F12000 ;move the platform down 15mm
+G1 X150 Y5 F{travel_speed} ;center
 M140 S{print_bed_temperature} ;Prep Heat Bed
 M109 S{print_temperature} ;Heat To temp
 M190 S{print_bed_temperature} ;Heat Bed to temp
@@ -301,53 +303,39 @@ G90           ;absolute positioning
 ;{profile_string}
 """, str, 'alteration', 'alteration')
 #######################################################################################
-setting('start2.gcode', """;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-;Print time: {print_time}
-;Filament used: {filament_amount}m {filament_weight}g
-;Filament cost: {filament_cost}
-;M190 S{print_bed_temperature} ;Uncomment to add your own bed temperature line
-;M104 S{print_temperature} ;Uncomment to add your own temperature line
-;M109 T1 S{print_temperature2} ;Uncomment to add your own temperature line
-;M109 T0 S{print_temperature} ;Uncomment to add your own temperature line
-G21        ;metric values
-G90        ;absolute positioning
-M107       ;start with the fan off
-
-G28 X0 Y0  ;move X/Y to min endstops
-G28 Z0     ;move Z to min endstops
-
-G1 Z15.0 F{travel_speed} ;move the platform down 15mm
-
-T1                      ;Switch to the 2nd extruder
-G92 E0                  ;zero the extruded length
-G1 F200 E10             ;extrude 10mm of feed stock
-G92 E0                  ;zero the extruded length again
-G1 F200 E-{retraction_dual_amount}
-
-T0                      ;Switch to the first extruder
-G92 E0                  ;zero the extruded length
-G1 F200 E10             ;extrude 10mm of feed stock
-G92 E0                  ;zero the extruded length again
-G1 F{travel_speed}
-;Put printing message on LCD screen
-M117 Printing...
+setting('start2.gcode', """;-- START GCODE --
+				;Sliced for Type A Machines Series 1
+				;Sliced at: {day} {date} {time}
+				;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+				;Print Speed: {print_speed} Support: {support}
+				;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
+				;Print time: {print_time}
+				;Filament used: {filament_amount}m {filament_weight}g
+				;Filament cost: {filament_cost}
+				G21        ;metric values
+				G90        ;absolute positioning
+				G28     ;move to endstops
+				G29		;allows for auto-levelling
+				G1 Z15.0 F12000 ;move the platform down 15mm
+				G1 X150 Y5 F{travel_speed} ;center
+				M109 S{print_temperature} ;Heat To temp
+				G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
+				G92 E0 ;zero the extruded length
+				G1 F200 X250 E30 ;extrude 30mm of feed stock
+				G92 E0 ;zero the extruded length again
+				G1 X150 Y150  Z25 F12000 ;recenter and begin
+				G1 F{travel_speed}
 """, str, 'alteration', 'alteration')
 #######################################################################################
-setting('end2.gcode', """;End GCode
-M104 T0 S0                     ;extruder heater off
-M104 T1 S0                     ;extruder heater off
-M140 S0                     ;heated bed heater off (if you have it)
-
-G91                                    ;relative positioning
-G1 E-1 F300                            ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-G1 Z+0.5 E-5 X-20 Y-20 F{travel_speed} ;move Z up a bit and retract filament even more
-G28 X0 Y0                              ;move X/Y to min endstops, so the head is out of the way
-
-M84                         ;steppers off
-G90                         ;absolute positioning
-;{profile_string}
-""", str, 'alteration', 'alteration')
+setting('end2.gcode',  """;-- END GCODE --
+			M104 S0     ;extruder heater off
+			G91         ;relative positioning
+			G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
+			G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
+			G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
+			M84           ;steppers off
+			G90           ;absolute positioning
+""", str, 'alteration', 'alteration')	
 #######################################################################################
 setting('start3.gcode', """;Sliced at: {day} {date} {time}
 ;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
@@ -492,13 +480,16 @@ def _getMyDocumentsFolder():
 		path = ''
 	return path
 
+setting('serialNumber', '', str, 'preference', 'hidden')
 setting('startMode', 'Simple', ['Simple', 'Normal'], 'preference', 'hidden')
 setting('simpleModeProfile', '2_normal', str, 'preference', 'hidden')
-setting('simpleModeMaterial', 'Generic_PLA', str, 'preference', 'hidden')
+setting('simpleModeMaterialSupplier', 'Generic', str, 'preference', 'hidden')
+setting('simpleModeMaterialName', 'PLA', str, 'preference', 'hidden')
+setting('simpleModeMaterial', 'Generic PLA', str, 'preference', 'hidden')
 setting('simpleModeStrength', 'Medium', str, 'preference', 'hidden')
 setting('simpleModeQuality', 'Normal', str, 'preference', 'hidden')
-setting('oneAtATime', 'True', bool, 'preference', 'hidden')
-setting('lastFile', os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'firstPrintCone.stl')), str, 'preference', 'hidden')
+setting('oneAtATime', 'False', bool, 'preference', 'hidden')
+setting('lastFile', os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'FirstPrintCone.stl')), str, 'preference', 'hidden')
 setting('initialFile', _getMyDocumentsFolder, 'str', 'preference', 'hidden')
 setting('save_profile', 'False', bool, 'preference', 'hidden').setLabel(_("Save profile on slice"), _("When slicing save the profile as [stl_file]_profile.ini next to the model."))
 setting('filament_cost_kg', '0', float, 'preference', 'hidden').setLabel(_("Cost (price/kg)"), _("Cost of your filament per kg, to estimate the cost of the final print."))
@@ -511,10 +502,10 @@ setting('filament_physical_density', '1240', float, 'preference', 'hidden').setR
 setting('language', 'English', str, 'preference', 'hidden').setLabel(_('Language'), _('Change the language in which Cura runs. Switching language requires a restart of Cura'))
 setting('active_machine', '0', int, 'preference', 'hidden')
 
-setting('model_colour', '#FFC924', str, 'preference', 'hidden').setLabel(_('Model colour'), _('Display color for first extruder'))
-setting('model_colour2', '#CB3030', str, 'preference', 'hidden').setLabel(_('Model colour (2)'), _('Display color for second extruder'))
-setting('model_colour3', '#DDD93C', str, 'preference', 'hidden').setLabel(_('Model colour (3)'), _('Display color for third extruder'))
-setting('model_colour4', '#4550D3', str, 'preference', 'hidden').setLabel(_('Model colour (4)'), _('Display color for forth extruder'))
+setting('model_colour', '#ff5900', str, 'preference', 'hidden').setLabel(_('Model colour'), _('Display color for first extruder'))
+setting('model_colour2', 'e2e2e2', str, 'preference', 'hidden').setLabel(_('Model colour (2)'), _('Display color for second extruder'))
+setting('model_colour3', '#919191', str, 'preference', 'hidden').setLabel(_('Model colour (3)'), _('Display color for third extruder'))
+setting('model_colour4', '#b7b5b8', str, 'preference', 'hidden').setLabel(_('Model colour (4)'), _('Display color for forth extruder'))
 setting('printing_window', 'Basic', ['Basic'], 'preference', 'hidden').setLabel(_('Printing window type'), _('Select the interface used for USB printing.'))
 
 setting('window_maximized', 'True', bool, 'preference', 'hidden')
@@ -527,13 +518,13 @@ setting('last_run_version', '', str, 'preference', 'hidden')
 
 setting('machine_name', '', str, 'machine', 'hidden')
 setting('machine_type', 'unknown', str, 'machine', 'hidden') #Ultimaker, Ultimaker2, RepRap
-setting('machine_width', '205', float, 'machine', 'hidden').setLabel(_("Maximum width (mm)"), _("Size of the machine in mm"))
-setting('machine_depth', '205', float, 'machine', 'hidden').setLabel(_("Maximum depth (mm)"), _("Size of the machine in mm"))
-setting('machine_height', '200', float, 'machine', 'hidden').setLabel(_("Maximum height (mm)"), _("Size of the machine in mm"))
+setting('machine_width', '305', float, 'machine', 'hidden').setLabel(_("Maximum width (mm)"), _("Size of the machine in mm"))
+setting('machine_depth', '305', float, 'machine', 'hidden').setLabel(_("Maximum depth (mm)"), _("Size of the machine in mm"))
+setting('machine_height', '305', float, 'machine', 'hidden').setLabel(_("Maximum height (mm)"), _("Size of the machine in mm"))
 setting('machine_center_is_zero', 'False', bool, 'machine', 'hidden').setLabel(_("Machine center 0,0"), _("Machines firmware defines the center of the bed as 0,0 instead of the front left corner."))
 setting('machine_shape', 'Square', ['Square','Circular'], 'machine', 'hidden').setLabel(_("Build area shape"), _("The shape of machine build area."))
 setting('ultimaker_extruder_upgrade', 'False', bool, 'machine', 'hidden')
-setting('has_heated_bed', 'False', bool, 'machine', 'hidden').setLabel(_("Heated bed"), _("If you have an heated bed, this enabled heated bed settings (requires restart)"))
+setting('has_heated_bed', 'False', bool, 'machine', 'hidden').setLabel(_("Heated bed"), _("Heated bed support on/off."))
 setting('gcode_flavor', 'RepRap (Marlin/Sprinter)', ['RepRap (Marlin/Sprinter)', 'RepRap (Volumetric)', 'UltiGCode', 'MakerBot', 'BFB', 'Mach3/LinuxCNC'], 'machine', 'hidden').setLabel(_("GCode Flavor"), _("Flavor of generated GCode.\nRepRap is normal 5D GCode which works on Marlin/Sprinter based firmwares.\nUltiGCode is a variation of the RepRap GCode which puts more settings in the machine instead of the slicer.\nMakerBot GCode has a few changes in the way GCode is generated, but still requires MakerWare to generate to X3G.\nBFB style generates RPM based code.\nMach3 uses A,B,C instead of E for extruders."))
 setting('extruder_amount', '1', ['1','2','3','4','5'], 'machine', 'hidden').setLabel(_("Extruder count"), _("Amount of extruders in your machine."))
 setting('extruder_offset_x1', '0.0', float, 'machine', 'hidden').setLabel(_("Offset X"), _("The offset of your secondary extruder compared to the primary."))
@@ -550,11 +541,11 @@ setting('serial_port_auto', '', str, 'machine', 'hidden')
 setting('serial_baud', 'AUTO', str, 'machine', 'hidden').setLabel(_("Baudrate"), _("Speed of the serial port communication\nNeeds to match your firmware settings\nCommon values are 250000, 115200, 57600"))
 setting('serial_baud_auto', '', int, 'machine', 'hidden')
 
-setting('extruder_head_size_min_x', '0.0', float, 'machine', 'hidden').setLabel(_("Head size towards X min (mm)"), _("The head size when printing multiple objects, measured from the tip of the nozzle towards the outer part of the head."))
-setting('extruder_head_size_min_y', '0.0', float, 'machine', 'hidden').setLabel(_("Head size towards Y min (mm)"), _("The head size when printing multiple objects, measured from the tip of the nozzle towards the outer part of the head."))
-setting('extruder_head_size_max_x', '0.0', float, 'machine', 'hidden').setLabel(_("Head size towards X max (mm)"), _("The head size when printing multiple objects, measured from the tip of the nozzle towards the outer part of the head."))
-setting('extruder_head_size_max_y', '0.0', float, 'machine', 'hidden').setLabel(_("Head size towards Y max (mm)"), _("The head size when printing multiple objects, measured from the tip of the nozzle towards the outer part of the head."))
-setting('extruder_head_size_height', '0.0', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
+setting('extruder_head_size_min_x', '30', float, 'machine', 'hidden').setLabel(_("Head size towards X min (mm)"), _("The distance between left side of the print head to the nozzle."))
+setting('extruder_head_size_min_y', '55', float, 'machine', 'hidden').setLabel(_("Head size towards Y min (mm)"), _("The distance between the nozzle and right-most part of the print head."))
+setting('extruder_head_size_max_x', '30', float, 'machine', 'hidden').setLabel(_("Head size towards X max (mm)"), _("The distance between the the front (closest to you) fan and the nozzle."))
+setting('extruder_head_size_max_y', '60', float, 'machine', 'hidden').setLabel(_("Head size towards Y max (mm)"), _("The distance between the nozzle and the back-end (farthest from you) of the print head."))
+setting('extruder_head_size_height', '110', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
 
 validators.warningAbove(settingsDictionary['filament_flow'], 150, _("More flow than 150% is rare and usually not recommended."))
 validators.warningBelow(settingsDictionary['filament_flow'], 50, _("Less flow than 50% is rare and usually not recommended."))
@@ -567,11 +558,11 @@ validators.printSpeedValidator(settingsDictionary['infill_speed'])
 validators.printSpeedValidator(settingsDictionary['solidarea_speed'])
 validators.printSpeedValidator(settingsDictionary['inset0_speed'])
 validators.printSpeedValidator(settingsDictionary['insetx_speed'])
-validators.warningAbove(settingsDictionary['print_temperature'], 260.0, _("Temperatures above 260C could damage your machine, be careful!"))
-validators.warningAbove(settingsDictionary['print_temperature2'], 260.0, _("Temperatures above 260C could damage your machine, be careful!"))
-validators.warningAbove(settingsDictionary['print_temperature3'], 260.0, _("Temperatures above 260C could damage your machine, be careful!"))
-validators.warningAbove(settingsDictionary['print_temperature4'], 260.0, _("Temperatures above 260C could damage your machine, be careful!"))
-validators.warningAbove(settingsDictionary['print_temperature5'], 260.0, _("Temperatures above 260C could damage your machine, be careful!"))
+validators.warningAbove(settingsDictionary['print_temperature'], 300.0, _("Temperatures above 300C could damage your machine, be careful!"))
+validators.warningAbove(settingsDictionary['print_temperature2'], 300.0, _("Temperatures above 300C could damage your machine, be careful!"))
+validators.warningAbove(settingsDictionary['print_temperature3'], 300.0, _("Temperatures above 300C could damage your machine, be careful!"))
+validators.warningAbove(settingsDictionary['print_temperature4'], 300.0, _("Temperatures above 300C could damage your machine, be careful!"))
+validators.warningAbove(settingsDictionary['print_temperature5'], 300.0, _("Temperatures above 300C could damage your machine, be careful!"))
 validators.warningAbove(settingsDictionary['filament_diameter'], 3.5, _("Are you sure your filament is that thick? Normal filament is around 3mm or 1.75mm."))
 validators.warningAbove(settingsDictionary['filament_diameter2'], 3.5, _("Are you sure your filament is that thick? Normal filament is around 3mm or 1.75mm."))
 validators.warningAbove(settingsDictionary['filament_diameter3'], 3.5, _("Are you sure your filament is that thick? Normal filament is around 3mm or 1.75mm."))
@@ -704,6 +695,137 @@ def getDefaultProfilePath():
 	"""
 	return os.path.join(getBasePath(), 'current_profile.ini')
 
+
+
+# 
+def initializeOctoPrintAPIConfig(s,k):
+	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
+	cp = ConfigParser.ConfigParser()
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError:
+		return
+
+	if cp.has_section(s):
+		pass
+	
+	if len(cp.sections()) == 0 or not cp.has_section(s):
+		octoprintConfigFile = open(path, 'w+')
+		# create a section
+		cp.add_section(s)
+		# now that the section exists, give it a value
+		cp.set(s, 'apiKey', k.encode('utf-8'))
+		# write to file object
+
+		cp.write(octoprintConfigFile)		
+		octoprintConfigFile.close()
+
+	
+def getHeatedBedAlterationPath():
+		if tempOverride:
+			print tempOverride
+		else:
+			print "No temp override"
+		
+		alterationFileOptions = resources.getAlterationFiles()
+		print "Alteration file options: ", alterationFileOptions
+		altFile = None
+		startGCode = None
+		endGCode = None
+		
+		if getMachineSetting('has_heated_bed') == 'True':
+			heatedBed = True
+		else:
+			heatedBed = False
+			
+		for item in alterationFileOptions:
+			if os.path.basename(item) == 'series1_hasBed.ini' and heatedBed is True:
+				altFile = item
+			elif os.path.basename(item) == 'series1_noBed.ini' and heatedBed is False:
+				altFile = item
+		if altFile is not None: 		
+			return altFile
+		
+def setHeatedBedGCode():
+	path = getHeatedBedAlterationPath()
+	cp = ConfigParser.ConfigParser()
+		
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError as e:
+		print e
+			
+#	GCode = cp.get('alterations', sequence)
+#	setAlterationFile(sequence, GCode)
+	setAlterationFileFromFilePath(path)
+	
+	
+def getStartGCode():
+	path = getHeatedBedAlterationPath()
+	print "Start gcode path: ", path 
+	cp = ConfigParser.ConfigParser()
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError as e:
+		print e
+		
+	startGCode = cp.get('alterations', 'start.gcode')
+	
+	return startGCode
+	
+def getEndGCode():
+	path = getHeatedBedAlterationPath()
+	print "End gcode path: ", path
+	cp = ConfigParser.ConfigParser()
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError as e:
+		print e
+		
+	endGCode = cp.get('alterations', 'end.gcode')
+	return endGCode
+	
+def printerExists(s):
+	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
+	cp = ConfigParser.ConfigParser()
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError:
+		return
+		
+	if cp.has_section(s):
+		return True
+	else:
+		return False
+		
+		
+def OctoPrintConfigAPI(serial):
+	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
+	cp = ConfigParser.ConfigParser()
+
+	cp.read(path)
+	key = cp.get(serial, 'apiKey')
+	
+	return key
+	
+def OctoPrintAPIRemoveSerial(serial):
+	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
+	cp = ConfigParser.ConfigParser()
+	try:
+		cp.read(path)
+	except ConfigParser.ParsingError:
+		return
+	octoprintConfigFile = open(path, 'wb+')
+	if cp.has_section(serial):
+		cp.remove_section(serial)
+		print "Removing section ", serial
+		cp.write(octoprintConfigFile)
+	else:
+		print "Error: section does not exist"
+		return
+		
+	octoprintConfigFile.close()
+
 def loadProfile(filename, allMachines = False):
 	"""
 		Read a profile file as active profile settings.
@@ -796,6 +918,27 @@ def saveProfileDifferenceFromDefault(filename):
 	except:
 		print "Failed to write profile file: %s" % (filename)
 
+def saveProfileDifferenceFromDefault(filename):
+	"""
+		Save the current profile to an ini file. Only save the profile settings that differ from the default settings.
+	:param filename:    The ini filename to save the profile in.
+	"""
+	global settingsList
+	profileParser = ConfigParser.ConfigParser()
+	profileParser.add_section('profile')
+	for set in settingsList:
+		if set.isPreference() or set.isMachineSetting() or set.isAlteration():
+			continue
+		if set.getDefault() == set.getValue():
+			continue
+		profileParser.set('profile', set.getName(), set.getValue().encode('utf-8'))
+	try:
+		profileParser.write(open(filename, 'w'))
+	except:
+		print "Failed to write profile file: %s" % (filename)
+
+
+
 def resetProfile():
 	""" Reset the profile for the current machine to default. """
 	global settingsList
@@ -804,19 +947,8 @@ def resetProfile():
 			continue
 		set.setValue(set.getDefault())
 
-	if getMachineSetting('machine_type') == 'ultimaker':
-		putProfileSetting('nozzle_size', '0.4')
-		if getMachineSetting('ultimaker_extruder_upgrade') == 'True':
-			putProfileSetting('retraction_enable', 'True')
-	elif getMachineSetting('machine_type') == 'ultimaker_plus':
-		putProfileSetting('nozzle_size', '0.4')
-		putProfileSetting('retraction_enable', 'True')
-	elif getMachineSetting('machine_type').startswith('ultimaker2'):
-		putProfileSetting('nozzle_size', '0.4')
-		putProfileSetting('retraction_enable', 'True')
-	else:
-		putProfileSetting('nozzle_size', '0.5')
-		putProfileSetting('retraction_enable', 'True')
+	putProfileSetting('nozzle_size', '0.4')
+	putProfileSetting('retraction_enable', 'True')
 
 def setProfileFromString(options):
 	"""
@@ -994,6 +1126,7 @@ def savePreferences(filename):
 			parser.set('preference', set.getName(), set.getValue().encode('utf-8'))
 
 	n = 0
+	
 	while getMachineSetting('machine_name', n) != '':
 		parser.add_section('machine_%d' % (n))
 		for set in settingsList:
@@ -1277,7 +1410,7 @@ def getAlterationFile(filename):
 		return tempOverride[filename]
 	global settingsDictionary
 	if filename in settingsDictionary and settingsDictionary[filename].isAlteration():
-		return settingsDictionary[filename].getValue()
+			return settingsDictionary[filename].getValue()
 	traceback.print_stack()
 	sys.stderr.write('Error: "%s" not found in alteration settings\n' % (filename))
 	return ''
@@ -1287,15 +1420,22 @@ def setAlterationFileFromFilePath(file):
 	cp.read(file)
 	if cp.has_section('Alteration'):
 		startGCode = cp.get('Alteration', 'start.gcode')
-		print ("Start Gcode:\n%s\n\n\n") % startGCode
+	#	print ("Start Gcode:\n%s\n\n\n") % startGCode
 		endGCode = cp.get('Alteration', 'end.gcode')
-		print ("End Gcode:\n%s\n\n\n") % endGCode	
-		self.setAlterationFile('start.gcode', startGCode)
-		self.setAlterationFile('end.gcode', endGCode)
+	#	print ("End Gcode:\n%s\n\n\n") % endGCode
+	elif cp.has_section('alterations'):
+		startGCode = cp.get('alterations', 'start.gcode')
+	#	print ("Start Gcode:\n%s\n\n\n") % startGCode
+		endGCode = cp.get('alterations', 'end.gcode')
+	#	print ("End Gcode:\n%s\n\n\n") % endGCode
+		
+	setAlterationFile('start.gcode', startGCode)
+	setAlterationFile('end.gcode', endGCode)
 
 def setAlterationFile(name, value):
 	#Check if we have a configuration file loaded, else load the default.
 	global settingsDictionary
+#	print value
 	if name in settingsDictionary and settingsDictionary[name].isAlteration():
 		settingsDictionary[name].setValue(value)
 	saveProfile(getDefaultProfilePath(), True)

@@ -1,7 +1,9 @@
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura for Type A Machines) - Released under terms of the AGPLv3 License"
 
 import os
 import webbrowser
+from wx.lib.pubsub import pub
+import wx.lib.agw.hyperlink as hl
 import threading
 import time
 import math
@@ -9,14 +11,19 @@ import wx
 import re
 import wx.wizard
 import ConfigParser as configparser
+try:
+    from io import BytesIO
+except ImportError:
+    from StringIO import StringIO as BytesIO
 
 from Cura.gui import firmwareInstall
 from Cura.gui import printWindow
+from Cura.gui import sceneView
 from Cura.util import machineCom
 from Cura.util import profile
 from Cura.util import gcodeGenerator
 from Cura.util import resources
-
+from Cura.util import printerConnect
 
 class InfoBox(wx.Panel):
 	def __init__(self, parent):
@@ -115,51 +122,130 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		sizer = wx.GridBagSizer(5, 5)
 		self.sizer = sizer
 		self.SetSizer(sizer)
+		self.rowNr = 1
+		self.sizer.AddGrowableCol(0)
+		
+	def AddLogo(self):
+		curaTAMLogo = resources.getPathForImage('CuraTAMIcon.png')
+		self.AddImage(curaTAMLogo)
+	#	self.AddHiddenSeperator(1)
+		self.AddTextTitleBold('Cura For Type A Machines')
+		self.AddTextSubtitle('v1.3.4')
+		#	sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
+		self.AddHiddenSeperator(1)
 
-		title = wx.StaticText(self, -1, title)
-		title.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.BOLD))
-		sizer.Add(title, pos=(0, 0), span=(1, 2), flag=wx.ALIGN_CENTRE | wx.ALL)
-		sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
-		sizer.AddGrowableCol(1)
+	def AddHyperlink(self, text, url):
+		hyper1 = hl.HyperLinkCtrl(self, -1, text, URL=url)
+		font = wx.Font(pointSize=14, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.LIGHT)
+		hyper1.SetFont(font)
+		self.GetSizer().Add(hyper1, pos=(self.rowNr,0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return hyper1
 
-		self.rowNr = 2
+	def GuidedTourLogo(self):
+		curaTAMLogo = resources.getPathForImage('CuraTAMIcon.png')
+		self.AddImage(curaTAMLogo)
+	#	self.AddHiddenSeperator(1)
+		self.AddTextTitleBold('Cura For Type A Machines')
+		self.AddTextTagLine('Guided Tour')
+	#	self.AddHiddenSeperator(1)
 
+	def JustIconLogo(self):
+		curaTAMLogo = resources.getPathForImage('CuraTAMIconLarger.png')
+		self.AddImage(curaTAMLogo)
+		self.AddTextTitleBold('Cura For Type A Machines')
+	#	self.AddHiddenSeperator(1)
+		
+		
 	def AddText(self, info):
-		text = wx.StaticText(self, -1, info)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
 		text.SetFont(font)
-		text.Wrap(500)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT)
+		text.Wrap(400)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.EXPAND, border=100)
+		self.rowNr += 1
+		return text
+
+	def AddTextTip(self,info):
+		text = wx.StaticText(self, -1, info)
+		font = wx.Font(pointSize=12, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
+		text.SetFont(font)
+		text.Wrap(400)
+		self.GetSizer().Add(text, pos=(self.rowNr,0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return text
+		
+	def AddTextTagLine(self, info):
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.LIGHT)
+		text.SetFont(font)
+		text.Wrap(400)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return text
 		
 	def AddTextSubtitle(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=16, family = wx.DEFAULT,
-               style = wx.NORMAL, weight = wx.NORMAL)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
-		text.Wrap(500)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		text.Wrap(425)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.TOP, border=10)
 		self.rowNr += 1
 		return text
 		
 	def AddTextDescription(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=13.5, family = wx.DEFAULT,
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(300)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_LEFT)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.EXPAND, border=155)
 		self.rowNr += 1
 		return text
 		
+	def AddSeries1OptionsDescription(self, info):
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.NORMAL)
+		text.SetFont(font)
+		text.Wrap(300)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.EXPAND, border=100)
+		self.rowNr += 1
+		return text
+
 	def AddTextTitle(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
-		font = wx.Font(pointSize=24, family = wx.DEFAULT,
-               style = wx.NORMAL, weight = wx.BOLD)
+		font = wx.Font(pointSize=15, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
-		text.Wrap(500)
+		text.Wrap(400)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.BOTTOM, border=7)
+		self.rowNr += 1
+		return text
+		
+	def AddTextTitleBold(self, info):
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
+		font = wx.Font(pointSize=15, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		text.SetFont(font)
+		text.Wrap(400)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return text
+		
+	def AddErrorText(self, info, red=False):
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
+		font = wx.Font(pointSize=12, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.NORMAL)
+		text.SetFont(font)
+		if red:
+			text.SetForegroundColour('Red')
+		else:
+			text.SetForegroundColour('Black')
+			
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT | wx.EXPAND, border=140)
 		self.rowNr += 1
 		return text
 		
@@ -180,12 +266,24 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.rowNr += 1
 		return image
 
+	def AddGif(self, imagePath):
+		#Loading gif 
+		loadingGif = wx.animate.GIFAnimationCtrl(self, -1, imagePath)
+		loadingGif.Play()
+		
+		self.GetSizer().Add(loadingGif, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return loadingGif
+
 	def AddSeperator(self):
 		self.GetSizer().Add(wx.StaticLine(self, -1), pos=(self.rowNr, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 		self.rowNr += 1
 
-	def AddHiddenSeperator(self):
-		self.AddText("")
+	def AddHiddenSeperator(self, count):
+		if count < 1: 
+			count = 1
+		for x in range(0, count):
+			self.AddText("")
 
 	def AddInfoBox(self):
 		infoBox = InfoBox(self)
@@ -194,29 +292,48 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return infoBox
 
 	def AddRadioButton(self, label, style=0):
-		radio = wx.RadioButton(self, -1, label, style=style)
-		font = wx.Font(pointSize=20, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
+		radio = wx.RadioButton(self, -1, label)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
 		radio.SetFont(font)
-		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL | wx.ALIGN_CENTER)
+		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT, border=135)
+		self.rowNr += 1
+		return radio
+		
+	def AddRadioButtonThin(self, label, style=0):
+		radio = wx.RadioButton(self, -1, label)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		radio.SetFont(font)
+		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT, border=135)
 		self.rowNr += 1
 		return radio
 
 	def AddCheckbox(self, label, checked=False):
-		check = wx.CheckBox(self, -1)
-		text = wx.StaticText(self, -1, label)
-		font = wx.Font(pointSize=20, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
-		text.SetFont(font)
+		check = wx.CheckBox(self, -1, label)
+	#	text = wx.StaticText(self, -1, label)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
+		check.SetFont(font)
 		check.SetValue(checked)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT | wx.RIGHT)
-		self.GetSizer().Add(check, pos=(self.rowNr, 1), span=(1, 2), flag=wx.ALL)
+	#	self.GetSizer().Add(text, pos=(self.rowNr, 1), span=(1, 1))
+		self.GetSizer().Add(check, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return check
+
+	def AddMachineOptionCheckbox(self, label, checked=False):
+		check = wx.CheckBox(self, -1, label)
+	#	text = wx.StaticText(self, -1, label)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD)
+		check.SetFont(font)
+		check.SetValue(checked)
+	#	self.GetSizer().Add(text, pos=(self.rowNr, 1), span=(1, 1))
+		self.GetSizer().Add(check, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.RIGHT, border=150)
 		self.rowNr += 1
 		return check
 
 	def AddButton(self, label):
-		button = wx.Button(self, -1, label, style=wx.ALIGN_CENTER_HORIZONTAL)
-		font = wx.Font(pointSize=16, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
+		button = wx.Button(self, -1, str(label))
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		button.SetFont(font)
-		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT,  border=200)
+		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return button
 
@@ -229,16 +346,21 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return button1, button2
 
 	def AddTextCtrl(self, value):
-		ret = wx.TextCtrl(self, -1, value)
-		self.GetSizer().Add(ret, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT)
+		ret = wx.TextCtrl(self, -1, value, size=(200, 25))
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style=wx.NORMAL, weight = wx.LIGHT)
+		ret.SetFont(font)
+		self.GetSizer().Add(ret, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return ret
 
 	def AddLabelTextCtrl(self, info, value):
 		text = wx.StaticText(self, -1, info)
 		ret = wx.TextCtrl(self, -1, value)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.LEFT)
-		self.GetSizer().Add(ret, pos=(self.rowNr, 1), span=(1, 1), flag=wx.LEFT)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT,
+		style = wx.NORMAL, weight = wx.LIGHT)
+		text.SetFont(font)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,1), flag=wx.ALIGN_RIGHT | wx.LEFT, border=115)
+		self.GetSizer().Add(ret, pos=(self.rowNr, 1), span=(1, 2), )
 		self.rowNr += 1
 		return ret
 
@@ -255,6 +377,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.GetSizer().Add(bitmap, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT)
 		self.rowNr += 1
 		return bitmap
+		
 
 	def AddCheckmark(self, label, bitmap):
 		check = wx.StaticBitmap(self, -1, bitmap)
@@ -287,24 +410,15 @@ class FirstInfoPage(InfoPage):
 			
 		else:
 			super(FirstInfoPage, self).__init__(parent, _("Welcome"))
-			
-
 	
-		typeALogo = resources.getPathForImage('TypeALogo.png')
-		for n in range(0, 3):
-			self.AddHiddenSeperator()
+		typeALogo = resources.getPathForImage('TAMLogoAndText.png')
+		
 		self.AddImage(typeALogo)
-		for n in range(0, 5):
-			self.AddHiddenSeperator()
 		
-		if addNew: 
-			self.AddTextTitle(_("Thank you for trying Cura for Type A Machines!"))
-		else: 
-			self.AddTextTitle(_("Thank you for downloading Cura for Type A Machines!"))
-		
-		self.AddTextSubtitle(_("This wizard will help you set up Cura for your Series 1 and guide you through the Cura workflow."))
-		for n in range(0, 2):
-			self.AddHiddenSeperator()
+		self.AddTextTitle(_("Cura for Type A Machines\nConfigurator"))
+		self.AddHiddenSeperator(1)
+		self.AddTextSubtitle(_("Continue to select your model of 3D printer, install material profiles, and tour the core features of Cura for Type A Machines v1.3.4."))
+		self.AddHiddenSeperator(2)
 		# self.AddText(_("This wizard will help you with the following steps:"))
 		# self.AddText(_("* Configure Cura for your machine"))
 		# self.AddText(_("* Optionally upgrade your firmware"))
@@ -324,38 +438,28 @@ class FirstInfoPage(InfoPage):
 class MachineSelectPage(InfoPage):
 	def __init__(self, parent):
 		super(MachineSelectPage, self).__init__(parent, _("Select your machine"))
-		for n in range(0, 5):
-			self.AddHiddenSeperator()
+		self.AddLogo()
+		
+		self.AddHiddenSeperator(1)
+		self.AddTextTitle('Select your model of 3D printer:')
+		self.AddHiddenSeperator(1)
 		self.Series1_Pro_Radio = self.AddRadioButton("Series 1 Pro", style=wx.RB_GROUP)
 		self.Series1_Pro_Radio.SetValue(True)
-		self.AddTextDescription(_("\t(serial numbers 10,000+)"))
-		for n in range(0, 3):
-			self.AddHiddenSeperator()
+		self.AddTextDescription(_("#10000-99999"))
+		self.AddHiddenSeperator(1)
 		self.Series1_Radio = self.AddRadioButton("Series 1")
 		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
-		self.AddTextDescription(_("\t(serial numbers 1000+)"))
-		for n in range(0, 3):
-			self.AddHiddenSeperator()
-		
+		self.AddTextDescription(_("#1000-9999"))
+		self.AddHiddenSeperator(1)
 		self.Series1_Legacy = self.AddRadioButton("Legacy Series 1")
-		self.AddTextDescription(_("\t(serial numbers <1000)"))
-
-		for n in range(0, 3):
-			self.AddHiddenSeperator()
-
-		self.nonTAMRadio = self.AddRadioButton("Other")
-		for n in range(0, 2):
-			self.AddHiddenSeperator()
+		self.AddTextDescription(_("#001-999 (wooden frame)"))
+		self.AddHiddenSeperator(1)
+		self.nonTAMRadio = self.AddRadioButton("All other 3D printer models")
 			
 		self.nonTAMRadio.Bind(wx.EVT_RADIOBUTTON, self.OnNonTAM)
 		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
 		self.Series1_Pro_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1Pro)
 		self.Series1_Legacy.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1_Legacy)
-		
-		if self.Series1_Pro_Radio.GetValue():
-			profile.putMachineSetting('has_print_bed', "True")
-		else:
-			profile.putMachineSetting('has_print_bed', "False")
 		
 	def OnNonTAM(self, e):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().nonTAM)
@@ -364,6 +468,39 @@ class MachineSelectPage(InfoPage):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_select_options)
 	
 	def OnSeries1Pro(self, e):
+		profile.putMachineSetting('has_print_bed', "True")
+		profile.setAlterationFile('start.gcode',  """;-- START GCODE --
+	;Sliced for Type A Machines Series 1
+	;Sliced at: {day} {date} {time}
+	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+	;Print Speed: {print_speed} Support: {support}
+	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
+	;Print time: {print_time}
+	;Filament used: {filament_amount}m {filament_weight}g
+	;Filament cost: {filament_cost}
+	G21        ;metric values
+	G90        ;absolute positioning
+	G28     ;move to endstops
+	G29		;allows for auto-levelling
+	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
+	M140 S{print_bed_temperature} ;Prep Heat Bed
+	M109 S{print_temperature} ;Heat To temp
+	M190 S{print_bed_temperature} ;Heat Bed to temp
+	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
+	G92 E0 ;zero the extruded length
+	G1 F200 X250 E30 ;extrude 30mm of feed stock
+	G92 E0 ;zero the extruded length again
+	G1 X150 Y150  Z25 F12000 ;recenter and begin
+	G1 F{travel_speed}""")
+		profile.setAlterationFile('end.gcode', """;-- END GCODE --
+	M104 S0     ;extruder heater off
+	G91         ;relative positioning
+	M109 S0			;heated bed off
+	G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
+	G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
+	G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
+	M84           ;steppers off
+	G90           ;absolute positioning""")
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
 		
 	def OnSeries1_Legacy(self, e):
@@ -408,28 +545,29 @@ class MachineSelectPage(InfoPage):
 class TAMSelectOptions(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectOptions, self).__init__(parent, _("Options and Upgrades"))
+		self.AddLogo()
 		
 		for n in range(0,3):
-			self.AddHiddenSeperator()
+			self.AddHiddenSeperator(1)
 		
 		# G2 extruder
-		self.G2ExtruderCheckBox = self.AddCheckbox("G2 Extruder")
-		self.AddTextDescription("The G2 extruder is standard on all Series 1 3D Printers.\n\nIf you have an early 2014 Series 1 or a custom print head, please uncheck this option.")
+		self.G2ExtruderCheckBox = self.AddMachineOptionCheckbox("G2 Extruder")
+		self.AddSeries1OptionsDescription("The G2 extruder is standard on all Series 1 3D Printers.\n\nIf you have an early 2014 Series 1 or a custom print head, please uncheck this option.")
 		self.G2ExtruderCheckBox.SetValue(True)
 		
 		# Spacer
 		for n in range(0,3):
-			self.AddHiddenSeperator()
+			self.AddHiddenSeperator(1)
 
 		# Heated bed
-		self.HeatedBedCheckBox = self.AddCheckbox("Heated Bed")
-		self.AddTextDescription("*The heated bed upgrade is available for purchase on www.TypeAMachines.com/products")
+		self.HeatedBedCheckBox = self.AddMachineOptionCheckbox("Heated Bed")
+		self.AddSeries1OptionsDescription("The heated bed is available as an upgrade. Contact sales@typeamachines.com for more information.")
 		
 		# Spacer
 		for n in range(0,2):
-			self.AddHiddenSeperator()
+			self.AddHiddenSeperator(1)
 			
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
+		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_octoprint_config)
 	
 	def StoreData(self):
 		# Print temp 185 for non-G2
@@ -461,6 +599,15 @@ class TAMSelectOptions(InfoPage):
 	G92 E0 ;zero the extruded length again
 	G1 X150 Y150  Z25 F12000 ;recenter and begin
 	G1 F{travel_speed}""")
+			profile.setAlterationFile('end.gcode', """;-- END GCODE --
+	M104 S0     ;extruder heater off
+	G91         ;relative positioning
+	M109 S0			;heated bed off
+	G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
+	G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
+	G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
+	M84           ;steppers off
+	G90           ;absolute positioning""")
 		else:
 			print("No heated bed")
 			profile.putMachineSetting("has_heated_bed", "False")
@@ -498,122 +645,211 @@ G90           ;absolute positioning""")
 class TAMReadyPage(InfoPage):
 	def __init__(self, parent):
 		super(TAMReadyPage, self).__init__(parent, _("Configuration Complete"))
-		typeALogo = resources.getPathForImage('cura_banner.png')
-		for x in range(0,3):
-			self.AddHiddenSeperator()		
+		self.AddLogo()
+		typeALogo = resources.getPathForImage('configScreen.png')	
 		self.AddImage(typeALogo)
-		for x in range(0,3):
-			self.AddHiddenSeperator()
-		self.AddTextTitle(_("Cura for Type A Machines is now configured"))
-		self.AddTextSubtitle(_("Select 'Next' below for a quick overview on how to use Cura."))
-		self.AddHiddenSeperator()
-		self.skipTut = self.AddButton("Skip tutorial")
-		self.AddHiddenSeperator()
+		self.AddHiddenSeperator(1)
+		self.AddTextTitle(_("Configuration Complete"))
+		self.AddTextSubtitle(_("Click 'Next' for a guided tour of Cura for Type A Machines features."))
+		self.AddHiddenSeperator(1)
+		self.skipTut = self.AddCheckbox("Skip tutorial")
 
+		self.skipTut.Bind(wx.EVT_CHECKBOX, self.skipTutorial)
 
-
-		
-		self.skipTut.Bind(wx.EVT_BUTTON, self.skipTutorial)
-		
-		
 	def skipTutorial(self, e):
-		self.GetParent().Close()
+		print "Skip tutorial: %s" % e.IsChecked()
+		if e.IsChecked():
+			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_first_print)
+		else:
+			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_select_materials)
+					
+	def AllowBack(self):
+		return False
+
+
+class TAMOctoPrintInfo(InfoPage):
+	def __init__(self, parent):
+		super(TAMOctoPrintInfo, self).__init__(parent, _("Octoprint Configuration"))
+		
+		self.AddLogo()
+		self.validSerial = False
+		self.validKey = False
+		self.saveInfo = False
+		self.parent = parent
+		self.configurationAttemptedOnce = False
+		self.inputCheck = printerConnect.InputValidation()
+				
+		self.AddTextSubtitle("Cura for Type A Machines allows you to send your sliced files directly to your Series 1 Printer.")
+		self.AddTextSubtitle("Enter your serial number and API key below to configure this feature. You can also choose to do this later by checking the 'skip configuration' box.")
+	#	self.AddHiddenSeperator(1)
+		apiTip = resources.getPathForImage('apiTip.png')
+		self.AddImage(apiTip)
+		self.tip = self.AddTextTip('Tip: You can find the API key in the OctoPrint web interface by going to Settings --> API')	
+	#	self.AddHiddenSeperator(1)
+		self.serialNumber = self.AddLabelTextCtrl("Serial Number", "")
+		self.APIKey = self.AddLabelTextCtrl("API Key", "")
+	#	self.errorMessageln0 = self.AddErrorText(' ', customFontSize=12, customFlag=(wx.ALIGN_CENTRE_HORIZONTAL), red=True)
+		self.AddHiddenSeperator(1)
+
+		self.configurePrinterButton = self.AddButton("Configure")
+		self.AddHiddenSeperator(1)
+		self.skipConfig = self.AddCheckbox("Skip configuration for now", checked=False)
+		self.errorMessageln1 = self.AddErrorText('\n\n')
+		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
+		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
+#		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
+#		self.APIKey.Bind(wx.EVT_TEXT, self.checkKeyValidity)
+
+	def AllowBack(self):
+		return True
+		
+	def AllowNext(self):
+		return False
+		
+	def skipPage(self, e):
+		if self.skipConfig.GetValue():
+			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
+			self.configurePrinterButton.Disable()
+			# If the user decides to skip configuration, but has already attempted configuration,
+			# delete the printer from the archive
+			serial = self.serialNumber.GetValue()
+			profile.OctoPrintAPIRemoveSerial(serial)
+		else:
+			self.GetParent().FindWindowById(wx.ID_FORWARD).Disable()
+			self.configurePrinterButton.Enable()
+			self.passCheck()
+		self.errorMessageln1.SetLabel('')
+		
+
+	def checkSerialValidity(self, e):
+		id = self.serialNumber.GetValue()
+		validityCheck =  self.inputCheck.verifySerial(id)
+		print "Validity check: %s" % validityCheck
+		if validityCheck == 0:
+			self.validSerial = True
+			self.errorMessageln1.SetLabel("")
+		else:
+			self.errorMessageln1.SetForegroundColour('Red')
+			self.errorMessageln1.SetLabel("Serial number consists of 4-6 digits")
+
+	def unSavePrinter(self):
+		profile.OctoPrintAPIRemoveSerial(self.serialNumber)
 	
-	
+	# Key check
+	def checkKeyValidity(self, e):
+		key = self.APIKey.GetValue()
+		keyLength = len(key)
+		
+		validityCheck = self.inputCheck.verifyKey(key)
+		
+		if validityCheck == 0:
+			self.validKey = True
+			self.errorMessageln1.SetLabel("")
+		else:
+			self.validKey = False
+	#		self.errorMessageln0.SetLabel("Error")
+			self.errorMessageln1.SetForegroundColour('Red')
+			self.errorMessageln1.SetLabel("API key consists of 32 characters")
+
+		self.passCheck()
+
+	def passCheck(self):
+		if self.validSerial == True and self.validKey == True and not self.skipConfig.GetValue():
+			self.saveInfo = True
+		else:
+			self.saveInfo = False
+			
+	def attemptConfiguration(self, e):
+		key = self.APIKey.GetValue()
+		serial = self.serialNumber.GetValue()
+		saveInfo = self.saveInfo
+		self.configurationAttemptedOnce = True
+		#testConnection = printerConnect.TestConnection(serial, key, saveInfo)
+		self.errorMessageln1.SetLabel("Configuring...")
+		self.errorMessageln1.SetForegroundColour('Blue')
+		self.configurePrinterButton.Disable()
+
+		thread = printerConnect.ConfirmCredentials(self, True, key, serial, self.errorMessageln1)
+		thread.start()
+		
+	def StoreData(self):
+		serial = self.serialNumber.GetValue()
+		key = self.APIKey.GetValue()
+		
+		
+		if 	self.skipConfig.GetValue() == True and self.configurationAttemptedOnce == True:
+			if profile.configExists() and serial is None and key is not None:
+				profile.OctoPrintAPIRemoveSerial(serial)
+				print "Config does not exist yet."
+		else:
+			self.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
+
+
 class TAMSelectMaterials(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectMaterials, self).__init__(parent, _("Material Selection"))
-		for x in range(0,3):
-			self.AddHiddenSeperator()
+		self.GuidedTourLogo()
 		typeALogo = resources.getPathForImage('0mp.png')
 		self.AddImage(typeALogo)
 		self.addText()
 	
 	# General informative text
 	def addText(self):
-		for x in range(0,2):
-			self.AddHiddenSeperator()
-		self.AddTextTitle("Having the right Material matters")
-		self.AddTextSubtitle("Cura for Type A Machines includes presets for the majority of materials available for 3D printing. The current material is displayed in the first panel.")
+		self.AddTextTitleBold("Over 40 Materials Settings")
+		self.AddTextSubtitle("Select from over 40 material profiles in just two clicks from our rapidly growing portfolio of material profiles.\n\nEvery material profile is tested and optimized for the Series 1 and Series 1 Pro, eliminating the time and effort necessary for you to to determine optimal settings from scratch.")
 
 class TAMSelectStrength(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectStrength, self).__init__(parent, _("Strength Selection"))
-		for x in range(0,3):
-			self.AddHiddenSeperator()
+		self.GuidedTourLogo()
 		typeALogo = resources.getPathForImage('2st.png')
 		self.AddImage(typeALogo)
 		self.addText()
-
 	
 	# General informative text
 	def addText(self):
-		for x in range(0,2):
-			self.AddHiddenSeperator()
-		self.AddTextTitle("Better, faster, stronger")
-		self.AddTextSubtitle("Different materials have different properties. Materials have varied properties depending on its strength settings.")
-		for x in range(0,2):
-			self.AddHiddenSeperator()
-			
-		self.AddText("Tip: Selecting low quality and high strength will result in the strongest part possible for a given material.")
+		self.AddTextTitleBold("Strength")
+		self.AddTextSubtitle("Changing Strength settings changes the Wall Thickness and the Fill Density of the print. Selecting High Strength will result in a print that is much stronger, and for some designs it will also result in a smoother and higher quality print, but it will also use more filament and will require a longer print time. Selecting Low Strength will use less filament and result in a faster print, but the strength will be reduced as well.")
 
 class TAMSelectQuality(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectQuality, self).__init__(parent, _("Quality Selection"))
-		for x in range(0,3):
-			self.AddHiddenSeperator()
+		
+		self.GuidedTourLogo()
 		typeALogo = resources.getPathForImage('1qu.png')
 		self.AddImage(typeALogo)
 		self.addText()
 	
 	# General informative text
 	def addText(self):
-		for x in range(0,2):
-			self.AddHiddenSeperator()
-		self.AddTextTitle("Quality and quantity")
-		self.AddTextSubtitle("Quality controls how fine the resolution of your print will be. In general, higher resolution prints take longer than lower resolution prints.")
+		self.AddTextTitleBold("Quality and Speed")
+		self.AddTextSubtitle("Changing Quality settings changes the layer height of the print which changes the surface finish or smoothness of the print. A higher Quality print results in a smoother and more detailed print, but will also require a longer print time.\n\nYou may want to reserve higher Quality settings for final prints where the final surface will matter more. Draft quality can deliver significantly shorter print times.")
 
 class TAMSelectSupport(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectSupport, self).__init__(parent, _("Support Selection"))
-		for x in range(0,3):
-			self.AddHiddenSeperator()
+		self.GuidedTourLogo()
 		typeALogo = resources.getPathForImage('3sa.png')
 		self.AddImage(typeALogo)
-		for x in range(0,2):
-			self.AddHiddenSeperator()
-		self.AddTextTitle("Lean on me")
-		self.AddTextSubtitle("If a 3D model has an overhang, extra material may be needed for structural support. This material can be removed after printing.")
-		for x in range(0,2):
-			self.AddHiddenSeperator()		
-		self.AddTextSubtitle("A raft or brim helps the print adhere to the build plate. If you do not wish to have print support, please uncheck this option.")
-	
-		for x in range(0,2):
-			self.AddHiddenSeperator()
-			
-		self.AddText("Tip: You can preview the support materials by selecting the 'Layers' icon within the 'View Mode' icon located in the upper-right corner of the window.")
-		
+#		self.AddHiddenSeperator(1)
+		self.AddTextTitleBold("Support, Brims, and Rafts")
+		self.AddTextSubtitle("Support structures are built during printing and are manually removed after printing is complete. \n\nA brim surrounds the first layer to prevent edges from lifting. A raft prints a platform under the print to improve adhesion, especially with complex or delicate prints.\n\nTo preview these, click the 'View Mode' icon, then click 'Layers'.")
 class TAMFirstPrint(InfoPage):
 	def __init__(self, parent):
 		super(TAMFirstPrint, self).__init__(parent, _("Your First Print"))
-		for x in range(0,3):
-			self.AddHiddenSeperator()
-		typeALogo = resources.getPathForImage('TypeALogo.png')
-		self.AddImage(typeALogo)
-		for x in range(0,5):
-			self.AddHiddenSeperator()
-		self.AddTextTitle("Get your motor running")
-		self.AddTextSubtitle("It's time to start printing.")
-		self.AddHiddenSeperator()
-		self.AddTextSubtitle("Adjust the settings to your liking or leave the default configuration as-is. Select the 'save gcode' icon in the upper-left of to save your sliced file.")
-		for x in range(0,3):
-			self.AddHiddenSeperator()
-		self.AddTextSubtitle("Select 'Finish' below to load an example model.")
-
-
+		self.JustIconLogo()
+		self.AddTextTitleBold("Ready to Go")
+		self.AddTextSubtitle("This concludes the guided tour. Click 'Finish' and Cura for Type A Machines will open and automatically load an example model for you to use to become more familiar with the application.")
+		saveAndUploadImage = resources.getPathForImage('readyToGoPage.png')
+		self.AddImage(saveAndUploadImage)
+		gettingStarted = "Getting Started Page"
+		self.AddTextSubtitle("When you are ready to print, click the 'Save' or 'Upload' icons to save and start printing your 3D models.\n\nFor more info, visit our Getting Started Page at:")
+		self.AddHyperlink("http://www.typeamachines.com/gettingstarted", "http://www.typeamachines.com/gettingstarted")
+		
 class NonTAM(InfoPage):
 	def __init__(self, parent):
 		super(NonTAM, self).__init__(parent, _("Select Machine"))
+		self.GuidedTourLogo()
 		self.Ultimaker2Radio = self.AddRadioButton("Ultimaker2", style=wx.RB_GROUP)
 		self.Ultimaker2Radio.SetValue(True)
 		self.Ultimaker2Radio.Bind(wx.EVT_RADIOBUTTON, self.OnUltimaker2Select)
@@ -766,7 +1002,6 @@ class NonTAM(InfoPage):
 		else:
 			profile.putPreference('submit_slice_information', 'False')
 
-
 class PrintrbotPage(InfoPage):
 	def __init__(self, parent):
 		self._printer_info = [
@@ -851,7 +1086,6 @@ G1 F{travel_speed}
 M117 Printing...
 """)
 
-
 class OtherMachineSelectPage(InfoPage):
 	def __init__(self, parent):
 		super(OtherMachineSelectPage, self).__init__(parent, _("Other machine information"))
@@ -882,7 +1116,6 @@ class OtherMachineSelectPage(InfoPage):
 			if option.GetValue():
 				profile.loadProfile(option.filename)
 				profile.loadMachineSettings(option.filename)
-
 
 class OtherMachineInfoPage(InfoPage):
 	def __init__(self, parent):
@@ -928,14 +1161,14 @@ class UltimakerFirmwareUpgradePage(InfoPage):
 	def __init__(self, parent):
 		super(UltimakerFirmwareUpgradePage, self).__init__(parent, _("Upgrade Ultimaker Firmware"))
 		self.AddText(_("Firmware is the piece of software running directly on your 3D printer.\nThis firmware controls the step motors, regulates the temperature\nand ultimately makes your printer work."))
-		self.AddHiddenSeperator()
+		self.AddHiddenSeperator(1)
 		self.AddText(_("The firmware shipping with new Ultimakers works, but upgrades\nhave been made to make better prints, and make calibration easier."))
-		self.AddHiddenSeperator()
+		self.AddHiddenSeperator(1)
 		self.AddText(_("Cura requires these new features and thus\nyour firmware will most likely need to be upgraded.\nYou will get the chance to do so now."))
 		upgradeButton, skipUpgradeButton = self.AddDualButton('Upgrade to Marlin firmware', 'Skip upgrade')
 		upgradeButton.Bind(wx.EVT_BUTTON, self.OnUpgradeClick)
 		skipUpgradeButton.Bind(wx.EVT_BUTTON, self.OnSkipClick)
-		self.AddHiddenSeperator()
+		self.AddHiddenSeperator(1)
 		if profile.getMachineSetting('machine_type') == 'ultimaker':
 			self.AddText(_("Do not upgrade to this firmware if:"))
 			self.AddText(_("* You have an older machine based on ATMega1280 (Rev 1 machine)"))
@@ -1392,7 +1625,8 @@ class SelectParts(InfoPage):
 class ConfigWizard(wx.wizard.Wizard):
 	def __init__(self, addNew = False):
 		super(ConfigWizard, self).__init__(None, -1, _("Configuration Wizard"))
-
+		
+		# Get the number of the current machine and label it as the old index
 		self._old_machine_index = int(profile.getPreferenceFloat('active_machine'))
 		if addNew:
 			profile.setActiveMachine(profile.getMachineCount())
@@ -1406,6 +1640,7 @@ class ConfigWizard(wx.wizard.Wizard):
 		self.nonTAM = NonTAM(self)
 		self.tamReadyPage = TAMReadyPage(self)
 		self.TAM_select_materials = TAMSelectMaterials(self)
+		self.TAM_octoprint_config = TAMOctoPrintInfo(self)
 		self.TAM_select_options = TAMSelectOptions(self)
 		self.TAM_select_strength = TAMSelectStrength(self)
 		self.TAM_select_quality = TAMSelectQuality(self)
@@ -1427,11 +1662,12 @@ class ConfigWizard(wx.wizard.Wizard):
 		self.lulzbotReadyPage = LulzbotReadyPage(self)
 
 		wx.wizard.WizardPageSimple.Chain(self.firstInfoPage, self.machineSelectPage)
-		wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.tamReadyPage)
+		wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.TAM_octoprint_config)
+		wx.wizard.WizardPageSimple.Chain(self.TAM_octoprint_config, self.tamReadyPage)
 		wx.wizard.WizardPageSimple.Chain(self.tamReadyPage, self.TAM_select_materials)
-		wx.wizard.WizardPageSimple.Chain(self.TAM_select_materials, self.TAM_select_strength)
-		wx.wizard.WizardPageSimple.Chain(self.TAM_select_strength, self.TAM_select_quality)
-		wx.wizard.WizardPageSimple.Chain(self.TAM_select_quality, self.TAM_select_support)
+		wx.wizard.WizardPageSimple.Chain(self.TAM_select_materials, self.TAM_select_quality)
+		wx.wizard.WizardPageSimple.Chain(self.TAM_select_quality, self.TAM_select_strength)
+		wx.wizard.WizardPageSimple.Chain(self.TAM_select_strength, self.TAM_select_support)
 		wx.wizard.WizardPageSimple.Chain(self.TAM_select_support, self.TAM_first_print)
 		#wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)
 #		wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimakerSelectParts)
@@ -1443,7 +1679,7 @@ class ConfigWizard(wx.wizard.Wizard):
 		wx.wizard.WizardPageSimple.Chain(self.printrbotSelectType, self.otherMachineInfoPage)
 		wx.wizard.WizardPageSimple.Chain(self.otherMachineSelectPage, self.customRepRapInfoPage)
 
-		self.FitToPage(self.firstInfoPage)
+		self.FitToPage(self.TAM_select_materials)
 		self.GetPageAreaSizer().Add(self.firstInfoPage)
 
 		self.RunWizard(self.firstInfoPage)
@@ -1465,6 +1701,8 @@ class ConfigWizard(wx.wizard.Wizard):
 	def OnCancel(self, e):
 		profile.setActiveMachine(self._old_machine_index)
 
+	def disableNext(self):
+		self.FindWindowById(wx.ID_FORWARD).Disable()
 
 class bedLevelWizardMain(InfoPage):
 	def __init__(self, parent):
@@ -1973,3 +2211,5 @@ class headOffsetWizard(wx.wizard.Wizard):
 			self.FindWindowById(wx.ID_BACKWARD).Enable()
 		else:
 			self.FindWindowById(wx.ID_BACKWARD).Disable()
+			
+

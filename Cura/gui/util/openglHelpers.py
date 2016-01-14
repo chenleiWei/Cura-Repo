@@ -14,7 +14,12 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from OpenGL.GL import *
 from OpenGL.GL import shaders
-glutInit() #Hack; required before glut can be called. Not required for all OS.
+
+if bool(glutInit):
+	try:
+		glutInit() #Hack; required before glut can be called. Not required for all OS.
+	except Exception as e:
+		print e
 
 class GLReferenceCounter(object):
 	def __init__(self):
@@ -242,15 +247,26 @@ def glDrawStringCenter(s):
 	glRasterPos2f(0, 0)
 	glBitmap(0,0,0,0, -glGetStringSize(s)[0]/2, 0, None)
 	for c in s:
-		glutBitmapCharacter(OpenGL.GLUT.GLUT_BITMAP_HELVETICA_18, ord(c))
-
+		try:
+			if bool(glutBitmapCharacter):
+				glutBitmapCharacter(OpenGL.GLUT.GLUT_BITMAP_HELVETICA_18, ord(c))
+		except Exception as e:
+			print e
 def glGetStringSize(s):
 	"""
 	Get size in pixels of string
 	"""
 	width = 0
 	for c in s:
-		width += glutBitmapWidth(OpenGL.GLUT.GLUT_BITMAP_HELVETICA_18, ord(c))
+		try:
+			if bool(glutBitmapWidth):
+				try:
+					width += glutBitmapWidth(OpenGL.GLUT.GLUT_BITMAP_HELVETICA_18, ord(c))
+				except Exception as e:
+					print e
+		except exception as e:
+			print e
+
 	height = 18
 	return width, height
 
@@ -265,8 +281,11 @@ def glDrawStringLeft(s):
 			glRasterPos2f(0, 0)
 			glPopMatrix()
 		else:
-			glutBitmapCharacter(OpenGL.GLUT.GLUT_BITMAP_HELVETICA_18, ord(c))
-
+			if bool(glutBitmapCharacter):
+				try:
+					glutBitmapCharacter(OpenGL.GLUT.GLUT_BITMAP_HELVETICA_18, ord(c))
+				except Exception as e:
+					print e
 def glDrawStringRight(s):
 	glRasterPos2f(0, 0)
 	glBitmap(0,0,0,0, -glGetStringSize(s)[0], 0, None)
