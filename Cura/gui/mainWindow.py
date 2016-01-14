@@ -173,6 +173,13 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnNormalSwitch, i)
 		expertMenu.AppendSeparator()
 		
+		# add a checkmark to whichever mode is selected
+		if profile.getPreference('startMode') == 'Simple':
+			self.switchToQuickprintMenuItem.Check()
+		else:
+			self.switchToNormalMenuItem.Check()
+		
+		# opens the material profile selector window	
 		i = expertMenu.Append(-1, _("Load Material Profile"))
 		self.switchToNormalMenuItem = i
 		self.Bind(wx.EVT_MENU, self.OnMaterialProfileSelect, i)
