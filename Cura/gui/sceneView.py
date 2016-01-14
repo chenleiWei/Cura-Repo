@@ -174,7 +174,7 @@ class SceneView(openglGui.glGuiPanel):
 		self.printButton.setDisabled(False)
 		pub.sendMessage('upload.enabled', enable=True)
 		self.OnViewChange()
-		self.gcodePath = gcodePath
+		self.gcodePath = filename
 
 	def loadSceneFiles(self, filenames):
 		#if self.viewSelection.getValue() == 4:
