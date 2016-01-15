@@ -588,7 +588,6 @@ class mainWindow(wx.Frame):
 		self.updateSliceMode()
 
 	def OnMaterialProfileSelect(self, e):
-
 		materialSelector = materialProfileSelector.MaterialProfileSelector()
 		materialSelector.Show()
 		
