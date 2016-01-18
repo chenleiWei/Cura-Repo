@@ -128,10 +128,9 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddLogo(self):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
-	#	self.AddHiddenSeperator(1)
-		self.AddText('v1.4.0')
-		#	sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
+		self.AddTextTagLine('v1.4.0')
 		self.AddHiddenSeperator(1)
+		#	sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 
 	def AddHyperlink(self, text, url):
 		hyper1 = hl.HyperLinkCtrl(self, -1, text, URL=url)
@@ -146,13 +145,26 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
 		self.AddTextTagLine('Guided Tour')
-
-	def JustIconLogo(self):
-		curaTAMLogo = resources.getPathForImage('CuraTAMIconLarger.png')
-		self.AddImage(curaTAMLogo)
+		self.AddHiddenSeperator(1)
 		
+	def JustIconLogo(self):
+		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
+		self.AddImage(curaTAMLogo)
+		self.AddHiddenSeperator(1)
+		
+	# Left-aligned text
 	def AddText(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
+		font = wx.Font(pointSize=13, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
+		text.SetFont(font)
+		text.Wrap(325)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.rowNr += 1
+		return text
+		
+		# Center-aligned text
+	def AddCenteredText(self, info):
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
 		font = wx.Font(pointSize=13, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(325)
@@ -609,7 +621,7 @@ class TAMReadyPage(InfoPage):
 		self.AddImage(typeALogo)
 		self.AddHiddenSeperator(1)
 		self.AddTextTitle(_("Configuration Complete"))
-		self.AddText(_("Click 'Next' for a guided tour of Cura for Type A features."))
+		self.AddCenteredText(_("Click 'Next' for a guided tour of\nCura for Type A features."))
 		self.AddHiddenSeperator(1)
 		self.skipTut = self.AddCheckbox("Skip Tour")
 
@@ -744,7 +756,7 @@ class TAMSelectMaterials(InfoPage):
 		materialProfileImage = resources.getPathForImage('0mp.png')
 		self.AddImage(materialProfileImage)
 		self.AddTextTitle("Optimized Material Profiles")
-		self.AddText("Select from over 40 material profiles in just two clicks from our rapidly growing portfolio of material profiles.\n\nEvery material profile is tested and optimized for the Series 1 and Series 1 Pro, eliminating the time and effort necessary for you to to determine optimal settings from scratch.")
+		self.AddText("Select from over 40 material profiles in just two clicks from our rapidly growing portfolio of material profiles.\n\nEvery material profile is tested and optimized for the Series 1, eliminating the time and effort necessary to determine optimal settings from scratch.")
 
 class TAMSelectStrength(InfoPage):
 	def __init__(self, parent):
@@ -757,7 +769,7 @@ class TAMSelectStrength(InfoPage):
 	# General informative text
 	def addText(self):
 		self.AddTextTitle("Strength")
-		self.AddText("The Strength setting specifies Wall Thickness and Fill Density. High uses more filament and results in longer print times. The High setting can produce a more smoother, more consistent surface on some models.")
+		self.AddText("The Strength setting specifies Wall Thickness and Fill Density. The High setting will use more filament and result in longer print times, but can produce a smoother, more consistent surface on some models.")
 
 class TAMSelectQuality(InfoPage):
 	def __init__(self, parent):
@@ -771,7 +783,7 @@ class TAMSelectQuality(InfoPage):
 	# General informative text
 	def addText(self):
 		self.AddTextTitle("Quality")
-		self.AddText("The Quality setting specifies layer height determining detail. Final sets the smallest layer height producing the finest detail and longest print times.\n\nDraft specifies the largest layer height resulting in much shorter print times. Draft is often sufficient for most needs.")
+		self.AddText("The Quality setting specifies layer height determining detail. The Final setting determines the smallest layer height, producing the finest detail and longest print times.\n\nThe Draft setting determines the largest layer height resulting in much shorter print times. Draft is often sufficient for most needs.")
 
 class TAMSelectSupport(InfoPage):
 	def __init__(self, parent):
@@ -781,19 +793,18 @@ class TAMSelectSupport(InfoPage):
 		self.AddImage(typeALogo)
 #		self.AddHiddenSeperator(1)
 		self.AddTextTitle("Support, Brims, and Rafts")
-		self.AddText("Support includes structures added to the printer to support overhangs or help with adherence which are removed after printing is complete.\n\nA brim is a structure printed around the first layer to prevent the edges of a print from lifting.\n\nA raft is a platform on to which the model is printed printed to assist with adhesion especially with delicate prints.\n\nTo preview these structures, click the View Mode icon, then click Layers.")
+		self.AddText("Support includes structures added to the print to support overhangs or help with adherence, which are removed after printing is complete.\n\nA brim is a structure printed around the first layer to help prevent the edges of a print from lifting.\n\nA raft is a platform on to which the model is printed to assist with adhesion, especially with delicate prints.\n\nTo preview these structures, click the View Mode icon, then click Layers.")
 		
 class TAMFirstPrint(InfoPage):
 	def __init__(self, parent):
 		super(TAMFirstPrint, self).__init__(parent, _("Your First Print"))
-		self.GuidedTourLogo()
-		
-		self.AddText("This concludes the guided tour. Click 'Finish' and Cura for Type A will open and automatically load an example model for you to use to become more familiar with the application.")
+		self.JustIconLogo()
+		self.AddText("Click 'Finish' and Cura Type A will open and open an example model which you can use to become more familiar with the application.")
 		saveAndUploadImage = resources.getPathForImage('readyToGoPage.png')
 		self.AddImage(saveAndUploadImage)
 		gettingStarted = "Getting Started Page"
-		self.AddText("When you are ready to print, click the 'Save' or 'Upload' icons to save and start printing your 3D models.\n\nFor more info, visit our Getting Started Page at:")
-		self.AddHyperlink("http://www.typeamachines.com/gettingstarted", "http://www.typeamachines.com/gettingstarted")
+		self.AddText("When you are ready to print, click the 'Save' or 'Upload' icon to save and start printing your 3D models.\n\nFor more info, visit our Getting Started page:")
+		self.AddHyperlink("http://www.typeamachines.com/gettingstarted", "typeamachines.com/gettingstarted")
 		
 class NonTAM(InfoPage):
 	def __init__(self, parent):
