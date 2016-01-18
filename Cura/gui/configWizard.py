@@ -800,11 +800,13 @@ class TAMFirstPrint(InfoPage):
 		super(TAMFirstPrint, self).__init__(parent, _("Your First Print"))
 		self.JustIconLogo()
 		self.AddText("Click 'Finish' and Cura Type A will open and open an example model which you can use to become more familiar with the application.")
+		self.AddHiddenSeperator(1)
 		saveAndUploadImage = resources.getPathForImage('readyToGoPage.png')
 		self.AddImage(saveAndUploadImage)
 		gettingStarted = "Getting Started Page"
+		self.AddHiddenSeperator(1)
 		self.AddText("When you are ready to print, click the 'Save' or 'Upload' icon to save and start printing your 3D models.\n\nFor more info, visit our Getting Started page:")
-		self.AddHyperlink("http://www.typeamachines.com/gettingstarted", "typeamachines.com/gettingstarted")
+		self.AddHyperlink("typeamachines.com/gettingstarted", "typeamachines.com/gettingstarted")
 		
 class NonTAM(InfoPage):
 	def __init__(self, parent):
