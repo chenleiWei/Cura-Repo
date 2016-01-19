@@ -25,7 +25,7 @@ class newVersionDialog(wx.Dialog):
 		# Title text
 		title = wx.StaticText(p, -1, 'Cura - ' + version.getVersion())
 		title.SetFont(titleFont)
-		versionForked = wx.StaticText(p, -1, 'This version of Cura is based on Daid/Ultimaker\'s Cura v15.02.')
+		versionForked = wx.StaticText(p, -1, 'Based On Daid/Ultimaker\'s Cura v15.02.')
 		versionForked.SetFont(textFont)
 		s.Add(title, flag=wx.ALIGN_CENTRE|wx.EXPAND|wx.BOTTOM, border=5)
 		s.Add(versionForked)
