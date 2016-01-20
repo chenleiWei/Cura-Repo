@@ -58,7 +58,7 @@ class newVersionDialog(wx.Dialog):
 		feedbackTitle = wx.StaticText(p, -1, 'Bugs and Feedback')
 		feedbackTitle.SetFont(titleFont)
 		font = wx.StaticText(p, -1, "")
-		bugReportLink = hl.HyperLinkCtrl(p, -1, "typeamachines.com/bugreport", URL="http://www.typeamachines.com/bugreport")
+		bugReportLink = hl.HyperLinkCtrl(p, -1, "typeamachines.com/cura-beta", URL="http://www.typeamachines.com/cura-beta")
 		s.Add(feedbackTitle)
 		s.Add(bugReportLink)
 		

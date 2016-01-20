@@ -196,7 +196,7 @@ class mainWindow(wx.Frame):
 		i = helpMenu.Append(-1, _("Online Documentation..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://support.typeamachines.com/hc/en-us'), i)
 		i = helpMenu.Append(-1, _("Report a Problem..."))
-		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://typeamachines.com/bugreport'), i)
+		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://typeamachines.com/cura-beta'), i)
 		#i = helpMenu.Append(-1, _("Check for update..."))
 		#self.Bind(wx.EVT_MENU, self.OnCheckForUpdate, i)
 		i = helpMenu.Append(-1, _("Check for Update..."))
