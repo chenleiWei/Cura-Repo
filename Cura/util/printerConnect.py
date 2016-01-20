@@ -50,9 +50,9 @@ class ConfirmCredentials(threading.Thread):
 		self.serial = serial
 		self.errorMessage1 = errorMessage1		
 		self.success = False
-		self.status = None
 
 	def run(self):
+		status = None
 		r = requests.Session()
 		resourceBasePath = resources.resourceBasePath
 		filepath = os.path.join(resourceBasePath, 'example/dummy_code.gcode')
@@ -67,9 +67,16 @@ class ConfirmCredentials(threading.Thread):
 			print e
 			self.conveyError
 
-		print r.text
-		status = r.status_code
+		try: 
+			print r.text
+		except Exception as e:
+			print e
 		
+		try: 	
+			status = r.status_code
+		except Exception as e:
+			print e
+			
 		self.setStatusBasedText(status)
 
 	def setConfigText(self):
@@ -92,8 +99,9 @@ class ConfirmCredentials(threading.Thread):
 
 	def setStatusBasedText(self, status):
 		# 201 - File uploaded
-		print "Status line 86", status
-		if status == 201:
+		if status is None:
+			pass
+		elif status == 201:
 			profile.initializeOctoPrintAPIConfig(self.serial, self.key)
 			if self.configWizard:
 				self.parent.GetParent().FindWindowById(wx.ID_FORWARD).Enable()
@@ -105,14 +113,8 @@ class ConfirmCredentials(threading.Thread):
 				self.parent.addPrinterButton.Bind(wx.EVT_BUTTON, self.parent.OnClose)
 				self.parent.addPrinterButton.Enable()	
 				pub.sendMessage('printer.add', serial=self.serial)
-#				self.parent.openOctoPrintInBrowser == True:
-#				webbrowser.open_new('http:series1-%s.local:5000' % self.serial)
-#				self.parent.openOctoPrintInBrowser = False
-
-				
 			self.removeFile()
 			print "Removing file"
-
 		# 401 - Authentication error
 		elif status == 401:
 			self.errorMessage1.SetLabel("Invalid serial or API Key. Please try again.")
@@ -123,7 +125,7 @@ class ConfirmCredentials(threading.Thread):
 			else:
 				self.parent.configurePrinterButton.Enable()
 		else:
-			self.errorMessage1.SetLabel("Check that your printer is connected to the network")
+			self.errorMessage1.SetLabel(status)
 			if not self.configWizard:			
 				self.parent.successText.SetLabel("")
 			else:
@@ -163,7 +165,7 @@ class  GcodeUpload(threading.Thread):
 		filename = self.filename
 		
 		# Printer information
-		url = 'http://series1-%s.local:5000/api/files/local'  % self.serial
+		url = 'http://series1-%s.local:5000/api/files/local' % self.serial
 		header = {'X-Api-Key':self.key}
 		files = {'file': (filename, open(filepath, 'rb'), 'multipart/form-data')}
 		data = {'select': 'true', 'print': self.printOnUpload}
