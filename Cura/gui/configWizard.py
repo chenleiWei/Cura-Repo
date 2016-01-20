@@ -128,7 +128,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddLogo(self):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
-		self.AddTextTagLine('v1.4.0')
+		self.AddTextTagLine('v1.4.0 Beta 1')
 		#	sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 
 	def AddHyperlink(self, text, url):
@@ -205,7 +205,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=12, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
-		text.Wrap(200)
+		text.Wrap(230)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.EXPAND, border=130)
 		self.rowNr += 1
 		return text
@@ -533,7 +533,7 @@ class TAMSelectOptions(InfoPage):
 
 		# Heated bed
 		self.HeatedBedCheckBox = self.AddMachineOptionCheckbox("Heated Bed Installed")
-		self.AddSeries1OptionsDescription("The heated bed is available as an upgrade. Contact sales@typeamachines.com for more information.")
+		self.AddSeries1OptionsDescription("The heated bed is available\nas an upgrade. Contact sales@typeamachines.com\nfor more information.")
 		
 		# Spacer
 		for n in range(0,2):
@@ -807,7 +807,7 @@ class TAMFirstPrint(InfoPage):
 		self.AddHiddenSeperator(1)
 		self.AddText("When you are ready to print, click the 'Save' or 'Upload' icon to save and start printing your 3D models.")
 		self.AddCenteredText("For more information, visit our Getting Started page:")
-		self.AddHyperlink("typeamachines.com/gettingstarted", "typeamachines.com/gettingstarted")
+		self.AddHyperlink("typeamachines.com/gettingstarted", "http://www.typeamachines.com/gettingstarted")
 		
 class NonTAM(InfoPage):
 	def __init__(self, parent):
