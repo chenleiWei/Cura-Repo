@@ -695,9 +695,7 @@ def getDefaultProfilePath():
 	"""
 	return os.path.join(getBasePath(), 'current_profile.ini')
 
-
-
-# 
+ 
 def initializeOctoPrintAPIConfig(s,k):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
 	cp = ConfigParser.ConfigParser()
@@ -790,6 +788,13 @@ def printerExists(s):
 	else:
 		return False
 		
+def configExists():
+	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
+	
+	if path:
+		return path
+	else:
+		return None
 		
 def OctoPrintConfigAPI(serial):
 	path = os.path.join(getBasePath(), 'octoprint_api_config.ini')
@@ -939,6 +944,8 @@ def resetProfile():
 			continue
 		set.setValue(set.getDefault())
 
+	putProfileSetting('nozzle_size', '0.4')    #Changed from 0.5 to 0.4
+	putProfileSetting('retraction_enable', 'True')
 
 def setProfileFromString(options):
 	"""
