@@ -205,8 +205,8 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=12, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
-		text.Wrap(300)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.EXPAND, border=100)
+		text.Wrap(200)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.EXPAND, border=130)
 		self.rowNr += 1
 		return text
 
@@ -307,7 +307,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=12, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		check.SetFont(font)
 		check.SetValue(checked)
-		self.GetSizer().Add(check, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.RIGHT, border=150)
+		self.GetSizer().Add(check, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_LEFT | wx.LEFT, border=130)
 		self.rowNr += 1
 		return check
 
@@ -341,7 +341,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=12, family = wx.DEFAULT,
 		style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.ALIGN_RIGHT | wx.LEFT, border=30)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.ALIGN_RIGHT | wx.LEFT, border=45)
 		self.GetSizer().Add(ret, pos=(self.rowNr, 1), span=(1, 1), flag=wx.CENTER)
 		self.rowNr += 1
 		return ret
@@ -521,6 +521,8 @@ class TAMSelectOptions(InfoPage):
 			self.AddHiddenSeperator(1)
 		
 		# G2 extruder
+		g2ExtruderImage = resources.getPathForImage('g2Extruder.png')
+		self.AddImage(g2ExtruderImage)
 		self.G2ExtruderCheckBox = self.AddMachineOptionCheckbox("G2 Extruder")
 		self.AddSeries1OptionsDescription("If you have an extruder that's not the G2, please uncheck this option.")
 		self.G2ExtruderCheckBox.SetValue(True)
@@ -740,7 +742,7 @@ class TAMOctoPrintInfo(InfoPage):
 		
 		
 		if 	self.skipConfig.GetValue() == True and self.configurationAttemptedOnce == True:
-			if profile.configExists() and serial is None and key is not None:
+			if profile.configExists() is not None and serial is None and key is not None:
 				profile.OctoPrintAPIRemoveSerial(serial)
 				print "Config does not exist yet."
 		else:
