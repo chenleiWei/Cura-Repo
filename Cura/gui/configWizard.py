@@ -663,7 +663,10 @@ class TAMOctoPrintInfo(InfoPage):
 		self.errorMessageln1 = self.AddErrorText('\n\n')
 		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
 		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
-
+		self.configurePrinterButton.Disable()
+		
+		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
+		
 	def AllowBack(self):
 		return True
 		
@@ -692,9 +695,11 @@ class TAMOctoPrintInfo(InfoPage):
 		if validityCheck == 0:
 			self.validSerial = True
 			self.errorMessageln1.SetLabel("")
+			self.configurePrinterButton.Enable()
 		else:
 			self.errorMessageln1.SetForegroundColour('Red')
 			self.errorMessageln1.SetLabel("Serial number consists of 4-6 digits")
+			self.configurePrinterButton.Disable()
 
 	def unSavePrinter(self):
 		profile.OctoPrintAPIRemoveSerial(self.serialNumber)
