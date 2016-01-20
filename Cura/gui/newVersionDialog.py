@@ -1,9 +1,11 @@
 __copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
 
 import wx
+import wx.lib.agw.hyperlink as hl
 from Cura.gui import firmwareInstall
 from Cura.util import version
 from Cura.util import profile
+
 
 class newVersionDialog(wx.Dialog):
 	def __init__(self):
@@ -23,7 +25,7 @@ class newVersionDialog(wx.Dialog):
 		textFont = wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL)
 
 		# Title text
-		title = wx.StaticText(p, -1, 'Cura - ' + version.getVersion())
+		title = wx.StaticText(p, -1, 'Cura Type A - ' + version.getVersion())
 		title.SetFont(titleFont)
 		versionForked = wx.StaticText(p, -1, 'Based On Daid/Ultimaker\'s Cura v15.02.')
 		versionForked.SetFont(textFont)
@@ -39,27 +41,34 @@ class newVersionDialog(wx.Dialog):
 		# Bullet point list
 		# Add or remove static text objects as needed
 		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing, all with a single click"),
+			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing, all with a single click."),
 			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu."),
-			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching"),
+			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching."),
 			wx.StaticText(p, -1, "* New optimized material profiles added: PolyMaker PC Plus, 3DOM PLA."),
 		]
 			
-	
 		# Add bullet points
 		for item in changesAndAdditions:
 			item.SetFont(textFont)
 			item.Wrap(600)
 			s.Add(item, flag=wx.TOP, border=10)
 
-
+		# Note for Beta Testers
+		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
+		feedbackTitle = wx.StaticText(p, -1, 'Bugs and Feedback')
+		feedbackTitle.SetFont(titleFont)
+		font = wx.StaticText(p, -1, "")
+		bugReportLink = hl.HyperLinkCtrl(p, -1, "typeamachines.com/bugreport", URL="http://www.typeamachines.com/bugreport")
+		s.Add(feedbackTitle)
+		s.Add(bugReportLink)
+		
 		self.hasUltimaker = None
 		self.hasUltimaker2 = None
 
 	#	s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
 		button = wx.Button(p, -1, 'Ok')
 		button.Bind(wx.EVT_BUTTON, self.OnOk)
-		s.Add(button, flag=wx.TOP|wx.ALIGN_RIGHT, border=7)
+		s.Add(button, flag=wx.TOP|wx.ALIGN_CENTRE | wx.ALL, border=10)
 
 		self.Fit()
 		self.Centre()
