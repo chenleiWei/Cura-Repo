@@ -128,7 +128,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddLogo(self):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
-		self.AddTextTagLine('v1.4.0 Beta')
+		self.AddTextTagLine('v1.4.0 Beta 1')
 		#	sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 
 	def AddHyperlink(self, text, url):
@@ -663,7 +663,10 @@ class TAMOctoPrintInfo(InfoPage):
 		self.errorMessageln1 = self.AddErrorText('\n\n')
 		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
 		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
-
+		self.configurePrinterButton.Disable()
+		
+		self.serialNumber.Bind(wx.EVT_TEXT, self.checkSerialValidity)
+		
 	def AllowBack(self):
 		return True
 		
@@ -692,9 +695,11 @@ class TAMOctoPrintInfo(InfoPage):
 		if validityCheck == 0:
 			self.validSerial = True
 			self.errorMessageln1.SetLabel("")
+			self.configurePrinterButton.Enable()
 		else:
 			self.errorMessageln1.SetForegroundColour('Red')
 			self.errorMessageln1.SetLabel("Serial number consists of 4-6 digits")
+			self.configurePrinterButton.Disable()
 
 	def unSavePrinter(self):
 		profile.OctoPrintAPIRemoveSerial(self.serialNumber)
@@ -807,7 +812,7 @@ class TAMFirstPrint(InfoPage):
 		self.AddHiddenSeperator(1)
 		self.AddText("When you are ready to print, click the 'Save' or 'Upload' icon to save and start printing your 3D models.")
 		self.AddCenteredText("For more information, visit our Getting Started page:")
-		self.AddHyperlink("typeamachines.com/gettingstarted", "typeamachines.com/gettingstarted")
+		self.AddHyperlink("typeamachines.com/gettingstarted", "http://www.typeamachines.com/gettingstarted")
 		
 class NonTAM(InfoPage):
 	def __init__(self, parent):
