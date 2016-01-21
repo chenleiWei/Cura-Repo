@@ -144,12 +144,10 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
 		self.AddTextTagLine('Guided Tour')
-		self.AddHiddenSeperator(1)
 		
 	def JustIconLogo(self):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
-		self.AddHiddenSeperator(1)
 		
 	# Left-aligned text
 	def AddText(self, info):
