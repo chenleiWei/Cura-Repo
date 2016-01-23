@@ -363,12 +363,6 @@ class mainWindow(wx.Frame):
 		self.simpleSettingsPanel.Show(isSimple)
 		self.leftPane.Layout()
 
-		for i in self.normalModeOnlyItems:
-			i.Enable(not isSimple)
-		if isSimple:
-			self.switchToQuickprintMenuItem.Check()
-		else:
-			self.switchToNormalMenuItem.Check()
 
 		# Set splitter sash position & size
 		if isSimple:
