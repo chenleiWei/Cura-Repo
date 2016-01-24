@@ -25,7 +25,7 @@ class newVersionDialog(wx.Dialog):
 		textFont = wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL)
 
 		# Title text
-		title = wx.StaticText(p, -1, 'Cura Type A - ' + version.getVersion())
+		title = wx.StaticText(p, -1, 'Cura Type A - Beta ' + version.getVersion())
 		title.SetFont(titleFont)
 		versionForked = wx.StaticText(p, -1, 'Based On Daid/Ultimaker\'s Cura v15.02.')
 		versionForked.SetFont(textFont)
@@ -33,8 +33,15 @@ class newVersionDialog(wx.Dialog):
 		s.Add(versionForked)
 		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
 	
+		bugFixTitle = wx.StaticText(p, -1, "Bug Fixes:")
+		bugFixTitle.SetFont(titleFont)
+		bugsFixed = wx.StaticText(p, -1, "* SLIC-318 - Exiting Expert Mode will no longer result in a crash.")
+		
+		s.Add(bugFixTitle, flag=wx.TOP, border=10)
+		s.Add(bugsFixed, flag=wx.BOTTOM | wx.EXPAND, border=10)
+
 		# "New in This Version" label
-		newHere = wx.StaticText(p, -1, 'New in this version:')
+		newHere = wx.StaticText(p, -1, "New in Cura 1.4.0")
 		newHere.SetFont(headerFont)
 		s.Add(newHere)
 	
