@@ -56,7 +56,6 @@ class newVersionDialog(wx.Dialog):
 			
 		# Add bullet points
 		for item in changesAndAdditions:
-			item.SetFont(textFont)
 			item.Wrap(600)
 			s.Add(item, flag=wx.TOP, border=10)
 
