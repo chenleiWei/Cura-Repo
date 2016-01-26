@@ -128,7 +128,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddLogo(self):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
-		self.AddTextTagLine('v1.4.0 Beta 1')
+		self.AddTextTagLine('v1.4.0 Beta 3')
 		#	sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 
 	def AddHyperlink(self, text, url):
@@ -772,7 +772,7 @@ class TAMSelectStrength(InfoPage):
 	# General informative text
 	def addText(self):
 		self.AddTextTitle("Strength")
-		self.AddText("The Strength setting specifies Wall Thickness and Fill Density. The High setting will use more filament and result in longer print times, but can produce a smoother, more consistent surface on some models.")
+		self.AddText("The Strength setting specifies Wall Thickness and Fill Density. The High setting will use more filament and result in longer print times, but can produce much stronger objects.")
 
 class TAMSelectQuality(InfoPage):
 	def __init__(self, parent):
