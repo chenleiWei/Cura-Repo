@@ -31,19 +31,29 @@ class newVersionDialog(wx.Dialog):
 		versionForked.SetFont(textFont)
 		s.Add(title, flag=wx.ALIGN_CENTRE|wx.EXPAND|wx.BOTTOM, border=5)
 		s.Add(versionForked)
-		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
+		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=5)
 	
-		bugFixTitle = wx.StaticText(p, -1, "Bug Fixes:")
+		bugFixTitle = wx.StaticText(p, -1, "Recent Bug Fixes")
 		bugFixTitle.SetFont(titleFont)
-		bugsFixed = wx.StaticText(p, -1, "* SLIC-318 - Exiting Expert Mode will no longer result in a crash.")
+		bugsFixed = [
+			wx.StaticText(p, -1, "* SLIC-313 - Configuration wizard copy edits."),
+			wx.StaticText(p, -1, "* SLIC-314 - Edits to material profile tour text."),
+			wx.StaticText(p, -1, "* SLIC-315 - More configuration copy edits."),
+			wx.StaticText(p, -1, "* SLIC-318 - Exiting Expert Mode will no longer result in a crash."),
+			wx.StaticText(p, -1, "* SLIC-319 - revised retraction distance tooltip text.")
+		]
+	
+		s.Add(bugFixTitle, flag=wx.TOP, border=5)
+		for count in bugsFixed:
+			s.Add(count, flag=wx.TOP | wx.EXPAND, border=5)
 		
-		s.Add(bugFixTitle, flag=wx.TOP, border=10)
-		s.Add(bugsFixed, flag=wx.BOTTOM | wx.EXPAND, border=10)
+		
+		
 
 		# "New in This Version" label
 		newHere = wx.StaticText(p, -1, "New in Cura 1.4.0")
-		newHere.SetFont(headerFont)
-		s.Add(newHere)
+		newHere.SetFont(titleFont)
+		s.Add(newHere, flag=wx.TOP, border=10)
 	
 		# Bullet point list
 		# Add or remove static text objects as needed
@@ -57,10 +67,10 @@ class newVersionDialog(wx.Dialog):
 		# Add bullet points
 		for item in changesAndAdditions:
 			item.Wrap(600)
-			s.Add(item, flag=wx.TOP, border=10)
+			s.Add(item, flag=wx.TOP, border=5)
 
 		# Note for Beta Testers
-		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
+		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=5)
 		feedbackTitle = wx.StaticText(p, -1, 'Bugs and Feedback')
 		feedbackTitle.SetFont(titleFont)
 		font = wx.StaticText(p, -1, "")
@@ -74,7 +84,7 @@ class newVersionDialog(wx.Dialog):
 	#	s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
 		button = wx.Button(p, -1, 'Ok')
 		button.Bind(wx.EVT_BUTTON, self.OnOk)
-		s.Add(button, flag=wx.TOP|wx.ALIGN_CENTRE | wx.ALL, border=10)
+		s.Add(button, flag=wx.TOP|wx.ALIGN_CENTRE | wx.ALL, border=5)
 
 		self.Fit()
 		self.Centre()

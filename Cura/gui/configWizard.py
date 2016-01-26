@@ -1,4 +1,4 @@
-__copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura for Type A Machines) - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura Type A Machines) - Released under terms of the AGPLv3 License"
 
 import os
 import webbrowser
@@ -128,7 +128,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddLogo(self):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
-		self.AddTextTagLine('v1.4.0 Beta 2')
+		self.AddTextTagLine('v1.4.0 Beta 3')
 		#	sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 
 	def AddHyperlink(self, text, url):
@@ -531,7 +531,7 @@ class TAMSelectOptions(InfoPage):
 
 		# Heated bed
 		self.HeatedBedCheckBox = self.AddMachineOptionCheckbox("Heated Bed Installed")
-		self.AddSeries1OptionsDescription("The heated bed is available as an upgrade. Contact sales@typeamachines.com for more information.")
+		self.AddSeries1OptionsDescription("The heated bed is available\nas an upgrade. Contact sales@typeamachines.com\nfor more information.")
 		
 		# Spacer
 		for n in range(0,2):
@@ -620,7 +620,7 @@ class TAMReadyPage(InfoPage):
 		self.AddImage(typeALogo)
 		self.AddHiddenSeperator(1)
 		self.AddTextTitle(_("Configuration Complete"))
-		self.AddCenteredText(_("Click 'Next' for a guided tour of\nCura for Type A features."))
+		self.AddCenteredText(_("Click 'Next' for a guided tour of\nCura Type A features."))
 		self.AddHiddenSeperator(1)
 		self.skipTut = self.AddCheckbox("Skip Tour")
 
@@ -759,7 +759,7 @@ class TAMSelectMaterials(InfoPage):
 		materialProfileImage = resources.getPathForImage('0mp.png')
 		self.AddImage(materialProfileImage)
 		self.AddTextTitle("Optimized Material Profiles")
-		self.AddText("Select from over 40 material profiles in just two clicks from our rapidly growing portfolio of material profiles.\n\nEvery material profile is tested and optimized for the Series 1, eliminating the time and effort necessary to determine optimal settings from scratch.")
+		self.AddText("Select from over 40 material profiles from our rapidly growing portfolio of material profiles.\n\nEvery material profile is tested and optimized for the Series 1, eliminating the time and effort necessary to determine optimal settings from scratch.")
 
 class TAMSelectStrength(InfoPage):
 	def __init__(self, parent):
@@ -772,7 +772,7 @@ class TAMSelectStrength(InfoPage):
 	# General informative text
 	def addText(self):
 		self.AddTextTitle("Strength")
-		self.AddText("The Strength setting specifies Wall Thickness and Fill Density. The High setting will use more filament and result in longer print times, but can produce a smoother, more consistent surface on some models.")
+		self.AddText("The Strength setting specifies Wall Thickness and Fill Density. The High setting will use more filament and result in longer print times, but can produce much stronger objects.")
 
 class TAMSelectQuality(InfoPage):
 	def __init__(self, parent):
