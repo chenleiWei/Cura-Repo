@@ -21,19 +21,19 @@ class newVersionDialog(wx.Dialog):
 		
 		# Fonts
 		titleFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)
-		headerFont = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+		headerFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 		textFont = wx.Font(11, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 
 		# Title text
 		title = wx.StaticText(p, -1, 'Cura Type A - Beta ' + version.getVersion())
 		title.SetFont(titleFont)
 		versionForked = wx.StaticText(p, -1, 'Based On Daid/Ultimaker\'s Cura v15.02.')
-		versionForked.SetFont(textFont)
+		versionForked.SetFont(headerFont)
 		s.Add(title, flag=wx.ALIGN_CENTRE|wx.EXPAND|wx.BOTTOM, border=5)
 		s.Add(versionForked)
 		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=5)
 	
-		bugFixTitle = wx.StaticText(p, -1, "Bug Fixes:")
+		bugFixTitle = wx.StaticText(p, -1, "Bug Fixes")
 		bugFixTitle.SetFont(titleFont)
 		bugsFixed = [
 			wx.StaticText(p, -1, "* SLIC-313 - Configuration wizard copy edits."),
@@ -52,7 +52,7 @@ class newVersionDialog(wx.Dialog):
 
 		# "New in This Version" label
 		newHere = wx.StaticText(p, -1, "New in Cura 1.4.0")
-		newHere.SetFont(headerFont)
+		newHere.SetFont(titleFont)
 		s.Add(newHere, flag=wx.TOP, border=10)
 	
 		# Bullet point list
