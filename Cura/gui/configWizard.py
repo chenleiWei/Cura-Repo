@@ -1,4 +1,4 @@
-__copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura for Type A Machines) - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura Type A Machines) - Released under terms of the AGPLv3 License"
 
 import os
 import webbrowser
@@ -620,7 +620,7 @@ class TAMReadyPage(InfoPage):
 		self.AddImage(typeALogo)
 		self.AddHiddenSeperator(1)
 		self.AddTextTitle(_("Configuration Complete"))
-		self.AddCenteredText(_("Click 'Next' for a guided tour of\nCura for Type A features."))
+		self.AddCenteredText(_("Click 'Next' for a guided tour of\nCura Type A features."))
 		self.AddHiddenSeperator(1)
 		self.skipTut = self.AddCheckbox("Skip Tour")
 
