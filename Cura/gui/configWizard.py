@@ -759,7 +759,7 @@ class TAMSelectMaterials(InfoPage):
 		materialProfileImage = resources.getPathForImage('0mp.png')
 		self.AddImage(materialProfileImage)
 		self.AddTextTitle("Optimized Material Profiles")
-		self.AddText("Select from over 40 material profiles in just two clicks from our rapidly growing portfolio of material profiles.\n\nEvery material profile is tested and optimized for the Series 1, eliminating the time and effort necessary to determine optimal settings from scratch.")
+		self.AddText("Select from over 40 material profiles from our rapidly growing portfolio of material profiles.\n\nEvery material profile is tested and optimized for the Series 1, eliminating the time and effort necessary to determine optimal settings from scratch.")
 
 class TAMSelectStrength(InfoPage):
 	def __init__(self, parent):
