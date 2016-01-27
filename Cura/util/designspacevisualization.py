@@ -23,6 +23,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import scipy.interpolate
 import time
 import datetime
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 class dsvDialog(wx.Dialog):
 	def __init__(self, parent):
@@ -72,8 +75,7 @@ class dsvDialog(wx.Dialog):
 		self.gauge = wx.Gauge(left, id=-1, range=24,size = ((left.GetSize()[1]*pointsize)-(pointsize*5),pointsize),pos = (10,wx.SystemSettings.GetFont(wx.SYS_ANSI_VAR_FONT).GetPointSize()*(left.GetSizer().GetRows()+4))) 
 
 		self.nozzleSize = profile.getProfileSettingFloat('nozzle_size')
-		print self.nozzleSize
-
+		#print self.nozzleSize
 		main.Fit()
 		self.Fit()
 
@@ -185,12 +187,16 @@ class dsvDialog(wx.Dialog):
 
 
 	def run2d(self,X,Y,Z):
-	  import matplotlib.pyplot as plt
+	  #import matplotlib.pyplot as plt
 	  from scipy.interpolate import interp1d
 
+	  sns.set_style("white")
+	  #plt.plot(np.cumsum(np.random.randn(1000,1)))
+	  #plt.show()
+
 	
-	  #matplotlib.rcParams['toolbar'] = 'None'
- 	  matplotlib.rcParams['toolbar'] = 'toolbar2'	  
+	  matplotlib.rcParams['toolbar'] = 'None'
+ 	  #matplotlib.rcParams['toolbar'] = 'toolbar2'	  
 
 	  fig = plt.figure(facecolor='w')
  	  
@@ -251,13 +257,15 @@ class dsvDialog(wx.Dialog):
 #	  print "fig.canvas",fig.canvas
 #	  print "fig.canvas.manager", fig.canvas.manager
 #	  print "fig.canvas.manager.toolbar", fig.canvas.manager.toolbar
-	  fig.canvas.manager.toolbar.set_message("")
+#	  fig.canvas.manager.toolbar.set_message("")
 
 
 	def run3d(self,X,Y,Z):
 		import matplotlib.pyplot as plt
-		#matplotlib.rcParams['toolbar'] = 'None'
-		matplotlib.rcParams['toolbar'] = 'toolbar2'
+		sns.set_style("whitegrid")
+
+		matplotlib.rcParams['toolbar'] = 'None'
+		#matplotlib.rcParams['toolbar'] = 'toolbar2'
 		fig = plt.figure(facecolor='w')
 
 		x = np.asarray(X)
@@ -307,7 +315,7 @@ class dsvDialog(wx.Dialog):
 		plt.gca().spines["left"].set_visible(False) 
 		plt.show(block = False)
 		fig.canvas.manager.set_window_title('Design Space Visualization')
-		fig.canvas.manager.toolbar.set_message("")
+		#fig.canvas.manager.toolbar.set_message("")
 
 
 
