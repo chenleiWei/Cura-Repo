@@ -535,16 +535,34 @@ class Engine(object):
 		if profile.getProfileSetting('support_type') == 'Lines':
 			settings['supportType'] = 1
 
-		if profile.getProfileSettingFloat('fill_density') == 0:
+		if profile.getProfileSetting('infill_type') == 'Line':
+			settings['infillPattern'] = 0
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Grid':
+			settings['infillPattern'] = 1
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Cube':
+			settings['infillPattern'] = 2
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Concentric':
+			settings['infillPattern'] = 3
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Gradient grid':
+			settings['infillPattern'] = 4
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Gradient concentric':
+			settings['infillPattern'] = 5
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'None':
 			settings['sparseInfillLineDistance'] = -1
-		elif profile.getProfileSettingFloat('fill_density') == 100:
-			settings['sparseInfillLineDistance'] = settings['extrusionWidth']
-			#Set the up/down skins height to 10000 if we want a 100% filled object.
-			# This gives better results then normal 100% infill as the sparse and up/down skin have some overlap.
-			settings['downSkinCount'] = 10000
-			settings['upSkinCount'] = 10000
-		else:
-			settings['sparseInfillLineDistance'] = int(100 * profile.calculateEdgeWidth() * 1000 / profile.getProfileSettingFloat('fill_density'))
+			makeInfill = False
+
+		if makeInfill  == True:	
+			sparseInfillLineDistance = profile.getProfileSettingFloat('fill_density') * 1000
+			if sparseInfillLineDistance<400:
+				sparseInfillLineDistance = 400
+			settings['sparseInfillLineDistance'] = sparseInfillLineDistance 
+
 		if profile.getProfileSetting('platform_adhesion') == 'Brim':
 			settings['skirtDistance'] = 0
 			settings['skirtLineCount'] = int(profile.getProfileSettingFloat('brim_line_count'))

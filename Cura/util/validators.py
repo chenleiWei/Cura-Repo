@@ -16,6 +16,7 @@ import math
 SUCCESS = 0
 WARNING = 1
 ERROR   = 2
+DISABLED = 3
 
 class validFloat(object):
 	"""
@@ -144,6 +145,30 @@ class wallThicknessValidator(object):
 				return WARNING, 'Current selected shell thickness results in a line thickness of ' + str(lineWidthAlt) + 'mm which is not recommended with your nozzle of ' + str(nozzleSize) + 'mm'
 			if abs((lineCount * nozzleSize) - wallThickness) > 0.01 and abs(((lineCount + 1) * nozzleSize) - wallThickness) > 0.01:
 				return WARNING, 'Currently selected shell thickness is not a multiple of the nozzle size. While this prints fine, it does not give optimal results.'
+			return SUCCESS, ''
+		except ValueError:
+			#We already have an error by the int/float validator in this case.
+			return SUCCESS, ''
+
+class infillValidator(object):
+	"""
+	Validate the printing speed by checking for a certain amount of volume per second.
+	This is based on the fact that you can push 10mm3 per second trough an UM-Origonal nozzle.
+	TODO: Update this code so it works better for different machine times with other feeders.
+	"""
+	def __init__(self, setting):
+		self.setting = setting
+		self.setting._validators.append(self)
+
+	def validate(self):
+		from Cura.util import profile
+		try:
+			fill_density = profile.getProfileSettingFloat('fill_density')
+			infill_type = profile.getProfileSetting('infill_type')
+		#	print infill_type
+			if infill_type == 'None':
+				return 	DISABLED, 'Infill has been disabled'
+			
 			return SUCCESS, ''
 		except ValueError:
 			#We already have an error by the int/float validator in this case.
