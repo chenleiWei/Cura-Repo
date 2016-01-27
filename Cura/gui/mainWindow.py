@@ -22,6 +22,8 @@ from Cura.util import version
 import platform
 from Cura.util import meshLoader
 from Cura.gui import materialProfileSelector
+from Cura.util import designspacevisualization
+
 
 try: 
 	from wx.lib.pubsub import pub
@@ -129,6 +131,10 @@ class mainWindow(wx.Frame):
 		#i = toolsMenu.Append(-1, 'Batch run...')
 		#self.Bind(wx.EVT_MENU, self.OnBatchRun, i)
 		#self.normalModeOnlyItems.append(i)
+		
+		i = toolsMenu.Append(-1, _("Design Space Visualization"))
+		self.Bind(wx.EVT_MENU, self.onDSV, i)
+		toolsMenu.AppendSeparator()
 
 		if minecraftImport.hasMinecraft():
 			i = toolsMenu.Append(-1, _("Minecraft map import..."))
@@ -675,6 +681,14 @@ class mainWindow(wx.Frame):
 		ecw = expertConfig.expertConfigWindow(lambda : self.scene.sceneUpdated())
 		ecw.Centre()
 		ecw.Show()
+
+	def onDSV(self,e):
+		self.scene._engine.abortEngine()
+		self.dsvDialog = designspacevisualization.dsvDialog(self)
+		self.dsvDialog.Centre()
+		self.dsvDialog.Show()
+		self.dsvDialog.Raise()
+		wx.CallAfter(self.dsvDialog.Show)
 
 	def OnMinecraftImport(self, e):
 		mi = minecraftImport.minecraftImportWindow(self)
