@@ -36,9 +36,9 @@ void generateGridInfill(const Polygons& in_outline, Polygons& result,
                         int extrusionWidth, int lineSpacing, int infillOverlap,
                         double rotation)
 {
-    generateLineInfill(in_outline, result, extrusionWidth, lineSpacing * 2,
+    generateLineInfill(in_outline, result, extrusionWidth, lineSpacing,
                        infillOverlap, rotation);
-    generateLineInfill(in_outline, result, extrusionWidth, lineSpacing * 2,
+    generateLineInfill(in_outline, result, extrusionWidth, lineSpacing,
                        infillOverlap, rotation + 90);
 }
 
@@ -60,6 +60,8 @@ void generateLineInfill(const Polygons& in_outline, Polygons& result, int extrus
     AABB boundary(outline);
     
     boundary.min.X = ((boundary.min.X / lineSpacing) - 1) * lineSpacing;
+    boundary.min.X -= lineSpacing/2;
+
     int lineCount = (boundary.max.X - boundary.min.X + (lineSpacing - 1)) / lineSpacing;
     vector<vector<int64_t> > cutList;
     for(int n=0; n<lineCount; n++)
