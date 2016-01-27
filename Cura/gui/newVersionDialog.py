@@ -36,12 +36,14 @@ class newVersionDialog(wx.Dialog):
 		bugFixTitle = wx.StaticText(p, -1, "Recent Bug Fixes")
 		bugFixTitle.SetFont(titleFont)
 		bugsFixed = [
-			wx.StaticText(p, -1, "* SLIC-313 - Configuration wizard copy edits."),
-			wx.StaticText(p, -1, "* SLIC-314 - Edits to material profile tour text."),
-			wx.StaticText(p, -1, "* SLIC-315 - More configuration copy edits."),
-			wx.StaticText(p, -1, "* SLIC-318 - Exiting Expert Mode will no longer result in a crash."),
-			wx.StaticText(p, -1, "* SLIC-319 - revised retraction distance tooltip text.")
-		]
+			wx.StaticText(p, -1, "* Configuration wizard copy edits (SLIC-313/315)"),
+			wx.StaticText(p, -1, "* Edits to material profile tour text (SLIC-314)"),
+			wx.StaticText(p, -1, "* Exiting Expert Mode will no longer result in a crash (SLIC-318)"),
+			wx.StaticText(p, -1, "* Revised retraction distance tooltip text (SLIC-319)"),
+			wx.StaticText(p, -1, "* Slicing engine issue in Windows addressed (SLIC-328)"),
+			wx.StaticText(p, -1, "* Removed 'Legacy' and 'Other' from machine select page (SLIC-332)"),
+			wx.StaticText(p, -1, "* Printer interface will only show if option is checked (SLIC-335)"),
+			wx.StaticText(p, -1, "* Release notes and bug reporter now available under 'Help' dropdown (SLIC-336)")]
 	
 		s.Add(bugFixTitle, flag=wx.TOP, border=5)
 		for count in bugsFixed:
@@ -58,10 +60,10 @@ class newVersionDialog(wx.Dialog):
 		# Bullet point list
 		# Add or remove static text objects as needed
 		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing, all with a single click."),
-			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu."),
-			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching."),
-			wx.StaticText(p, -1, "* New optimized material profiles added: PolyMaker PC Plus, 3DOM PLA."),
+			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing"),
+			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu"),
+			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching"),
+			wx.StaticText(p, -1, "* New optimized material profiles added: PolyMaker PC Plus, 3DOM PLA")
 		]
 			
 		# Add bullet points
