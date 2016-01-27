@@ -6,6 +6,8 @@ import webbrowser
 import sys
 
 from wx.lib.pubsub import pub
+
+from Cura.gui import newVersionDialog
 from Cura.gui import configBase
 from Cura.gui import expertConfig
 from Cura.gui import alterationPanel
@@ -193,7 +195,7 @@ class mainWindow(wx.Frame):
 		i = helpMenu.Append(-1, _("Online Documentation..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://support.typeamachines.com/hc/en-us'), i)
 		i = helpMenu.Append(-1, _("Release Notes..."))
-		self.Bind(wx.EVT_MENU, lambda e: self.OnReleaseNotes(e), i)
+		self.Bind(wx.EVT_MENU, self.OnReleaseNotes, i)
 		i = helpMenu.Append(-1, _("Report a Problem..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://typeamachines.com/cura-beta'), i)
 		#i = helpMenu.Append(-1, _("Check for update..."))
