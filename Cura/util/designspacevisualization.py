@@ -43,7 +43,7 @@ class dsvDialog(wx.Dialog):
 		self.panel = configBase.configPanelBase(self)
 
 		left, right, main = self.panel.CreateConfigPanel(self)
-		variables = ['-','Layer Height', 'Infill', 'Wall Thickness', 'Print Speed']
+		variables = ['-','Layer Height', 'Infill', 'Wall Thickness','Shells', 'Print Speed']
 #		variableTypes = ['Layer Height']
 		configBase.TitleRow(left, _(" "))
 		configBase.SettingRow(left, 'dsvYaxis', variables)
@@ -124,7 +124,7 @@ class dsvDialog(wx.Dialog):
 			del self.parent.dsvDialog
 
 	def init(self):
-		axis = ['Layer Height', 'Infill', 'Wall Thickness', 'Print Speed']
+		axis = ['Layer Height', 'Infill', 'Wall Thickness','Shells', 'Print Speed']
 
 		datapoints = []
 
@@ -137,12 +137,14 @@ class dsvDialog(wx.Dialog):
 		if profile.getProfileSetting('dsvXaxis') == axis[0]: self.xSetting='layer_height'
 		if profile.getProfileSetting('dsvXaxis') == axis[1]: self.xSetting='fill_density'
 		if profile.getProfileSetting('dsvXaxis') == axis[2]: self.xSetting='wall_thickness'
-		if profile.getProfileSetting('dsvXaxis') == axis[3]: self.xSetting='print_speed'
+		if profile.getProfileSetting('dsvXaxis') == axis[3]: self.xSetting='shells'
+		if profile.getProfileSetting('dsvXaxis') == axis[4]: self.xSetting='print_speed'
 
 		if profile.getProfileSetting('dsvYaxis') == axis[0]: self.ySetting='layer_height'
 		if profile.getProfileSetting('dsvYaxis') == axis[1]: self.ySetting='fill_density'
 		if profile.getProfileSetting('dsvYaxis') == axis[2]: self.ySetting='wall_thickness'
-		if profile.getProfileSetting('dsvYaxis') == axis[3]: self.ySetting='print_speed'
+		if profile.getProfileSetting('dsvYaxis') == axis[3]: self.ySetting='shells'
+		if profile.getProfileSetting('dsvYaxis') == axis[4]: self.ySetting='print_speed'
 
 		yUB = float(profile.getProfileSetting('yUpperBound'))
 		yLB = float(profile.getProfileSetting('yLowerBound'))
@@ -154,7 +156,7 @@ class dsvDialog(wx.Dialog):
 		xUnit = (xUB-xLB) / 4
 		xRange = np.around(np.arange(xLB, xUB+xUnit, xUnit),decimals = 2)
 
-		if self.ySetting is 'wall_thickness' and 1==2:
+		if self.ySetting is 'shells':
 			yUB = float(profile.getProfileSetting('yUpperBound'))/self.nozzleSize
 			yLB = float(profile.getProfileSetting('yLowerBound'))/self.nozzleSize
 			yUnit = (yUB-yLB) / 4
@@ -162,7 +164,7 @@ class dsvDialog(wx.Dialog):
 			yRange = np.around(yRange)
 			yRange = yRange * self.nozzleSize
 
-		if self.xSetting is 'wall_thickness' and 1==2:
+		if self.xSetting is 'shells':
 			xUB = float(profile.getProfileSetting('xUpperBound'))/self.nozzleSize
 			xLB = float(profile.getProfileSetting('xLowerBound'))/self.nozzleSize
 			xUnit = (xUB-xLB) / 4
@@ -186,8 +188,13 @@ class dsvDialog(wx.Dialog):
 	  import matplotlib.pyplot as plt
 	  from scipy.interpolate import interp1d
 
-	  matplotlib.rcParams['toolbar'] = 'None'
+	
+	  #matplotlib.rcParams['toolbar'] = 'None'
+ 	  matplotlib.rcParams['toolbar'] = 'toolbar2'	  
+
 	  fig = plt.figure(facecolor='w')
+ 	  
+
 	  x = np.asarray(X)
 	  y = np.asarray(Y)
 	  z = np.asarray(Z)
@@ -212,7 +219,7 @@ class dsvDialog(wx.Dialog):
 
 
 	  print zlabel
-  	  matplotlib.rcParams['toolbar'] = 'None'
+  #	  matplotlib.rcParams['toolbar'] = 'None'
 
 	  plt.plot(y,z,'--')
 	  plt.plot(y,z,'ko')
@@ -240,10 +247,17 @@ class dsvDialog(wx.Dialog):
 #	  cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
 	  plt.show(block = False)
+	  fig.canvas.manager.set_window_title('Design Space Visualization')
+#	  print "fig.canvas",fig.canvas
+#	  print "fig.canvas.manager", fig.canvas.manager
+#	  print "fig.canvas.manager.toolbar", fig.canvas.manager.toolbar
+	  fig.canvas.manager.toolbar.set_message("")
+
 
 	def run3d(self,X,Y,Z):
 		import matplotlib.pyplot as plt
-		matplotlib.rcParams['toolbar'] = 'None'
+		#matplotlib.rcParams['toolbar'] = 'None'
+		matplotlib.rcParams['toolbar'] = 'toolbar2'
 		fig = plt.figure(facecolor='w')
 
 		x = np.asarray(X)
@@ -253,8 +267,8 @@ class dsvDialog(wx.Dialog):
 		xSubdivision = 20
 		ySubdivision = 20
 
-		if self.xSetting == 'wall_thickness' : xSubdivision = 5
-		if self.ySetting == 'wall_thickness' : ySubdivision = 5
+		if self.xSetting == 'shells' : xSubdivision = 5
+		if self.ySetting == 'shells' : ySubdivision = 5
 
 		xi, yi = np.linspace(x.min(), x.max(), xSubdivision), np.linspace(y.min(), y.max(), ySubdivision)
 		xi, yi = np.meshgrid(xi, yi)
@@ -263,6 +277,9 @@ class dsvDialog(wx.Dialog):
 		rbf = scipy.interpolate.Rbf(x, y, z, function='thin_plate')
 		zi = rbf(xi, yi)
 		#zi = scipy.interpolate.NearestNDInterpolator(xi,yi)
+		
+
+
 		##	  im = plt.imshow(zi, interpolation='bilinear',cmap='winter_r', extent=[x.min(), x.max(), y.min(), y.max()],aspect = 'auto')
 		##	  im = plt.imshow(zi,cmap='winter_r', extent=[x.min(), x.max(), y.min(), y.max()],aspect = 'auto')
 		im = plt.imshow(zi, cmap = 'rainbow',vmin=z.min(), vmax=z.max(), origin='lower',extent=[x.min(), x.max(), y.min(), y.max()],aspect = 'auto')
@@ -289,6 +306,8 @@ class dsvDialog(wx.Dialog):
 		plt.gca().spines["right"].set_visible(False)    
 		plt.gca().spines["left"].set_visible(False) 
 		plt.show(block = False)
+		fig.canvas.manager.set_window_title('Design Space Visualization')
+		fig.canvas.manager.toolbar.set_message("")
 
 
 
@@ -317,6 +336,7 @@ class dsvDialog(wx.Dialog):
 
 	def onUpdateThread(self):
 		self.gauge.SetValue(self.dsvcounter)
+
 
 	def onDSVThread(self,dimension):
 		dp=[]
