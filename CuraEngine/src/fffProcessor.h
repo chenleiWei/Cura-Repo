@@ -684,11 +684,12 @@ private:
                     currentHeight = config.layerThickness * (layerNr+1);
                     unitStep3 = int(config.sparseInfillLineDistance) / int(config.layerThickness);
                     mod = int(layerNr+1) % int(unitStep3);
-                    if (mod==0) {sild2 = 400;}
-                    generateGridInfill(part->sparseOutline, infillPolygons,
+                    //if (mod==0) {sild2 = 400;}
+                    fillAngle = 0;
+                    generateCubeInfill(part->sparseOutline, infillPolygons,
                                        extrusionWidth,
                                        sild2,
-                                       config.infillOverlap, fillAngle);
+                                       config.infillOverlap, fillAngle,currentHeight);
                     break;
 
 

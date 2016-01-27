@@ -30,6 +30,7 @@ def getEngineFilename():
 		Finds and returns the path to the current engine executable. This is OS depended.
 	:return: The full path to the engine executable.
 	"""
+	return '/Users/vaibhavsharma/Documents/Cura/cura/CuraEngine/build/CuraEngine'
 	base_search_path = os.path.dirname(inspect.getfile(getEngineFilename))
 	search_filename = 'CuraEngine'
 	if platform.system() == 'Windows':
