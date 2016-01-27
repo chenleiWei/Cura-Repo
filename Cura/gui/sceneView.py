@@ -1383,6 +1383,53 @@ class SceneView(openglGui.glGuiPanel):
 				glDisable(GL_BLEND)
 
 		self._drawMachine()
+	
+		sparseInfillLineDistance = int(profile.getProfileSettingFloat('fill_density'))
+		self.layerSelect.setHidden(True)
+		self.layerSelectCondition = (self.viewMode != 'gcode' and isinstance(sparseInfillLineDistance, int) and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and profile.getProfileSetting('infill_type') != 'None' and profile.getProfileSetting('infill_type') != 'Concentric' and profile.getProfileSetting('infill_type') != 'Gradient concentric')
+		for i in range(0,2):
+			if self.layerSelectCondition:
+				self.layerSelect.setHidden(False)
+				homeX = -int(profile.getMachineSetting('machine_width'))/2 #  -305/2 
+				homeY = -int(profile.getMachineSetting('machine_height'))/2
+
+				if i==1:
+					glLineWidth(4)
+					glColor3f(1, 0,0)
+					glBegin(GL_LINES)
+				
+				if i==0:
+					glLineWidth(1)
+					glColor3f(0, 0,0)
+					glBegin(GL_LINES)
+				
+				for y in range(0,-homeY*2,sparseInfillLineDistance):
+				
+					if sparseInfillLineDistance+homeY+y < -homeY :
+						if profile.getProfileSetting('infill_type') == 'Line':
+							if self.layerSelect.getValue() % 2 == 0:
+								glVertex3f(homeX, sparseInfillLineDistance+homeY+y, self.layerSelect.getValue())
+								glVertex3f(-homeX, sparseInfillLineDistance+homeY+y, self.layerSelect.getValue())
+							else :				
+								glVertex3f(sparseInfillLineDistance+homeX+y,homeY, self.layerSelect.getValue())
+								glVertex3f(sparseInfillLineDistance+homeX+y,-homeY, self.layerSelect.getValue())
+
+						else :
+							glVertex3f(homeX, sparseInfillLineDistance+homeY+y, self.layerSelect.getValue())
+							glVertex3f(-homeX, sparseInfillLineDistance+homeY+y, self.layerSelect.getValue())
+							glVertex3f(sparseInfillLineDistance+homeX+y,homeY, self.layerSelect.getValue())
+							glVertex3f(sparseInfillLineDistance+homeX+y,-homeY, self.layerSelect.getValue())
+				glEnd()
+
+				if profile.getProfileSetting('infill_type') == 'Cube' and self.layerSelect.getValue() % sparseInfillLineDistance == 0:				
+					glBegin(GL_QUADS)
+					glColor4ub(1, 0, 0, 50)
+					glVertex3f(-homeX, -homeY, self.layerSelect.getValue())
+					glVertex3f(-homeX, homeY, self.layerSelect.getValue())
+					glVertex3f(homeX, homeY, self.layerSelect.getValue())
+					glVertex3f(homeX, -homeY, self.layerSelect.getValue())
+					glEnd()
+
 
 		if self.viewMode != 'gcode':
 			#Draw the object box-shadow, so you can see where it will collide with other objects.
