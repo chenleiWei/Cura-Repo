@@ -33,14 +33,14 @@ class newVersionDialog(wx.Dialog):
 		s.Add(versionForked)
 		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=5)
 	
-		bugFixTitle = wx.StaticText(p, -1, "Bug Fixes")
+		bugFixTitle = wx.StaticText(p, -1, "Recent Bug Fixes")
 		bugFixTitle.SetFont(titleFont)
 		bugsFixed = [
-			wx.StaticText(p, -1, "* SLIC-313 - Configuration wizard copy edits."),
-			wx.StaticText(p, -1, "* SLIC-314 - Edits to material profile tour text."),
-			wx.StaticText(p, -1, "* SLIC-315 - More configuration copy edits."),
-			wx.StaticText(p, -1, "* SLIC-318 - Exiting Expert Mode will no longer result in a crash."),
-			wx.StaticText(p, -1, "* SLIC-319 - revised retraction distance tooltip text.")
+			wx.StaticText(p, -1, "* Configuration wizard copy edits (SLIC-313)"),
+			wx.StaticText(p, -1, "* Edits to material profile tour text (SLIC-314)"),
+			wx.StaticText(p, -1, "* More configuration copy edits (SLIC-315)"),
+			wx.StaticText(p, -1, "* Exiting Expert Mode will no longer result in a crash (SLIC-318)"),
+			wx.StaticText(p, -1, "* Revised retraction distance tooltip text (SLIC-319)")
 		]
 	
 		s.Add(bugFixTitle, flag=wx.TOP, border=5)
@@ -58,7 +58,7 @@ class newVersionDialog(wx.Dialog):
 		# Bullet point list
 		# Add or remove static text objects as needed
 		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing, all with a single click."),
+			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing."),
 			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu."),
 			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching."),
 			wx.StaticText(p, -1, "* New optimized material profiles added: PolyMaker PC Plus, 3DOM PLA."),
