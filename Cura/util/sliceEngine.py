@@ -494,7 +494,7 @@ class Engine(object):
 			'fanSpeedMax': int(profile.getProfileSettingFloat('fan_speed_max')) if profile.getProfileSetting('fan_enabled') == 'True' else 0,
 			'supportAngle': int(-1) if profile.getProfileSetting('support') == 'None' else int(profile.getProfileSettingFloat('support_angle')),
 			'supportEverywhere': int(1) if profile.getProfileSetting('support') == 'Everywhere' else int(0),
-			'supportLineDistance': int(100 * profile.calculateEdgeWidth() * 1000 / profile.getProfileSettingFloat('support_fill_rate')) if profile.getProfileSettingFloat('support_fill_rate') > 0 else -1,
+			#'supportLineDistance': int(100 * profile.calculateEdgeWidth() * 1000 / profile.getProfileSettingFloat('support_fill_rate')) if profile.getProfileSettingFloat('support_fill_rate') > 0 else -1,
 			'supportXYDistance': int(1000 * profile.getProfileSettingFloat('support_xy_distance')),
 			'supportZDistance': int(1000 * profile.getProfileSettingFloat('support_z_distance')),
 			'supportExtruder': 0 if profile.getProfileSetting('support_dual_extrusion') == 'First extruder' else (1 if profile.getProfileSetting('support_dual_extrusion') == 'Second extruder' and profile.minimalExtruderCount() > 1 else -1),
@@ -562,6 +562,11 @@ class Engine(object):
 			if sparseInfillLineDistance<400:
 				sparseInfillLineDistance = 400
 			settings['sparseInfillLineDistance'] = sparseInfillLineDistance 
+
+		supportLineDistance = profile.getProfileSettingFloat('support_fill_rate') * 1000
+		if supportLineDistance<400:
+			supportLineDistance = 400
+		settings['supportLineDistance'] = supportLineDistance 
 
 		if profile.getProfileSetting('platform_adhesion') == 'Brim':
 			settings['skirtDistance'] = 0
