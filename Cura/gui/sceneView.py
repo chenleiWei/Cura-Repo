@@ -48,7 +48,6 @@ from Cura.gui.tools import imageToMesh
 class SceneView(openglGui.glGuiPanel):
 	def __init__(self, parent):
 		super(SceneView, self).__init__(parent)
-
 		self._yaw = 30
 		self._pitch = 60
 		self._zoom = 800
@@ -68,6 +67,10 @@ class SceneView(openglGui.glGuiPanel):
 		self._platformMesh = {}
 		self._platformTexture = None
 		self._isSimpleMode = True
+
+		self.layerSelect = openglGui.glSlider(self, 1, 1, 305, (-1,-2), lambda : self.QueueRefresh())
+		self.layerSelectCondition = False
+		
 		self._printerConnectionManager = printerConnectionManager.PrinterConnectionManager()
 		
 		self.printGcode = "false"
