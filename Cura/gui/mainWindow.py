@@ -5,6 +5,8 @@ import os
 import webbrowser
 import sys
 
+
+from Cura.gui import newVersionDialog
 from Cura.gui import configBase
 from Cura.gui import expertConfig
 from Cura.gui import alterationPanel
@@ -195,6 +197,8 @@ class mainWindow(wx.Frame):
 		helpMenu = wx.Menu()
 		i = helpMenu.Append(-1, _("Online Documentation..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://support.typeamachines.com/hc/en-us'), i)
+		i = helpMenu.Append(-1, _("Release Notes..."))
+		self.Bind(wx.EVT_MENU, self.OnReleaseNotes)
 		i = helpMenu.Append(-1, _("Report a Problem..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://typeamachines.com/cura-beta'), i)
 		#i = helpMenu.Append(-1, _("Check for update..."))
@@ -297,6 +301,10 @@ class mainWindow(wx.Frame):
 
 		if pluginCount > 1:
 			self.scene.notification.message("Warning: %i plugins from the previous session are still active." % pluginCount)
+			
+	def OnReleaseNotes(self, e):
+		newVersion = newVersionDialog.newVersionDialog()
+		newVersion.Show()
 			
 	def onPluginUpdate(self,msg): #receives commands from the plugin thread
 		cmd = str(msg.data).split(";")
