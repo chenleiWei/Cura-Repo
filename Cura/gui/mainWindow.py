@@ -22,6 +22,8 @@ from Cura.util import version
 import platform
 from Cura.util import meshLoader
 from Cura.gui import materialProfileSelector
+from Cura.gui import batchSlice
+
 
 try: 
 	from wx.lib.pubsub import pub
@@ -129,6 +131,10 @@ class mainWindow(wx.Frame):
 		#i = toolsMenu.Append(-1, 'Batch run...')
 		#self.Bind(wx.EVT_MENU, self.OnBatchRun, i)
 		#self.normalModeOnlyItems.append(i)
+		self.batchSlicePanelCheck = toolsMenu.Append(-1, _("Batch Slice"), kind=wx.ITEM_CHECK)
+		self.Bind(wx.EVT_MENU, self.OnBatchSlicePanelCheck, self.batchSlicePanelCheck)
+		toolsMenu.AppendSeparator()
+
 
 		if minecraftImport.hasMinecraft():
 			i = toolsMenu.Append(-1, _("Minecraft map import..."))
@@ -676,6 +682,10 @@ class mainWindow(wx.Frame):
 		ecw.Centre()
 		ecw.Show()
 
+	def OnBatchSlicePanelCheck(self, e):
+		profile.putPreference('batch_slice',e.IsChecked())
+		self.reloadSettingPanels()
+
 	def OnMinecraftImport(self, e):
 		mi = minecraftImport.minecraftImportWindow(self)
 		mi.Centre()
@@ -772,6 +782,10 @@ class normalSettingsPanel(configBase.configPanelBase):
 		#Plugin page
 		self.pluginPanel = pluginPanel.pluginPanel(self.nb, callback)
 		self.nb.AddPage(self.pluginPanel, _("Plugins"))
+
+		if parent.GetParent().GetParent().batchSlicePanelCheck.IsChecked():
+			self.bsPanel = batchSlice.bsPanel(self.nb)
+			self.nb.AddPage(self.bsPanel, _("Batch Slice"))
 
 		#Alteration page
 		if profile.getMachineSetting('gcode_flavor') == 'UltiGCode':
