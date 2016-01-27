@@ -248,10 +248,10 @@ class SettingRow(object):
 			ctrl = ctrl.GetTextCtrl()
 		if result == validators.ERROR:
 			ctrl.SetBackgroundColour('Red')
-		elif result == validators.WARNING:
-			ctrl.SetBackgroundColour('Yellow')
 		elif result == validators.DISABLED:
 			ctrl.SetBackgroundColour('Grey')
+		elif result == validators.WARNING:
+			ctrl.SetBackgroundColour('Yellow')
 		else:
 			ctrl.SetBackgroundColour(self.defaultBGColour)
 		ctrl.Refresh()
