@@ -1388,13 +1388,18 @@ class SceneView(openglGui.glGuiPanel):
 		self._drawMachine()
 	
 		sparseInfillLineDistance = int(profile.getProfileSettingFloat('fill_density'))
+		sparseInfillLineDistance = sparseInfillLineDistance
+		if profile.getProfileSetting('infill_type') == 'Cube':
+			sparseInfillLineDistance = sparseInfillLineDistance  / 0.816138	
+
 		self.layerSelect.setHidden(True)
-		self.layerSelectCondition = (self.viewMode != 'gcode' and isinstance(sparseInfillLineDistance, int) and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and profile.getProfileSetting('infill_type') != 'None' and profile.getProfileSetting('infill_type') != 'Concentric' and profile.getProfileSetting('infill_type') != 'Gradient concentric')
+		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
+#		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and profile.getProfileSetting('infill_type') != 'None' and profile.getProfileSetting('infill_type') != 'Concentric' and profile.getProfileSetting('infill_type') != 'Gradient concentric')
 		for i in range(0,2):
 			if self.layerSelectCondition:
 				self.layerSelect.setHidden(False)
-				homeX = -int(profile.getMachineSetting('machine_width'))/2 #  -305/2 
-				homeY = -int(profile.getMachineSetting('machine_height'))/2
+				homeX = -float(profile.getMachineSetting('machine_width'))/2 #  -305/2 
+				homeY = -float(profile.getMachineSetting('machine_height'))/2
 
 				if i==1:
 					glLineWidth(4)
@@ -1406,32 +1411,31 @@ class SceneView(openglGui.glGuiPanel):
 					glColor3f(0, 0,0)
 					glBegin(GL_LINES)
 				
-				for y in range(0,-homeY*2,sparseInfillLineDistance):
-				
-					if sparseInfillLineDistance+homeY+y < -homeY :
-						if profile.getProfileSetting('infill_type') == 'Line':
-							if self.layerSelect.getValue() % 2 == 0:
-								glVertex3f(homeX, sparseInfillLineDistance+homeY+y, self.layerSelect.getValue())
-								glVertex3f(-homeX, sparseInfillLineDistance+homeY+y, self.layerSelect.getValue())
-							else :				
-								glVertex3f(sparseInfillLineDistance+homeX+y,homeY, self.layerSelect.getValue())
-								glVertex3f(sparseInfillLineDistance+homeX+y,-homeY, self.layerSelect.getValue())
+				#print homeX, -homeX, sparseInfillLineDistance
+				subdivisions = numpy.arange(homeX, -homeX, sparseInfillLineDistance)
+#				print subdivisions
 
-						else :
-							glVertex3f(homeX, sparseInfillLineDistance+homeY+y, self.layerSelect.getValue())
-							glVertex3f(-homeX, sparseInfillLineDistance+homeY+y, self.layerSelect.getValue())
-							glVertex3f(sparseInfillLineDistance+homeX+y,homeY, self.layerSelect.getValue())
-							glVertex3f(sparseInfillLineDistance+homeX+y,-homeY, self.layerSelect.getValue())
+				for index,value in enumerate(subdivisions):
+					if profile.getProfileSetting('infill_type') == 'Line':
+						if self.layerSelect.getValue() % 2 == 0:
+							glVertex3f(homeX , value , self.layerSelect.getValue())
+							glVertex3f(-homeX, value , self.layerSelect.getValue())
+						else :				
+							glVertex3f(value , homeY , self.layerSelect.getValue())
+							glVertex3f(value ,-homeY , self.layerSelect.getValue())
+
+					elif profile.getProfileSetting('infill_type') == 'Grid':
+						glVertex3f(homeX  , value  , self.layerSelect.getValue())
+						glVertex3f(-homeX , value  , self.layerSelect.getValue())
+						glVertex3f(value  , homeY  , self.layerSelect.getValue())
+						glVertex3f(value  , -homeY , self.layerSelect.getValue())
+
+					elif profile.getProfileSetting('infill_type') == 'Cube':
+						if value > homeX and value < - homeX:
+							glVertex3f(value, homeY  , self.layerSelect.getValue())
+							glVertex3f(value , -homeY , self.layerSelect.getValue())
 				glEnd()
 
-				if profile.getProfileSetting('infill_type') == 'Cube' and self.layerSelect.getValue() % sparseInfillLineDistance == 0:				
-					glBegin(GL_QUADS)
-					glColor4ub(1, 0, 0, 50)
-					glVertex3f(-homeX, -homeY, self.layerSelect.getValue())
-					glVertex3f(-homeX, homeY, self.layerSelect.getValue())
-					glVertex3f(homeX, homeY, self.layerSelect.getValue())
-					glVertex3f(homeX, -homeY, self.layerSelect.getValue())
-					glEnd()
 
 
 		if self.viewMode != 'gcode':
