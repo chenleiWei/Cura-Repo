@@ -5,3 +5,6 @@ power>=1.2
 setuptools>=0.6.34
 requests
 pubsub
+matplotlib
+scipy
+seaborn
