@@ -46,12 +46,13 @@ void generateCubeInfill(const Polygons& in_outline, Polygons& result,
                         int extrusionWidth, int lineSpacing, int infillOverlap,
                         double rotation, int offset)
 {
-//    generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
-//                       infillOverlap, rotation,offset/1.41235);
+    lineSpacing =  lineSpacing/0.816138 ;
+    generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
+                       infillOverlap, rotation,offset/1.41235);
     generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
                        infillOverlap, rotation-60+180, offset/1.41235);
-//    generateLineInfill(in_outline, result, extrusionWidth, lineSpacing,
-//                       infillOverlap, rotation + 90);
+    generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
+                       infillOverlap, rotation+60-180, offset/1.41235);
 }
 
 int compare_int64_t(const void* a, const void* b)
@@ -62,7 +63,7 @@ int compare_int64_t(const void* a, const void* b)
     return 0;
 }
 
-void generateCubeLineInfill(const Polygons& in_outline, Polygons& result, int extrusionWidth, int lineSpacing, int infillOverlap, double rotation,double offset)
+void generateCubeLineInfill(const Polygons& in_outline, Polygons& result, int extrusionWidth, double lineSpacing, int infillOverlap, double rotation,double offset)
 {
     Polygons outline = in_outline.offset(extrusionWidth * infillOverlap / 100);
     PointMatrix matrix(rotation);
