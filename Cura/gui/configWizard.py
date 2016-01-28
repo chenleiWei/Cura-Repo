@@ -129,7 +129,6 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
 		self.AddTextTagLine('v1.4.0 Beta 3')
-		#	sizer.Add(wx.StaticLine(self, -1), pos=(1, 0), span=(1, 2), flag=wx.EXPAND | wx.ALL)
 
 	def AddHyperlink(self, text, url):
 		hyper1 = hl.HyperLinkCtrl(self, -1, text, URL=url)
@@ -159,7 +158,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.rowNr += 1
 		return text
 		
-		# Center-aligned text
+	# Center-aligned text
 	def AddCenteredText(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
 		font = wx.Font(pointSize=12, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
@@ -168,7 +167,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return text
-
+	
 	def AddTextTip(self,info):
 		text = wx.StaticText(self, -1, info)
 		font = wx.Font(pointSize=12, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.NORMAL)
@@ -406,7 +405,6 @@ class MachineSelectPage(InfoPage):
 	def __init__(self, parent):
 		super(MachineSelectPage, self).__init__(parent, _("Select your machine"))
 		self.AddLogo()
-		
 		self.AddHiddenSeperator(1)
 		self.AddTextTitle('Select Printer')
 		self.AddHiddenSeperator(1)
@@ -418,20 +416,9 @@ class MachineSelectPage(InfoPage):
 		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
 		self.AddTextDescription(_("#1000-9999"))
 		self.AddHiddenSeperator(1)
-		self.Series1_Legacy = self.AddRadioButton("Legacy Series 1")
-		self.AddTextDescription(_("#001-500 (wooden frame)"))
-		self.AddHiddenSeperator(1)
-		self.nonTAMRadio = self.AddRadioButton("Other")
-		print self.nonTAMRadio.GetPosition()
-
-		self.nonTAMRadio.Bind(wx.EVT_RADIOBUTTON, self.OnNonTAM)
 		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
 		self.Series1_Pro_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1Pro)
-		self.Series1_Legacy.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1_Legacy)
-		
-	def OnNonTAM(self, e):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().nonTAM)
-	
+
 	def OnSeries1(self, e):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_select_options)
 	
@@ -471,24 +458,18 @@ class MachineSelectPage(InfoPage):
 	G90           ;absolute positioning""")
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
 		
-	def OnSeries1_Legacy(self, e):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_select_options)
-
-		
 	def StoreData(self):
 		allMachineProfiles = resources.getDefaultMachineProfiles()
 		machSettingsToStore = {}
 		n = None
 		
+		# loop through list of buttons to find selected
 		for machineProfile in allMachineProfiles:
-			if self.Series1_Legacy.GetValue():
-				n = re.search(r'Series1Legacy', machineProfile)
-			elif self.Series1_Radio.GetValue():
+			if self.Series1_Radio.GetValue():
 				n = re.search(r'Series1\.ini', machineProfile)
 			elif self.Series1_Pro_Radio.GetValue():
 				n = re.search(r'Series1Pro', machineProfile)
-				# also load alteration file
-				
+			
 			if n is not None:
 				machProfile = machineProfile
 				cp = configparser.ConfigParser()
@@ -731,7 +712,6 @@ class TAMOctoPrintInfo(InfoPage):
 		serial = self.serialNumber.GetValue()
 		saveInfo = self.saveInfo
 		self.configurationAttemptedOnce = True
-		#testConnection = printerConnect.TestConnection(serial, key, saveInfo)
 		self.errorMessageln1.SetLabel("Configuring...")
 		self.errorMessageln1.SetForegroundColour('Blue')
 		self.configurePrinterButton.Disable()
@@ -794,7 +774,6 @@ class TAMSelectSupport(InfoPage):
 		self.GuidedTourLogo()
 		typeALogo = resources.getPathForImage('3sa.png')
 		self.AddImage(typeALogo)
-#		self.AddHiddenSeperator(1)
 		self.AddTextTitle("Support, Brims, and Rafts")
 		self.AddText("Support includes structures added to the print to support overhangs or help with adherence, which are removed after printing is complete.\n\nA brim is a structure printed around the first layer to help prevent the edges of a print from lifting.\n\nA raft is a platform on to which the model is printed to assist with adhesion, especially with delicate prints.\n\nTo preview these structures, click the View Mode icon, then click Layers.")
 		
@@ -1604,7 +1583,6 @@ class ConfigWizard(wx.wizard.Wizard):
 
 		self.firstInfoPage = FirstInfoPage(self, addNew)
 		self.machineSelectPage = MachineSelectPage(self)
-		self.nonTAM = NonTAM(self)
 		self.tamReadyPage = TAMReadyPage(self)
 		self.TAM_select_materials = TAMSelectMaterials(self)
 		self.TAM_octoprint_config = TAMOctoPrintInfo(self)
@@ -1636,13 +1614,6 @@ class ConfigWizard(wx.wizard.Wizard):
 		wx.wizard.WizardPageSimple.Chain(self.TAM_select_quality, self.TAM_select_strength)
 		wx.wizard.WizardPageSimple.Chain(self.TAM_select_strength, self.TAM_select_support)
 		wx.wizard.WizardPageSimple.Chain(self.TAM_select_support, self.TAM_first_print)
-		#wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimaker2ReadyPage)
-#		wx.wizard.WizardPageSimple.Chain(self.machineSelectPage, self.ultimakerSelectParts)
-#		wx.wizard.WizardPageSimple.Chain(self.ultimakerSelectParts, self.ultimakerFirmwareUpgradePage)
-#		wx.wizard.WizardPageSimple.Chain(self.ultimakerFirmwareUpgradePage, self.ultimakerCheckupPage)
-#		wx.wizard.WizardPageSimple.Chain(self.ultimakerCheckupPage, self.bedLevelPage)
-		#wx.wizard.WizardPageSimple.Chain(self.ultimakerCalibrationPage, self.ultimakerCalibrateStepsPerEPage)
-
 		wx.wizard.WizardPageSimple.Chain(self.printrbotSelectType, self.otherMachineInfoPage)
 		wx.wizard.WizardPageSimple.Chain(self.otherMachineSelectPage, self.customRepRapInfoPage)
 
