@@ -128,7 +128,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddLogo(self):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
-		self.AddTextTagLine('v1.4.0 Beta 3')
+		self.AddTextTagLine('v1.4.0')
 
 	def AddHyperlink(self, text, url):
 		hyper1 = hl.HyperLinkCtrl(self, -1, text, URL=url)
@@ -236,7 +236,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		else:
 			text.SetForegroundColour('Black')
 			
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT | wx.EXPAND, border=155)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT | wx.EXPAND, border=140)
 		self.rowNr += 1
 		return text
 		
