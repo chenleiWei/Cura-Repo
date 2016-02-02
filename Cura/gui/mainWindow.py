@@ -1,4 +1,4 @@
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 Cat Casuat (Cura Type A) and David Braam - Released under terms of the AGPLv3 License"
 
 import wx
 import os
@@ -171,7 +171,6 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnNormalSwitch, i)
 		expertMenu.AppendSeparator()
 		
-
 		# add a checkmark to whichever mode is selected
 		if profile.getPreference('startMode') == 'Simple':
 			self.switchToQuickprintMenuItem.Check()
@@ -195,7 +194,7 @@ class mainWindow(wx.Frame):
 		i = helpMenu.Append(-1, _("Online Documentation..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://support.typeamachines.com/hc/en-us'), i)
 		i = helpMenu.Append(-1, _("Release Notes..."))
-		self.Bind(wx.EVT_MENU, self.OnReleaseNotes, i)
+		self.Bind(wx.EVT_MENU, lambda e: self.OnReleaseNotes(e), i)
 		i = helpMenu.Append(-1, _("Report a Problem..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://typeamachines.com/cura-beta'), i)
 		#i = helpMenu.Append(-1, _("Check for update..."))
