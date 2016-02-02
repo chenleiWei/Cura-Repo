@@ -33,7 +33,7 @@ def getVersion(getGitVersion = True):
 		except:
 			pass
 
-	gitHeadFile = gitPath + "/.git/refs/heads/SteamEngine"
+	gitHeadFile = gitPath + "/.git/refs/heads/devel"
 	if os.path.isfile(gitHeadFile):
 		if not getGitVersion:
 			return "dev"
@@ -63,7 +63,7 @@ def checkForNewerVersion():
 	if isDevVersion():
 		return None
 	try:
-		updateBaseURL = 'http://software.ultimaker.com'
+		updateBaseURL = ''
 		localVersion = map(int, getVersion(False).split('.'))
 		while len(localVersion) < 3:
 			localVersion += [1]

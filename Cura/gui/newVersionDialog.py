@@ -33,6 +33,27 @@ class newVersionDialog(wx.Dialog):
 		s.Add(versionForked)
 		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=5)
 	
+	
+		# "New in This Version" label
+		newHere = wx.StaticText(p, -1, "New in Cura 1.4.0")
+		newHere.SetFont(titleFont)
+		s.Add(newHere, flag=wx.TOP, border=10)
+	
+		# Bullet point list
+		# Add or remove static text objects as needed
+		changesAndAdditions = [
+			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing"),
+			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu"),
+			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching"),
+			wx.StaticText(p, -1, "* New optimized material profiles added: PolyMaker PC Plus, 3DOM PLA"),
+			wx.StaticText(p, -1, "")
+		]
+			
+		# Add bullet points
+		for item in changesAndAdditions:
+			item.Wrap(600)
+			s.Add(item, flag=wx.TOP, border=5)
+	
 		bugFixTitle = wx.StaticText(p, -1, "Recent Bug Fixes")
 		bugFixTitle.SetFont(titleFont)
 		bugsFixed = [
@@ -49,28 +70,7 @@ class newVersionDialog(wx.Dialog):
 		for count in bugsFixed:
 			s.Add(count, flag=wx.TOP | wx.EXPAND, border=5)
 		
-		
-		
-
-		# "New in This Version" label
-		newHere = wx.StaticText(p, -1, "New in Cura 1.4.0")
-		newHere.SetFont(titleFont)
-		s.Add(newHere, flag=wx.TOP, border=10)
-	
-		# Bullet point list
-		# Add or remove static text objects as needed
-		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing"),
-			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu"),
-			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching"),
-			wx.StaticText(p, -1, "* New optimized material profiles added: PolyMaker PC Plus, 3DOM PLA")
-		]
-			
-		# Add bullet points
-		for item in changesAndAdditions:
-			item.Wrap(600)
-			s.Add(item, flag=wx.TOP, border=5)
-
+		"""
 		# Note for Beta Testers
 		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=5)
 		feedbackTitle = wx.StaticText(p, -1, 'Bugs and Feedback')
@@ -79,6 +79,7 @@ class newVersionDialog(wx.Dialog):
 		bugReportLink = hl.HyperLinkCtrl(p, -1, "typeamachines.com/cura-beta", URL="http://www.typeamachines.com/cura-beta")
 		s.Add(feedbackTitle)
 		s.Add(bugReportLink)
+		"""
 		
 		self.hasUltimaker = None
 		self.hasUltimaker2 = None
