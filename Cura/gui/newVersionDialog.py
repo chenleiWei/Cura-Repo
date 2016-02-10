@@ -45,7 +45,7 @@ class newVersionDialog(wx.Dialog):
 			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing"),
 			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu"),
 			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching"),
-			wx.StaticText(p, -1, "* New optimized material profiles added: PolyMaker PC Plus, 3DOM PLA"),
+			wx.StaticText(p, -1, "* New optimized material profiles added: PolyMaker PC-Plus, 3DOM PLA, ColorFabb BambooFill"),
 			wx.StaticText(p, -1, "")
 		]
 			
