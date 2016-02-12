@@ -5,6 +5,8 @@ import os
 import webbrowser
 import sys
 
+
+from Cura.gui import newVersionDialog
 from Cura.gui import configBase
 from Cura.gui import expertConfig
 from Cura.gui import alterationPanel
@@ -22,6 +24,8 @@ from Cura.util import version
 import platform
 from Cura.util import meshLoader
 from Cura.gui import materialProfileSelector
+from Cura.util import designspacevisualization
+
 
 try: 
 	from wx.lib.pubsub import pub
@@ -129,6 +133,10 @@ class mainWindow(wx.Frame):
 		#i = toolsMenu.Append(-1, 'Batch run...')
 		#self.Bind(wx.EVT_MENU, self.OnBatchRun, i)
 		#self.normalModeOnlyItems.append(i)
+		
+		i = toolsMenu.Append(-1, _("Design Space Visualization"))
+		self.Bind(wx.EVT_MENU, self.onDSV, i)
+		toolsMenu.AppendSeparator()
 
 		if minecraftImport.hasMinecraft():
 			i = toolsMenu.Append(-1, _("Minecraft map import..."))
@@ -195,6 +203,8 @@ class mainWindow(wx.Frame):
 		helpMenu = wx.Menu()
 		i = helpMenu.Append(-1, _("Online Documentation..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://support.typeamachines.com/hc/en-us'), i)
+		i = helpMenu.Append(-1, _("Release Notes..."))
+		self.Bind(wx.EVT_MENU, lambda e: self.OnReleaseNotes(e), i)
 		i = helpMenu.Append(-1, _("Report a Problem..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://typeamachines.com/cura-beta'), i)
 		#i = helpMenu.Append(-1, _("Check for update..."))
@@ -297,6 +307,10 @@ class mainWindow(wx.Frame):
 
 		if pluginCount > 1:
 			self.scene.notification.message("Warning: %i plugins from the previous session are still active." % pluginCount)
+			
+	def OnReleaseNotes(self, e):
+		newVersion = newVersionDialog.newVersionDialog()
+		newVersion.Show()
 			
 	def onPluginUpdate(self,msg): #receives commands from the plugin thread
 		cmd = str(msg.data).split(";")
@@ -675,6 +689,14 @@ class mainWindow(wx.Frame):
 		ecw = expertConfig.expertConfigWindow(lambda : self.scene.sceneUpdated())
 		ecw.Centre()
 		ecw.Show()
+
+	def onDSV(self,e):
+		self.scene._engine.abortEngine()
+		self.dsvDialog = designspacevisualization.dsvDialog(self)
+		self.dsvDialog.Centre()
+		self.dsvDialog.Show()
+		self.dsvDialog.Raise()
+		wx.CallAfter(self.dsvDialog.Show)
 
 	def OnMinecraftImport(self, e):
 		mi = minecraftImport.minecraftImportWindow(self)
