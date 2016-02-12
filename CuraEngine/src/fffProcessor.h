@@ -685,12 +685,7 @@ private:
                     unitStep3 = int(config.sparseInfillLineDistance) / int(config.layerThickness);
                     mod = int(layerNr+1) % int(unitStep3);
                     //if (mod==0) {sild2 = 400;}
-                    if (int(layerNr+1) % 3 == 0)
-                        {fillAngle = 0;}
-                    else if (int(layerNr+1) % 3 == 1) 
-                        {fillAngle = -60+180;}
-                    else  //(int(layerNr+1) % 3 == 2) 
-                        {fillAngle = +60-180;}
+                    fillAngle = 0;
                     generateCubeInfill(part->sparseOutline, infillPolygons,
                                        extrusionWidth,
                                        sild2,

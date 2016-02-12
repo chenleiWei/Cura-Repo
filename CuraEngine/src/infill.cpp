@@ -46,16 +46,16 @@ void generateCubeInfill(const Polygons& in_outline, Polygons& result,
                         int extrusionWidth, int lineSpacing, int infillOverlap,
                         double rotation, int offset)
 {
-    lineSpacing =  lineSpacing/0.816138;
+//    lineSpacing =  lineSpacing/0.816138;
     generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
                        infillOverlap, rotation,offset/1.41235);
-/*    generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
+    generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
                        infillOverlap, rotation,offset/1.41235);
     generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
                        infillOverlap, rotation-60+180, offset/1.41235);
     generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
                        infillOverlap, rotation+60-180, offset/1.41235);
-*/
+
 }
 
 int compare_int64_t(const void* a, const void* b)
