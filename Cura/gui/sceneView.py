@@ -14,6 +14,7 @@ import OpenGL
 import sys
 OpenGL.ERROR_CHECKING = False
 from OpenGL.GLU import *
+from OpenGL.GLE import *
 from OpenGL.GL import *
 
 import ConfigParser as configparser
@@ -1405,7 +1406,6 @@ class SceneView(openglGui.glGuiPanel):
 					glLineWidth(4)
 					glColor3f(1, 0,0)
 					glBegin(GL_LINES)
-				
 				if i==0:
 					glLineWidth(1)
 					glColor3f(0, 0,0)
@@ -1417,10 +1417,17 @@ class SceneView(openglGui.glGuiPanel):
 
 				for index,value in enumerate(subdivisions):
 					if profile.getProfileSetting('infill_type') == 'Line':
+#						A = [-homeX, value, self.layerSelect.getValue()],[-homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()]
+#						color = [0.5, 0.5, 0.5],[0.5,0.5,0.5],[0.5,0.5,0.5],[0.5,0.5,0.5]
+
 						if self.layerSelect.getValue() % 2 == 0:
 							glVertex3f(homeX , value , self.layerSelect.getValue())
 							glVertex3f(-homeX, value , self.layerSelect.getValue())
+#							A = [-homeX, value, self.layerSelect.getValue()],[-homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()]
+#							glePolyCylinder (A, color, 0.8)
 						else :				
+#							A = [value, homeY, self.layerSelect.getValue()],[value,homeY,self.layerSelect.getValue()],[value,-homeY,self.layerSelect.getValue()],[value,-homeY,self.layerSelect.getValue()]
+#							glePolyCylinder (A, color, 0.8)
 							glVertex3f(value , homeY , self.layerSelect.getValue())
 							glVertex3f(value ,-homeY , self.layerSelect.getValue())
 

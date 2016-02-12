@@ -172,7 +172,7 @@ class infillValidator(object):
 				if profile.getProfileSettingFloat('fill_density') < profile.calculateEdgeWidth() :
 					return 	ERROR, 'Distance between infill cannot be less than extrusion width : '+str(profile.calculateEdgeWidth())	+'mm'
 				elif profile.getProfileSettingFloat('fill_density') > 0:
-					return 	SUCCESS, 'Fill Density:' + str(int(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_density')))+'%'
+					return 	SUCCESS, 'Fill Density:' + str(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_density')))+'%'
 			return SUCCESS, ''
 		except ValueError:
 			#We already have an error by the int/float validator in this case.
