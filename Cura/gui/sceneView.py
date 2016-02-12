@@ -1387,7 +1387,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self._drawMachine()
 	
-		sparseInfillLineDistance = int(profile.getProfileSettingFloat('fill_density'))
+		sparseInfillLineDistance = float(profile.getProfileSettingFloat('fill_density'))
 		sparseInfillLineDistance = sparseInfillLineDistance
 		if profile.getProfileSetting('infill_type') == 'Cube':
 			sparseInfillLineDistance = sparseInfillLineDistance  / 0.816138	
