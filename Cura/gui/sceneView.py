@@ -775,6 +775,11 @@ class SceneView(openglGui.glGuiPanel):
 		self.QueueRefresh()
 
 	def _onRunEngine(self, e):
+#VAIBHAv
+#		profile.putProfileSetting('infill_percentage',float(str("{0:.2f}".format(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_density'))))))
+		equivalent_percentage = float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_density'))
+		profile.putProfileSetting('infill_percentage',equivalent_percentage)
+
 		if self._isSimpleMode:
 			self._engine.runEngine(self._scene, self.GetTopLevelParent().simpleSettingsPanel.getSettingOverrides())
 		else:
