@@ -152,9 +152,7 @@ class wallThicknessValidator(object):
 
 class infillValidator(object):
 	"""
-	Validate the printing speed by checking for a certain amount of volume per second.
-	This is based on the fact that you can push 10mm3 per second trough an UM-Origonal nozzle.
-	TODO: Update this code so it works better for different machine times with other feeders.
+	Validate if the infill pattern is not set to None.
 	"""
 	def __init__(self, setting):
 		self.setting = setting
