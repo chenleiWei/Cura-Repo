@@ -776,11 +776,11 @@ class SceneView(openglGui.glGuiPanel):
 
 	def _onRunEngine(self, e):
 
-		equivalent_percentage = round(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_density')),2)
-		if profile.getProfileSettingFloat('infill_percentage') != equivalent_percentage:
-			profile.putProfileSetting('infill_percentage',equivalent_percentage)
-			self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
-
+		if profile.getProfileSettingFloat('fill_density') > 0:
+			equivalent_percentage = round(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_density')),2)
+			if profile.getProfileSettingFloat('infill_percentage') != equivalent_percentage:
+				profile.putProfileSetting('infill_percentage',equivalent_percentage)
+				self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
 		if self._isSimpleMode:
 			self._engine.runEngine(self._scene, self.GetTopLevelParent().simpleSettingsPanel.getSettingOverrides())
 		else:
