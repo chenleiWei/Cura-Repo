@@ -133,6 +133,9 @@ class SceneView(openglGui.glGuiPanel):
 
 		self.viewSelection = openglGui.glComboButton(self, _("View mode"), [7,19,11,15,23], [_("Normal"), _("Overhang"), _("Transparent"), _("X-Ray"), _("Layers")], (-1,0), self.OnViewChange)
 
+		self.infillGridButton = openglGui.glButton(self, 2, _("Infill"), (-1,-1), self.OninfillGridButton)
+
+
 		self.notification = openglGui.glNotification(self, (0, 0))
 
 		self._engine = sliceEngine.Engine(self._updateEngineProgress)
@@ -648,6 +651,12 @@ class SceneView(openglGui.glGuiPanel):
 		self._selectedObj.mirror(axis)
 		self.sceneUpdated()
 
+	def OninfillGridButton(self,button = 1):
+		if profile.getPreference('show_infill') == 'True':
+			profile.putPreference('show_infill',False)
+		else:
+			profile.putPreference('show_infill',True)
+
 	def OnScaleEntry(self, value, axis):
 		if self._selectedObj is None:
 			return
@@ -763,6 +772,10 @@ class SceneView(openglGui.glGuiPanel):
 		self.sceneUpdated()
 
 	def sceneUpdated(self):
+		if profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid':
+			self.infillGridButton.setDisabled(False)
+		else:
+			self.infillGridButton.setDisabled(True)
 
 		objectSink = profile.getProfileSettingFloat("object_sink")
 		if self._lastObjectSink != objectSink:
@@ -1400,7 +1413,8 @@ class SceneView(openglGui.glGuiPanel):
 			sparseInfillLineDistance = sparseInfillLineDistance  / 0.816138	
 
 		self.layerSelect.setHidden(True)
-		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
+		#self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
+		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getPreference('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
 #		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and profile.getProfileSetting('infill_type') != 'None' and profile.getProfileSetting('infill_type') != 'Concentric' and profile.getProfileSetting('infill_type') != 'Gradient concentric')
 		for i in range(0,2):
 			if self.layerSelectCondition:
