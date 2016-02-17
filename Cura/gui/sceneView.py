@@ -13,6 +13,7 @@ import cStringIO as StringIO
 import OpenGL
 import sys
 OpenGL.ERROR_CHECKING = False
+from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from OpenGL.GLE import *
 from OpenGL.GL import *
@@ -1412,6 +1413,7 @@ class SceneView(openglGui.glGuiPanel):
 		if profile.getProfileSetting('infill_type') == 'Cube':
 			sparseInfillLineDistance = sparseInfillLineDistance  / 0.816138	
 
+		
 		self.layerSelect.setHidden(True)
 		#self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
 		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getPreference('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
@@ -1457,7 +1459,14 @@ class SceneView(openglGui.glGuiPanel):
 						glVertex3f(value  , homeY  , self.layerSelect.getValue())
 						glVertex3f(value  , -homeY , self.layerSelect.getValue())
 
-					elif profile.getProfileSetting('infill_type') == 'Cube':
+					elif profile.getProfileSetting('infill_type') == 'Cube':						
+						#glRotatef(45, 0,0, 0.00)
+						#glRotatef(45, 0,1, 0.00)
+						#glColor3f(1, 0,0)
+						#glutSolidCube(20)
+						#glColor3f(0, 0,0)
+						#glutWireCube(20)
+						#glPopMatrix()
 						if value > homeX and value < - homeX:
 							glVertex3f(value, homeY  , self.layerSelect.getValue())
 							glVertex3f(value , -homeY , self.layerSelect.getValue())
