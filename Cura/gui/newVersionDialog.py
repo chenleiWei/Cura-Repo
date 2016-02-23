@@ -25,7 +25,7 @@ class newVersionDialog(wx.Dialog):
 		textFont = wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL)
 
 		# Title text
-		title = wx.StaticText(p, -1, 'Cura Type A - Beta ' + version.getVersion())
+		title = wx.StaticText(p, -1, 'Cura Type A - ' + version.getVersion())
 		title.SetFont(titleFont)
 		versionForked = wx.StaticText(p, -1, 'Based On Daid/Ultimaker\'s Cura v15.02.')
 		versionForked.SetFont(textFont)
@@ -35,13 +35,14 @@ class newVersionDialog(wx.Dialog):
 	
 	
 		# "New in This Version" label
-		newHere = wx.StaticText(p, -1, "New in Cura 1.4.0")
+		newHere = wx.StaticText(p, -1, "New in Cura 1.4.1")
 		newHere.SetFont(titleFont)
 		s.Add(newHere, flag=wx.TOP, border=10)
 	
 		# Bullet point list
 		# Add or remove static text objects as needed
 		changesAndAdditions = [
+			wx.StaticText(p, -1, "* Includes the Type A Machines ProMatte material profile"),
 			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing"),
 			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu"),
 			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching"),

@@ -22,7 +22,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="1.4.0"
+export BUILD_NAME="1.4.1"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -194,7 +194,7 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 	fi
 	
 	mkdir resources/quickprint/Materials
-	git clone -b Testing ${MATERIALS_REPO} resources/quickprint/Materials/
+	git clone -b ${MATERIALS_BRANCH} ${MATERIALS_REPO} resources/quickprint/Materials/
 	ls resources/quickprint/Materials/
 
 	rm -rf CuraEngine
