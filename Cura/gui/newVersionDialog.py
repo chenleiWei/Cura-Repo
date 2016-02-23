@@ -25,7 +25,7 @@ class newVersionDialog(wx.Dialog):
 		textFont = wx.Font(11, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 
 		# Title text
-		title = wx.StaticText(p, -1, 'Cura Type A - Beta ' + version.getVersion())
+		title = wx.StaticText(p, -1, 'Cura Type A - ' + version.getVersion())
 		title.SetFont(titleFont)
 		versionForked = wx.StaticText(p, -1, 'Based On Daid/Ultimaker\'s Cura v15.02.')
 		versionForked.SetFont(headerFont)
