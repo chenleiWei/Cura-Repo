@@ -34,26 +34,38 @@ class newVersionDialog(wx.Dialog):
 		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=5)
 	
 	
-		# "New in This Version" label
+		# New in this version
 		newHere = wx.StaticText(p, -1, "New in Cura 1.4.1")
 		newHere.SetFont(titleFont)
 		s.Add(newHere, flag=wx.TOP, border=10)
-	
-		# Bullet point list
-		# Add or remove static text objects as needed
+
 		changesAndAdditions = [
 			wx.StaticText(p, -1, "* Includes the Type A Machines ProMatte material profile"),
-			wx.StaticText(p, -1, "* Optimized material profiles: PolyMaker PC-Plus, 3DOM PLA"),
-			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing"),
-			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu"),
-			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching"),
-		]
-			
-		# Add bullet points
+			wx.StaticText(p, -1, "")
+		]			
+		
 		for item in changesAndAdditions:
 			item.Wrap(600)
 			s.Add(item, flag=wx.TOP, border=5)
 	
+		# Recent Additions
+		recentAdditions = wx.StaticText(p, -1, "Recent Additions")
+		recentAdditions.SetFont(titleFont)
+		s.Add(recentAdditions)
+				
+		recentAdditionsList = [
+			wx.StaticText(p, -1, "* Optimized material profiles: PolyMaker PC-Plus, 3DOM PLA"),
+			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing"),
+			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu"),
+			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching"),
+			wx.StaticText(p, -1, "")
+		]
+		
+		for item in recentAdditionsList:
+			item.Wrap(600)
+			s.Add(item, flag=wx.TOP, border=5)
+		
+		# Bug Fixes
 		bugFixTitle = wx.StaticText(p, -1, "Recent Bug Fixes")
 		bugFixTitle.SetFont(titleFont)
 		bugsFixed = [
