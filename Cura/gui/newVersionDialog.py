@@ -35,18 +35,18 @@ class newVersionDialog(wx.Dialog):
 	
 	
 		# "New in This Version" label
-		newHere = wx.StaticText(p, -1, "New in Cura 1.4.0")
+		newHere = wx.StaticText(p, -1, "New in Cura 1.4.1")
 		newHere.SetFont(titleFont)
 		s.Add(newHere, flag=wx.TOP, border=10)
 	
 		# Bullet point list
 		# Add or remove static text objects as needed
 		changesAndAdditions = [
+			wx.StaticText(p, -1, "* Includes the Type A Machines ProMatte material profile"),
+			wx.StaticText(p, -1, "* Optimized material profiles: PolyMaker PC-Plus, 3DOM PLA"),
 			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing"),
 			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu"),
 			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching"),
-			wx.StaticText(p, -1, "* New optimized material profiles added: PolyMaker PC Plus, 3DOM PLA"),
-			wx.StaticText(p, -1, "")
 		]
 			
 		# Add bullet points
