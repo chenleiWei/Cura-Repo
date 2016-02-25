@@ -1,4 +1,4 @@
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura Type A)- Released under terms of the AGPLv3 License"
 
 import wx
 import wx.lib.agw.hyperlink as hl
