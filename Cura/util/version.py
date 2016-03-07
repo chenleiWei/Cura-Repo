@@ -60,28 +60,111 @@ def isDevVersion():
 	return os.path.exists(gitPath) or os.path.exists(hgPath)
 
 def checkForNewerVersion():
-	if isDevVersion():
-		return None
-	try:
-		updateBaseURL = ''
-		localVersion = map(int, getVersion(False).split('.'))
-		while len(localVersion) < 3:
-			localVersion += [1]
-		latestFile = urllib2.urlopen("%s/latest.xml" % (updateBaseURL))
-		latestXml = latestFile.read()
-		latestFile.close()
-		xmlTree = ElementTree.fromstring(latestXml)
-		for release in xmlTree.iter('release'):
-			os = str(release.attrib['os'])
-			version = [int(release.attrib['major']), int(release.attrib['minor']), int(release.attrib['revision'])]
-			filename = release.find("filename").text
-			if platform.system() == os:
-				if version > localVersion:
-					return "%s/current/%s" % (updateBaseURL, filename)
-	except:
-		#print sys.exc_info()
-		return None
-	return None
+	# current version list
+	CVL= {}
+	# latest version list
+	LVL = {}
+
+
+	# current 
+	currentVersionURL = 'https://dl.dropboxusercontent.com/s/knr8667zlffnq9n/checkVersion.xml'
+	#currentFile = urllib2.urlopen("%s" % (currentVersionURL))
+	currentFile = open('/Users/catherinecasuat/CuraDevelopment/checkVersion.xml')
+	currentXml = currentFile.read()
+	currentFile.close()
+	currentXmlTree = ElementTree.fromstring(currentXml)
+
+	for release in currentXmlTree.iter('release'):
+		os = str(release.attrib['os'])
+		# get matching operating system
+		if sys.platform.lower() == os.lower():
+			CVL = {"major": int(release.attrib['major']),
+						"minor": int(release.attrib['minor']),
+						"revision": str(release.attrib['revision']),
+						"type": str(release.attrib['type']),
+						"testRev": str(release.attrib['testRev'])
+						}
+
+	# latest		
+	updateBaseURL = 'https://dl.dropboxusercontent.com/s/b2td8x9kfj3ckrv/LatestCura.xml'
+	#latestFile = urllib2.urlopen("%s" % (updateBaseURL))
+	latestFile = open('/Users/catherinecasuat/Downloads/latestCura.xml')
+	latestXml = latestFile.read()
+	latestFile.close()
+	latestXmlTree = ElementTree.fromstring(latestXml)
+
+	for release in latestXmlTree.iter('release'):
+		os = str(release.attrib['os'])
+		# get matching operating system
+		if sys.platform.lower() == os.lower():	
+			LVL = {"major": int(release.attrib['major']),
+						"minor": int(release.attrib['minor']),
+						"revision": str(release.attrib['revision']),
+						"type": str(release.attrib['type']),
+						"testRev": str(release.attrib['testRev'])
+						}
+	
+	# Comparison
+	"""
+	if CVL and LVL:
+		print "lists full"
+	else:
+		print "List error"
+	print "----------------------"
+	print "Current version"
+	for x, y in CVL.items():
+		print "\t", x, ": ", y 
+	print "----------------------"
+	print "Latest version"
+	for x, y in LVL.items():
+		print "\t", x, ": ", y
+	"""
+	updateVersion = False
+
+	# Compare major number(s)
+	if LVL["major"] > CVL["major"]:
+		updateVersion = True
+	else:
+		# Compare minor number(s)
+		# CVL = current version list
+		# LVL = latest version list
+		if LVL["minor"] > CVL["minor"]:
+			updateVersion = True
+		elif LVL["minor"] <= CVL["minor"]:
+			# Compare rev number(s)
+			if LVL["revision"] > CVL["revision"]:
+				updateVersion = True
+			elif LVL["revision"] <= CVL["revision"]:
+				# Compare rev type
+				if LVL["type"] == "GM":
+					if CVL["type"] != "GM":
+						updateVersion = True
+					else:
+						updateVersion = False
+				# If not GM:
+				# 	Compare betas and alphas
+				else:
+					if CVL["type"] == "Beta" and LVL["type"] == "GM":
+						updateVersion = True
+					if LVL["type"] == "Beta":
+						if CVL["type"] != "Beta":
+							updateVersion = True
+					elif LVL["type"] == "Alpha":
+						if CVL["type"] == "Beta":
+							updateVersion = True
+					# Compares testing (beta or alpha) rev number		
+					if updateVersion == False:
+						if LVL["testRev"] > CVL["testRev"]:
+							updateVersion = True
+			else:
+				updateVersion = False
+		
+		else:
+			updateVersion = False
+
+		return updateVersion
+	
+
 
 if __name__ == '__main__':
 	print(getVersion())
