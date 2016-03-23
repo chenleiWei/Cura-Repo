@@ -35,12 +35,12 @@ class newVersionDialog(wx.Dialog):
 	
 	
 		# New in this version
-		newHere = wx.StaticText(p, -1, "New in Cura 1.4.1")
+		newHere = wx.StaticText(p, -1, "New in Cura 1.4.2")
 		newHere.SetFont(titleFont)
 		s.Add(newHere, flag=wx.TOP, border=10)
 
 		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Includes the Type A Machines ProMatte material profile"),
+			wx.StaticText(p, -1, "* Optimized settings for Type A Machines ProMatte."),
 			wx.StaticText(p, -1, "")
 		]			
 		
@@ -97,7 +97,7 @@ class newVersionDialog(wx.Dialog):
 		self.hasUltimaker2 = None
 
 	#	s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
-		button = wx.Button(p, -1, 'Ok')
+		button = wx.Button(p, -1, 'OK')
 		button.Bind(wx.EVT_BUTTON, self.OnOk)
 		s.Add(button, flag=wx.TOP|wx.ALIGN_CENTRE | wx.ALL, border=5)
 
