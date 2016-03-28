@@ -359,6 +359,10 @@ class SceneView(openglGui.glGuiPanel):
 		
 					
 	def OnPrintButton(self, button):
+		mainWindow = self.GetParent().GetParent().GetParent()
+		directUpload = mainWindow.OnDirectUploadSettings(True)
+
+		
 		if button == 1:
 			connectionGroup = self._printerConnectionManager.getAvailableGroup()
 			"""
@@ -406,7 +410,7 @@ class SceneView(openglGui.glGuiPanel):
 				self._openPrintWindowForConnection(connection)
 			else:
 			"""
-			self.showSaveGCode()
+		#	self.showSaveGCode()
 		if button == 3:
 			menu = wx.Menu()
 			connections = self._printerConnectionManager.getAvailableConnections()
@@ -954,6 +958,7 @@ class SceneView(openglGui.glGuiPanel):
 			self._yaw = 90
 			self._pitch = 90
 			self.QueueRefresh()
+		# CGC - Still need to add print screen
 
 		if keyCode == wx.WXK_F3 and wx.GetKeyState(wx.WXK_SHIFT):
 			shaderEditor(self, self.ShaderUpdate, self._objectLoadShader.getVertexShader(), self._objectLoadShader.getFragmentShader())
@@ -972,7 +977,7 @@ class SceneView(openglGui.glGuiPanel):
 			for k in self._afterLeakTest:
 				if self._afterLeakTest[k]-self._beforeLeakTest[k]:
 					print k, self._afterLeakTest[k], self._beforeLeakTest[k], self._afterLeakTest[k] - self._beforeLeakTest[k]
-
+					
 	def ShaderUpdate(self, v, f):
 		s = openglHelpers.GLShader(v, f)
 		if s.isValid():
