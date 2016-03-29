@@ -450,13 +450,17 @@ class SceneView(openglGui.glGuiPanel):
 			return
 		if not self._engine.getResult().isFinished():
 			return
-		firstPrintPath = os.path.join('resources', 'example', 'FirstPrintCone.stl')
-		normalizedPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'FirstPrintCone.stl'))
-		# Don't save in resources folder if this is the user's first run
-		if profile.getPreference('lastFile') == firstPrintPath:
-			dlg=wx.FileDialog(self, _("Save GCode"), os.path.dirname('~/Documents'), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+		
+		firstPrintPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'resources', 'example'))
+		lastFilePath = os.path.dirname(profile.getPreference('lastFile'))
+		documentsDirectory = os.path.expanduser('~/Documents')
+		
+		# Don't save to Cura example directory path
+		if (lastFilePath == firstPrintPath):
+			dlg = wx.FileDialog(self, _("Save GCode"), os.path.dirname(documentsDirectory), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
 		else:
-			dlg=wx.FileDialog(self, _("Save GCode"), os.path.dirname(profile.getPreference('lastFile')), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+			dlg = wx.FileDialog(self, _("Save GCode"), lastFilePath, style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+
 		filename = self._scene._objectList[0].getName() + profile.getGCodeExtension()
 		dlg.SetFilename(filename)
 		dlg.SetWildcard('Toolpath (*%s)|*%s;*%s' % (profile.getGCodeExtension(), profile.getGCodeExtension(), profile.getGCodeExtension()[0:2]))
@@ -464,6 +468,8 @@ class SceneView(openglGui.glGuiPanel):
 			dlg.Destroy()
 			return
 		filename = dlg.GetPath()
+		
+		profile.putPreference('lastFile', filename)
 		dlg.Destroy()
 
 		threading.Thread(target=self._saveGCode,args=(filename,)).start()
