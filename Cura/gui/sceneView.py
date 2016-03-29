@@ -206,6 +206,7 @@ class SceneView(openglGui.glGuiPanel):
 			while filenames:
 				filename = filenames.pop(0)
 				self.filename = filename
+				print(filename)
 				profile.putPreference('lastFile', str(filename))
 				if os.path.isdir(filename):
 					# directory: queue all included files and directories
@@ -263,7 +264,8 @@ class SceneView(openglGui.glGuiPanel):
 
 	def showLoadModel(self, button = 1):
 		if button == 1:
-			dlg=wx.FileDialog(self, _("Open 3D model"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST|wx.FD_MULTIPLE)
+		
+			dlg=wx.FileDialog(self, _("Open 3D model"), os.path.split(profile.getPreference('lastSTLPath'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST|wx.FD_MULTIPLE)
 
 			wildcardList = ';'.join(map(lambda s: '*' + s, meshLoader.loadSupportedExtensions() + imageToMesh.supportedExtensions() + ['.g', '.gcode']))
 			wildcardFilter = "All (%s)|%s;%s" % (wildcardList, wildcardList, wildcardList.upper())
@@ -282,13 +284,22 @@ class SceneView(openglGui.glGuiPanel):
 			dlg.Destroy()
 			if len(filenames) < 1:
 				return False
-			profile.putPreference('lastFile', filenames[0])
+			profile.putPreference('lastSTLPath', filenames[0])
 			self.loadFiles(filenames)
 
 	def showSaveModel(self):
 		if len(self._scene.objects()) < 1:
 			return
-		dlg=wx.FileDialog(self, _("Save 3D model"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+		firstPrintPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'resources', 'example'))
+		lastFilePath = os.path.dirname(profile.getPreference('lastFile'))
+		documentsDirectory = os.path.expanduser('~/Documents')
+		
+		# Don't save to Cura example directory path
+		if (lastFilePath == firstPrintPath):
+			dlg = wx.FileDialog(self, _("Save GCode"), os.path.dirname(documentsDirectory), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+		else:
+			dlg = wx.FileDialog(self, _("Save GCode"), lastFilePath, style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+
 		fileExtensions = meshLoader.saveSupportedExtensions()
 		wildcardList = ';'.join(map(lambda s: '*' + s, fileExtensions))
 		wildcardFilter = "Mesh files (%s)|%s;%s" % (wildcardList, wildcardList, wildcardList.upper())
