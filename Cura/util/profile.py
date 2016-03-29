@@ -1386,8 +1386,13 @@ def replaceTagMatch(m):
 		return pre + '#F_WGHT#'
 	if tag == 'filament_cost':
 		return pre + '#F_COST#'
+	if tag == 'material_profile':
+		return pre + '#M_PROF#'
+	
 	if tag == 'profile_string':
 		return pre + 'CURA_PROFILE_STRING:%s' % (getProfileString())
+		
+		
 	if pre == 'F' and tag == 'max_z_speed':
 		f = getProfileSettingFloat('travel_speed') * 60
 	if pre == 'F' and tag in ['print_speed', 'retraction_speed', 'travel_speed', 'bottom_layer_speed', 'cool_min_feedrate']:
@@ -1469,6 +1474,7 @@ def getAlterationFileContents(filename, extruderCount = 1):
 
 		if bedTemp > 0 and not isTagIn('{print_bed_temperature}', alterationContents):
 			prefix += 'M190 %s%f\n' % (gcode_parameter_key, bedTemp)
+	
 		if temp > 0 and not isTagIn('{print_temperature}', alterationContents):
 			if extruderCount > 1:
 				for n in xrange(1, extruderCount):
