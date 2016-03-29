@@ -24,6 +24,7 @@ from Cura.util import profile
 from Cura.util import gcodeGenerator
 from Cura.util import resources
 from Cura.util import printerConnect
+from Cura.util import version
 
 class InfoBox(wx.Panel):
 	def __init__(self, parent):
@@ -128,7 +129,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddLogo(self):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
-		self.AddTextTagLine('v1.4.2')
+		self.AddTextTagLine(version.getVersion())
 
 	def AddHyperlink(self, text, url):
 		hyper1 = hl.HyperLinkCtrl(self, -1, text, URL=url)

@@ -35,7 +35,7 @@ class newVersionDialog(wx.Dialog):
 	
 	
 		# New in this version
-		newHere = wx.StaticText(p, -1, "New in Cura 1.4.2")
+		newHere = wx.StaticText(p, -1, "New in Cura " + version.getVersion())
 		newHere.SetFont(titleFont)
 		s.Add(newHere, flag=wx.TOP, border=10)
 
