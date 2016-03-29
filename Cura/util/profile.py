@@ -274,6 +274,7 @@ setting('start.gcode', """;-- START GCODE --
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
+;Settings based on material: {}
 G21        ;metric values
 G90        ;absolute positioning
 G28     ;move to endstops
@@ -483,9 +484,9 @@ def _getMyDocumentsFolder():
 setting('serialNumber', '', str, 'preference', 'hidden')
 setting('startMode', 'Simple', ['Simple', 'Normal'], 'preference', 'hidden')
 setting('simpleModeProfile', '2_normal', str, 'preference', 'hidden')
-setting('simpleModeMaterialSupplier', 'Generic', str, 'preference', 'hidden')
-setting('simpleModeMaterialName', 'PLA', str, 'preference', 'hidden')
-setting('simpleModeMaterial', 'Generic PLA', str, 'preference', 'hidden')
+setting('material_supplier', 'Generic', str, 'preference', 'hidden')
+setting('material_name', 'PLA', str, 'preference', 'hidden')
+setting('material_profile', 'Generic PLA', str, 'preference', 'hidden')
 setting('simpleModeStrength', 'Medium', str, 'preference', 'hidden')
 setting('simpleModeQuality', 'Normal', str, 'preference', 'hidden')
 setting('oneAtATime', 'False', bool, 'preference', 'hidden')
