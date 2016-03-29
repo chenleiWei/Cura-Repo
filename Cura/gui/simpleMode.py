@@ -22,10 +22,10 @@ class simpleModePanel(wx.Panel):
 		self._callback = callback
 
 		# Load current values into objects for comparison
-		self.matManufacturer = profile.getPreference('simpleModeMaterialSupplier')
-		self.matName = profile.getPreference('simpleModeMaterialName')
+		self.matManufacturer = profile.getPreference('material_supplier')
+		self.matName = profile.getPreference('material_name')
 		self.profileSettingsList = {}
-		self.materialProfileText = wx.TextDataObject(profile.getPreference('simpleModeMaterial'))
+		self.materialProfileText = wx.TextDataObject(profile.getPreference('material_profile'))
 		self.lastOpenedFileName = "No File Currently Open"
 
 		pub.subscribe(self.displayAndLoadMaterialData, 'matProf.update')
@@ -276,9 +276,9 @@ class simpleModePanel(wx.Panel):
 		self.materialProfileText.SetText(materialLoaded)
 		self.selectedMaterial.SetLabel(materialLoaded)
 
-		profile.putPreference('simpleModeMaterialSupplier', self.matManufacturer)
-		profile.putPreference('simpleModeMaterialName', self.matName)
-		profile.putPreference('simpleModeMaterial', materialLoaded)
+		profile.putPreference('material_supplier', self.matManufacturer)
+		profile.putPreference('material_name', self.matName)
+		profile.putPreference('material_profile', materialLoaded)
 		
 		# profile setting information update + info panel update
 		profileSectionData = self.getSectionItems(path, 'profile')
@@ -443,10 +443,10 @@ class MaterialSelectorFrame(wx.Frame):
 		index = self.brandsBox.GetSelection()
 		matIndex = self.matsBox.GetSelection()
 		
-		if profile.getPreference('simpleModeMaterialSupplier') is None:
+		if profile.getPreference('material_supplier') is None:
 			self.selectedBrand = self.brandsBox.GetString(index)
 		else:
-			self.selectedBrand = profile.getPreference('simpleModeMaterialSupplier')
+			self.selectedBrand = profile.getPreference('material_supplier')
 			newIndex = self.brandsBox.FindString(self.selectedBrand)
 			print "new index: ", newIndex
 			self.brandsBox.SetSelection(newIndex)
@@ -466,10 +466,10 @@ class MaterialSelectorFrame(wx.Frame):
 		self.matsBox.SetSelection(0)
 		self.selectedMaterial = self.matsBox.GetString(0)
 		
-		if profile.getPreference('simpleModeMaterialName') is None:
+		if profile.getPreference('material_name') is None:
 			self.selectedMaterial = self.matsBox.GetString(0)
 		else:
-			self.selectedMaterial = profile.getPreference('simpleModeMaterialName')
+			self.selectedMaterial = profile.getPreference('material_name')
 			newIndex = self.matsBox.FindString(self.selectedMaterial)
 			self.matsBox.SetSelection(newIndex)
 			
