@@ -631,7 +631,7 @@ class mainWindow(wx.Frame):
 		if manufacturer is not None and name is not None: 
 			profile.putPreference('material_supplier', manufacturer)
 			profile.putPreference('material_name', name)
-			profile.putPreference(material_profile, materialLoaded)
+			profile.putPreference('material_profile', materialLoaded)
 
 		# profile setting information update + info panel update
 		self.loadData(sectionSettings, 'profile')
