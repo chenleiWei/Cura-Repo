@@ -40,7 +40,9 @@ class newVersionDialog(wx.Dialog):
 		s.Add(newHere, flag=wx.TOP, border=10)
 
 		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Optimized material profile settings for Type A Machines ProMatte."),
+			wx.StaticText(p, -1, "* Optimized material profile settings for Type A Machines ProMatte"),
+			wx.StaticText(p, -1, "* Start GCode contains material profile info"),
+			wx.StaticText(p, -1, "* GCode save path bug addressed"),
 			wx.StaticText(p, -1, "")
 		]			
 		
