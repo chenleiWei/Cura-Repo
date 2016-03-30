@@ -290,15 +290,24 @@ class SceneView(openglGui.glGuiPanel):
 	def showSaveModel(self):
 		if len(self._scene.objects()) < 1:
 			return
+
 		firstPrintPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'resources', 'example'))
-		lastFilePath = os.path.dirname(profile.getPreference('lastFile'))
-		documentsDirectory = os.path.expanduser('~/Documents')
-		
+		lastFilePath = os.path.dirname(os.path.abspath(profile.getPreference('lastFile')))
+		homeDirectory = os.path.expanduser('~')
+		documentsDirectory =  os.path.join(homeDirectory, 'Documents')
+
+		docsDirectoryExists = os.path.isdir(documentsDirectory)
+
+		if docsDirectoryExists == True:	
+			initialSavePath = documentsDirectory
+		else:
+			initialSavePath = homeDirectory
+				
 		# Don't save to Cura example directory path
 		if (lastFilePath == firstPrintPath):
-			dlg = wx.FileDialog(self, _("Save GCode"), os.path.dirname(documentsDirectory), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+			dlg = wx.FileDialog(self, _("Save as AMF"), os.path.dirname(initialSavePath), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
 		else:
-			dlg = wx.FileDialog(self, _("Save GCode"), lastFilePath, style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+			dlg = wx.FileDialog(self, _("Save as AMF"), lastFilePath, style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
 
 		fileExtensions = meshLoader.saveSupportedExtensions()
 		wildcardList = ';'.join(map(lambda s: '*' + s, fileExtensions))
@@ -463,12 +472,19 @@ class SceneView(openglGui.glGuiPanel):
 			return
 		
 		firstPrintPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'resources', 'example'))
-		lastFilePath = os.path.dirname(profile.getPreference('lastFile'))
-		documentsDirectory = os.path.expanduser('~/Documents')
+		lastFilePath = os.path.dirname(os.path.abspath(profile.getPreference('lastFile')))
+		homeDirectory = os.path.expanduser('~')
+		documentsDirectory =  os.path.join(homeDirectory, 'Documents')
+		docsDirectoryExists = os.path.isdir(documentsDirectory)
 		
+		if docsDirectoryExists == True:	
+			initialSavePath = documentsDirectory
+		else:
+			initialSavePath = homeDirectory
+				
 		# Don't save to Cura example directory path
 		if (lastFilePath == firstPrintPath):
-			dlg = wx.FileDialog(self, _("Save GCode"), os.path.dirname(documentsDirectory), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+			dlg = wx.FileDialog(self, _("Save GCode"), os.path.dirname(initialSavePath), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
 		else:
 			dlg = wx.FileDialog(self, _("Save GCode"), lastFilePath, style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
 
@@ -820,9 +836,9 @@ class SceneView(openglGui.glGuiPanel):
 				if amount is None:
 					continue
 				text += '\n%s' % (amount)
-				cost = result.getFilamentCost(e)
-				if cost is not None:
-					text += '\n%s' % (cost)
+#				cost = result.getFilamentCost(e)
+#				if cost is not None:
+#					text += '\n%s' % (cost)
 			self.printButton.setProgressBar(None)
 			self.printButton.setBottomText(text)
 		self.QueueRefresh()

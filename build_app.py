@@ -13,7 +13,7 @@ if sys.platform.startswith('darwin'):
         u'CFBundleName': u'Cura Type A',
         u'CFBundleShortVersionString': version,
         u'CFBundleVersion': version,
-        u'CFBundleIdentifier': u'com.ultimaker.Cura-'+version,
+        u'CFBundleIdentifier': u'com.typeamachines.Cura-'+version,
         u'LSMinimumSystemVersion': u'10.6',
         u'LSApplicationCategoryType': u'public.app-category.graphics-design',
         u'CFBundleDocumentTypes': [
@@ -50,14 +50,14 @@ if sys.platform.startswith('darwin'):
                 u'UTTypeTagSpecification': {u'public.filename-extension': [u'dae'], u'public.mime-type': [u'model/vnd.collada+xml']}
             },
             {
-                u'UTTypeIdentifier': u'com.ultimaker.obj',
+                u'UTTypeIdentifier': u'com.typeamachines.obj',
                 u'UTTypeConformsTo': [u'public.data'],
                 u'UTTypeDescription': u'Wavefront OBJ',
                 u'UTTypeReferenceURL': u'https://en.wikipedia.org/wiki/Wavefront_.obj_file',
                 u'UTTypeTagSpecification': {u'public.filename-extension': [u'obj'], u'public.mime-type': [u'text/plain']}
             },
             {
-                u'UTTypeIdentifier': u'com.ultimaker.amf',
+                u'UTTypeIdentifier': u'com.typeamachines.amf',
                 u'UTTypeConformsTo': [u'public.data'],
                 u'UTTypeDescription': u'Additive Manufacturing File',
                 u'UTTypeReferenceURL': u'https://en.wikipedia.org/wiki/Additive_Manufacturing_File_Format',
