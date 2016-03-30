@@ -69,7 +69,7 @@ class mainWindow(wx.Frame):
 		self.fileMenu = wx.Menu()
 		i = self.fileMenu.Append(-1, _("Load Model File...\tCTRL+L"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.showLoadModel(), i)
-		i = self.fileMenu.Append(-1, _("Save Model...\tCTRL+S"))
+		i = self.fileMenu.Append(-1, _("Save Model as AMF...\tCTRL+S"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.showSaveModel(), i)
 		i = self.fileMenu.Append(-1, _("Reload Platform\tF5"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.reloadScene(e), i)
