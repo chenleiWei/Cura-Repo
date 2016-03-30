@@ -820,9 +820,9 @@ class SceneView(openglGui.glGuiPanel):
 				if amount is None:
 					continue
 				text += '\n%s' % (amount)
-				cost = result.getFilamentCost(e)
-				if cost is not None:
-					text += '\n%s' % (cost)
+#				cost = result.getFilamentCost(e)
+#				if cost is not None:
+#					text += '\n%s' % (cost)
 			self.printButton.setProgressBar(None)
 			self.printButton.setBottomText(text)
 		self.QueueRefresh()
