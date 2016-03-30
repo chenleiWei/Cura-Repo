@@ -547,7 +547,7 @@ setting('extruder_head_size_min_x', '35', float, 'machine', 'hidden').setLabel(_
 setting('extruder_head_size_min_y', '55', float, 'machine', 'hidden').setLabel(_("Head size towards Y min (mm)"), _("The distance between the nozzle and right-most part of the print head."))
 setting('extruder_head_size_max_x', '55', float, 'machine', 'hidden').setLabel(_("Head size towards X max (mm)"), _("The distance between the the front (closest to you) fan and the nozzle."))
 setting('extruder_head_size_max_y', '65', float, 'machine', 'hidden').setLabel(_("Head size towards Y max (mm)"), _("The distance between the nozzle and the back-end (farthest from you) of the print head."))
-setting('extruder_head_size_height', '110', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
+setting('extruder_head_size_height', '35', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
 
 validators.warningAbove(settingsDictionary['filament_flow'], 150, _("More flow than 150% is rare and usually not recommended."))
 validators.warningBelow(settingsDictionary['filament_flow'], 50, _("Less flow than 50% is rare and usually not recommended."))
@@ -1385,8 +1385,8 @@ def replaceTagMatch(m):
 		return pre + '#F_AMNT#'
 	if tag == 'filament_weight':
 		return pre + '#F_WGHT#'
-	if tag == 'filament_cost':
-		return pre + '#F_COST#'
+#	if tag == 'filament_cost':
+#		return pre + '#F_COST#'
 	if tag == 'material_profile':
 		return pre + '#M_PROF#'
 	
