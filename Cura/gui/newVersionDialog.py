@@ -43,8 +43,9 @@ class newVersionDialog(wx.Dialog):
 			wx.StaticText(p, -1, "* Optimized material profile settings for Type A Machines ProMatte"),
 			wx.StaticText(p, -1, "* PET-based material profiles updated (credit to Elijah)"),
 			wx.StaticText(p, -1, "* Print head size values updated (credit to Elijah)"),
+			wx.StaticText(p, -1, "* 5 second timeout applied to printer connection process"),
 			wx.StaticText(p, -1, "* Start GCode contains material profile info"),
-			wx.StaticText(p, -1, "* GCode save path bug addressed"),
+			wx.StaticText(p, -1, "* Save directory bug addressed"),
 			wx.StaticText(p, -1, "* GUI text is now in black"),
 			wx.StaticText(p, -1, "")
 		]
