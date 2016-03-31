@@ -219,7 +219,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return text
 
 	def AddTextTitle(self, info):
-		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_RIGHT)
 		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(340)
@@ -235,9 +235,9 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		if red:
 			text.SetForegroundColour('Red')
 		else:
-			text.SetForegroundColour('Black')
+			text.SetForegroundColour('Blue')
 			
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.LEFT | wx.EXPAND, border=140)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag= wx.ALIGN_CENTER | wx.LEFT | wx.EXPAND, border=140)
 		self.rowNr += 1
 		return text
 		
@@ -713,8 +713,8 @@ class TAMOctoPrintInfo(InfoPage):
 		serial = self.serialNumber.GetValue()
 		saveInfo = self.saveInfo
 		self.configurationAttemptedOnce = True
-		self.errorMessageln1.SetLabel("Configuring...")
 		self.errorMessageln1.SetForegroundColour('Blue')
+		self.errorMessageln1.SetLabel("Configuring...")
 		self.configurePrinterButton.Disable()
 
 		thread = printerConnect.ConfirmCredentials(self, True, key, serial, self.errorMessageln1)
