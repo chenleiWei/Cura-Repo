@@ -62,11 +62,10 @@ class ConfirmCredentials(threading.Thread):
 		url = 'http://series1-%s.local:5000/api/files/local' % self.serial
 
 		try:
-			r = requests.post(url, headers=header, files=files)
+			r = requests.post(url, headers=header, files=files, timeout=5)
 		except requests.exceptions.RequestException as e:
 			print e
-			self.conveyError
-
+			self.conveyError("Connection could not be made. Please try again later.")
 		try: 
 			print r.text
 		except Exception as e:
@@ -83,11 +82,11 @@ class ConfirmCredentials(threading.Thread):
 		self.errorMessage1.SetLabel("Configuring...")
 		self.errorMessage1.SetForegroundColour('Blue')
 
-	def conveyError(self):
+	def conveyError(self, e):
 		self.errorMessage1.SetForegroundColour('Red')
-		self.errorMessage1.SetLabel("Please check that your printer is connected to the network and that your inputs are correct.")
+		self.errorMessage1.SetLabel(str(e))
 		if self.configWizard: 
-			self.errorMessage1.Wrap(275)
+			self.errorMessage1.Wrap(200)
 		else:
 			self.errorMessage1.Wrap(420)
 		
