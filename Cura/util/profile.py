@@ -516,6 +516,8 @@ setting('window_width', '-1', float, 'preference', 'hidden')
 setting('window_height', '-1', float, 'preference', 'hidden')
 setting('window_normal_sash', '320', float, 'preference', 'hidden')
 setting('last_run_version', '', str, 'preference', 'hidden')
+setting('batch_slice', 'False', bool, 'preference', 'hidden')
+
 
 setting('machine_name', '', str, 'machine', 'hidden')
 setting('machine_type', 'unknown', str, 'machine', 'hidden') #Ultimaker, Ultimaker2, RepRap
