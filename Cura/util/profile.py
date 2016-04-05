@@ -203,7 +203,7 @@ setting('filament_diameter3',          0, float, 'basic',    _('Filament')).setR
 setting('filament_diameter4',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter4 (mm)"), _("Diameter of your filament for the 4th nozzle. Use 0 to use the same diameter as for nozzle 1."))
 setting('filament_diameter5',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter5 (mm)"), _("Diameter of your filament for the 5th nozzle. Use 0 to use the same diameter as for nozzle 1."))
 setting('filament_flow',            100., float, 'basic',    _('Filament')).setRange(5,300).setLabel(_("Flow (%)"), _("Flow compensation, the amount of material extruded is multiplied by this value"))
-setting('retraction_speed',         40.0, float, 'advanced', _('Retraction')).setRange(0.1).setLabel(_("Speed (mm/s)"), _("Speed at which the filament is retracted, a higher retraction speed works better. But a very high retraction speed can lead to filament grinding."))
+setting('retraction_speed',         40.0, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Speed (mm/s)"), _("Speed at which the filament is retracted, a higher retraction speed works better. But a very high retraction speed can lead to filament grinding."))
 setting('retraction_amount',         0.4, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Distance (mm)"), _("Distance of retraction. Set to 0 for no retraction. A setting of 0.4 is recommended for standard PLA. Retraction settings for specific materials are provided in the included Materials Profiles."))
 setting('retraction_dual_amount',   16.5, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Dual extrusion switch amount (mm)"), _("Amount of retraction when switching nozzle with dual-extrusion, set at 0 for no retraction at all. A value of 16.0mm seems to generate good results."))
 setting('retraction_min_travel',     1.5, float, 'expert',   _('Retraction')).setRange(0).setLabel(_("Minimum Travel (mm)"), _("Minimum amount of travel needed for a retraction to happen at all. To make sure you do not get a lot of retractions in a small area."))
@@ -274,6 +274,7 @@ setting('start.gcode', """;-- START GCODE --
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
+;Settings based on material: {}
 G21        ;metric values
 G90        ;absolute positioning
 G28     ;move to endstops
@@ -483,14 +484,14 @@ def _getMyDocumentsFolder():
 setting('serialNumber', '', str, 'preference', 'hidden')
 setting('startMode', 'Simple', ['Simple', 'Normal'], 'preference', 'hidden')
 setting('simpleModeProfile', '2_normal', str, 'preference', 'hidden')
-setting('simpleModeMaterialSupplier', 'Generic', str, 'preference', 'hidden')
-setting('simpleModeMaterialName', 'PLA', str, 'preference', 'hidden')
-setting('simpleModeMaterial', 'Generic PLA', str, 'preference', 'hidden')
+setting('material_supplier', 'Generic', str, 'preference', 'hidden')
+setting('material_name', 'PLA', str, 'preference', 'hidden')
+setting('material_profile', 'Generic PLA', str, 'preference', 'hidden')
 setting('simpleModeStrength', 'Medium', str, 'preference', 'hidden')
 setting('simpleModeQuality', 'Normal', str, 'preference', 'hidden')
 setting('oneAtATime', 'False', bool, 'preference', 'hidden')
 setting('lastFile', os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'FirstPrintCone.stl')), str, 'preference', 'hidden')
-setting('initialFile', _getMyDocumentsFolder, 'str', 'preference', 'hidden')
+setting('lastSTLPath', os.path.expanduser('~/Documents'), str, 'preference', 'hidden')
 setting('save_profile', 'False', bool, 'preference', 'hidden').setLabel(_("Save profile on slice"), _("When slicing save the profile as [stl_file]_profile.ini next to the model."))
 setting('filament_cost_kg', '0', float, 'preference', 'hidden').setLabel(_("Cost (price/kg)"), _("Cost of your filament per kg, to estimate the cost of the final print."))
 setting('filament_cost_meter', '0', float, 'preference', 'hidden').setLabel(_("Cost (price/m)"), _("Cost of your filament per meter, to estimate the cost of the final print."))
@@ -541,11 +542,11 @@ setting('serial_port_auto', '', str, 'machine', 'hidden')
 setting('serial_baud', 'AUTO', str, 'machine', 'hidden').setLabel(_("Baudrate"), _("Speed of the serial port communication\nNeeds to match your firmware settings\nCommon values are 250000, 115200, 57600"))
 setting('serial_baud_auto', '', int, 'machine', 'hidden')
 
-setting('extruder_head_size_min_x', '30', float, 'machine', 'hidden').setLabel(_("Head size towards X min (mm)"), _("The distance between left side of the print head to the nozzle."))
+setting('extruder_head_size_min_x', '35', float, 'machine', 'hidden').setLabel(_("Head size towards X min (mm)"), _("The distance between left side of the print head to the nozzle."))
 setting('extruder_head_size_min_y', '55', float, 'machine', 'hidden').setLabel(_("Head size towards Y min (mm)"), _("The distance between the nozzle and right-most part of the print head."))
-setting('extruder_head_size_max_x', '30', float, 'machine', 'hidden').setLabel(_("Head size towards X max (mm)"), _("The distance between the the front (closest to you) fan and the nozzle."))
-setting('extruder_head_size_max_y', '60', float, 'machine', 'hidden').setLabel(_("Head size towards Y max (mm)"), _("The distance between the nozzle and the back-end (farthest from you) of the print head."))
-setting('extruder_head_size_height', '110', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
+setting('extruder_head_size_max_x', '55', float, 'machine', 'hidden').setLabel(_("Head size towards X max (mm)"), _("The distance between the the front (closest to you) fan and the nozzle."))
+setting('extruder_head_size_max_y', '65', float, 'machine', 'hidden').setLabel(_("Head size towards Y max (mm)"), _("The distance between the nozzle and the back-end (farthest from you) of the print head."))
+setting('extruder_head_size_height', '35', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
 
 validators.warningAbove(settingsDictionary['filament_flow'], 150, _("More flow than 150% is rare and usually not recommended."))
 validators.warningBelow(settingsDictionary['filament_flow'], 50, _("Less flow than 50% is rare and usually not recommended."))
@@ -1383,10 +1384,15 @@ def replaceTagMatch(m):
 		return pre + '#F_AMNT#'
 	if tag == 'filament_weight':
 		return pre + '#F_WGHT#'
-	if tag == 'filament_cost':
-		return pre + '#F_COST#'
+#	if tag == 'filament_cost':
+#		return pre + '#F_COST#'
+	if tag == 'material_profile':
+		return pre + '#M_PROF#'
+	
 	if tag == 'profile_string':
 		return pre + 'CURA_PROFILE_STRING:%s' % (getProfileString())
+		
+		
 	if pre == 'F' and tag == 'max_z_speed':
 		f = getProfileSettingFloat('travel_speed') * 60
 	if pre == 'F' and tag in ['print_speed', 'retraction_speed', 'travel_speed', 'bottom_layer_speed', 'cool_min_feedrate']:
@@ -1468,6 +1474,7 @@ def getAlterationFileContents(filename, extruderCount = 1):
 
 		if bedTemp > 0 and not isTagIn('{print_bed_temperature}', alterationContents):
 			prefix += 'M190 %s%f\n' % (gcode_parameter_key, bedTemp)
+	
 		if temp > 0 and not isTagIn('{print_temperature}', alterationContents):
 			if extruderCount > 1:
 				for n in xrange(1, extruderCount):

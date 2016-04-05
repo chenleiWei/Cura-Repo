@@ -22,7 +22,7 @@ class newVersionDialog(wx.Dialog):
 		# Fonts
 		titleFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 		headerFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-		textFont = wx.Font(11, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+		textFont = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 
 		# Title text
 		title = wx.StaticText(p, -1, 'Cura Type A - ' + version.getVersion())
@@ -35,17 +35,24 @@ class newVersionDialog(wx.Dialog):
 	
 	
 		# New in this version
-		newHere = wx.StaticText(p, -1, "New in Cura 1.4.1")
+		newHere = wx.StaticText(p, -1, "New in Cura " + version.getVersion())
 		newHere.SetFont(titleFont)
 		s.Add(newHere, flag=wx.TOP, border=10)
 
 		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Includes the Type A Machines ProMatte material profile"),
+			wx.StaticText(p, -1, "* Optimized material profile settings for Type A Machines ProMatte"),
+			wx.StaticText(p, -1, "* PET-based material profiles updated (credit to Elijah)"),
+			wx.StaticText(p, -1, "* Print head size values updated (credit to Elijah)"),
+			wx.StaticText(p, -1, "* Start GCode contains material profile info"),
+			wx.StaticText(p, -1, "* GCode save path bug addressed"),
+			wx.StaticText(p, -1, "* GUI text is now in black"),
 			wx.StaticText(p, -1, "")
-		]			
+		]
+		
 		
 		for item in changesAndAdditions:
 			item.Wrap(600)
+			item.SetFont(textFont)
 			s.Add(item, flag=wx.TOP, border=5)
 	
 		# Recent Additions
@@ -63,8 +70,10 @@ class newVersionDialog(wx.Dialog):
 		
 		for item in recentAdditionsList:
 			item.Wrap(600)
+			item.SetFont(textFont)
 			s.Add(item, flag=wx.TOP, border=5)
 		
+		"""
 		# Bug Fixes
 		bugFixTitle = wx.StaticText(p, -1, "Recent Bug Fixes")
 		bugFixTitle.SetFont(titleFont)
@@ -81,7 +90,7 @@ class newVersionDialog(wx.Dialog):
 		s.Add(bugFixTitle, flag=wx.TOP, border=5)
 		for count in bugsFixed:
 			s.Add(count, flag=wx.TOP | wx.EXPAND, border=5)
-		
+		"""
 		"""
 		# Note for Beta Testers
 		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=5)
@@ -97,7 +106,7 @@ class newVersionDialog(wx.Dialog):
 		self.hasUltimaker2 = None
 
 	#	s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
-		button = wx.Button(p, -1, 'Ok')
+		button = wx.Button(p, -1, 'OK')
 		button.Bind(wx.EVT_BUTTON, self.OnOk)
 		s.Add(button, flag=wx.TOP|wx.ALIGN_CENTRE | wx.ALL, border=5)
 
