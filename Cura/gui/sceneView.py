@@ -135,7 +135,11 @@ class SceneView(openglGui.glGuiPanel):
 		self.viewSelection = openglGui.glComboButton(self, _("View mode"), [7,19,11,15,23], [_("Normal"), _("Overhang"), _("Transparent"), _("X-Ray"), _("Layers")], (-1,0), self.OnViewChange)
 
 		self.infillGridButton = openglGui.glButton(self, 2, _("Infill"), (-1,-1), self.OninfillGridButton)
-
+		
+		if profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid':
+			self.infillGridButton.setHidden(False)
+		else:
+			self.infillGridButton.setHidden(True)
 
 		self.notification = openglGui.glNotification(self, (0, 0))
 
@@ -260,6 +264,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self._scene.arrangeAll(True)
 		self._scene.centerAll()
+		self.sceneUpdated()
 
 	def OnResetTransformations(self, e):
 		for obj in self._scene.objects():
@@ -268,6 +273,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self._scene.arrangeAll()
 		self._scene.centerAll()
+		self.sceneUpdated()
 
 	def showLoadModel(self, button = 1):
 		if button == 1:
