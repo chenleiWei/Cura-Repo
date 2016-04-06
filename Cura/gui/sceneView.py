@@ -443,6 +443,9 @@ class SceneView(openglGui.glGuiPanel):
 			menu = wx.Menu()
 			connections = self._printerConnectionManager.getAvailableConnections()
 			menu.connectionMap = {}
+			
+		if button == 4:
+			self.OninfillGridButton()
 			"""
 			for connection in connections:
 				i = menu.Append(-1, _("Print with %s") % (connection.getName()))
@@ -689,7 +692,7 @@ class SceneView(openglGui.glGuiPanel):
 		self._selectedObj.mirror(axis)
 		self.sceneUpdated()
 
-	def OninfillGridButton(self,button = 1):
+	def OninfillGridButton(self, button = 4):
 		if profile.getPreference('show_infill') == 'True':
 			profile.putPreference('show_infill',False)
 		else:

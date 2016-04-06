@@ -705,7 +705,6 @@ def getAlternativeBasePaths():
 			paths = extra_list + paths
 	except:
 		import traceback
-		print traceback.print_exc()
 
 	return paths
 
@@ -738,11 +737,6 @@ def initializeOctoPrintAPIConfig(s,k):
 
 	
 def getHeatedBedAlterationPath():
-		if tempOverride:
-			print tempOverride
-		else:
-			print "No temp override"
-		
 		alterationFileOptions = resources.getAlterationFiles()
 		altFile = None
 		startGCode = None
@@ -767,7 +761,7 @@ def setHeatedBedGCode():
 		
 	try:
 		cp.read(path)
-	except ConfigParser.ParsingError as e:
+	except Exception as e:
 		print e
 			
 	setAlterationFileFromFilePath(path)
@@ -777,7 +771,7 @@ def getStartGCode():
 	cp = ConfigParser.ConfigParser()
 	try:
 		cp.read(path)
-	except ConfigParser.ParsingError as e:
+	except Exception as e:
 		print e
 		
 	startGCode = cp.get('alterations', 'start.gcode')

@@ -609,7 +609,6 @@ class TAMReadyPage(InfoPage):
 		self.skipTut.Bind(wx.EVT_CHECKBOX, self.skipTutorial)
 
 	def skipTutorial(self, e):
-		print "Skip Tour %s" % e.IsChecked()
 		if e.IsChecked():
 			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_first_print)
 		else:
@@ -671,7 +670,7 @@ class TAMOctoPrintInfo(InfoPage):
 	def checkSerialValidity(self, e):
 		id = self.serialNumber.GetValue()
 		validityCheck =  self.inputCheck.verifySerial(id)
-		print "Validity check: %s" % validityCheck
+		
 		if validityCheck == 0:
 			self.validSerial = True
 			self.errorMessageln1.SetLabel("")
