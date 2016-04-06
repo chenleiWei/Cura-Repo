@@ -155,7 +155,9 @@ class setting(object):
 			res, err = validator.validate()
 			if res == validators.ERROR:
 				result = res
-			elif res == validators.WARNING and result != validators.ERROR:
+			elif res == validators.WARNING and result != validators.ERROR and result != validators.DISABLED:
+				result = res
+			elif res == validators.DISABLED and result != validators.WARNING and result != validators.ERROR:
 				result = res
 			if len(err) > 0:
 				msgs.append(err)
@@ -182,8 +184,10 @@ setting('layer_height',              0.15, float, 'basic',    _('Quality')).setR
 setting('wall_thickness',            0.8, float, 'basic',    _('Quality')).setRange(0.0).setLabel(_("Shell Thickness (mm)"), _("Thickness of the outside shell in the horizontal direction.\n\nThis is used in combination with the nozzle size to define the number of perimeter lines and the thickness of those perimeter lines."))
 setting('retraction_enable',        True, bool,  'basic',    _('Quality')).setExpertSubCategory(_('Retraction')).setLabel(_("Enable Retraction"), _("Retract the filament when the nozzle is moving over a none-printed area. Details about the retraction can be configured in the advanced tab."))
 setting('solid_layer_thickness',     0.8, float, 'basic',    _('Fill')).setRange(0).setLabel(_("Bottom/Top Thickness (mm)"), _("This controls the thickness of the bottom and top layers. The amount of solid layers put down is calculated by this value and the layer thickness.\n\nHaving this value a multiple of the layer thickness makes sense. Keep it near your wall thickness to make an evenly strong part."))
-setting('fill_density',               12, float, 'basic',    _('Fill')).setExpertSubCategory(_('Infill')).setRange(0, 100).setLabel(_("Fill Density (%)"), _("This controls how densely filled the insides of your print will be. For a solid part use 100%, for an empty part use 0%. A value around 20% is usually enough.\n\nThis won't affect the outside of the print and only adjusts how strong the part becomes."))
-setting('nozzle_size',               0.4, float, 'advanced', _('Machine')).setRange(0.1,10).setLabel(_("Nozzle Size (mm)"), _("The nozzle size is very important, this is used to calculate the line width of the infill, and used to calculate the amount of outside wall lines and thickness for the wall thickness you entered in the print settings."))
+setting('infill_type',      'None',  [_('None'),_('Line'),_('Grid'),_('Cube'),_('Concentric'),_('Gradient grid'),_('Gradient concentric')], 'basic', _('Fill')).setLabel(_("Infill type"), _("Infill is used to add internal geometries.\n Line alternates grid segments per layer. \n Grid generates a grid pattern on each layer. \n Cube generates 3d infill. \n Gradient infills generate a gradient from 100% at the bottom and infill distace on topmost layer"))
+setting('fill_density',               12, float, 'basic',    _('Fill')).setExpertSubCategory(_('Infill')).setRange(0, 305).setLabel(_("Infill distance (mm)"), _("This controls the distance between each line of infill"))
+setting('infill_percentage',               12, float, 'basic',    _('Fill')).setRange(0, 100).setLabel(_("Equivalent percentage"), _("This is not a user editable field. \nTo change infill change infill distance."))
+setting('nozzle_size',               0.4, float, 'advanced', _('Machine')).setRange(0.1,10).setLabel(_("Nozzle size (mm)"), _("The nozzle size is very important, this is used to calculate the line width of the infill, and used to calculate the amount of outside wall lines and thickness for the wall thickness you entered in the print settings."))
 setting('print_speed',                100, float, 'basic',    _('Speed and Temperature')).setRange(1).setLabel(_("Print Speed (mm/s)"), _("Speed at which printing happens. Printing speed depends on a lot of factors. So you will be experimenting with optimal settings for this."))
 setting('print_temperature',         220, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("Printing Temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself."))
 setting('print_temperature2',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("2nd Nozzle Temperature (C)"), _("Temperature used for printing with a second nozzle. Set at 0 to pre-heat yourself."))
@@ -238,7 +242,7 @@ setting('fill_overlap', 15, int, 'expert', _('Infill')).setRange(0,100).setLabel
 setting('perimeter_before_infill', False, bool, 'expert', _('Infill')).setLabel(_("Infill prints after perimeters"), _("Print infill after perimeter lines. This can reduce infill from showing through the surface. If not checked, infill will print before perimeter lines."))
 setting('support_type', 'Lines', ['Grid', 'Lines'], 'expert', _('Support')).setLabel(_("Structure Type"), _("The type of support structure.\nGrid is very strong and can come off in 1 piece, however, sometimes it is too strong.\nLines are single walled lines that break off one at a time. Which is more work to remove, but as it is less strong it does work better on tricky prints."))
 setting('support_angle', 30, float, 'expert', _('Support')).setRange(0,90).setLabel(_("Overhang Angle for Support (deg)"), _("The minimal angle that overhangs need to have to get support. With 90 degree being horizontal and 0 degree being vertical."))
-setting('support_fill_rate', 25, int, 'expert', _('Support')).setRange(0,100).setLabel(_("Fill Amount (%)"), _("Amount of infill structure in the support material, less material gives weaker support which is easier to remove. 15% seems to be a good average."))
+setting('support_fill_rate', 25, int, 'expert', _('Support')).setRange(0.4,610).setLabel(_("Fill distance (mm)"), _("Amount of infill structure in the support material, less material gives weaker support which is easier to remove. 15% seems to be a good average."))
 setting('support_xy_distance', 0.7, float, 'expert', _('Support')).setRange(0,10).setLabel(_("Distance X/Y (mm)"), _("Distance of the support material from the print, in the X/Y directions.\n0.7mm gives a nice distance from the print so the support does not stick to the print."))
 setting('support_z_distance', 0.15, float, 'expert', _('Support')).setRange(0,10).setLabel(_("Distance Z (mm)"), _("Distance from the top/bottom of the support to the print. A small gap here makes it easier to remove the support but makes the print a bit uglier.\n0.15mm gives a good seperation of the support material."))
 setting('spiralize', False, bool, 'expert', _('Black Magic')).setLabel(_("Spiralize The Outer Contour"), _("Spiralize is smoothing out the Z move of the outer edge. This will create a steady Z increase over the whole print. This feature turns a solid object into a single walled print with a solid bottom.\nThis feature used to be called Joris in older versions."))
@@ -260,6 +264,13 @@ setting('fix_horrible_union_all_type_a', True,  bool, 'expert', _('Fix horrible'
 setting('fix_horrible_union_all_type_b', False, bool, 'expert', _('Fix horrible')).setLabel(_("Combine Everything (Type-B)"), _("This expert option adds all parts of the model together. The result is usually that internal cavities disappear. Depending on the model this can be intended or not. Enabling this option is at your own risk. Type-A is dependent on the model normals and tries to keep some internal holes intact. Type-B ignores all internal holes and only keeps the outside shape per layer."))
 setting('fix_horrible_use_open_bits', False, bool, 'expert', _('Fix horrible')).setLabel(_("Keep Open Faces"), _("This expert option keeps all the open bits of the model intact. Normally Cura tries to stitch up small holes and remove everything with big holes, but this option keeps bits that are not properly part of anything and just goes with whatever is left. This option is usually not what you want, but it might enable you to slice models otherwise failing to produce proper paths.\nAs with all \"Fix horrible\" options, results may vary and use at your own risk."))
 setting('fix_horrible_extensive_stitching', False, bool, 'expert', _('Fix horrible')).setLabel(_("Extensive Stitching"), _("Extensive stitching tries to fix up open holes in the model by closing the hole with touching polygons. This algorthm is quite expensive and could introduce a lot of processing time.\nAs with all \"Fix horrible\" options, results may vary and use at your own risk."))
+
+setting('dsvXaxis', 'Layer Height', [_('-'),_('Layer Height'), _('Infill'), _('Wall Thickness'), _('Shells'),_('Print Speed')], 'dsvpreference', 'hidden').setLabel(_('X Axis'), _('Select the first variable for DSV.'))
+setting('dsvYaxis', 'Layer Height', [_('-'),_('Layer Height'), _('Infill'), _('Wall Thickness'), _('Shells'),_('Print Speed')], 'dsvpreference', 'hidden').setLabel(_('Y Axis'), _('Select the second variable for DSV.'))
+setting('xUpperBound',None, float, 'dsvpreference',    ('hidden')).setRange(0).setLabel(_("Upper bound"), _("The toolbox will divide the X axis in 5 parts between the upper bound and lower bound"))
+setting('xLowerBound',None, float, 'dsvpreference',    ('hidden')).setRange(0).setLabel(_("Lower bound"), _("The toolbox will divide the X axis in 5 parts between the upper bound and lower bound"))
+setting('yUpperBound',None, float, 'dsvpreference',    ('hidden')).setRange(0).setLabel(_("Upper bound"), _("The toolbox will divide the Y axis in 5 parts between the upper bound and lower bound"))
+setting('yLowerBound',None, float, 'dsvpreference',    ('hidden')).setRange(0).setLabel(_("Lower bound"), _("The toolbox will divide the Y axis in 5 parts between the upper bound and lower bound"))
 
 setting('plugin_config', '', str, 'hidden', 'hidden')
 setting('object_center_x', -1, float, 'hidden', 'hidden')
@@ -519,6 +530,9 @@ setting('last_run_version', '', str, 'preference', 'hidden')
 setting('batch_slice', 'False', bool, 'preference', 'hidden')
 
 
+setting('show_infill', 'False', bool, 'preference', 'hidden')
+
+
 setting('machine_name', '', str, 'machine', 'hidden')
 setting('machine_type', 'unknown', str, 'machine', 'hidden') #Ultimaker, Ultimaker2, RepRap
 setting('machine_width', '305', float, 'machine', 'hidden').setLabel(_("Maximum width (mm)"), _("Size of the machine in mm"))
@@ -550,6 +564,9 @@ setting('extruder_head_size_max_x', '55', float, 'machine', 'hidden').setLabel(_
 setting('extruder_head_size_max_y', '65', float, 'machine', 'hidden').setLabel(_("Head size towards Y max (mm)"), _("The distance between the nozzle and the back-end (farthest from you) of the print head."))
 setting('extruder_head_size_height', '35', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
 
+
+#validators.warningBelow(settingsDictionary['fill_density'], 0.4, _("The minimum distance between infill is Nozzle Size(mm)"))
+validators.infillValidator(settingsDictionary['fill_density'])
 validators.warningAbove(settingsDictionary['filament_flow'], 150, _("More flow than 150% is rare and usually not recommended."))
 validators.warningBelow(settingsDictionary['filament_flow'], 50, _("Less flow than 50% is rare and usually not recommended."))
 validators.warningAbove(settingsDictionary['layer_height'], lambda : (float(getProfileSetting('nozzle_size')) * 80.0 / 100.0), _("Thicker layers then %.2fmm (80%% nozzle size) usually give bad results and are not recommended."))

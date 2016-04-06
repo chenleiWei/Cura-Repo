@@ -13,7 +13,9 @@ import cStringIO as StringIO
 import OpenGL
 import sys
 OpenGL.ERROR_CHECKING = False
+from OpenGL.GLUT import *
 from OpenGL.GLU import *
+from OpenGL.GLE import *
 from OpenGL.GL import *
 
 import ConfigParser as configparser
@@ -48,7 +50,6 @@ from Cura.gui.tools import imageToMesh
 class SceneView(openglGui.glGuiPanel):
 	def __init__(self, parent):
 		super(SceneView, self).__init__(parent)
-
 		self._yaw = 30
 		self._pitch = 60
 		self._zoom = 800
@@ -68,6 +69,10 @@ class SceneView(openglGui.glGuiPanel):
 		self._platformMesh = {}
 		self._platformTexture = None
 		self._isSimpleMode = True
+
+		self.layerSelect = openglGui.glSlider(self, 1, 1, 305, (-1,-2), lambda : self.QueueRefresh())
+		self.layerSelectCondition = False
+		
 		self._printerConnectionManager = printerConnectionManager.PrinterConnectionManager()
 		
 		self.printGcode = "false"
@@ -128,6 +133,9 @@ class SceneView(openglGui.glGuiPanel):
 		self.scaleUniform = openglGui.glCheckbox(self.scaleForm, True, (1,8), None)
 
 		self.viewSelection = openglGui.glComboButton(self, _("View mode"), [7,19,11,15,23], [_("Normal"), _("Overhang"), _("Transparent"), _("X-Ray"), _("Layers")], (-1,0), self.OnViewChange)
+
+		self.infillGridButton = openglGui.glButton(self, 2, _("Infill"), (-1,-1), self.OninfillGridButton)
+
 
 		self.notification = openglGui.glNotification(self, (0, 0))
 
@@ -681,6 +689,12 @@ class SceneView(openglGui.glGuiPanel):
 		self._selectedObj.mirror(axis)
 		self.sceneUpdated()
 
+	def OninfillGridButton(self,button = 1):
+		if profile.getPreference('show_infill') == 'True':
+			profile.putPreference('show_infill',False)
+		else:
+			profile.putPreference('show_infill',True)
+
 	def OnScaleEntry(self, value, axis):
 		if self._selectedObj is None:
 			return
@@ -796,6 +810,10 @@ class SceneView(openglGui.glGuiPanel):
 		self.sceneUpdated()
 
 	def sceneUpdated(self):
+		if profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid':
+			self.infillGridButton.setDisabled(False)
+		else:
+			self.infillGridButton.setDisabled(True)
 
 		objectSink = profile.getProfileSettingFloat("object_sink")
 		if self._lastObjectSink != objectSink:
@@ -808,6 +826,12 @@ class SceneView(openglGui.glGuiPanel):
 		self.QueueRefresh()
 
 	def _onRunEngine(self, e):
+
+		if profile.getProfileSettingFloat('fill_density') > 0:
+			equivalent_percentage = round(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_density')),2)
+			if profile.getProfileSettingFloat('infill_percentage') != equivalent_percentage:
+				profile.putProfileSetting('infill_percentage',equivalent_percentage)
+				self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
 		if self._isSimpleMode:
 			self._engine.runEngine(self._scene, self.GetTopLevelParent().simpleSettingsPanel.getSettingOverrides())
 		else:
@@ -1421,6 +1445,72 @@ class SceneView(openglGui.glGuiPanel):
 				glDisable(GL_BLEND)
 
 		self._drawMachine()
+	
+		sparseInfillLineDistance = float(profile.getProfileSettingFloat('fill_density'))
+		sparseInfillLineDistance = sparseInfillLineDistance
+		if profile.getProfileSetting('infill_type') == 'Cube':
+			sparseInfillLineDistance = sparseInfillLineDistance  / 0.816138	
+
+		
+		self.layerSelect.setHidden(True)
+		#self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
+		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getPreference('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
+#		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and profile.getProfileSetting('infill_type') != 'None' and profile.getProfileSetting('infill_type') != 'Concentric' and profile.getProfileSetting('infill_type') != 'Gradient concentric')
+		for i in range(0,2):
+			if self.layerSelectCondition:
+				self.layerSelect.setHidden(False)
+				homeX = -float(profile.getMachineSetting('machine_width'))/2 #  -305/2 
+				homeY = -float(profile.getMachineSetting('machine_height'))/2
+
+				if i==1:
+					glLineWidth(4)
+					glColor3f(1, 0,0)
+					glBegin(GL_LINES)
+				if i==0:
+					glLineWidth(1)
+					glColor3f(0, 0,0)
+					glBegin(GL_LINES)
+				
+				#print homeX, -homeX, sparseInfillLineDistance
+				subdivisions = numpy.arange(homeX, -homeX, sparseInfillLineDistance)
+#				print subdivisions
+
+				for index,value in enumerate(subdivisions):
+					if profile.getProfileSetting('infill_type') == 'Line':
+#						A = [-homeX, value, self.layerSelect.getValue()],[-homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()]
+#						color = [0.5, 0.5, 0.5],[0.5,0.5,0.5],[0.5,0.5,0.5],[0.5,0.5,0.5]
+
+						if self.layerSelect.getValue() % 2 == 0:
+							glVertex3f(homeX , value , self.layerSelect.getValue())
+							glVertex3f(-homeX, value , self.layerSelect.getValue())
+#							A = [-homeX, value, self.layerSelect.getValue()],[-homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()]
+#							glePolyCylinder (A, color, 0.8)
+						else :				
+#							A = [value, homeY, self.layerSelect.getValue()],[value,homeY,self.layerSelect.getValue()],[value,-homeY,self.layerSelect.getValue()],[value,-homeY,self.layerSelect.getValue()]
+#							glePolyCylinder (A, color, 0.8)
+							glVertex3f(value , homeY , self.layerSelect.getValue())
+							glVertex3f(value ,-homeY , self.layerSelect.getValue())
+
+					elif profile.getProfileSetting('infill_type') == 'Grid':
+						glVertex3f(homeX  , value  , self.layerSelect.getValue())
+						glVertex3f(-homeX , value  , self.layerSelect.getValue())
+						glVertex3f(value  , homeY  , self.layerSelect.getValue())
+						glVertex3f(value  , -homeY , self.layerSelect.getValue())
+
+					elif profile.getProfileSetting('infill_type') == 'Cube':						
+						#glRotatef(45, 0,0, 0.00)
+						#glRotatef(45, 0,1, 0.00)
+						#glColor3f(1, 0,0)
+						#glutSolidCube(20)
+						#glColor3f(0, 0,0)
+						#glutWireCube(20)
+						#glPopMatrix()
+						if value > homeX and value < - homeX:
+							glVertex3f(value, homeY  , self.layerSelect.getValue())
+							glVertex3f(value , -homeY , self.layerSelect.getValue())
+				glEnd()
+
+
 
 		if self.viewMode != 'gcode':
 			#Draw the object box-shadow, so you can see where it will collide with other objects.

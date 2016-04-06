@@ -500,7 +500,7 @@ class Engine(object):
 			'fanSpeedMax': int(profile.getProfileSettingFloat('fan_speed_max')) if profile.getProfileSetting('fan_enabled') == 'True' else 0,
 			'supportAngle': int(-1) if profile.getProfileSetting('support') == 'None' else int(profile.getProfileSettingFloat('support_angle')),
 			'supportEverywhere': int(1) if profile.getProfileSetting('support') == 'Everywhere' else int(0),
-			'supportLineDistance': int(100 * profile.calculateEdgeWidth() * 1000 / profile.getProfileSettingFloat('support_fill_rate')) if profile.getProfileSettingFloat('support_fill_rate') > 0 else -1,
+			#'supportLineDistance': int(100 * profile.calculateEdgeWidth() * 1000 / profile.getProfileSettingFloat('support_fill_rate')) if profile.getProfileSettingFloat('support_fill_rate') > 0 else -1,
 			'supportXYDistance': int(1000 * profile.getProfileSettingFloat('support_xy_distance')),
 			'supportZDistance': int(1000 * profile.getProfileSettingFloat('support_z_distance')),
 			'supportExtruder': 0 if profile.getProfileSetting('support_dual_extrusion') == 'First extruder' else (1 if profile.getProfileSetting('support_dual_extrusion') == 'Second extruder' and profile.minimalExtruderCount() > 1 else -1),
@@ -541,16 +541,39 @@ class Engine(object):
 		if profile.getProfileSetting('support_type') == 'Lines':
 			settings['supportType'] = 1
 
-		if profile.getProfileSettingFloat('fill_density') == 0:
+		if profile.getProfileSetting('infill_type') == 'Line':
+			settings['infillPattern'] = 0
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Grid':
+			settings['infillPattern'] = 1
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Cube':
+			settings['infillPattern'] = 2
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Concentric':
+			settings['infillPattern'] = 3
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Gradient grid':
+			settings['infillPattern'] = 4
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Gradient concentric':
+			settings['infillPattern'] = 5
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'None':
 			settings['sparseInfillLineDistance'] = -1
-		elif profile.getProfileSettingFloat('fill_density') == 100:
-			settings['sparseInfillLineDistance'] = settings['extrusionWidth']
-			#Set the up/down skins height to 10000 if we want a 100% filled object.
-			# This gives better results then normal 100% infill as the sparse and up/down skin have some overlap.
-			settings['downSkinCount'] = 10000
-			settings['upSkinCount'] = 10000
-		else:
-			settings['sparseInfillLineDistance'] = int(100 * profile.calculateEdgeWidth() * 1000 / profile.getProfileSettingFloat('fill_density'))
+			makeInfill = False
+
+		if makeInfill  == True:	
+			sparseInfillLineDistance = profile.getProfileSettingFloat('fill_density') * 1000
+			if sparseInfillLineDistance<400:
+				sparseInfillLineDistance = 400
+			settings['sparseInfillLineDistance'] = sparseInfillLineDistance 
+
+		supportLineDistance = profile.getProfileSettingFloat('support_fill_rate') * 1000
+		if supportLineDistance<400:
+			supportLineDistance = 400
+		settings['supportLineDistance'] = supportLineDistance 
+
 		if profile.getProfileSetting('platform_adhesion') == 'Brim':
 			settings['skirtDistance'] = 0
 			settings['skirtLineCount'] = int(profile.getProfileSettingFloat('brim_line_count'))

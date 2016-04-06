@@ -143,6 +143,15 @@ class TitleRow(object):
 		sizer.Add(wx.StaticLine(panel), (x+1,0), (1,4), flag=wx.EXPAND|wx.LEFT,border=10)
 		sizer.SetRows(x + 2)
 
+class BlankRow(object):
+	def __init__(self, panel, name=None):
+		"Add a title row to the configuration panel"
+		sizer = panel.GetSizer()
+		x = sizer.GetRows()
+		self.title = wx.StaticText(panel, -1, " ")
+		sizer.Add(self.title, (x,0), (1,3), flag=wx.EXPAND|wx.TOP|wx.LEFT, border=10)
+		sizer.SetRows(x + 2)
+
 class SettingRow(object):
 	def __init__(self, panel, configName, valueOverride = None, index = None):
 		"Add a setting to the configuration panel"
@@ -248,6 +257,8 @@ class SettingRow(object):
 			ctrl = ctrl.GetTextCtrl()
 		if result == validators.ERROR:
 			ctrl.SetBackgroundColour('Red')
+		elif result == validators.DISABLED:
+			ctrl.SetBackgroundColour('Grey')
 		elif result == validators.WARNING:
 			ctrl.SetBackgroundColour('Yellow')
 		else:
