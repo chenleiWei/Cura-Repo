@@ -420,8 +420,6 @@ class Engine(object):
 				self._result.setFinished(True)
 				self._callback(1.0)
 			else:
-				for line in self._result.getLog():
-					print line
 				self._callback(-1.0)
 			self._process = None
 		except MemoryError:

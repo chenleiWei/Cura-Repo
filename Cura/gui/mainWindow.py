@@ -133,9 +133,9 @@ class mainWindow(wx.Frame):
 		#i = toolsMenu.Append(-1, 'Batch run...')
 		#self.Bind(wx.EVT_MENU, self.OnBatchRun, i)
 		#self.normalModeOnlyItems.append(i)
-		self.batchSlicePanelCheck = toolsMenu.Append(-1, _("Batch Slice"), kind=wx.ITEM_CHECK)
-		self.Bind(wx.EVT_MENU, self.OnBatchSlicePanelCheck, self.batchSlicePanelCheck)
-		toolsMenu.AppendSeparator()
+	#	self.batchSlicePanelCheck = toolsMenu.Append(-1, _("Batch Slice"), kind=wx.ITEM_CHECK)
+	#	self.Bind(wx.EVT_MENU, self.OnBatchSlicePanelCheck, self.batchSlicePanelCheck)
+	#	toolsMenu.AppendSeparator()
 
 
 		if minecraftImport.hasMinecraft():
@@ -791,9 +791,9 @@ class normalSettingsPanel(configBase.configPanelBase):
 		self.pluginPanel = pluginPanel.pluginPanel(self.nb, callback)
 		self.nb.AddPage(self.pluginPanel, _("Plugins"))
 
-		if parent.GetParent().GetParent().batchSlicePanelCheck.IsChecked():
-			self.bsPanel = batchSlice.bsPanel(self.nb)
-			self.nb.AddPage(self.bsPanel, _("Batch Slice"))
+	#	if parent.GetParent().GetParent().batchSlicePanelCheck.IsChecked():
+	#		self.bsPanel = batchSlice.bsPanel(self.nb)
+	#		self.nb.AddPage(self.bsPanel, _("Batch Slice"))
 
 		#Alteration page
 		if profile.getMachineSetting('gcode_flavor') == 'UltiGCode':
