@@ -781,9 +781,9 @@ class SceneView(openglGui.glGuiPanel):
 
 	def sceneUpdated(self):
 		if profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid':
-			self.infillGridButton.setDisabled(False)
+			self.infillGridButton.setHidden(False)
 		else:
-			self.infillGridButton.setDisabled(True)
+			self.infillGridButton.setHidden(True)
 
 		objectSink = profile.getProfileSettingFloat("object_sink")
 		if self._lastObjectSink != objectSink:
