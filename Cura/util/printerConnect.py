@@ -170,9 +170,9 @@ class  GcodeUpload(threading.Thread):
 		data = {'select': 'true', 'print': self.printOnUpload}
 		
 		try:
-			r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files)
+			r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files, timeout=5)
 		except requests.exceptions.RequestException as e:
-			self.conveyStatus(e)
+			self.notification.message("Upload failed, please try again later.")
 
 		try:
 			os.remove(self.tempFilePath)
