@@ -348,7 +348,7 @@ class SceneView(openglGui.glGuiPanel):
 			size = float(len(gcode))
 			read_pos = 0
 			# writes gcode to targetFileName
-			with open(gcodeFile, 'wb') as fdst:
+			with open(gcodeFile, 'wb+') as fdst:
 				while 1:
 					buf = gcode.read(16*1024)
 					if len(buf) < 1:
@@ -1794,6 +1794,8 @@ class printerSelector(wx.Frame):
 			for item in listSections:
 				printerList.append("Series 1 %s" % item)
 		
+
+
 		#--wxPython Text Widgets--#
 		text = wx.StaticText(panel, 26, "Upload to")
 		text.SetFont(font)

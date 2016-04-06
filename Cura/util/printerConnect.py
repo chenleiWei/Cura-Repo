@@ -173,11 +173,14 @@ class  GcodeUpload(threading.Thread):
 			newFilePath = os.path.join(fileDirectory, newFileName)
 			
 			try: 
+				if os.path.exists(newFilePath):
+					os.unlink(newFilePath)
 				os.rename(filePath, newFilePath)
 				self.filename = newFileName
 				self.tempFilePath = newFilePath
 			except Exception as e:
 				print e
+				print "check the checkFilename function in util/printerConnect"
 				
 	def run(self):
 		r = requests.Session()
