@@ -10,7 +10,7 @@ BUILD_TYPE = RELEASE
 
 VERSION ?= DEV
 CXX ?= g++
-CFLAGS += -c -Wall -Wextra -Wold-style-cast -Woverloaded-virtual -std=c++11 -DVERSION=\"$(VERSION)\" -isystem libs -o
+CFLAGS += -c -Wall -Wextra -Wold-style-cast -Woverloaded-virtual -std=c++11 -DVERSION=\"$(VERSION)\" -isystem libs
 
 ifeq ($(BUILD_TYPE),DEBUG)
 	CFLAGS+=-ggdb -Og -g
@@ -18,10 +18,9 @@ endif
 ifeq ($(BUILD_TYPE),PROFILE)
 	CFLAGS+= -pg
 endif
-
-#ifeq ($(BUILD_TYPE),RELEASE)
-#	CFLAGS+= -O3 -fomit-frame-pointer
-#endif
+ifeq ($(BUILD_TYPE),RELEASE)
+	CFLAGS+= -O3 -fomit-frame-pointer
+endif
 
 LDFLAGS += -Lbuild/ -lclipper
 
@@ -40,7 +39,7 @@ ifeq ($(OS),Windows_NT)
 	#For windows make it large address aware, which allows the process to use more then 2GB of memory.
 	EXECUTABLE := $(EXECUTABLE).exe
 	CFLAGS += -march=pentium4 -flto
-	LDFLAGS += -Wl,--large-address-aware -lm -lwsock32 -flto -static -static-libgcc -static-libstdc++
+	LDFLAGS += -Wl,--large-address-aware -lm -lwsock32 -flto
 	MKDIR_PREFIX = mkdir -p
 else
 	MKDIR_PREFIX = mkdir -p

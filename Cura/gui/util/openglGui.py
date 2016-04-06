@@ -273,7 +273,7 @@ class glGuiPanel(glcanvas.GLCanvas):
 		# glBindTexture(GL_TEXTURE_2D, self._glRobotTexture)
 		# glEnable(GL_TEXTURE_2D)
 		# glPushMatrix()
-		glColor4f(0,0,0,0)
+		# glColor4f(1,1,1,1)
 		# glTranslate(size.GetWidth(),size.GetHeight(),0)
 		# s = self._buttonSize * 1
 		# glScale(s,s,s)
@@ -488,7 +488,7 @@ class glButton(glGuiControl):
 			glTranslatef(0, -0.55*bs*scale, 0)
 
 			glPushMatrix()
-			glColor4ub(0,0,0,0)
+			glColor4ub(60,60,60,255)
 			glTranslatef(-1, -1, 0)
 			openglHelpers.glDrawStringCenter(self._tooltip)
 			glTranslatef(0, 2, 0)
@@ -499,7 +499,7 @@ class glButton(glGuiControl):
 			openglHelpers.glDrawStringCenter(self._tooltip)
 			glPopMatrix()
 
-			glColor4ub(60,60,60,255)
+			glColor4ub(255,255,255,255)
 			openglHelpers.glDrawStringCenter(self._tooltip)
 		glPopMatrix()
 		progress = self._progressBar
@@ -518,7 +518,7 @@ class glButton(glGuiControl):
 				glTranslatef(0, bs/4+4, 0) #shifts text to the bottom if progress bar is active
 			for line in self._altTooltip.split('\n'):
 				glPushMatrix()
-				glColor4ub(0,0,0,0)
+				glColor4ub(60,60,60,255)
 				glTranslatef(-1, -1, 0)
 				openglHelpers.glDrawStringCenter(line)
 				glTranslatef(0, 2, 0)
@@ -529,7 +529,7 @@ class glButton(glGuiControl):
 				openglHelpers.glDrawStringCenter(line)
 				glPopMatrix()
 
-				glColor4ub(60,60,60,255)
+				glColor4ub(255,255,255,255)
 				openglHelpers.glDrawStringCenter(line)
 				glTranslatef(0, 18, 0)
 			glPopMatrix()
@@ -615,7 +615,7 @@ class glComboButton(glButton):
 			glTranslatef(-0.55*bs, 0.1*bs, 0)
 
 			glPushMatrix()
-			glColor4ub(0,0,0,0)
+			glColor4ub(60,60,60,255)
 			glTranslatef(-1, -1, 0)
 			openglHelpers.glDrawStringRight(self._tooltips[n])
 			glTranslatef(0, 2, 0)
@@ -626,7 +626,7 @@ class glComboButton(glButton):
 			openglHelpers.glDrawStringRight(self._tooltips[n])
 			glPopMatrix()
 
-			glColor4ub(60,60,60,255)
+			glColor4ub(255,255,255,255)
 			openglHelpers.glDrawStringRight(self._tooltips[n])
 			glPopMatrix()
 		glPopMatrix()

@@ -80,7 +80,6 @@ class EngineResult(object):
 	def getFilamentCost(self, e=0):
 		cost_kg = profile.getPreferenceFloat('filament_cost_kg')
 		cost_meter = profile.getPreferenceFloat('filament_cost_meter')
-
 		if cost_kg > 0.0 and cost_meter > 0.0:
 			return "%.2f / %.2f" % (self.getFilamentWeight(e) * cost_kg, self._filamentMM[e] / 1000.0 * cost_meter)
 		elif cost_kg > 0.0:
@@ -102,9 +101,6 @@ class EngineResult(object):
 		if self._filamentMM[e] == 0.0:
 			return None
 		return _('%0.2f meter %0.0f gram') % (float(self._filamentMM[e]) / 1000.0, self.getFilamentWeight(e) * 1000.0)
-
-	def getMaterialProfile(self):
-		return profile.getPreference('material_profile')
 
 	def getFilamentAmountMeters(self, e=0):
 		return float(self._filamentMM[e]) / 1000.0
@@ -415,9 +411,7 @@ class Engine(object):
 				self._result.addReplaceTag('#P_TIME#', self._result.getPrintTime())
 				self._result.addReplaceTag('#F_AMNT#', self._result.getFilamentAmountMeters(0))
 				self._result.addReplaceTag('#F_WGHT#', math.floor(self._result.getFilamentWeight(0) * 1000.0))
-	#			self._result.addReplaceTag('#F_COST#', self._result.getFilamentCost(0))
-				#CGC
-				self._result.addReplaceTag('#M_PROF#', self._result.getMaterialProfile())
+				self._result.addReplaceTag('#F_COST#', self._result.getFilamentCost(0))
 				self._result.applyReplaceTags()
 				plugin_error = pluginInfo.runPostProcessingPlugins(self._result)
 				if plugin_error is not None:
