@@ -3,6 +3,7 @@ import requests
 import os
 import wx
 import webbrowser
+import sys
 
 from Cura.util import profile
 import json
@@ -154,7 +155,30 @@ class  GcodeUpload(threading.Thread):
 		self.notification = notification
 		self.printOnUpload = printOnUpload
 		self.filename = os.path.basename(tempFilePath)
+		
+		if ' ' in self.filename: 
+			self.checkFilename(tempFilePath)
+		
 
+	# Whitespaces occasionally affect user experience on 
+	# Windows, will sometimes not send.
+	# Plan to have a better fix for this soon.
+	def checkFilename(self, filePath):
+		filename = os.path.basename(filePath)
+		fileDirectory = os.path.dirname(filePath)
+		gcodeFileList = os.listdir(fileDirectory)
+
+		if filename in gcodeFileList:
+			newFileName = filename.replace(' ', '')
+			newFilePath = os.path.join(fileDirectory, newFileName)
+			
+			try: 
+				os.rename(filePath, newFilePath)
+				self.filename = newFileName
+				self.tempFilePath = newFilePath
+			except Exception as e:
+				print e
+				
 	def run(self):
 		r = requests.Session()
 		resourceBasePath = resources.resourceBasePath
@@ -162,7 +186,7 @@ class  GcodeUpload(threading.Thread):
 		# File name and path
 		filepath = self.tempFilePath
 		filename = self.filename
-		
+				
 		# Printer information
 		url = 'http://series1-%s.local:5000/api/files/local' % self.serial
 		header = {'X-Api-Key':self.key}
@@ -176,13 +200,16 @@ class  GcodeUpload(threading.Thread):
 
 		try:
 			os.remove(self.tempFilePath)
-			print "Removed file"
+			print "Removed file %s " % self.tempFilePath
 		except:
 			print "error"
-
-		status = r.status_code
-			
-		self.conveyStatus(status)
+		
+		try: 
+			status = r.status_code
+			self.conveyStatus(status)		
+		except Exception as e:
+			print e	
+		
 	
 	def conveyStatus(self, status):
 		if status == 201: 
@@ -190,6 +217,5 @@ class  GcodeUpload(threading.Thread):
 				webbrowser.open_new('http://series1-%s.local:5000' % self.serial)
 			self.notification.message("Successfully uploaded as %s!" % self.filename, lambda : webbrowser.open_new('http://series1-%s.local:5000' % self.serial), 6, 'Open In Browser')
 		else:
-		
 			self.notification.message("Error: Please check that your Series 1 is connected to the internet")
 			
