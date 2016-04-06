@@ -157,20 +157,6 @@ Function LaunchLink
   Exec '"$WINDIR\explorer.exe" "$SMPROGRAMS\Cura ${VERSION}\Cura ${VERSION}.lnk"'
 FunctionEnd
 
-Section "Install Arduino Drivers"
-  ; Set output path to the driver directory.
-  SetOutPath "$INSTDIR\drivers\"
-  File /r "drivers\"
-  
-  ${If} ${RunningX64}
-    IfSilent +2
-      ExecWait '"$INSTDIR\drivers\dpinst64.exe" /lm'
-  ${Else}
-    IfSilent +2
-      ExecWait '"$INSTDIR\drivers\dpinst32.exe" /lm'
-  ${EndIf}
-SectionEnd
-
 Section "Open STL files with Cura"
 	WriteRegStr HKCR .stl "" "Cura STL model file"
 	DeleteRegValue HKCR .stl "Content Type"

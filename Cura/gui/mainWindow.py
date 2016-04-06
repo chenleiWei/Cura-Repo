@@ -1,10 +1,11 @@
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 Cat Casuat (Cura Type A) and David Braam - Released under terms of the AGPLv3 License"
 
 import wx
 import os
 import webbrowser
 import sys
 
+from wx.lib.pubsub import pub
 
 from Cura.gui import newVersionDialog
 from Cura.gui import configBase
@@ -26,11 +27,6 @@ from Cura.util import meshLoader
 from Cura.gui import materialProfileSelector
 from Cura.gui import batchSlice
 
-
-try: 
-	from wx.lib.pubsub import pub
-except ImportError:
-	from wx.lib.pubsub import Publisher as pub
 
 class mainWindow(wx.Frame):
 	def __init__(self):
@@ -207,10 +203,10 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, lambda e: self.OnReleaseNotes(e), i)
 		i = helpMenu.Append(-1, _("Report a Problem..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://typeamachines.com/cura-beta'), i)
-		#i = helpMenu.Append(-1, _("Check for update..."))
-		#self.Bind(wx.EVT_MENU, self.OnCheckForUpdate, i)
-		i = helpMenu.Append(-1, _("Check for Update..."))
-		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://www.typeamachines.com/pages/downloads'), i)
+		i = helpMenu.Append(-1, _("Check for update..."))
+		self.Bind(wx.EVT_MENU, self.OnCheckForUpdate, i)
+	#	i = helpMenu.Append(-1, _("Check for Update..."))
+	#	self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://www.typeamachines.com/pages/downloads'), i)
 		i = helpMenu.Append(-1, _("Open Type A Machines Website..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://www.typeamachines.com/'), i)
 		i = helpMenu.Append(-1, _("About Cura..."))
@@ -729,10 +725,11 @@ class mainWindow(wx.Frame):
 			print "Could not write to clipboard, unable to get ownership. Another program is using the clipboard."
 
 	def OnCheckForUpdate(self, e):
-		newVersion = version.checkForNewerVersion()
-		if newVersion is not None:
+		shouldUpdateVersion = version.checkForNewerVersion()
+		print shouldUpdateVersion
+		if shouldUpdateVersion is True:
 			if wx.MessageBox(_("A new version of Cura is available, would you like to download?"), _("New version available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
-				webbrowser.open(newVersion)
+				webbrowser.open('http://www.typeamachines.com/downloads')
 		else:
 			wx.MessageBox(_("You are running the latest version of Cura!"), _("Awesome!"), wx.ICON_INFORMATION)
 
