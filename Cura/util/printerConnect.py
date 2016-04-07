@@ -156,8 +156,7 @@ class  GcodeUpload(threading.Thread):
 		self.printOnUpload = printOnUpload
 		self.filename = os.path.basename(tempFilePath)
 		
-		if ' ' in self.filename:
-			print "Uploaded model filename contains spaces."
+		if ' ' in self.filename: 
 			self.checkFilename(tempFilePath)
 		
 
