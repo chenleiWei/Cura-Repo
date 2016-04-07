@@ -302,7 +302,25 @@ class SceneView(openglGui.glGuiPanel):
 	def showSaveModel(self):
 		if len(self._scene.objects()) < 1:
 			return
-		dlg=wx.FileDialog(self, _("Save 3D model"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+
+		firstPrintPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'resources', 'example'))
+		lastFilePath = os.path.dirname(os.path.abspath(profile.getPreference('lastFile')))
+		homeDirectory = os.path.expanduser('~')
+		documentsDirectory =  os.path.join(homeDirectory, 'Documents')
+
+		docsDirectoryExists = os.path.isdir(documentsDirectory)
+
+		if docsDirectoryExists == True:	
+			initialSavePath = documentsDirectory
+		else:
+			initialSavePath = homeDirectory
+				
+		# Don't save to Cura example directory path
+		if (lastFilePath == firstPrintPath):
+			dlg = wx.FileDialog(self, _("Save as AMF"), os.path.dirname(initialSavePath), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+		else:
+			dlg = wx.FileDialog(self, _("Save as AMF"), lastFilePath, style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+
 		fileExtensions = meshLoader.saveSupportedExtensions()
 		wildcardList = ';'.join(map(lambda s: '*' + s, fileExtensions))
 		wildcardFilter = "Mesh files (%s)|%s;%s" % (wildcardList, wildcardList, wildcardList.upper())
@@ -374,8 +392,6 @@ class SceneView(openglGui.glGuiPanel):
 					
 	def OnPrintButton(self, button):
 		mainWindow = self.GetParent().GetParent().GetParent()
-		directUpload = mainWindow.OnDirectUploadSettings(True)
-
 		
 		if button == 1:
 			connectionGroup = self._printerConnectionManager.getAvailableGroup()
@@ -424,14 +440,13 @@ class SceneView(openglGui.glGuiPanel):
 				self._openPrintWindowForConnection(connection)
 			else:
 			"""
-		#	self.showSaveGCode()
+			self.showSaveGCode()
 		if button == 3:
+			directUpload = mainWindow.OnDirectUploadSettings(True)
+
 			menu = wx.Menu()
 			connections = self._printerConnectionManager.getAvailableConnections()
 			menu.connectionMap = {}
-			
-		if button == 4:
-			self.OninfillGridButton()
 			"""
 			for connection in connections:
 				i = menu.Append(-1, _("Print with %s") % (connection.getName()))
@@ -467,13 +482,24 @@ class SceneView(openglGui.glGuiPanel):
 			return
 		if not self._engine.getResult().isFinished():
 			return
-		firstPrintPath = os.path.join('resources', 'example', 'FirstPrintCone.stl')
-		normalizedPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'FirstPrintCone.stl'))
-		# Don't save in resources folder if this is the user's first run
-		if profile.getPreference('lastFile') == firstPrintPath:
-			dlg=wx.FileDialog(self, _("Save GCode"), os.path.dirname('~/Documents'), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+		
+		firstPrintPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'resources', 'example'))
+		lastFilePath = os.path.dirname(os.path.abspath(profile.getPreference('lastFile')))
+		homeDirectory = os.path.expanduser('~')
+		documentsDirectory =  os.path.join(homeDirectory, 'Documents')
+		docsDirectoryExists = os.path.isdir(documentsDirectory)
+		
+		if docsDirectoryExists == True:	
+			initialSavePath = documentsDirectory
 		else:
-			dlg=wx.FileDialog(self, _("Save GCode"), os.path.dirname(profile.getPreference('lastFile')), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+			initialSavePath = homeDirectory
+				
+		# Don't save to Cura example directory path
+		if (lastFilePath == firstPrintPath):
+			dlg = wx.FileDialog(self, _("Save GCode"), os.path.dirname(initialSavePath), style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+		else:
+			dlg = wx.FileDialog(self, _("Save GCode"), lastFilePath, style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+
 		filename = self._scene._objectList[0].getName() + profile.getGCodeExtension()
 		dlg.SetFilename(filename)
 		dlg.SetWildcard('Toolpath (*%s)|*%s;*%s' % (profile.getGCodeExtension(), profile.getGCodeExtension(), profile.getGCodeExtension()[0:2]))
@@ -481,6 +507,8 @@ class SceneView(openglGui.glGuiPanel):
 			dlg.Destroy()
 			return
 		filename = dlg.GetPath()
+		
+		profile.putPreference('lastFile', filename)
 		dlg.Destroy()
 
 		threading.Thread(target=self._saveGCode,args=(filename,)).start()
@@ -836,9 +864,9 @@ class SceneView(openglGui.glGuiPanel):
 				if amount is None:
 					continue
 				text += '\n%s' % (amount)
-				cost = result.getFilamentCost(e)
-				if cost is not None:
-					text += '\n%s' % (cost)
+#				cost = result.getFilamentCost(e)
+#				if cost is not None:
+#					text += '\n%s' % (cost)
 			self.printButton.setProgressBar(None)
 			self.printButton.setBottomText(text)
 		self.QueueRefresh()
@@ -1860,8 +1888,6 @@ class printerSelector(wx.Frame):
 			for item in listSections:
 				printerList.append("Series 1 %s" % item)
 		
-
-
 		#--wxPython Text Widgets--#
 		text = wx.StaticText(panel, 26, "Upload to")
 		text.SetFont(font)
