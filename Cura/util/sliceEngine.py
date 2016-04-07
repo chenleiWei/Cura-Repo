@@ -58,7 +58,7 @@ class EngineResult(object):
 	Result from running the CuraEngine.
 	Contains the engine log, polygons retrieved from the engine, the GCode and some meta-data.
 	"""
-	def __init__(self):
+	def __init__(self,scene):
 		self._engineLog = []
 		self._gcodeData = BigDataStorage()
 		self._polygons = []
@@ -72,6 +72,7 @@ class EngineResult(object):
 		self._gcodeInterpreter = gcodeInterpreter.gcode()
 		self._gcodeLoadThread = None
 		self._finished = False
+		self._scene = scene
 
 	def getFilamentWeight(self, e=0):
 		#Calculates the weight of the filament in kg
@@ -391,7 +392,7 @@ class Engine(object):
 			traceback.print_exc()
 			return
 
-		self._result = EngineResult()
+		self._result = EngineResult(scene)
 		self._result.addLog('Running: %s' % (' '.join(commandList)))
 		self._result.setHash(modelHash)
 		self._callback(0.0)
