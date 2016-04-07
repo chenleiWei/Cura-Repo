@@ -167,6 +167,7 @@ class EngineResult(object):
 			'printtime': self._printTimeSeconds,
 			'filament': ','.join(map(str, self._filamentMM)),
 		}
+		analytics.analyticsOnSave(self)
 
 class Engine(object):
 	"""
