@@ -45,7 +45,7 @@ class newVersionDialog(wx.Dialog):
 			wx.StaticText(p, -1, "* Updated print head size values"),
 			wx.StaticText(p, -1, "* Name of the material profile used included in start gcode"),
 			wx.StaticText(p, -1, "* GUI text is now in black"),
-			wx.StaticText(p, -1, "* Printer communication processes improved"),
+			wx.StaticText(p, -1, "* Processes involving printer communication improved"),
 			wx.StaticText(p, -1, "")
 		]
 		
