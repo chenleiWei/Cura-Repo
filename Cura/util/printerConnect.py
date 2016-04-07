@@ -156,7 +156,8 @@ class  GcodeUpload(threading.Thread):
 		self.printOnUpload = printOnUpload
 		self.filename = os.path.basename(tempFilePath)
 		
-		if ' ' in self.filename: 
+		if ' ' in self.filename:
+			print "Uploaded model filename contains spaces."
 			self.checkFilename(tempFilePath)
 		
 
@@ -168,19 +169,18 @@ class  GcodeUpload(threading.Thread):
 		fileDirectory = os.path.dirname(filePath)
 		gcodeFileList = os.listdir(fileDirectory)
 
-		if filename in gcodeFileList:
-			newFileName = filename.replace(' ', '')
-			newFilePath = os.path.join(fileDirectory, newFileName)
-			
+		if os.path.isdir(fileDirectory) and filename in gcodeFileList:
+			newFilename = filename.replace(' ', '')
+			newFilePath = os.path.join(fileDirectory, newFilename)
+			# Checks if file already exists
 			try: 
 				if os.path.exists(newFilePath):
 					os.unlink(newFilePath)
 				os.rename(filePath, newFilePath)
-				self.filename = newFileName
+				self.filename = newFilename
 				self.tempFilePath = newFilePath
 			except Exception as e:
-				print e
-				print "check the checkFilename function in util/printerConnect"
+				print "Attempted to convert %s to %s\nRan into error: %s\n\n" % (filename, newFilename, e)
 				
 	def run(self):
 		r = requests.Session()
@@ -199,14 +199,14 @@ class  GcodeUpload(threading.Thread):
 		try:
 			r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files, timeout=5)
 		except requests.exceptions.RequestException as e:
-			self.notification.message("Upload failed, please try again later.")
+			self.notification.message("Upload failed, please check your network connection or try again later.")
 
 		try:
 			os.remove(self.tempFilePath)
 			print "Removed file %s " % self.tempFilePath
-		except:
-			print "error"
-		
+		except Exception as e:
+			print "\n\nAttempted to remove temporary file: ", self.tempFilePath
+			print "Error: ", e
 		try: 
 			status = r.status_code
 			self.conveyStatus(status)		
