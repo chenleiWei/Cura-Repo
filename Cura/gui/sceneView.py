@@ -248,11 +248,13 @@ class SceneView(openglGui.glGuiPanel):
 
 		self.OnDeleteAll(None)
 		self.loadScene(fileList, pms_transforms)
+		self.sceneUpdated()
 
 	def OnResetPositions(self, e):
 
 		self._scene.arrangeAll(True)
 		self._scene.centerAll()
+		self.sceneUpdated()
 
 	def OnResetTransformations(self, e):
 		for obj in self._scene.objects():
@@ -261,6 +263,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self._scene.arrangeAll()
 		self._scene.centerAll()
+		self.sceneUpdated()
 
 	def showLoadModel(self, button = 1):
 		if button == 1:
