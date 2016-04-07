@@ -324,7 +324,7 @@ class SceneView(openglGui.glGuiPanel):
 		try: 
 			self.win.OpenPrinterSelector()
 		except Exception as e:
-			print e
+			print "Attempted to open printerSelector\n error: %s" % e
 
 	def SendToPrinter(self, serial):
 		import re
