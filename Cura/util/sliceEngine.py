@@ -24,6 +24,8 @@ from Cura.util import profile
 from Cura.util import pluginInfo
 from Cura.util import version
 from Cura.util import gcodeInterpreter
+from Cura.util import analytics
+
 
 def getEngineFilename():
 	"""
@@ -154,18 +156,18 @@ class EngineResult(object):
 	def submitInfoOnline(self):
 		if profile.getPreference('submit_slice_information') != 'True':
 			return
-		if version.isDevVersion():
-			return
+		#if version.isDevVersion():
+	#		return
 		data = {
 			'processor': platform.processor(),
 			'machine': platform.machine(),
 			'platform': platform.platform(),
-			'profile': self._profileString,
-			'preferences': self._preferencesString,
-			'modelhash': self._modelHash,
+#			'profile': self._profileString,
+#			'preferences': self._preferencesString,
+#			'modelhash': self._modelHash,
 			'version': version.getVersion(),
-			'printtime': self._printTimeSeconds,
-			'filament': ','.join(map(str, self._filamentMM)),
+#			'printtime': self._printTimeSeconds,
+#			'filament': ','.join(map(str, self._filamentMM)),
 		}
 		analytics.analyticsOnSave(self)
 

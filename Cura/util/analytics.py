@@ -2,6 +2,9 @@ import time
 from datetime import date
 import urllib2
 from Cura.util import profile
+import platform
+from Cura.util import version
+
 
 
 def featureAnalytics(MS,BS,DU,DSV,featureName):
@@ -53,3 +56,5 @@ def analyticsOnSave(self):
 	url = 'https://docs.google.com/forms/d/1ZYnwO7qUprv9OxEROPqVxJYxiwoD-FDryECB8E1d9nI/formResponse?ifq&entry.521154058='+size_x+'&entry.671353976='+size_y+'&entry.13086712='+size_z+'&entry.1978610599='+print_time+'&entry.41743500='+layer_height+'&entry.1372370450='+infill_type+'&entry.1122747225='+sparse_infill_line_distance+'&entry.1165297693='+wall_thickness+'&entry.1389723193='+cura_profile_string
 	resp = urllib2.urlopen(url)
 	print 'SUBMITTED' , resp
+	url = 'https://docs.google.com/forms/d/10oPd6RVwbucO7MkM3JYgxWO4lykjTeeAE0523b9XCjk/formResponse?ifq&entry.934083010='+platform.processor()+'&entry.273325052='+platform.machine()+'&entry.170849433='+platform.platform()+'&entry.1350805925='+version.getVersion()
+	resp = urllib2.urlopen(url)
