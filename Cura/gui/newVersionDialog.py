@@ -46,9 +46,9 @@ class newVersionDialog(wx.Dialog):
 			wx.StaticText(p, -1, "* Name of the material profile used included in start gcode"),
 			wx.StaticText(p, -1, "* GUI text is now in black"),
 			wx.StaticText(p, -1, "* Processes involving printer communication improved"),
-			wx.StaticText(p, -1, "")
+			wx.StaticText(p, -1, "* Fill amount setting updated from 25 to 30"),
+			wx.StaticText(p, -1, "* Airgap (Distance Z) updated from 0.15 to 0.3")
 		]
-		
 		
 		for item in changesAndAdditions:
 			item.Wrap(600)
