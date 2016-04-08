@@ -50,6 +50,11 @@ class mainWindow(wx.Frame):
 		self.config = wx.FileConfig(appName="Cura",
 						localFilename=mruFile,
 						style=wx.CONFIG_USE_LOCAL_FILE)
+						
+		# temporary directory for files to be sent to the printer directly
+		tempDirectory = os.path.join(profile.getBasePath(), '.temp')
+		if not os.path.exists(tempDirectory):
+			os.makedirs(tempDirectory)
 
 		self.ID_MRU_MODEL1, self.ID_MRU_MODEL2, self.ID_MRU_MODEL3, self.ID_MRU_MODEL4, self.ID_MRU_MODEL5, self.ID_MRU_MODEL6, self.ID_MRU_MODEL7, self.ID_MRU_MODEL8, self.ID_MRU_MODEL9, self.ID_MRU_MODEL10 = [wx.NewId() for line in xrange(10)]
 		self.modelFileHistory = wx.FileHistory(10, self.ID_MRU_MODEL1)
