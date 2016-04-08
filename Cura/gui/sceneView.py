@@ -340,7 +340,7 @@ class SceneView(openglGui.glGuiPanel):
 		filename = file + suffix
 		# Path to temporary file
 		key = profile.OctoPrintConfigAPI(serial)
-		tempFilePath = os.path.join(resourceBasePath, 'example', filename)
+		tempFilePath = os.path.join(profile.getBasePath(), '.temp', filename)
 		self._createTempFiles(tempFilePath)
 		self._uploadToOctoPrint(key, serial, tempFilePath)
 		
