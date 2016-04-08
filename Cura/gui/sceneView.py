@@ -85,7 +85,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self.openFileButton        = openglGui.glButton(self, 4, _("Load"), (0,0), self.showLoadModel)
 		self.printButton           = openglGui.glButton(self, 6, _("Print"), (1,0), self.OnPrintButton)
-		self.octoPrintButton	   = openglGui.glButton(self, 6, _("Upload to Series 1"), (2,0), self.OnOctoPrintButton)
+		self.octoPrintButton	   = openglGui.glButton(self, 6, _("Send to Series 1"), (2,0), self.OnOctoPrintButton)
 		self.printButton.setDisabled(True)
 		self.win = middleMan(self.printButton, self._scene.objects())
 
