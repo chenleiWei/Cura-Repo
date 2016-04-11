@@ -90,7 +90,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self.openFileButton        = openglGui.glButton(self, 4, _("Load"), (0,0), self.showLoadModel)
 		self.printButton           = openglGui.glButton(self, 6, _("Print"), (1,0), self.OnPrintButton)
-		self.octoPrintButton	   = openglGui.glButton(self, 6, _("Upload to Series 1"), (2,0), self.OnOctoPrintButton)
+		self.octoPrintButton	   = openglGui.glButton(self, 6, _("Send to Series 1"), (2,0), self.OnOctoPrintButton)
 		self.printButton.setDisabled(True)
 		self.win = middleMan(self.printButton, self._scene.objects())
 
@@ -259,6 +259,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self.OnDeleteAll(None)
 		self.loadScene(fileList, pms_transforms)
+		self.sceneUpdated()
 
 	def OnResetPositions(self, e):
 
@@ -336,7 +337,7 @@ class SceneView(openglGui.glGuiPanel):
 		try: 
 			self.win.OpenPrinterSelector()
 		except Exception as e:
-			print e
+			print "Attempted to open printerSelector\n error: %s" % e
 
 	def SendToPrinter(self, serial):
 		import re
@@ -349,7 +350,7 @@ class SceneView(openglGui.glGuiPanel):
 		filename = file + suffix
 		# Path to temporary file
 		key = profile.OctoPrintConfigAPI(serial)
-		tempFilePath = os.path.join(resourceBasePath, 'example', filename)
+		tempFilePath = os.path.join(profile.getBasePath(), '.temp', filename)
 		self._createTempFiles(tempFilePath)
 		self._uploadToOctoPrint(key, serial, tempFilePath)
 		

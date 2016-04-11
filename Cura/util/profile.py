@@ -242,9 +242,9 @@ setting('fill_overlap', 15, int, 'expert', _('Infill')).setRange(0,100).setLabel
 setting('perimeter_before_infill', False, bool, 'expert', _('Infill')).setLabel(_("Infill prints after perimeters"), _("Print infill after perimeter lines. This can reduce infill from showing through the surface. If not checked, infill will print before perimeter lines."))
 setting('support_type', 'Lines', ['Grid', 'Lines'], 'expert', _('Support')).setLabel(_("Structure Type"), _("The type of support structure.\nGrid is very strong and can come off in 1 piece, however, sometimes it is too strong.\nLines are single walled lines that break off one at a time. Which is more work to remove, but as it is less strong it does work better on tricky prints."))
 setting('support_angle', 30, float, 'expert', _('Support')).setRange(0,90).setLabel(_("Overhang Angle for Support (deg)"), _("The minimal angle that overhangs need to have to get support. With 90 degree being horizontal and 0 degree being vertical."))
-setting('support_fill_rate', 25, int, 'expert', _('Support')).setRange(0.4,610).setLabel(_("Fill distance (mm)"), _("Amount of infill structure in the support material, less material gives weaker support which is easier to remove. 15% seems to be a good average."))
+setting('support_fill_rate', 30, int, 'expert', _('Support')).setRange(0,100).setLabel(_("Fill Amount (%)"), _("Amount of infill structure in the support material, less material gives weaker support which is easier to remove. 15% seems to be a good average."))
 setting('support_xy_distance', 0.7, float, 'expert', _('Support')).setRange(0,10).setLabel(_("Distance X/Y (mm)"), _("Distance of the support material from the print, in the X/Y directions.\n0.7mm gives a nice distance from the print so the support does not stick to the print."))
-setting('support_z_distance', 0.15, float, 'expert', _('Support')).setRange(0,10).setLabel(_("Distance Z (mm)"), _("Distance from the top/bottom of the support to the print. A small gap here makes it easier to remove the support but makes the print a bit uglier.\n0.15mm gives a good seperation of the support material."))
+setting('support_z_distance', 0.3, float, 'expert', _('Support')).setRange(0,10).setLabel(_("Airgap (mm)"), _("Distance from the top/bottom of the support to the print. A small gap here makes it easier to remove the support but makes the print a bit uglier.\n0.15mm gives a good seperation of the support material."))
 setting('spiralize', False, bool, 'expert', _('Black Magic')).setLabel(_("Spiralize The Outer Contour"), _("Spiralize is smoothing out the Z move of the outer edge. This will create a steady Z increase over the whole print. This feature turns a solid object into a single walled print with a solid bottom.\nThis feature used to be called Joris in older versions."))
 setting('simple_mode', False, bool, 'expert', _('Black Magic')).setLabel(_("Only Follow Mesh Surface"), _("Only follow the mesh surfaces of the 3D model, do not do anything else. No infill, no top/bottom, nothing."))
 #setting('bridge_speed', 100, int, 'expert', 'Bridge').setRange(0,100).setLabel(_("Bridge speed (%)"), _("Speed at which layers with bridges are printed, compared to normal printing speed."))
@@ -265,13 +265,6 @@ setting('fix_horrible_union_all_type_b', False, bool, 'expert', _('Fix horrible'
 setting('fix_horrible_use_open_bits', False, bool, 'expert', _('Fix horrible')).setLabel(_("Keep Open Faces"), _("This expert option keeps all the open bits of the model intact. Normally Cura tries to stitch up small holes and remove everything with big holes, but this option keeps bits that are not properly part of anything and just goes with whatever is left. This option is usually not what you want, but it might enable you to slice models otherwise failing to produce proper paths.\nAs with all \"Fix horrible\" options, results may vary and use at your own risk."))
 setting('fix_horrible_extensive_stitching', False, bool, 'expert', _('Fix horrible')).setLabel(_("Extensive Stitching"), _("Extensive stitching tries to fix up open holes in the model by closing the hole with touching polygons. This algorthm is quite expensive and could introduce a lot of processing time.\nAs with all \"Fix horrible\" options, results may vary and use at your own risk."))
 
-setting('dsvXaxis', 'Layer Height', [_('-'),_('Layer Height'), _('Infill'), _('Wall Thickness'), _('Shells'),_('Print Speed')], 'dsvpreference', 'hidden').setLabel(_('X Axis'), _('Select the first variable for DSV.'))
-setting('dsvYaxis', 'Layer Height', [_('-'),_('Layer Height'), _('Infill'), _('Wall Thickness'), _('Shells'),_('Print Speed')], 'dsvpreference', 'hidden').setLabel(_('Y Axis'), _('Select the second variable for DSV.'))
-setting('xUpperBound',None, float, 'dsvpreference',    ('hidden')).setRange(0).setLabel(_("Upper bound"), _("The toolbox will divide the X axis in 5 parts between the upper bound and lower bound"))
-setting('xLowerBound',None, float, 'dsvpreference',    ('hidden')).setRange(0).setLabel(_("Lower bound"), _("The toolbox will divide the X axis in 5 parts between the upper bound and lower bound"))
-setting('yUpperBound',None, float, 'dsvpreference',    ('hidden')).setRange(0).setLabel(_("Upper bound"), _("The toolbox will divide the Y axis in 5 parts between the upper bound and lower bound"))
-setting('yLowerBound',None, float, 'dsvpreference',    ('hidden')).setRange(0).setLabel(_("Lower bound"), _("The toolbox will divide the Y axis in 5 parts between the upper bound and lower bound"))
-
 setting('plugin_config', '', str, 'hidden', 'hidden')
 setting('object_center_x', -1, float, 'hidden', 'hidden')
 setting('object_center_y', -1, float, 'hidden', 'hidden')
@@ -285,6 +278,7 @@ setting('start.gcode', """;-- START GCODE --
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
+;Settings based on material: {}
 G21        ;metric values
 G90        ;absolute positioning
 G28     ;move to endstops
@@ -501,7 +495,7 @@ setting('simpleModeStrength', 'Medium', str, 'preference', 'hidden')
 setting('simpleModeQuality', 'Normal', str, 'preference', 'hidden')
 setting('oneAtATime', 'False', bool, 'preference', 'hidden')
 setting('lastFile', os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'resources', 'example', 'FirstPrintCone.stl')), str, 'preference', 'hidden')
-setting('initialFile', _getMyDocumentsFolder, 'str', 'preference', 'hidden')
+setting('lastSTLPath', os.path.expanduser('~/Documents'), str, 'preference', 'hidden')
 setting('save_profile', 'False', bool, 'preference', 'hidden').setLabel(_("Save profile on slice"), _("When slicing save the profile as [stl_file]_profile.ini next to the model."))
 setting('filament_cost_kg', '0', float, 'preference', 'hidden').setLabel(_("Cost (price/kg)"), _("Cost of your filament per kg, to estimate the cost of the final print."))
 setting('filament_cost_meter', '0', float, 'preference', 'hidden').setLabel(_("Cost (price/m)"), _("Cost of your filament per meter, to estimate the cost of the final print."))
@@ -526,7 +520,6 @@ setting('window_width', '-1', float, 'preference', 'hidden')
 setting('window_height', '-1', float, 'preference', 'hidden')
 setting('window_normal_sash', '320', float, 'preference', 'hidden')
 setting('last_run_version', '', str, 'preference', 'hidden')
-setting('batch_slice', 'False', bool, 'preference', 'hidden')
 
 
 setting('show_infill', 'False', bool, 'preference', 'hidden')
@@ -557,11 +550,11 @@ setting('serial_port_auto', '', str, 'machine', 'hidden')
 setting('serial_baud', 'AUTO', str, 'machine', 'hidden').setLabel(_("Baudrate"), _("Speed of the serial port communication\nNeeds to match your firmware settings\nCommon values are 250000, 115200, 57600"))
 setting('serial_baud_auto', '', int, 'machine', 'hidden')
 
-setting('extruder_head_size_min_x', '30', float, 'machine', 'hidden').setLabel(_("Head size towards X min (mm)"), _("The distance between left side of the print head to the nozzle."))
+setting('extruder_head_size_min_x', '35', float, 'machine', 'hidden').setLabel(_("Head size towards X min (mm)"), _("The distance between left side of the print head to the nozzle."))
 setting('extruder_head_size_min_y', '55', float, 'machine', 'hidden').setLabel(_("Head size towards Y min (mm)"), _("The distance between the nozzle and right-most part of the print head."))
-setting('extruder_head_size_max_x', '30', float, 'machine', 'hidden').setLabel(_("Head size towards X max (mm)"), _("The distance between the the front (closest to you) fan and the nozzle."))
-setting('extruder_head_size_max_y', '60', float, 'machine', 'hidden').setLabel(_("Head size towards Y max (mm)"), _("The distance between the nozzle and the back-end (farthest from you) of the print head."))
-setting('extruder_head_size_height', '110', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
+setting('extruder_head_size_max_x', '55', float, 'machine', 'hidden').setLabel(_("Head size towards X max (mm)"), _("The distance between the the front (closest to you) fan and the nozzle."))
+setting('extruder_head_size_max_y', '65', float, 'machine', 'hidden').setLabel(_("Head size towards Y max (mm)"), _("The distance between the nozzle and the back-end (farthest from you) of the print head."))
+setting('extruder_head_size_height', '35', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
 
 
 #validators.warningBelow(settingsDictionary['fill_density'], 0.4, _("The minimum distance between infill is Nozzle Size(mm)"))
@@ -1396,8 +1389,11 @@ def replaceTagMatch(m):
 		return pre + '#F_AMNT#'
 	if tag == 'filament_weight':
 		return pre + '#F_WGHT#'
-	if tag == 'filament_cost':
-		return pre + '#F_COST#'
+#	if tag == 'filament_cost':
+#		return pre + '#F_COST#'
+	if tag == 'material_profile':
+		return pre + '#M_PROF#'
+	
 	if tag == 'profile_string':
 		return pre + 'CURA_PROFILE_STRING:%s' % (getProfileString())
 	if pre == 'F' and tag == 'max_z_speed':
