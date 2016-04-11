@@ -772,6 +772,8 @@ class normalSettingsPanel(configBase.configPanelBase):
 		self.GetSizer().Add(self.nb, 1, wx.EXPAND)
 
 		(left, right, self.printPanel) = self.CreateDynamicConfigTab(self.nb, _('Basic'))
+		
+
 		self._addSettingsToPanels('basic', left, right)
 		self.SizeLabelWidths(left, right)
 
@@ -800,6 +802,8 @@ class normalSettingsPanel(configBase.configPanelBase):
 
 		p = left
 		n = 0
+
+		configBase.StaticTopRow(p)
 		for title in profile.getSubCategoriesFor(category):
 			n += 1 + len(profile.getSettingsForCategory(category, title))
 			if n > count / 2:
@@ -807,6 +811,8 @@ class normalSettingsPanel(configBase.configPanelBase):
 			configBase.TitleRow(p, _(title))
 			for s in profile.getSettingsForCategory(category, title):
 				configBase.SettingRow(p, s.getName())
+
+		configBase.BottomRow(p)
 
 	def SizeLabelWidths(self, left, right):
 		leftWidth = self.getLabelColumnWidth(left)
