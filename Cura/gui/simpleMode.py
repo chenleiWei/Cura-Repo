@@ -181,7 +181,7 @@ class simpleModePanel(wx.Panel):
 		heatedBedWarning.Wrap(250)
 		boxsizer.Add(heatedBedWarning)
 		warningPanel.SetSizer(boxsizer, wx.VERTICAL)
-		sizer.Add(warningPanel, pos=(18,0), flag=wx.ALIGN_BOTTOM)
+		sizer.Add(warningPanel, pos=(12,0), flag=wx.ALIGN_BOTTOM)
 #		infoPanel.GetSizer().Add(heatedBedWarning)
 
 
