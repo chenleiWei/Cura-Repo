@@ -151,7 +151,30 @@ class BlankRow(object):
 		self.title = wx.StaticText(panel, -1, " ")
 		sizer.Add(self.title, (x,0), (1,3), flag=wx.EXPAND|wx.TOP|wx.LEFT, border=10)
 		sizer.SetRows(x + 2)
+		
 
+class StaticTopRow(object):
+	def __init__(self, panel):
+		sizer = panel.GetSizer()
+		x = sizer.GetRows()
+		self.title = wx.StaticText(panel, -1, "")
+		self.title.SetFont(wx.Font(20, wx.SWISS, wx.ITALIC, wx.NORMAL))
+		
+		sizer.Add(self.title, (x,0), (1,3), flag=wx.EXPAND|wx.TOP|wx.LEFT, border=10)
+		sizer.SetRows(x + 2)
+		
+
+class BottomRow(object):
+	def __init__(self, panel):
+		sizer = panel.GetSizer()
+		x = sizer.GetRows()
+		self.title = wx.StaticText(panel, -1, "")
+		self.title.SetFont(wx.Font(20, wx.SWISS, wx.ITALIC, wx.NORMAL))
+		
+		sizer.Add(self.title, (x,0), (1,3), flag=wx.EXPAND|wx.TOP|wx.LEFT, border=10)
+		sizer.SetRows(x + 2)
+		
+		
 class SettingRow(object):
 	def __init__(self, panel, configName, valueOverride = None, index = None):
 		"Add a setting to the configuration panel"
