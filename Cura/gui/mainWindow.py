@@ -1,4 +1,4 @@
-__copyright__ = "Copyright (C) 2013 Cat Casuat (Cura Type A) and David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2016 Cat Casuat (Cura Type A) and David Braam - Released under terms of the AGPLv3 License"
 
 import wx
 import os
@@ -812,7 +812,16 @@ class normalSettingsPanel(configBase.configPanelBase):
 			for s in profile.getSettingsForCategory(category, title):
 				configBase.SettingRow(p, s.getName())
 
-		configBase.BottomRow(p)
+			if str(title) == "Speed and Temperature":
+				warning = self.PrintBedWarning(p)
+				configBase.BoxedText(p, warning)
+
+	#	configBase.BottomRow(p)
+
+	def PrintBedWarning(self, p):
+		# Heated bed warning
+		warning = wx.StaticText(p, -1, "Always use surface treatment with heated bed to prevent damage from material bonding to glass. See material manufacturer recommendations.")
+		return warning
 
 	def SizeLabelWidths(self, left, right):
 		leftWidth = self.getLabelColumnWidth(left)
