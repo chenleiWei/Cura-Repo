@@ -2,7 +2,7 @@
 The version utility module is used to get the current Cura version, and check for updates.
 It can also see if we are running a development build of Cura.
 """
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2016 Cat Casuat and David Braam - Released under terms of the AGPLv3 License"
 
 import os
 import sys
@@ -105,7 +105,7 @@ def checkForNewerVersion():
 						}
 	
 	# Comparison
-	"""
+	
 	if CVL and LVL:
 		print "lists full"
 	else:
@@ -118,9 +118,10 @@ def checkForNewerVersion():
 	print "Latest version"
 	for x, y in LVL.items():
 		print "\t", x, ": ", y
-	"""
+	
 	updateVersion = False
-
+	versionLVL =  str(LVL["major"]) + "." + str(LVL["minor"]) + "." + str(LVL["revision"])  + " " + str(LVL["type"]) + " " + "rev" + str(LVL['testRev'])
+	print versionLVL
 	# Compare major number(s)
 	if LVL["major"] > CVL["major"]:
 		updateVersion = True
