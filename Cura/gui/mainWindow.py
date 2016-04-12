@@ -1,4 +1,4 @@
-__copyright__ = "Copyright (C) 2013 Cat Casuat (Cura Type A) and David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2016 Cat Casuat (Cura Type A) and David Braam - Released under terms of the AGPLv3 License"
 
 import wx
 import os
@@ -25,8 +25,6 @@ from Cura.util import version
 import platform
 from Cura.util import meshLoader
 from Cura.gui import materialProfileSelector
-from Cura.gui import batchSlice
-
 
 class mainWindow(wx.Frame):
 	def __init__(self):
@@ -72,7 +70,7 @@ class mainWindow(wx.Frame):
 		self.fileMenu = wx.Menu()
 		i = self.fileMenu.Append(-1, _("Load Model File...\tCTRL+L"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.showLoadModel(), i)
-		i = self.fileMenu.Append(-1, _("Save Model...\tCTRL+S"))
+		i = self.fileMenu.Append(-1, _("Save Model as AMF...\tCTRL+S"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.showSaveModel(), i)
 		i = self.fileMenu.Append(-1, _("Reload Platform\tF5"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.reloadScene(e), i)
@@ -134,10 +132,6 @@ class mainWindow(wx.Frame):
 		#i = toolsMenu.Append(-1, 'Batch run...')
 		#self.Bind(wx.EVT_MENU, self.OnBatchRun, i)
 		#self.normalModeOnlyItems.append(i)
-	#	self.batchSlicePanelCheck = toolsMenu.Append(-1, _("Batch Slice"), kind=wx.ITEM_CHECK)
-	#	self.Bind(wx.EVT_MENU, self.OnBatchSlicePanelCheck, self.batchSlicePanelCheck)
-	#	toolsMenu.AppendSeparator()
-
 
 		if minecraftImport.hasMinecraft():
 			i = toolsMenu.Append(-1, _("Minecraft map import..."))
@@ -640,9 +634,9 @@ class mainWindow(wx.Frame):
 
 		# update manufacturer and material names saved
 		if manufacturer is not None and name is not None: 
-			profile.putPreference('simpleModeMaterialSupplier', manufacturer)
-			profile.putPreference('simpleModeMaterialName', name)
-			profile.putPreference('simpleModeMaterial', materialLoaded)
+			profile.putPreference('material_supplier', manufacturer)
+			profile.putPreference('material_name', name)
+			profile.putPreference('material_profile', materialLoaded)
 
 		# profile setting information update + info panel update
 		self.loadData(sectionSettings, 'profile')
@@ -690,10 +684,6 @@ class mainWindow(wx.Frame):
 		ecw = expertConfig.expertConfigWindow(lambda : self.scene.sceneUpdated())
 		ecw.Centre()
 		ecw.Show()
-
-	def OnBatchSlicePanelCheck(self, e):
-		profile.putPreference('batch_slice',e.IsChecked())
-		self.reloadSettingPanels()
 
 	def OnMinecraftImport(self, e):
 		mi = minecraftImport.minecraftImportWindow(self)
@@ -795,10 +785,6 @@ class normalSettingsPanel(configBase.configPanelBase):
 		self.pluginPanel = pluginPanel.pluginPanel(self.nb, callback)
 		self.nb.AddPage(self.pluginPanel, _("Plugins"))
 
-	#	if parent.GetParent().GetParent().batchSlicePanelCheck.IsChecked():
-	#		self.bsPanel = batchSlice.bsPanel(self.nb)
-	#		self.nb.AddPage(self.bsPanel, _("Batch Slice"))
-
 		#Alteration page
 		if profile.getMachineSetting('gcode_flavor') == 'UltiGCode':
 			self.alterationPanel = None
@@ -826,7 +812,16 @@ class normalSettingsPanel(configBase.configPanelBase):
 			for s in profile.getSettingsForCategory(category, title):
 				configBase.SettingRow(p, s.getName())
 
-		configBase.BottomRow(p)
+			if str(title) == "Speed and Temperature":
+				warning = self.PrintBedWarning(p)
+				configBase.BoxedText(p, warning)
+
+	#	configBase.BottomRow(p)
+
+	def PrintBedWarning(self, p):
+		# Heated bed warning
+		warning = wx.StaticText(p, -1, "Always use surface treatment with heated bed to prevent damage from material bonding to glass. See material manufacturer recommendations.")
+		return warning
 
 	def SizeLabelWidths(self, left, right):
 		leftWidth = self.getLabelColumnWidth(left)

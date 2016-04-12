@@ -179,7 +179,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTagLine(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=10, family = wx.DEFAULT,
+		font = wx.Font(pointSize=11, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(340)
@@ -236,7 +236,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		else:
 			text.SetForegroundColour('Blue')
 			
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag= wx.ALIGN_CENTER | wx.LEFT | wx.EXPAND, border=140)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag= wx.ALIGN_CENTER | wx.LEFT | wx.EXPAND, border=148)
 		self.rowNr += 1
 		return text
 		

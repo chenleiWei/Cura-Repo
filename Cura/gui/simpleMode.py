@@ -20,7 +20,7 @@ class simpleModePanel(wx.Panel):
 	def __init__(self, parent, callback):
 		super(simpleModePanel, self).__init__(parent)
 		self._callback = callback
-
+		
 		# Load current values into objects for comparison
 		self.matManufacturer = profile.getPreference('simpleModeMaterialSupplier')
 		self.matName = profile.getPreference('simpleModeMaterialName')
@@ -63,9 +63,15 @@ class simpleModePanel(wx.Panel):
 		infoPanel = wx.Panel(self)
 		self.infoPanelSettingsList = self.InitializeInfoPanelList(infoPanel)
 		
+		# Panel 7: Warning Panel
+		warningPanel = wx.Panel(self)
+		
+		
 		#----------- Panel Items Populate Below ----------- #
+
 		sizer = wx.GridBagSizer()
 		self.SetSizer(sizer)
+
 		
 		# Panel 0: Last File Loaded		
 		sb = wx.StaticBox(currentFilePanel, label=_("Last File Opened"))
@@ -166,8 +172,19 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(gridsizer)
 		infoPanel.SetSizer(wx.BoxSizer(wx.VERTICAL))
 		infoPanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
-		sizer.Add(infoPanel, (6,0))
+		sizer.Add(infoPanel, (6,0), flag=wx.EXPAND)
 		
+		sb = wx.StaticBox(warningPanel)
+		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+		heatedBedWarning = wx.StaticText(warningPanel, -1, "Always use surface treatment with heated bed to prevent damage from material bonding to glass. See material manufacturer recommendations.")
+		heatedBedWarning.SetFont(wx.Font(12, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL))
+		heatedBedWarning.Wrap(240)
+		boxsizer.Add(heatedBedWarning)
+		warningPanel.SetSizer(boxsizer, wx.VERTICAL)
+		sizer.Add(warningPanel, pos=(8,0), flag=wx.ALIGN_BOTTOM)
+#		infoPanel.GetSizer().Add(heatedBedWarning)
+
+
 		# Button and checkbox bindings
 		for name, button in strengthButtons.items():
 			button.Bind(wx.EVT_RADIOBUTTON, self.strengthSelected)

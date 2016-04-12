@@ -1896,10 +1896,9 @@ class printerSelector(wx.Frame):
 		#--wxPython Container Widgets--#
 		self.availPrinters = wx.ListBox(panel, 10, wx.DefaultPosition, size=(200, 65), choices=printerList)
 	#	print self.availPrinters.GetCount()	
-		if self.availPrinters.GetCount() > 0:
+		if self.availPrinters.GetCount() >= 1:
 			self.availPrinters.SetSelection(0)
 		self.availPrinters.SetFont(font)
-
 		
 		#--wxPython Image/Media Widgets--#
 		# Upload Icon
@@ -2020,7 +2019,7 @@ class printerSelector(wx.Frame):
 	def OnEdit(self, e):
 		index = self.availPrinters.GetSelection()
 		printerString = self.availPrinters.GetString(index)
-		series, one, serial = printerString.split()	
+		series, one, serial = printerString.split()
 	
 		editPrinter = EditPrinter(serial)
 		editPrinter.Show()
@@ -2032,11 +2031,11 @@ class printerSelector(wx.Frame):
 		printerString = self.availPrinters.GetString(index)
 		series, one, serial = printerString.split()
 		# this sends the selected serial number to the octoPrint setup
-		
+		pub.sendMessage('gcode.update', serial=serial)
+
+			
 		self.Destroy()
 		
-		pub.sendMessage('gcode.update', serial=serial)
-	
 	def OnAddNew(self, e):
 		print("Adding new printer")
 		newPrinter = AddNewPrinter(self)
@@ -2064,7 +2063,7 @@ class printerSelector(wx.Frame):
 			self.availPrinters.Append(printer)
 			printerIndex = self.availPrinters.FindString(printer)
 			self.availPrinters.SetSelection(printerIndex)
-			
+				
 		if profile.printerExists(serial) is True:
 			pass
 		else:

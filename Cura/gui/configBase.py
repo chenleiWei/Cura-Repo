@@ -151,29 +151,54 @@ class BlankRow(object):
 		self.title = wx.StaticText(panel, -1, " ")
 		sizer.Add(self.title, (x,0), (1,3), flag=wx.EXPAND|wx.TOP|wx.LEFT, border=10)
 		sizer.SetRows(x + 2)
-		
+
+class TextRow(object):
+	def __init__(self, panel, message):
+		sizer = panel.GetSizer()
+		x = sizer.GetRows()
+		self.title = wx.StaticText(panel, -1, message)
+		self.title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.NORMAL))
+		self.title.Wrap(300)
+		sizer.Add(self.title, (x,0), (1,3), flag=wx.LEFT, border=10)#, flag=wx.ALIGN_CENTER)
+		sizer.SetRows(x + 1)
 
 class StaticTopRow(object):
 	def __init__(self, panel):
 		sizer = panel.GetSizer()
 		x = sizer.GetRows()
-		self.title = wx.StaticText(panel, -1, "")
-		self.title.SetFont(wx.Font(20, wx.SWISS, wx.ITALIC, wx.NORMAL))
+#		self.title = wx.StaticText(panel, -1, "")
+#		self.title.SetFont(wx.Font(12, wx.SWISS, wx.ITALIC, wx.NORMAL))
 		
-		sizer.Add(self.title, (x,0), (1,3), flag=wx.EXPAND|wx.TOP|wx.LEFT, border=10)
-		sizer.SetRows(x + 2)
+#		sizer.Add(self.title, (x,0), (1,3), flag=wx.EXPAND|wx.TOP|wx.LEFT, border=10)
+#		sizer.SetRows(x + 2)
 		
-
+class BoxedText(object):
+	def __init__(self, panel, message):
+		font = wx.Font(13, wx.SWISS, wx.NORMAL, wx.NORMAL)
+		sizer = panel.GetSizer()
+		x = sizer.GetRows() + 1
+			
+		sb = wx.StaticBox(panel)
+		staticBoxSizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+		message.SetFont(font)
+		message.Wrap(330)
+		staticBoxSizer.Add(message, flag=wx.ALIGN_LEFT)
+		
+		
+		sizer.Add(staticBoxSizer, (x,0), (1,3), flag=wx.EXPAND)
+	#	sizer.SetRows(x + 2)
+	
+	
 class BottomRow(object):
 	def __init__(self, panel):
 		sizer = panel.GetSizer()
 		x = sizer.GetRows()
 		self.title = wx.StaticText(panel, -1, "")
-		self.title.SetFont(wx.Font(20, wx.SWISS, wx.ITALIC, wx.NORMAL))
-		
-		sizer.Add(self.title, (x,0), (1,3), flag=wx.EXPAND|wx.TOP|wx.LEFT, border=10)
-		sizer.SetRows(x + 2)
-		
+		font = wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL)
+		self.title.SetFont(font)
+		self.title.Wrap(345)
+		sizer.Add(self.title, (x,0), (1,3), flag=wx.EXPAND|wx.ALIGN_BOTTOM|wx.LEFT, border=10)
+	#	sizer.SetRows(x + 2)
 		
 class SettingRow(object):
 	def __init__(self, panel, configName, valueOverride = None, index = None):
