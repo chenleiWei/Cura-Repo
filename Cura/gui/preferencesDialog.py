@@ -59,7 +59,7 @@ class preferencesDialog(wx.Dialog):
 		configBase.SettingRow(right, 'check_for_updates')
 		configBase.SettingRow(right, 'submit_slice_information')
 
-		self.okButton = wx.Button(right, -1, 'Ok')
+		self.okButton = wx.Button(right, -1, 'OK')
 		right.GetSizer().Add(self.okButton, (right.GetSizer().GetRows(), 0), flag=wx.BOTTOM, border=5)
 		self.okButton.Bind(wx.EVT_BUTTON, lambda e: self.OnClose())
 
@@ -67,29 +67,7 @@ class preferencesDialog(wx.Dialog):
 		self.Fit()
 
 	def OnClose(self, e):
-		#self.parent.reloadSettingPanels()
 		self.Destroy()
-	"""
-	def OnBrowseSDRootFolder(self, e):
-		path = profile.getPreference('sdcard_rootfolder')
-		if path == '':
-			path = os.path.expanduser('~/Documents')
-			if not os.path.exists(path):
-				path = ''
-	
-		dlg=wx.DirDialog(self, _("Select replication root folder"), path)
-		if dlg.ShowModal() != wx.ID_OK:
-			dlg.Destroy()
-			return
-
-		profile.putPreference('sdcard_rootfolder', dlg.GetPath())
-		dlg.Destroy()
-		self.Close()
-		self.parent.OnPreferences(None)
-	"""
-
-
-
 
 class machineSettingsDialog(wx.Dialog):
 	def __init__(self, parent):
