@@ -63,7 +63,7 @@ class ConfirmCredentials(threading.Thread):
 		url = 'http://series1-%s.local:5000/api/files/local' % self.serial
 
 		try:
-			r = requests.post(url, headers=header, files=files, timeout=5)
+			r = requests.post(url, headers=header, files=files, timeout=10)
 		except requests.exceptions.RequestException as e:
 			print e
 			self.conveyError("Connection could not be made. Please try again later.")
@@ -90,7 +90,6 @@ class ConfirmCredentials(threading.Thread):
 			self.errorMessage1.Wrap(200)
 		else:
 			self.errorMessage1.Wrap(420)
-		
 
 		if self.configWizard:
 			self.parent.configurePrinterButton.Enable()
@@ -188,23 +187,25 @@ class  GcodeUpload(threading.Thread):
 		# File name and path
 		filepath = self.tempFilePath
 		filename = self.filename
-				
+		openedFilePath = open(filepath, 'rb')
 		# Printer information
 		url = 'http://series1-%s.local:5000/api/files/local' % self.serial
 		header = {'X-Api-Key':self.key}
-		files = {'file': (filename, open(filepath, 'rb'), 'multipart/form-data')}
+		files = {'file': (filename, openedFilePath, 'multipart/form-data')}
 		data = {'select': 'true', 'print': self.printOnUpload}
 		
 		try:
-			r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files, timeout=5)
+			r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files, timeout=10)
 		except requests.exceptions.RequestException as e:
 			self.notification.message("Upload failed, please check your network connection or try again later.")
 
+		
 		try:
-			os.remove(self.tempFilePath)
-			print "Removed file %s " % self.tempFilePath
+			openedFilePath.close()
+			os.remove(filepath)
+			print "Removed file %s " % filepath
 		except Exception as e:
-			print "\n\nAttempted to remove temporary file: ", self.tempFilePath
+			print "\n\nAttempted to remove temporary file: ", filepath
 			print "Error: ", e
 		try: 
 			status = r.status_code
