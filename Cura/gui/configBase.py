@@ -210,6 +210,7 @@ class SettingRow(object):
 		has_expert_settings = False
 
 		self.setting = profile.settingsDictionary[configName]
+
 		self.settingIndex = index
 		self.validationMsg = ''
 		self.panel = panel
@@ -245,9 +246,15 @@ class SettingRow(object):
 			for n in xrange(0, len(choices)):
 				choices[n] = _(choices[n])
 			value = _(value)
-			self.ctrl = wx.ComboBox(panel, -1, value, choices=choices, style=wx.CB_DROPDOWN|wx.CB_READONLY)
+			self.ctrl = wx.ComboBox(panel, -1, value, choices=choices, style=wx.CB_DROPDOWN)
+			self.ctrl.SetBackgroundColour('white')
 			self.ctrl.Bind(wx.EVT_COMBOBOX, self.OnSettingChange)
 			self.ctrl.Bind(wx.EVT_LEFT_DOWN, self.OnMouseExit)
+			flag = wx.EXPAND
+		elif str(self.setting.getLabel()) == "Equivalent percentage":
+			self.ctrl = wx.TextCtrl(panel, -1, str(self.setting.getValue()), style=wx.TE_READONLY)
+			self.ctrl.SetBackgroundColour('#e2e2e2')
+			self.ctrl.Bind(wx.EVT_TEXT, self.OnSettingChange)
 			flag = wx.EXPAND
 		else:
 			self.ctrl = wx.TextCtrl(panel, -1, self.setting.getValue(self.settingIndex))
