@@ -246,7 +246,7 @@ class SettingRow(object):
 			for n in xrange(0, len(choices)):
 				choices[n] = _(choices[n])
 			value = _(value)
-			self.ctrl = wx.ComboBox(panel, -1, value, choices=choices, style=wx.CB_DROPDOWN)
+			self.ctrl = wx.ComboBox(panel, -1, value, choices=choices, style=wx.CB_DROPDOWN | wx.CB_READONLY)
 			self.ctrl.SetBackgroundColour('white')
 			self.ctrl.Bind(wx.EVT_COMBOBOX, self.OnSettingChange)
 			self.ctrl.Bind(wx.EVT_LEFT_DOWN, self.OnMouseExit)
