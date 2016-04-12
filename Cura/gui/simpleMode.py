@@ -178,10 +178,10 @@ class simpleModePanel(wx.Panel):
 		boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 		heatedBedWarning = wx.StaticText(warningPanel, -1, "Always use surface treatment with heated bed to prevent damage from material bonding to glass. See material manufacturer recommendations.")
 		heatedBedWarning.SetFont(wx.Font(12, family = wx.SWISS, style = wx.NORMAL, weight = wx.NORMAL))
-		heatedBedWarning.Wrap(250)
+		heatedBedWarning.Wrap(240)
 		boxsizer.Add(heatedBedWarning)
 		warningPanel.SetSizer(boxsizer, wx.VERTICAL)
-		sizer.Add(warningPanel, pos=(12,0), flag=wx.ALIGN_BOTTOM)
+		sizer.Add(warningPanel, pos=(8,0), flag=wx.ALIGN_BOTTOM)
 #		infoPanel.GetSizer().Add(heatedBedWarning)
 
 
