@@ -46,6 +46,8 @@ from Cura.gui.util import openglHelpers
 from Cura.gui.util import openglGui
 from Cura.gui.util import engineResultView
 from Cura.gui.tools import imageToMesh
+from Cura.util import analytics
+
 
 class SceneView(openglGui.glGuiPanel):
 	def __init__(self, parent):
@@ -1840,6 +1842,8 @@ class middleMan(SceneView):
 		self.sceneObjects = sceneObjects		
 			
 	def OpenPrinterSelector(self):
+		analytics.featureAnalytics('','','1','','direct_upload') #featureAnalytics(MS,,DU,,featureName)
+
 		if self.printButtonStatus.isDisabled():
 			self.enableUpload = False
 		else:

@@ -24,6 +24,8 @@ from Cura.util import profile
 from Cura.util import pluginInfo
 from Cura.util import version
 from Cura.util import gcodeInterpreter
+from Cura.util import analytics
+
 
 def getEngineFilename():
 	"""
@@ -56,7 +58,7 @@ class EngineResult(object):
 	Result from running the CuraEngine.
 	Contains the engine log, polygons retrieved from the engine, the GCode and some meta-data.
 	"""
-	def __init__(self):
+	def __init__(self,scene):
 		self._engineLog = []
 		self._gcodeData = BigDataStorage()
 		self._polygons = []
@@ -70,6 +72,7 @@ class EngineResult(object):
 		self._gcodeInterpreter = gcodeInterpreter.gcode()
 		self._gcodeLoadThread = None
 		self._finished = False
+		self._scene = scene
 
 	def getFilamentWeight(self, e=0):
 		#Calculates the weight of the filament in kg
@@ -154,19 +157,20 @@ class EngineResult(object):
 	def submitInfoOnline(self):
 		if profile.getPreference('submit_slice_information') != 'True':
 			return
-		if version.isDevVersion():
-			return
+		#if version.isDevVersion():
+	#		return
 		data = {
 			'processor': platform.processor(),
 			'machine': platform.machine(),
 			'platform': platform.platform(),
-			'profile': self._profileString,
-			'preferences': self._preferencesString,
-			'modelhash': self._modelHash,
+#			'profile': self._profileString,
+#			'preferences': self._preferencesString,
+#			'modelhash': self._modelHash,
 			'version': version.getVersion(),
-			'printtime': self._printTimeSeconds,
-			'filament': ','.join(map(str, self._filamentMM)),
+#			'printtime': self._printTimeSeconds,
+#			'filament': ','.join(map(str, self._filamentMM)),
 		}
+		analytics.analyticsOnSave(self)
 
 class Engine(object):
 	"""
@@ -388,7 +392,7 @@ class Engine(object):
 			traceback.print_exc()
 			return
 
-		self._result = EngineResult()
+		self._result = EngineResult(scene)
 		self._result.addLog('Running: %s' % (' '.join(commandList)))
 		self._result.setHash(modelHash)
 		self._callback(0.0)
