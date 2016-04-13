@@ -427,7 +427,7 @@ class MachineSelectPage(InfoPage):
 		profile.setAlterationFile('start.gcode',  """;-- START GCODE --
 	;Sliced for Type A Machines Series 1
 	;Sliced at: {day} {date} {time}
-	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 	;Print Speed: {print_speed} Support: {support}
 	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 	;Print time: {print_time}
@@ -530,7 +530,7 @@ class TAMSelectOptions(InfoPage):
 			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
 	;Sliced for Type A Machines Series 1
 	;Sliced at: {day} {date} {time}
-	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 	;Print Speed: {print_speed} Support: {support}
 	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 	;Print time: {print_time}
@@ -565,7 +565,7 @@ class TAMSelectOptions(InfoPage):
 			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
 	;Sliced for Type A Machines Series 1
 	;Sliced at: {day} {date} {time}
-	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 	;Print Speed: {print_speed} Support: {support}
 	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 	;Print time: {print_time}
@@ -1008,7 +1008,7 @@ class PrintrbotPage(InfoPage):
 				profile.putMachineSetting('extruder_head_size_height', '0')
 				if data[10]:
 					profile.setAlterationFile('start.gcode', """;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}

@@ -560,7 +560,7 @@ class Engine(object):
 			makeInfill = False
 
 		if makeInfill  == True:	
-			sparseInfillLineDistance = profile.getProfileSettingFloat('fill_density') * 1000
+			sparseInfillLineDistance = profile.getProfileSettingFloat('fill_distance') * 1000
 			if sparseInfillLineDistance<400:
 				sparseInfillLineDistance = 400
 			settings['sparseInfillLineDistance'] = sparseInfillLineDistance 

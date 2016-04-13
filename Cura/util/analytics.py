@@ -49,7 +49,7 @@ def analyticsOnSave(self):
 	infill_type = str(profile.getProfileSetting('infill_type'))
 	sparse_infill_line_distance = 'None'
 	if profile.getProfileSetting('infill_type') != 'None':
-		sparse_infill_line_distance = str(profile.getProfileSettingFloat('fill_density'))
+		sparse_infill_line_distance = str(profile.getProfileSettingFloat('fill_distance'))
 	wall_thickness = str(profile.getProfileSettingFloat('wall_thickness'))
 	cura_profile_string = str(self._profileString)
 	#try :

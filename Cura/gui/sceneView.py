@@ -834,8 +834,8 @@ class SceneView(openglGui.glGuiPanel):
 
 	def _onRunEngine(self, e):
 
-		if profile.getProfileSettingFloat('fill_density') > 0:
-			equivalent_percentage = round(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_density')),2)
+		if profile.getProfileSettingFloat('fill_distance') > 0:
+			equivalent_percentage = round(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_distance')),2)
 			if profile.getProfileSettingFloat('infill_percentage') != equivalent_percentage:
 				profile.putProfileSetting('infill_percentage',equivalent_percentage)
 				self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
@@ -1453,7 +1453,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self._drawMachine()
 	
-		sparseInfillLineDistance = float(profile.getProfileSettingFloat('fill_density'))
+		sparseInfillLineDistance = float(profile.getProfileSettingFloat('fill_distance'))
 		sparseInfillLineDistance = sparseInfillLineDistance
 		if profile.getProfileSetting('infill_type') == 'Cube':
 			sparseInfillLineDistance = sparseInfillLineDistance  / 0.816138	

@@ -185,7 +185,7 @@ setting('wall_thickness',            0.8, float, 'basic',    _('Quality')).setRa
 setting('retraction_enable',        True, bool,  'basic',    _('Quality')).setExpertSubCategory(_('Retraction')).setLabel(_("Enable Retraction"), _("Retract the filament when the nozzle is moving over a none-printed area. Details about the retraction can be configured in the advanced tab."))
 setting('solid_layer_thickness',     0.8, float, 'basic',    _('Fill')).setRange(0).setLabel(_("Bottom/Top Thickness (mm)"), _("This controls the thickness of the bottom and top layers. The amount of solid layers put down is calculated by this value and the layer thickness.\n\nHaving this value a multiple of the layer thickness makes sense. Keep it near your wall thickness to make an evenly strong part."))
 setting('infill_type',      'None',  [_('None'),_('Line'),_('Grid'),_('Cube'),_('Concentric'),_('Gradient grid'),_('Gradient concentric')], 'basic', _('Fill')).setLabel(_("Infill type"), _("Infill is used to add internal geometries.\n Line alternates grid segments per layer. \n Grid generates a grid pattern on each layer. \n Cube generates 3d infill. \n Gradient infills generate a gradient from 100% at the bottom and infill distace on topmost layer"))
-setting('fill_density',               12, float, 'basic',    _('Fill')).setExpertSubCategory(_('Infill')).setRange(0, 305).setLabel(_("Infill distance (mm)"), _("This controls the distance between each line of infill"))
+setting('fill_distance',               12, float, 'basic',    _('Fill')).setExpertSubCategory(_('Infill')).setRange(0, 305).setLabel(_("Infill distance (mm)"), _("This controls the distance between each line of infill"))
 setting('infill_percentage',               12, float, 'basic',    _('Fill')).setRange(0, 100).setLabel(_("Equivalent percentage"), _("This is not a user editable field. \nTo change infill change infill distance."))
 setting('nozzle_size',               0.4, float, 'advanced', _('Machine')).setRange(0.1,10).setLabel(_("Nozzle size (mm)"), _("The nozzle size is very important, this is used to calculate the line width of the infill, and used to calculate the amount of outside wall lines and thickness for the wall thickness you entered in the print settings."))
 setting('print_speed',                100, float, 'basic',    _('Speed and Temperature')).setRange(1).setLabel(_("Print Speed (mm/s)"), _("Speed at which printing happens. Printing speed depends on a lot of factors. So you will be experimenting with optimal settings for this."))
@@ -272,7 +272,7 @@ setting('object_center_y', -1, float, 'hidden', 'hidden')
 setting('start.gcode', """;-- START GCODE --
 ;Sliced for Type A Machines Series 1
 ;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 ;Print Speed: {print_speed} Support: {support}
 ;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 ;Print time: {print_time}
@@ -311,7 +311,7 @@ G90           ;absolute positioning
 setting('start2.gcode', """;-- START GCODE --
 				;Sliced for Type A Machines Series 1
 				;Sliced at: {day} {date} {time}
-				;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+				;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 				;Print Speed: {print_speed} Support: {support}
 				;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 				;Print time: {print_time}
@@ -343,7 +343,7 @@ setting('end2.gcode',  """;-- END GCODE --
 """, str, 'alteration', 'alteration')	
 #######################################################################################
 setting('start3.gcode', """;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
@@ -397,7 +397,7 @@ G90                         ;absolute positioning
 ;{profile_string}
 """, str, 'alteration', 'alteration')
 setting('start4.gcode', """;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
@@ -557,8 +557,8 @@ setting('extruder_head_size_max_y', '65', float, 'machine', 'hidden').setLabel(_
 setting('extruder_head_size_height', '35', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
 
 
-#validators.warningBelow(settingsDictionary['fill_density'], 0.4, _("The minimum distance between infill is Nozzle Size(mm)"))
-validators.infillValidator(settingsDictionary['fill_density'])
+#validators.warningBelow(settingsDictionary['fill_distance'], 0.4, _("The minimum distance between infill is Nozzle Size(mm)"))
+validators.infillValidator(settingsDictionary['fill_distance'])
 validators.warningAbove(settingsDictionary['filament_flow'], 150, _("More flow than 150% is rare and usually not recommended."))
 validators.warningBelow(settingsDictionary['filament_flow'], 50, _("Less flow than 50% is rare and usually not recommended."))
 validators.warningAbove(settingsDictionary['layer_height'], lambda : (float(getProfileSetting('nozzle_size')) * 80.0 / 100.0), _("Thicker layers then %.2fmm (80%% nozzle size) usually give bad results and are not recommended."))

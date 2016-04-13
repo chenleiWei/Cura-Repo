@@ -161,16 +161,16 @@ class infillValidator(object):
 	def validate(self):
 		from Cura.util import profile
 		try:
-			fill_density = profile.getProfileSettingFloat('fill_density')
+			fill_distance = profile.getProfileSettingFloat('fill_distance')
 			infill_type = profile.getProfileSetting('infill_type')
 		#	print infill_type
 			if infill_type == 'None':
 				return 	DISABLED, 'Infill has been disabled'
 			else :
-				if profile.getProfileSettingFloat('fill_density') < profile.calculateEdgeWidth() :
+				if profile.getProfileSettingFloat('fill_distance') < profile.calculateEdgeWidth() :
 					return 	ERROR, 'Distance between infill cannot be less than extrusion width : '+str(profile.calculateEdgeWidth())	+'mm'
-				elif profile.getProfileSettingFloat('fill_density') > 0:
-					return 	SUCCESS, 'Fill Density:' + str("{0:.2f}".format(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_density'))))+'%'
+				elif profile.getProfileSettingFloat('fill_distance') > 0:
+					return 	SUCCESS, 'Fill Density:' + str("{0:.2f}".format(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_distance'))))+'%'
 			return SUCCESS, ''
 		except ValueError:
 			#We already have an error by the int/float validator in this case.
