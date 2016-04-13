@@ -61,7 +61,7 @@ class preferencesDialog(wx.Dialog):
 
 		self.okButton = wx.Button(right, -1, 'OK')
 		right.GetSizer().Add(self.okButton, (right.GetSizer().GetRows(), 0), flag=wx.BOTTOM, border=5)
-		self.okButton.Bind(wx.EVT_BUTTON, lambda e: self.OnClose())
+		self.okButton.Bind(wx.EVT_BUTTON, lambda e: self.OnClose(e))
 
 		main.Fit()
 		self.Fit()

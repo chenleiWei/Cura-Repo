@@ -37,24 +37,61 @@ class newVersionDialog(wx.Dialog):
 		# New in this version
 		newHere = wx.StaticText(p, -1, "New in Cura " + version.getVersion())
 		newHere.SetFont(titleFont)
+		degree_sign = u'\N{DEGREE SIGN}'
 		s.Add(newHere, flag=wx.TOP, border=10)
-
+		
 		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Optimized material profile settings for Type A Machines ProMatte"),
-			wx.StaticText(p, -1, "* Updated PET-based material profiles"),
 			wx.StaticText(p, -1, "* Updated print head size values"),
+			wx.StaticText(p, -1, "* Processes involving printer communication improved"),
+			wx.StaticText(p, -1, "* The Fill Amount setting updated from 25mm to 30mm"),
+			wx.StaticText(p, -1, "* Airgap (Distance Z) setting updated from 0.15mm to 0.3mm"),
 			wx.StaticText(p, -1, "* Name of the material profile used included in start gcode"),
 			wx.StaticText(p, -1, "* GUI text is now in black"),
-			wx.StaticText(p, -1, "* Processes involving printer communication improved"),
-			wx.StaticText(p, -1, "* Fill amount setting updated from 25 to 30"),
-			wx.StaticText(p, -1, "* Airgap (Distance Z) updated from 0.15 to 0.3")
+			wx.StaticText(p, -1, "")
 		]
 		
 		for item in changesAndAdditions:
 			item.Wrap(600)
 			item.SetFont(textFont)
 			s.Add(item, flag=wx.TOP, border=5)
+		
+		# Materials
+		materialsLabel = wx.StaticText(p, -1, "Material Profile Updates")
+		materialsLabel.SetFont(titleFont)
+		s.Add(materialsLabel)
+		
+		# --- ProMatte --- #
+		material = wx.StaticText(p, -1, "Type A Machines ProMatte")
+		materialUpdates = [
+			wx.StaticText(p, -1, "* Print bed temperature decreased from 75%sC to 60%sC" % (degree_sign, degree_sign)),
+			wx.StaticText(p, -1, "* Print head temperature increase from 180%sC to 220%sC" % (degree_sign, degree_sign)),
+			wx.StaticText(p, -1, "* Retraction disabled"),
+		]
+		self.addMaterial(s, material, materialUpdates)	
 	
+		# --- Polymaker PC-Plus --- #
+		material = wx.StaticText(p, -1, "Polymaker PC-Plus")
+		materialUpdates = [
+			wx.StaticText(p, -1, "* Fan disabled")
+		]
+		self.addMaterial(s, material, materialUpdates)	
+		
+		# -- PET Profiles (All) -- #
+		material = wx.StaticText(p, -1, "All PET Profiles")	
+		materialUpdates = [
+			wx.StaticText(p, -1, "* Retraction speeds have been decreased from ~90mm/s to 35mm/s"),
+			wx.StaticText(p, -1, "* Retraction amounts have decreased from 9.5mm to 0.5mm")
+		]
+		self.addMaterial(s, material, materialUpdates)			
+
+		# -- Generic PLA -- #
+		material = wx.StaticText(p, -1, "Generic PLA")	
+		materialUpdates = [
+			wx.StaticText(p, -1, "* Print speed reduced from 100mm/s to 60mm/s")
+		]
+		self.addMaterial(s, material, materialUpdates)	
+		
+		"""
 		# Recent Additions
 		recentAdditions = wx.StaticText(p, -1, "Recent Additions")
 		recentAdditions.SetFont(titleFont)
@@ -73,39 +110,10 @@ class newVersionDialog(wx.Dialog):
 			item.SetFont(textFont)
 			s.Add(item, flag=wx.TOP, border=5)
 		
-		"""
-		# Bug Fixes
-		bugFixTitle = wx.StaticText(p, -1, "Recent Bug Fixes")
-		bugFixTitle.SetFont(titleFont)
-		bugsFixed = [
-			wx.StaticText(p, -1, "* Configuration wizard copy edits (SLIC-313/315)"),
-			wx.StaticText(p, -1, "* Edits to material profile tour text (SLIC-314)"),
-			wx.StaticText(p, -1, "* Exiting Expert Mode will no longer result in a crash (SLIC-318)"),
-			wx.StaticText(p, -1, "* Revised retraction distance tooltip text (SLIC-319)"),
-			wx.StaticText(p, -1, "* Slicing engine issue in Windows addressed (SLIC-328)"),
-			wx.StaticText(p, -1, "* Removed 'Legacy' and 'Other' from machine select page (SLIC-332)"),
-			wx.StaticText(p, -1, "* Printer interface will only show if option is checked (SLIC-335)"),
-			wx.StaticText(p, -1, "* Release notes and bug reporter now available under 'Help' dropdown (SLIC-336)")]
-	
-		s.Add(bugFixTitle, flag=wx.TOP, border=5)
-		for count in bugsFixed:
-			s.Add(count, flag=wx.TOP | wx.EXPAND, border=5)
-		"""
-		"""
-		# Note for Beta Testers
-		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=5)
-		feedbackTitle = wx.StaticText(p, -1, 'Bugs and Feedback')
-		feedbackTitle.SetFont(titleFont)
-		font = wx.StaticText(p, -1, "")
-		bugReportLink = hl.HyperLinkCtrl(p, -1, "typeamachines.com/cura-beta", URL="http://www.typeamachines.com/cura-beta")
-		s.Add(feedbackTitle)
-		s.Add(bugReportLink)
-		"""
-		
 		self.hasUltimaker = None
 		self.hasUltimaker2 = None
-
-	#	s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
+		"""
+		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
 		button = wx.Button(p, -1, 'OK')
 		button.Bind(wx.EVT_BUTTON, self.OnOk)
 		s.Add(button, flag=wx.TOP|wx.ALIGN_CENTRE | wx.ALL, border=5)
@@ -113,6 +121,18 @@ class newVersionDialog(wx.Dialog):
 		self.Fit()
 		self.Centre()
 
+	def addMaterial(self, s, material, materialUpdates):
+		# Fonts
+		titleFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+		headerFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+		textFont = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+
+		material.SetFont(headerFont)
+		s.Add(material, flag=wx.TOP, border=10)
+		for update in materialUpdates:
+			update.SetFont(textFont)
+			s.Add(update, flag=wx.TOP | wx.LEFT, border=5)
+		
 	def OnUltimakerFirmware(self, e):
 		firmwareInstall.InstallFirmware(machineIndex=self.hasUltimaker)
 
