@@ -154,7 +154,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
 		font = wx.Font(pointSize=11, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
 		text.SetFont(font)
-		text.Wrap(340)
+		text.Wrap(360)
 		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
 		self.rowNr += 1
 		return text
@@ -180,7 +180,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		
 	def AddTextTagLine(self, info):
 		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
-		font = wx.Font(pointSize=11, family = wx.DEFAULT,
+		font = wx.Font(pointSize=12, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(340)
@@ -789,6 +789,7 @@ class TAMFirstPrint(InfoPage):
 		gettingStarted = "Getting Started Page"
 		self.AddHiddenSeperator(1)
 		self.AddText("When you are ready to print, click the 'Save' or 'Upload' icon to save and start printing your 3D models.")
+		self.AddHiddenSeperator(1)
 		self.AddCenteredText("For more information, visit our Getting Started page:")
 		self.AddHyperlink("typeamachines.com/gettingstarted", "http://www.typeamachines.com/gettingstarted")
 		
