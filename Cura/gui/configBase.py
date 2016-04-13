@@ -215,7 +215,11 @@ class SettingRow(object):
 		self.validationMsg = ''
 		self.panel = panel
 
-		self.label = wx.lib.stattext.GenStaticText(panel, -1, self.setting.getLabel())
+		#If a setting's label starts with an * , then treat it as a non-usereditable field.
+		if self.setting.getLabel()[0]=='*':
+			self.label = wx.lib.stattext.GenStaticText(panel, -1, self.setting.getLabel()[1:])
+		else:
+			self.label = wx.lib.stattext.GenStaticText(panel, -1, self.setting.getLabel())
 		self.label.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
 		self.label.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseExit)
 
@@ -251,7 +255,7 @@ class SettingRow(object):
 			self.ctrl.Bind(wx.EVT_COMBOBOX, self.OnSettingChange)
 			self.ctrl.Bind(wx.EVT_LEFT_DOWN, self.OnMouseExit)
 			flag = wx.EXPAND
-		elif str(self.setting.getLabel()) == "Equivalent percentage":
+		elif str(self.setting.getLabel())[0] == '*':#"Equivalent percentage":
 			self.ctrl = wx.TextCtrl(panel, -1, str(self.setting.getValue()), style=wx.TE_READONLY)
 			self.ctrl.SetBackgroundColour('#e2e2e2')
 			self.ctrl.Bind(wx.EVT_TEXT, self.OnSettingChange)

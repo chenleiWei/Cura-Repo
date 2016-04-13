@@ -62,6 +62,7 @@ class setting(object):
 		self._type = type
 		self._category = category
 		self._subcategory = subcategory
+		#self._readonly = readonly
 		self._expert_sub_category = None
 		self._validators = []
 		self._conditions = []
@@ -125,6 +126,9 @@ class setting(object):
 	def getType(self):
 		return self._type
 
+	def getReadOnly(self):
+		return self._readonly
+
 	def getValue(self, index = None):
 		if index is None:
 			index = self.getValueIndex()
@@ -186,7 +190,7 @@ setting('retraction_enable',        True, bool,  'basic',    _('Quality')).setEx
 setting('solid_layer_thickness',     0.8, float, 'basic',    _('Fill')).setRange(0).setLabel(_("Bottom/Top Thickness (mm)"), _("This controls the thickness of the bottom and top layers. The amount of solid layers put down is calculated by this value and the layer thickness.\n\nHaving this value a multiple of the layer thickness makes sense. Keep it near your wall thickness to make an evenly strong part."))
 setting('infill_type',      'None',  [_('None'),_('Line'),_('Grid'),_('Cube'),_('Concentric'),_('Gradient grid'),_('Gradient concentric')], 'basic', _('Fill')).setLabel(_("Infill type"), _("Infill is used to add internal geometries.\n Line alternates grid segments per layer. \n Grid generates a grid pattern on each layer. \n Cube generates 3d infill. \n Gradient infills generate a gradient from 100% at the bottom and infill distace on topmost layer"))
 setting('fill_density',               12, float, 'basic',    _('Fill')).setExpertSubCategory(_('Infill')).setRange(0, 305).setLabel(_("Infill distance (mm)"), _("This controls the distance between each line of infill"))
-setting('infill_percentage',               12, float, 'basic',    _('Fill')).setRange(0, 100).setLabel(_("Equivalent percentage"), _("This is not a user editable field. \nTo change infill change infill distance."))
+setting('infill_percentage',               12, float, 'basic',    _('Fill')).setRange(0, 100).setLabel(_("*Equivalent percentage"), _("This is not a user editable field. \nTo change infill change infill distance."))#Readonly
 setting('nozzle_size',               0.4, float, 'advanced', _('Machine')).setRange(0.1,10).setLabel(_("Nozzle size (mm)"), _("The nozzle size is very important, this is used to calculate the line width of the infill, and used to calculate the amount of outside wall lines and thickness for the wall thickness you entered in the print settings."))
 setting('print_speed',                100, float, 'basic',    _('Speed and Temperature')).setRange(1).setLabel(_("Print Speed (mm/s)"), _("Speed at which printing happens. Printing speed depends on a lot of factors. So you will be experimenting with optimal settings for this."))
 setting('print_temperature',         220, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("Printing Temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself."))
