@@ -149,7 +149,7 @@ class simpleModePanel(wx.Panel):
 		sizer.Add(supportSelectionPanel, (5,0), flag=wx.EXPAND)
 
 		self.platformAdhesionOptions = {'Raft': support_raft, 'Brim': support_brim, 'None':support_disabled}
-		settingOrder = ["Layer Height", "Print Temperature", "Print Bed Temperature", "Wall Thickness", "Fill Density"]
+		settingOrder = ["Layer Height", "Print Temperature", "Print Bed Temperature", "Wall Thickness", "Fill Distance"]
 		if profile.getMachineSetting('has_heated_bed') == "False":
 			settingOrder.remove("Print Bed Temperature")
 			
