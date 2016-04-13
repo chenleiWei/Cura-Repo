@@ -751,7 +751,7 @@ class TAMSelectStrength(InfoPage):
 	# General informative text
 	def addText(self):
 		self.AddTextTitle("Strength")
-		self.AddText("The Strength setting specifies Wall Thickness and Fill Density. The High setting will use more filament and result in longer print times, but can produce much stronger objects.")
+		self.AddText("The Strength setting specifies Wall Thickness and Fill Distance. The High setting will use more filament and result in longer print times, but can produce much stronger objects.")
 
 class TAMSelectQuality(InfoPage):
 	def __init__(self, parent):
