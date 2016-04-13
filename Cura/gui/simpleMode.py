@@ -265,7 +265,7 @@ class simpleModePanel(wx.Panel):
 		# quality and strength panels need to override this
 		for setting in settingNames:
 			if setting == "fill_distance":
-				fill_distance_display = str(profile.getProfileSetting(setting) + "%")
+				fill_distance_display = str(profile.getProfileSetting(setting) + "mm")
 				settingsToDisplay[setting] = wx.StaticText(infoPanel, -1, label=fill_distance_display)
 			elif setting == "print_temperature": 
 				print_temperature_display = str(profile.getProfileSetting(setting)) + degree_sign + "C"
@@ -321,7 +321,7 @@ class simpleModePanel(wx.Panel):
 	def infoPanelValueCheck(self, data):
 		degree_sign= u'\N{DEGREE SIGN}'
 		temperatureUnit = degree_sign + "C" 
-		infoPanelSettingsList = {"layer_height": "mm", "print_temperature": temperatureUnit, "print_bed_temperature": temperatureUnit, "wall_thickness": "mm", "fill_distance":"%"}
+		infoPanelSettingsList = {"layer_height": "mm", "print_temperature": temperatureUnit, "print_bed_temperature": temperatureUnit, "wall_thickness": "mm", "fill_distance":"mm"}
 		if profile.getMachineSetting('has_heated_bed') == "False": 
 			del infoPanelSettingsList['print_bed_temperature']
 		for setting, unit in infoPanelSettingsList.items():
