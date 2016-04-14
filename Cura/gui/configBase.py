@@ -313,7 +313,11 @@ class SettingRow(object):
 		if result == validators.ERROR:
 			ctrl.SetBackgroundColour('Red')
 		elif result == validators.DISABLED:
-			ctrl.SetBackgroundColour('Grey')
+			ctrl.SetBackgroundColour('#e2e2e2')
+			ctrl.Disable()
+		elif result == validators.SUCCESS:
+			ctrl.SetBackgroundColour('White')
+			ctrl.Enable()
 		elif result == validators.WARNING:
 			ctrl.SetBackgroundColour('Yellow')
 		else:
