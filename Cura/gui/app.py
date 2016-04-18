@@ -148,6 +148,9 @@ class CuraApp(wx.App):
 		"""
 		#If we haven't run it before, run the configuration wizard.
 		if profile.getMachineSetting('machine_type') == 'unknown':
+			configWizard.ConfigWizard()
+
+			
 			#Check if we need to copy our examples
 			exampleFile = os.path.normpath(os.path.join(resources.resourceBasePath, 'example', 'FirstPrintCone.stl'))
 
@@ -162,7 +165,7 @@ class CuraApp(wx.App):
 				except Exception as e:
 					print e
 
-			configWizard.ConfigWizard()
+			
 	#		if self.splash is not None:
 	#			print "Splash is none"
 	#			try:

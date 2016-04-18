@@ -8,7 +8,7 @@ if sys.platform.startswith('darwin'):
     version = os.environ['BUILD_NAME']
 
     APP = ['Cura/cura.py']
-    DATA_FILES = ['Cura/LICENSE', 'resources/alterations', 'resources/images', 'resources/meshes', 'resources/example', 'resources/firmware', 'resources/locale', 'resources/machine_profiles', 'resources/quickprint', 'plugins']
+    DATA_FILES = ['Cura/LICENSE', 'resources/alterations', 'resources/images', 'resources/meshes', 'resources/example', 'resources/firmware', 'resources/locale', 'resources/machineProfiles', 'resources/quickprint', 'plugins']
     PLIST = {
         u'CFBundleName': u'Cura Type A',
         u'CFBundleShortVersionString': version,
