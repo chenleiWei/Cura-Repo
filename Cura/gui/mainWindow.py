@@ -303,6 +303,13 @@ class mainWindow(wx.Frame):
 		if pluginCount > 1:
 			self.scene.notification.message("Warning: %i plugins from the previous session are still active." % pluginCount)
 			
+		try:
+			if profile.getPreference('check_for_updates') == 'True':
+				version.checkForNewerVersion()
+		except Exception as e:
+			print "Attempted to check for newer version, got error:\n", e
+			
+			
 	def OnReleaseNotes(self, e):
 		newVersion = newVersionDialog.newVersionDialog()
 		newVersion.Show()
@@ -726,7 +733,7 @@ class mainWindow(wx.Frame):
 			if wx.MessageBox(_("A new version of Cura is available, would you like to download?"), _("New version available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
 				webbrowser.open('http://www.typeamachines.com/downloads')
 		else:
-			wx.MessageBox(_("You are running the latest version of Cura!"), _("Awesome!"), wx.ICON_INFORMATION)
+			wx.MessageBox(_("You are running the latest version of Cura!"), wx.ICON_INFORMATION)
 
 	def OnAbout(self, e):
 		aboutBox = aboutWindow.aboutWindow()

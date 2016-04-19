@@ -185,8 +185,8 @@ class CuraApp(wx.App):
 #					except Exception as e:
 #						print e
 
-	#	if profile.getMachineSetting('machine_name') == '':
-	#		return
+		if profile.getMachineSetting('machine_name') == '':
+			return
 		try:
 			self.mainWindow = mainWindow.mainWindow()
 		except Exception as e:

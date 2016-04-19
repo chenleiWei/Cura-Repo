@@ -185,6 +185,7 @@ setting('wall_thickness',            0.8, float, 'basic',    _('Quality')).setRa
 setting('retraction_enable',        True, bool,  'basic',    _('Quality')).setExpertSubCategory(_('Retraction')).setLabel(_("Enable Retraction"), _("Retract the filament when the nozzle is moving over a none-printed area. Details about the retraction can be configured in the advanced tab."))
 setting('solid_layer_thickness',     0.8, float, 'basic',    _('Fill')).setRange(0).setLabel(_("Bottom/Top Thickness (mm)"), _("This controls the thickness of the bottom and top layers. The amount of solid layers put down is calculated by this value and the layer thickness.\n\nHaving this value a multiple of the layer thickness makes sense. Keep it near your wall thickness to make an evenly strong part."))
 setting('infill_type',      'None',  [_('None'),_('Line'),_('Grid'),_('Cube'),_('Concentric'),_('Gradient grid'),_('Gradient concentric')], 'basic', _('Fill')).setLabel(_("Infill type"), _("Infill is used to add internal geometries.\n Line alternates grid segments per layer. \n Grid generates a grid pattern on each layer. \n Cube generates 3d infill. \n Gradient infills generate a gradient from 100% at the bottom and infill distace on topmost layer"))
+
 setting('fill_distance',               12, float, 'basic',    _('Fill')).setExpertSubCategory(_('Infill')).setRange(0, 305).setLabel(_("Infill distance (mm)"), _("This controls the distance between each line of infill"))
 setting('infill_percentage',               12, float, 'basic',    _('Fill')).setRange(0, 100).setLabel(_("Equivalent percentage"), _("This is not a user editable field. \nTo change infill change infill distance."))
 setting('nozzle_size',               0.4, float, 'advanced', _('Machine')).setRange(0.1,10).setLabel(_("Nozzle size (mm)"), _("The nozzle size is very important, this is used to calculate the line width of the infill, and used to calculate the amount of outside wall lines and thickness for the wall thickness you entered in the print settings."))
@@ -526,7 +527,7 @@ setting('show_infill', 'False', bool, 'preference', 'hidden')
 
 
 setting('machine_name', '', str, 'machine', 'hidden')
-setting('machine_type', 'unknown', str, 'machine', 'hidden') #Ultimaker, Ultimaker2, RepRap
+setting('machine_type', 'unknown', str, 'machine', 'hidden')
 setting('machine_width', '305', float, 'machine', 'hidden').setLabel(_("Maximum width (mm)"), _("Size of the machine in mm"))
 setting('machine_depth', '305', float, 'machine', 'hidden').setLabel(_("Maximum depth (mm)"), _("Size of the machine in mm"))
 setting('machine_height', '305', float, 'machine', 'hidden').setLabel(_("Maximum height (mm)"), _("Size of the machine in mm"))

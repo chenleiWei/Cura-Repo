@@ -39,17 +39,12 @@ class newVersionDialog(wx.Dialog):
 		newHere.SetFont(titleFont)
 		degree_sign = u'\N{DEGREE SIGN}'
 		s.Add(newHere, flag=wx.TOP, border=10)
-		
+
 		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Updated print head size values"),
-			wx.StaticText(p, -1, "* Processes involving printer communication improved"),
-			wx.StaticText(p, -1, "* The Fill Amount setting updated from 25mm to 30mm"),
-			wx.StaticText(p, -1, "* Airgap (Distance Z) setting updated from 0.15mm to 0.3mm"),
-			wx.StaticText(p, -1, "* Name of the material profile used included in start gcode"),
-			wx.StaticText(p, -1, "* GUI text is now in black"),
-			wx.StaticText(p, -1, "* Processes involving printer communication improved"),
-			wx.StaticText(p, -1, "* Fill amount setting updated from 25 to 30"),
-			wx.StaticText(p, -1, "* Airgap (Distance Z) updated from 0.15 to 0.3")
+			wx.StaticText(p, -1, "* Introducing infill types: cubic and concentric"),
+			wx.StaticText(p, -1, "* New infill visualizer"),
+			wx.StaticText(p, -1, "* ")
+
 		]
 		
 		for item in changesAndAdditions:
