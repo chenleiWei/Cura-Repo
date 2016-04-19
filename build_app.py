@@ -77,7 +77,7 @@ if sys.platform.startswith('darwin'):
     }
 
     setup(
-        name="Cura Type A " + str(version),
+        name="Cura Type A",
         app=APP,
         data_files=DATA_FILES,
         options={'py2app': OPTIONS},
