@@ -207,9 +207,23 @@ class CuraApp(wx.App):
 			newVersion.Destroy()
 			
 		setFullScreenCapable(self.mainWindow)
-
+			
 		if sys.platform.startswith('darwin'):
 			wx.CallAfter(self.StupidMacOSWorkaround)
+		# Version check	
+		
+		if profile.getPreference('check_for_updates') == 'True':
+			import threading
+			versionCheck = threading.Thread(target=self.newVersionCheck)
+			versionCheck.start()
+		
+	def newVersionCheck(self):
+		try:
+			self.mainWindow.OnCheckForUpdate(True)
+			
+		except Exception as e:
+			print "Attempted to check for newer version, got error:\n", e
+	
 
 	def StupidMacOSWorkaround(self):
 		"""

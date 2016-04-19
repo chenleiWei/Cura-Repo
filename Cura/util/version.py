@@ -63,50 +63,74 @@ def checkForNewerVersion():
 	releaseData = getCuraVersionXMLTree()
 	latestReleaseDict = {}
 	
-	print "is development version?: ", isDevVersion()
-	print "version: ", getVersion()
-	for release in releaseData:
-	
+	downloadLink = ''
+	latestVersion = ''
+	# When parsing xml file:
+	# 	- .tag gets the name of the element i.e., <elementName>
+	# 	- .text gets the data stored within that element
+	for release in releaseData:	
 		os = str(release.attrib['os'])
+
 		if sys.platform.lower() == os.lower():
-			latestReleaseDict = {"major": int(release.attrib['major']),
-													"minor": int(release.attrib['minor']),
-													"patch": str(release.attrib['patch']),
-													"preReleaseType": str(release.attrib['preReleaseType']),
-													"preReleaseVersion": str(release.attrib['preReleaseVersion'])
-													}
-	
+			latestReleaseDict = {
+				"major": int(release.attrib['major']),
+				"minor": int(release.attrib['minor']),
+				"patch": str(release.attrib['patch']),
+				"preReleaseType": str(release.attrib['preReleaseType']),
+				"preReleaseVersion": str(release.attrib['preReleaseVersion'])
+			}
+			# file name and version
+			for item in release:
+				if item.tag == 'filename':
+					downloadLink = item.text
+				if item.tag == 'version':
+					latestVersion = item.text
+						
 	thisVersion = getVersion()
-	if thisVersion != 'dev':
-		thisVersionDict = getThisVersionDataForComparison(thisVersion)
-		needsUpdate = compareLocalToLatest(thisVersionDict, latestReleaseDict)
-		print needsUpdate
+	if thisVersion == 'dev':
+		thisVersion = '1.4.2'
 	
-		return needsUpdate
-	else:
-		return ''
+	updateStatusDict = {"needsUpdate" : '',
+											"downloadLink" : '',
+											"updateVersion" : ''
+											}
+		
+	thisVersionDict = getThisVersionDataForComparison(thisVersion)
+	needsUpdate = compareLocalToLatest(thisVersionDict, latestReleaseDict)
+	updateStatusDict['needsUpdate'] = needsUpdate	
+	
+	if needsUpdate == True:
+		updateStatusDict['downloadLink'] = downloadLink
+		updateStatusDict['updateVersion'] = latestVersion
+	try:	
+		return updateStatusDict
+	except Exception as e:
+		print e
 			
 def compareLocalToLatest(thisVersionDict, latestReleaseDict):
 	updateVersion = False
+	sameBaseVersion = True
 	
-	for x, y in thisVersionDict.items():
-		print "thisVersion Label: ", x
-		print "thisVersion Value: ", y
-
-
 	for label, localValue in thisVersionDict.items():
-
-		if localValue < latestReleaseDict[label] and "preRelease" not in label:
-			updateVersion = True
+		if "preRelease" not in label:
+			if int(localValue) < int(latestReleaseDict[label]):
+				updateVersion = True
+			elif int(localValue) != int(latestReleaseDict[label]):
+				sameBaseVersion = False
 		
-		if updateVersion != True and label == "preReleaseType":
-			if localValue < latestReleaseDict[label]:
-				updateVersion = True
-	
-		if label == "preReleaseVersion" and updateVersion != True:
-			if localValue < latestReleaseDict[label]:
-				updateVersion = True
-
+		if sameBaseVersion == True:
+			if label == "preReleaseVersion" or label == "preReleaseType":
+				if latestReleaseDict[label] == "":
+					updateVersion = True
+				else:
+					# unicode comparison
+					if label == "preReleaseType":
+						if localValue < latestReleaseDict[label]:
+							updateVersion = True
+					elif label == "preReleaseVersion":
+						if int(localValue) < int(latestReleaseDict[label]):
+							updateVersion = True
+					
 	return updateVersion
 
 def getThisVersionDataForComparison(thisVersion):	
@@ -117,10 +141,12 @@ def getThisVersionDataForComparison(thisVersion):
 	if len(versionInThirds) == 3:
 		pass
 	else:
-		print "versionInThirds is not in thirds."
+		print "Error: Cura/util/version --> getThisVersionDataForComparison --> versionInThirds"
 			
 	# Gets details on the last part of the version number, i.e., <major>.<minor>.2a10
 	# parses that last bit to figure out the patch, preReleaseType, and preRelease version if they apply
+	thisVersionDict['major'] = versionInThirds[0]
+	thisVersionDict['minor'] = versionInThirds[1]
 	if 'a' or 'b' in thisVersionList:
 		preReleaseValue = versionInThirds[-1]
 
@@ -134,16 +160,19 @@ def getThisVersionDataForComparison(thisVersion):
 				print "Version number error. Check Cura/util/version for details."
 		elif 'b' in preReleaseValue:
 			betaVersion = preReleaseValue.split('b')
-			thisVersionDict['preReleaseType'] = 'b'
+			if len(betaVersion) == 2:
+				thisVersionDict['patch'] = betaVersion[0]
+				thisVersionDict['preReleaseVersion'] = betaVersion[1]
+				thisVersionDict['preReleaseType'] = 'b'
+			else:
+				print "Version number error. Check Cura/util/version for details."
 	else:
-		thisVersionDict['minor'] == thisVersionDict[2]
-		print 'This version of Cura is a GM release.'
+		thisVersionDict['patch'] == thisVersionDict[2]
 			
 	return thisVersionDict
 			
 def getCuraVersionXMLTree():	
-	# latest		
-	versionURL = 'https://dl.dropboxusercontent.com/s/b2td8x9kfj3ckrv/LatestCura.xml'
+	versionURL = "https://www.dropbox.com/s/d2c6quovpirtgwr/LatestCuraVersion.xml?dl=1"
 	versionXML = urllib2.urlopen("%s" % (versionURL))
 	versionData = versionXML.read()
 	versionXML.close()
