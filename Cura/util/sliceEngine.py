@@ -100,6 +100,9 @@ class EngineResult(object):
 			return _('%d hour %d minutes') % (int(self._printTimeSeconds / 60 / 60), int(self._printTimeSeconds / 60) % 60)
 		return _('%d hours %d minutes') % (int(self._printTimeSeconds / 60 / 60), int(self._printTimeSeconds / 60) % 60)
 
+	def getMaterialProfile(self):
+		return profile.getPreference('material_profile')
+
 	def getFilamentAmount(self, e=0):
 		if self._filamentMM[e] == 0.0:
 			return None
@@ -415,7 +418,8 @@ class Engine(object):
 				self._result.addReplaceTag('#P_TIME#', self._result.getPrintTime())
 				self._result.addReplaceTag('#F_AMNT#', self._result.getFilamentAmountMeters(0))
 				self._result.addReplaceTag('#F_WGHT#', math.floor(self._result.getFilamentWeight(0) * 1000.0))
-				self._result.addReplaceTag('#F_COST#', self._result.getFilamentCost(0))
+		#		self._result.addReplaceTag('#F_COST#', self._result.getFilamentCost(0))
+				self._result.addReplaceTag('#M_PROF#', self._result.getMaterialProfile())
 				self._result.applyReplaceTags()
 				plugin_error = pluginInfo.runPostProcessingPlugins(self._result)
 				if plugin_error is not None:
