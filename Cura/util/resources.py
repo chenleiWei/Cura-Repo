@@ -46,7 +46,7 @@ def getPathForFirmware(name):
 	return getPathForResource(resourceBasePath, 'firmware', name)
 
 def getDefaultMachineProfiles():
-	path = os.path.normpath(os.path.join(resourceBasePath, 'machine_profiles', '*.ini'))
+	path = os.path.normpath(os.path.join(resourceBasePath, 'machineProfiles', '*.ini'))
 	return glob.glob(path)
 	
 def getSimpleModeMaterialsProfiles():

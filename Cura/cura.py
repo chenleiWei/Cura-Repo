@@ -11,6 +11,7 @@ __copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AG
 from optparse import OptionParser
 
 from Cura.util import profile
+from Cura.util import version
 
 def main():
 	"""
@@ -42,7 +43,6 @@ def main():
 		profile.loadPreferences(profile.getPreferencePath())
 	except Exception as e:
 		print e
-
 		
 	if options.profile is not None:
 		profile.setProfileFromString(options.profile)

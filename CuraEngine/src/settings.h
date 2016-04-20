@@ -93,18 +93,13 @@ enum GCode_Flavor
 /**
  * Type of infill pattern.
  */
-
 enum Infill_Pattern
 {
-    INFILL_LINES = 0,
+    INFILL_AUTOMATIC = 0,
     INFILL_GRID = 1,
-    INFILL_CUBE = 2,
+    INFILL_LINES = 2,
     INFILL_CONCENTRIC = 3,
-    INFILL_AUTOMATIC_GRADIENT = 4,
-    INFILL_CONCENTRIC_GRADIENT = 5,
-    INFILL_AUTOMATIC = 7,
 };
-
 
 /**
  * Where to use the combing feature

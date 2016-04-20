@@ -302,7 +302,7 @@ class mainWindow(wx.Frame):
 
 		if pluginCount > 1:
 			self.scene.notification.message("Warning: %i plugins from the previous session are still active." % pluginCount)
-			
+						
 	def OnReleaseNotes(self, e):
 		newVersion = newVersionDialog.newVersionDialog()
 		newVersion.Show()
@@ -719,14 +719,39 @@ class mainWindow(wx.Frame):
 		except:
 			print "Could not write to clipboard, unable to get ownership. Another program is using the clipboard."
 
+	# Version update checker
 	def OnCheckForUpdate(self, e):
-		shouldUpdateVersion = version.checkForNewerVersion()
-		print shouldUpdateVersion
-		if shouldUpdateVersion is True:
-			if wx.MessageBox(_("A new version of Cura is available, would you like to download?"), _("New version available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
-				webbrowser.open('http://www.typeamachines.com/downloads')
+		needsUpdate = False
+		downloadLink = ''
+		updateVersion = ''
+		
+		versionStatus = version.checkForNewerVersion()
+		
+		# Corresponding keys for versionStatus:
+		#		"needsUpdate"
+		#		"downloadLink"
+		# 	"updateVersion"
+		#
+		# If download is not needed, then the value returned will be: ''
+		for x, y in versionStatus.items():
+			if x == 'needsUpdate' and y != '':
+				needsUpdate = y
+			elif x == 'downloadLink' and y != '':
+				downloadLink = y
+			elif x == 'updateVersion' and y != '':
+				updateVersion = y
+
+		if needsUpdate is True and updateVersion != '':
+			if wx.MessageBox(_("Cura Type A v%s, would you like to download?" % updateVersion), _("New Version Available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
+				webbrowser.open(downloadLink)
+			else:
+				profile.putPreference('check_for_updates', False)
+				# If the user says no, then set check_for_updates to False
+				# Users will still be able to see the update dialog from the
+				# help menu
 		else:
-			wx.MessageBox(_("You are running the latest version of Cura!"), _("Awesome!"), wx.ICON_INFORMATION)
+			wx.MessageBox(_("You are running the latest version of Cura!"), style=wx.ICON_INFORMATION)
+				
 
 	def OnAbout(self, e):
 		aboutBox = aboutWindow.aboutWindow()

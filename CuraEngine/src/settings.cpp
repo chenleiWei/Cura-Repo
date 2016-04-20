@@ -46,7 +46,6 @@ ConfigSettings::ConfigSettings()
     SETTING(skinSpeed, 50);
     SETTING(perimeterBeforeInfill, 0);
 
-
     SETTING(supportType, SUPPORT_TYPE_GRID);
     SETTING(supportAngle, -1);
     SETTING(supportEverywhere, 0);

@@ -22,10 +22,10 @@ class simpleModePanel(wx.Panel):
 		self._callback = callback
 		
 		# Load current values into objects for comparison
-		self.matManufacturer = profile.getPreference('simpleModeMaterialSupplier')
-		self.matName = profile.getPreference('simpleModeMaterialName')
+		self.matManufacturer = profile.getPreference('material_supplier')
+		self.matName = profile.getPreference('material_name')
 		self.profileSettingsList = {}
-		self.materialProfileText = wx.TextDataObject(profile.getPreference('simpleModeMaterial'))
+		self.materialProfileText = wx.TextDataObject(profile.getPreference('material_profile'))
 		self.lastOpenedFileName = "No File Currently Open"
 
 		pub.subscribe(self.displayAndLoadMaterialData, 'matProf.update')
@@ -149,7 +149,7 @@ class simpleModePanel(wx.Panel):
 		sizer.Add(supportSelectionPanel, (5,0), flag=wx.EXPAND)
 
 		self.platformAdhesionOptions = {'Raft': support_raft, 'Brim': support_brim, 'None':support_disabled}
-		settingOrder = ["Layer Height", "Print Temperature", "Print Bed Temperature", "Wall Thickness", "Fill Density"]
+		settingOrder = ["Layer Height", "Print Temperature", "Print Bed Temperature", "Wall Thickness", "Fill Distance"]
 		if profile.getMachineSetting('has_heated_bed') == "False":
 			settingOrder.remove("Print Bed Temperature")
 			
@@ -255,7 +255,7 @@ class simpleModePanel(wx.Panel):
 	def InitializeInfoPanelList(self, infoPanel):
 		mainWindow = self.GetParent().GetParent().GetParent()
 		settingsToDisplay = {}
-		settingNames = ['layer_height', 'print_temperature', 'print_bed_temperature', 'fill_density', 'wall_thickness']
+		settingNames = ['layer_height', 'print_temperature', 'print_bed_temperature', 'fill_distance', 'wall_thickness']
 		newValue = None
 		degree_sign= u'\N{DEGREE SIGN}'
 		# Check to see if heated bed and retraction are enabled; if not, remove them from display list
@@ -264,9 +264,9 @@ class simpleModePanel(wx.Panel):
 		# dictionary key is set to setting name, dictionary value is set to static text object with label specific to what is set in profile at that point;
 		# quality and strength panels need to override this
 		for setting in settingNames:
-			if setting == "fill_density":
-				fill_density_display = str(profile.getProfileSetting(setting) + "%")
-				settingsToDisplay[setting] = wx.StaticText(infoPanel, -1, label=fill_density_display)
+			if setting == "fill_distance":
+				fill_distance_display = str(profile.getProfileSetting(setting) + "mm")
+				settingsToDisplay[setting] = wx.StaticText(infoPanel, -1, label=fill_distance_display)
 			elif setting == "print_temperature": 
 				print_temperature_display = str(profile.getProfileSetting(setting)) + degree_sign + "C"
 				settingsToDisplay[setting] =  wx.StaticText(infoPanel, -1, label=print_temperature_display)
@@ -293,9 +293,9 @@ class simpleModePanel(wx.Panel):
 		self.materialProfileText.SetText(materialLoaded)
 		self.selectedMaterial.SetLabel(materialLoaded)
 
-		profile.putPreference('simpleModeMaterialSupplier', self.matManufacturer)
-		profile.putPreference('simpleModeMaterialName', self.matName)
-		profile.putPreference('simpleModeMaterial', materialLoaded)
+		profile.putPreference('material_supplier', self.matManufacturer)
+		profile.putPreference('material_name', self.matName)
+		profile.putPreference('material_profile', materialLoaded)
 		
 		# profile setting information update + info panel update
 		profileSectionData = self.getSectionItems(path, 'profile')
@@ -321,7 +321,7 @@ class simpleModePanel(wx.Panel):
 	def infoPanelValueCheck(self, data):
 		degree_sign= u'\N{DEGREE SIGN}'
 		temperatureUnit = degree_sign + "C" 
-		infoPanelSettingsList = {"layer_height": "mm", "print_temperature": temperatureUnit, "print_bed_temperature": temperatureUnit, "wall_thickness": "mm", "fill_density":"%"}
+		infoPanelSettingsList = {"layer_height": "mm", "print_temperature": temperatureUnit, "print_bed_temperature": temperatureUnit, "wall_thickness": "mm", "fill_distance":"mm"}
 		if profile.getMachineSetting('has_heated_bed') == "False": 
 			del infoPanelSettingsList['print_bed_temperature']
 		for setting, unit in infoPanelSettingsList.items():
@@ -460,10 +460,10 @@ class MaterialSelectorFrame(wx.Frame):
 		index = self.brandsBox.GetSelection()
 		matIndex = self.matsBox.GetSelection()
 		
-		if profile.getPreference('simpleModeMaterialSupplier') is None:
+		if profile.getPreference('material_supplier') is None:
 			self.selectedBrand = self.brandsBox.GetString(index)
 		else:
-			self.selectedBrand = profile.getPreference('simpleModeMaterialSupplier')
+			self.selectedBrand = profile.getPreference('material_supplier')
 			newIndex = self.brandsBox.FindString(self.selectedBrand)
 			print "new index: ", newIndex
 			self.brandsBox.SetSelection(newIndex)
@@ -483,10 +483,10 @@ class MaterialSelectorFrame(wx.Frame):
 		self.matsBox.SetSelection(0)
 		self.selectedMaterial = self.matsBox.GetString(0)
 		
-		if profile.getPreference('simpleModeMaterialName') is None:
+		if profile.getPreference('material_name') is None:
 			self.selectedMaterial = self.matsBox.GetString(0)
 		else:
-			self.selectedMaterial = profile.getPreference('simpleModeMaterialName')
+			self.selectedMaterial = profile.getPreference('material_name')
 			newIndex = self.matsBox.FindString(self.selectedMaterial)
 			self.matsBox.SetSelection(newIndex)
 			

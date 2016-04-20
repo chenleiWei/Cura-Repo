@@ -276,7 +276,7 @@ setting('object_center_y', -1, float, 'hidden', 'hidden')
 setting('start.gcode', """;-- START GCODE --
 ;Sliced for Type A Machines Series 1
 ;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 ;Print Speed: {print_speed} Support: {support}
 ;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 ;Print time: {print_time}
@@ -315,7 +315,7 @@ G90           ;absolute positioning
 setting('start2.gcode', """;-- START GCODE --
 				;Sliced for Type A Machines Series 1
 				;Sliced at: {day} {date} {time}
-				;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+				;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 				;Print Speed: {print_speed} Support: {support}
 				;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 				;Print time: {print_time}
@@ -347,7 +347,7 @@ setting('end2.gcode',  """;-- END GCODE --
 """, str, 'alteration', 'alteration')	
 #######################################################################################
 setting('start3.gcode', """;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
@@ -401,7 +401,7 @@ G90                         ;absolute positioning
 ;{profile_string}
 """, str, 'alteration', 'alteration')
 setting('start4.gcode', """;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
@@ -492,9 +492,9 @@ def _getMyDocumentsFolder():
 setting('serialNumber', '', str, 'preference', 'hidden')
 setting('startMode', 'Simple', ['Simple', 'Normal'], 'preference', 'hidden')
 setting('simpleModeProfile', '2_normal', str, 'preference', 'hidden')
-setting('simpleModeMaterialSupplier', 'Generic', str, 'preference', 'hidden')
-setting('simpleModeMaterialName', 'PLA', str, 'preference', 'hidden')
-setting('simpleModeMaterial', 'Generic PLA', str, 'preference', 'hidden')
+setting('material_supplier', 'Generic', str, 'preference', 'hidden')
+setting('material_name', 'PLA', str, 'preference', 'hidden')
+setting('material_profile', 'Generic PLA', str, 'preference', 'hidden')
 setting('simpleModeStrength', 'Medium', str, 'preference', 'hidden')
 setting('simpleModeQuality', 'Normal', str, 'preference', 'hidden')
 setting('oneAtATime', 'False', bool, 'preference', 'hidden')
@@ -530,7 +530,7 @@ setting('show_infill', 'False', bool, 'preference', 'hidden')
 
 
 setting('machine_name', '', str, 'machine', 'hidden')
-setting('machine_type', 'unknown', str, 'machine', 'hidden') #Ultimaker, Ultimaker2, RepRap
+setting('machine_type', 'unknown', str, 'machine', 'hidden')
 setting('machine_width', '305', float, 'machine', 'hidden').setLabel(_("Maximum width (mm)"), _("Size of the machine in mm"))
 setting('machine_depth', '305', float, 'machine', 'hidden').setLabel(_("Maximum depth (mm)"), _("Size of the machine in mm"))
 setting('machine_height', '305', float, 'machine', 'hidden').setLabel(_("Maximum height (mm)"), _("Size of the machine in mm"))
@@ -561,8 +561,8 @@ setting('extruder_head_size_max_y', '65', float, 'machine', 'hidden').setLabel(_
 setting('extruder_head_size_height', '35', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
 
 
-#validators.warningBelow(settingsDictionary['fill_density'], 0.4, _("The minimum distance between infill is Nozzle Size(mm)"))
-validators.infillValidator(settingsDictionary['fill_density'])
+#validators.warningBelow(settingsDictionary['fill_distance'], 0.4, _("The minimum distance between infill is Nozzle Size(mm)"))
+validators.infillValidator(settingsDictionary['fill_distance'])
 validators.warningAbove(settingsDictionary['filament_flow'], 150, _("More flow than 150% is rare and usually not recommended."))
 validators.warningBelow(settingsDictionary['filament_flow'], 50, _("Less flow than 50% is rare and usually not recommended."))
 validators.warningAbove(settingsDictionary['layer_height'], lambda : (float(getProfileSetting('nozzle_size')) * 80.0 / 100.0), _("Thicker layers then %.2fmm (80%% nozzle size) usually give bad results and are not recommended."))

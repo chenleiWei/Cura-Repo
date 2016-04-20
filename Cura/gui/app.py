@@ -148,6 +148,9 @@ class CuraApp(wx.App):
 		"""
 		#If we haven't run it before, run the configuration wizard.
 		if profile.getMachineSetting('machine_type') == 'unknown':
+			configWizard.ConfigWizard()
+
+			
 			#Check if we need to copy our examples
 			exampleFile = os.path.normpath(os.path.join(resources.resourceBasePath, 'example', 'FirstPrintCone.stl'))
 
@@ -162,7 +165,7 @@ class CuraApp(wx.App):
 				except Exception as e:
 					print e
 
-			configWizard.ConfigWizard()
+			
 	#		if self.splash is not None:
 	#			print "Splash is none"
 	#			try:
@@ -182,8 +185,8 @@ class CuraApp(wx.App):
 #					except Exception as e:
 #						print e
 
-	#	if profile.getMachineSetting('machine_name') == '':
-	#		return
+		if profile.getMachineSetting('machine_name') == '':
+			return
 		try:
 			self.mainWindow = mainWindow.mainWindow()
 		except Exception as e:
@@ -204,9 +207,23 @@ class CuraApp(wx.App):
 			newVersion.Destroy()
 			
 		setFullScreenCapable(self.mainWindow)
-
+			
 		if sys.platform.startswith('darwin'):
 			wx.CallAfter(self.StupidMacOSWorkaround)
+		# Version check	
+		
+		if profile.getPreference('check_for_updates') == 'True':
+			import threading
+			versionCheck = threading.Thread(target=self.newVersionCheck)
+			versionCheck.start()
+		
+	def newVersionCheck(self):
+		try:
+			self.mainWindow.OnCheckForUpdate(True)
+			
+		except Exception as e:
+			print "Attempted to check for newer version, got error:\n", e
+	
 
 	def StupidMacOSWorkaround(self):
 		"""
