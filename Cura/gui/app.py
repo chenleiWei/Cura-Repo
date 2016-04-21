@@ -213,14 +213,11 @@ class CuraApp(wx.App):
 		# Version check	
 		
 		if profile.getPreference('check_for_updates') == 'True':
-			import threading
-			versionCheck = threading.Thread(target=self.newVersionCheck)
-			versionCheck.start()
+			self.newVersionCheck()
 		
 	def newVersionCheck(self):
 		try:
-			self.mainWindow.OnCheckForUpdate(True)
-			
+			self.mainWindow.OnCheckForUpdate(False)
 		except Exception as e:
 			print "Attempted to check for newer version, got error:\n", e
 	

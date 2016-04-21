@@ -60,70 +60,85 @@ def isDevVersion():
 	return os.path.exists(gitPath) or os.path.exists(hgPath)
 
 def checkForNewerVersion():
-	releaseData = getCuraVersionXMLTree()
-	latestReleaseDict = {}
-	
-	downloadLink = ''
-	latestVersion = ''
-	# When parsing xml file:
-	# 	- .tag gets the name of the element i.e., <elementName>
-	# 	- .text gets the data stored within that element
-	for release in releaseData:	
-		os = str(release.attrib['os'])
-
-		if sys.platform.lower() == os.lower():
-			latestReleaseDict = {
-				"major": int(release.attrib['major']),
-				"minor": int(release.attrib['minor']),
-				"patch": str(release.attrib['patch']),
-				"preReleaseType": str(release.attrib['preReleaseType']),
-				"preReleaseVersion": str(release.attrib['preReleaseVersion'])
-			}
-			# file name and version
-			for item in release:
-				if item.tag == 'filename':
-					downloadLink = item.text
-				if item.tag == 'version':
-					latestVersion = item.text
-						
-	thisVersion = getVersion()
-	if thisVersion == 'dev':
-		thisVersion = '1.4.2'
-	
-	updateStatusDict = {"needsUpdate" : '',
-											"downloadLink" : '',
-											"updateVersion" : ''
-											}
+	try:
+		releaseData = getCuraVersionXMLTree()
+	except:
+		releaseData = None
 		
-	thisVersionDict = getThisVersionDataForComparison(thisVersion)
-	needsUpdate = compareLocalToLatest(thisVersionDict, latestReleaseDict)
-	updateStatusDict['needsUpdate'] = needsUpdate	
+	if releaseData != None:
+		latestReleaseDict = {}
 	
-	if needsUpdate == True:
-		updateStatusDict['downloadLink'] = downloadLink
-		updateStatusDict['updateVersion'] = latestVersion
-	try:	
-		return updateStatusDict
-	except Exception as e:
-		print e
+		downloadLink = ''
+		latestVersion = ''
+		# When parsing xml file:
+		# 	- .tag gets the name of the element i.e., <elementName>
+		# 	- .text gets the data stored within that element
+		if releaseData: 
+			for release in releaseData:	
+				os = str(release.attrib['os'])
+
+				if sys.platform.lower() == os.lower():
+					latestReleaseDict = {
+						"major": int(release.attrib['major']),
+						"minor": int(release.attrib['minor']),
+						"patch": str(release.attrib['patch']),
+						"preReleaseType": str(release.attrib['preReleaseType']),
+						"preReleaseVersion": str(release.attrib['preReleaseVersion'])
+					}
+					# file name and version
+					for item in release:
+						if item.tag == 'filename':
+							downloadLink = item.text
+						if item.tag == 'version':
+							latestVersion = item.text
+						
+			thisVersion = getVersion()
 			
+			# "arbitrary" version number
+			if thisVersion == 'dev':
+				thisVersion = '1.4.2'
+				
+			updateStatusDict = {"needsUpdate" : '',
+													"downloadLink" : '',
+													"updateVersion" : ''
+													}
+
+			thisVersionDict = getThisVersionDataForComparison(thisVersion)
+			needsUpdate = compareLocalToLatest(thisVersionDict, latestReleaseDict)
+			updateStatusDict['needsUpdate'] = needsUpdate	
+
+			if needsUpdate == True:
+				updateStatusDict['downloadLink'] = downloadLink
+				updateStatusDict['updateVersion'] = latestVersion
+
+			return updateStatusDict
+	else:
+		return None
+		
 def compareLocalToLatest(thisVersionDict, latestReleaseDict):
 	updateVersion = False
 	sameBaseVersion = True
-	
 	for label, localValue in thisVersionDict.items():
+		# deals with the major, minor and patch values
 		if "preRelease" not in label:
 			if int(localValue) < int(latestReleaseDict[label]):
 				updateVersion = True
 			elif int(localValue) != int(latestReleaseDict[label]):
 				sameBaseVersion = False
 		
+		# The conditional above will tell the user they'll need to update only if
+		# the individual values for major, minor or patch of the latest version are 
+		# greater than this current version; if the version numbers are the same, then
+		# start comparing preRelease values
 		if sameBaseVersion == True:
 			if label == "preReleaseVersion" or label == "preReleaseType":
+				# If the latest version doesn't have data in either the preReleaseVersion 
+				# or preReleaseType variables, then that means that the version is a GM
+				# and the this version is an alpha or beta
 				if latestReleaseDict[label] == "":
 					updateVersion = True
 				else:
-					# unicode comparison
+					# unicode comparison of 'a' to 'b' or vice versa
 					if label == "preReleaseType":
 						if localValue < latestReleaseDict[label]:
 							updateVersion = True
@@ -136,13 +151,14 @@ def compareLocalToLatest(thisVersionDict, latestReleaseDict):
 def getThisVersionDataForComparison(thisVersion):	
 	thisVersionList = []
 	thisVersionDict = {}
-
-	versionInThirds = thisVersion.split('.')	
-	if len(versionInThirds) == 3:
-		pass
-	else:
+	versionInThirds = thisVersion.split('.')
+	
+	# [major, minor, patchPreReleaseType/Version]
+	if len(versionInThirds) != 3:
 		print "Error: Cura/util/version --> getThisVersionDataForComparison --> versionInThirds"
-			
+		print "len(versionInThirds) = ", len(versionInThirds)
+		print "versionInThirds: ", versionInThirds
+
 	# Gets details on the last part of the version number, i.e., <major>.<minor>.2a10
 	# parses that last bit to figure out the patch, preReleaseType, and preRelease version if they apply
 	thisVersionDict['major'] = versionInThirds[0]
@@ -173,12 +189,15 @@ def getThisVersionDataForComparison(thisVersion):
 			
 def getCuraVersionXMLTree():	
 	versionURL = "https://www.dropbox.com/s/d2c6quovpirtgwr/LatestCuraVersion.xml?dl=1"
-	versionXML = urllib2.urlopen("%s" % (versionURL))
-	versionData = versionXML.read()
-	versionXML.close()
-	latestXMLTree = ElementTree.fromstring(versionData)
-	
-	return latestXMLTree
+	try: 
+		versionXML = urllib2.urlopen("%s" % (versionURL), timeout=1)
+		versionData = versionXML.read()
+		versionXML.close()
+		latestXMLTree = ElementTree.fromstring(versionData)	
+		return latestXMLTree
+	except ValueError as e:
+		raise e
+		return None
 
 if __name__ == '__main__':
 	print(getVersion())

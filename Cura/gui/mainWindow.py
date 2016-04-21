@@ -202,7 +202,7 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, lambda e: self.OnReleaseNotes(e), i)
 		i = helpMenu.Append(-1, _("Report a Problem..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://typeamachines.com/cura-beta'), i)
-		i = helpMenu.Append(-1, _("Check for update..."))
+		i = helpMenu.Append(-1, _("Check for Update..."))
 		self.Bind(wx.EVT_MENU, self.OnCheckForUpdate, i)
 	#	i = helpMenu.Append(-1, _("Check for Update..."))
 	#	self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://www.typeamachines.com/pages/downloads'), i)
@@ -721,6 +721,7 @@ class mainWindow(wx.Frame):
 
 	# Version update checker
 	def OnCheckForUpdate(self, e):
+
 		needsUpdate = False
 		downloadLink = ''
 		updateVersion = ''
@@ -733,25 +734,28 @@ class mainWindow(wx.Frame):
 		# 	"updateVersion"
 		#
 		# If download is not needed, then the value returned will be: ''
-		for x, y in versionStatus.items():
-			if x == 'needsUpdate' and y != '':
-				needsUpdate = y
-			elif x == 'downloadLink' and y != '':
-				downloadLink = y
-			elif x == 'updateVersion' and y != '':
-				updateVersion = y
+		if versionStatus: 
+			for x, y in versionStatus.items():
+				if x == 'needsUpdate' and y != '':
+					needsUpdate = y
+				elif x == 'downloadLink' and y != '':
+					downloadLink = y
+				elif x == 'updateVersion' and y != '':
+					updateVersion = y
 
-		if needsUpdate is True and updateVersion != '':
-			if wx.MessageBox(_("Cura Type A v%s, would you like to download?" % updateVersion), _("New Version Available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
-				webbrowser.open(downloadLink)
+			if needsUpdate is True and updateVersion != '':
+				if wx.MessageBox(_("Cura Type A v%s, would you like to download?" % updateVersion), _("New Version Available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
+					webbrowser.open(downloadLink)
+				else:
+					profile.putPreference('check_for_updates', False)
+					# If the user says no, then set check_for_updates to False
+					# Users will still be able to see the update dialog from the
+					# help menu
 			else:
-				profile.putPreference('check_for_updates', False)
-				# If the user says no, then set check_for_updates to False
-				# Users will still be able to see the update dialog from the
-				# help menu
+				wx.MessageBox(_("You are running the latest version of Cura!"), style=wx.ICON_INFORMATION)
 		else:
-			wx.MessageBox(_("You are running the latest version of Cura!"), style=wx.ICON_INFORMATION)
-				
+			if e:
+				wx.MessageBox(_("Please check your internet connection or try again later."), _("Error"), wx.OK | wx.ICON_INFORMATION)				
 
 	def OnAbout(self, e):
 		aboutBox = aboutWindow.aboutWindow()
