@@ -80,6 +80,7 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(self.currentFileName)
 		currentFilePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(currentFilePanel, (0,0), flag=wx.EXPAND)
+
 		
 		# Panel 1: Material Profile Select
 		sb = wx.StaticBox(materialSelectorPanel, label=_("Material Profile"))
