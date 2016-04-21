@@ -36,24 +36,10 @@ void generateGridInfill(const Polygons& in_outline, Polygons& result,
                         int extrusionWidth, int lineSpacing, int infillOverlap,
                         double rotation)
 {
-    generateLineInfill(in_outline, result, extrusionWidth, lineSpacing,
+    generateLineInfill(in_outline, result, extrusionWidth, lineSpacing * 2,
                        infillOverlap, rotation);
-    generateLineInfill(in_outline, result, extrusionWidth, lineSpacing,
+    generateLineInfill(in_outline, result, extrusionWidth, lineSpacing * 2,
                        infillOverlap, rotation + 90);
-}
-
-void generateCubeInfill(const Polygons& in_outline, Polygons& result,
-                        int extrusionWidth, int lineSpacing, int infillOverlap,
-                        double rotation, int offset)
-{
-    lineSpacing =  lineSpacing/0.816138;
-    generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
-                       infillOverlap, rotation,offset/1.41235);
-    generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
-                       infillOverlap, rotation-60+180, offset/1.41235);
-    generateCubeLineInfill(in_outline, result, extrusionWidth, lineSpacing,
-                       infillOverlap, rotation+60-180, offset/1.41235);
-
 }
 
 int compare_int64_t(const void* a, const void* b)
@@ -64,62 +50,6 @@ int compare_int64_t(const void* a, const void* b)
     return 0;
 }
 
-void generateCubeLineInfill(const Polygons& in_outline, Polygons& result, int extrusionWidth, double lineSpacing, int infillOverlap, double rotation,double offset)
-{
-    Polygons outline = in_outline.offset(extrusionWidth * infillOverlap / 100);
-    PointMatrix matrix(rotation);
-    
-    outline.applyMatrix(matrix);
-    
-    AABB boundary(outline);
-    
-    boundary.min.X = ((boundary.min.X / lineSpacing) - 1) * lineSpacing;
-    boundary.min.X -= lineSpacing/2;
-    boundary.min.X -= offset;
-
-    int lineCount = (boundary.max.X - boundary.min.X + (lineSpacing - 1)) / lineSpacing;
-    vector<vector<int64_t> > cutList;
-    for(int n=0; n<lineCount; n++)
-        cutList.push_back(vector<int64_t>());
-
-    for(unsigned int polyNr=0; polyNr < outline.size(); polyNr++)
-    {
-        Point p1 = outline[polyNr][outline[polyNr].size()-1];
-        for(unsigned int i=0; i < outline[polyNr].size(); i++)
-        {
-            Point p0 = outline[polyNr][i];
-            int idx0 = (p0.X - boundary.min.X) / lineSpacing;
-            int idx1 = (p1.X - boundary.min.X) / lineSpacing;
-            int64_t xMin = p0.X, xMax = p1.X;
-            if (p0.X > p1.X) { xMin = p1.X; xMax = p0.X; }
-            if (idx0 > idx1) { int tmp = idx0; idx0 = idx1; idx1 = tmp; }
-            for(int idx = idx0; idx<=idx1; idx++)
-            {
-                int x = (idx * lineSpacing) + boundary.min.X + lineSpacing / 2;
-                if (x < xMin) continue;
-                if (x >= xMax) continue;
-                int y = p0.Y + (p1.Y - p0.Y) * (x - p0.X) / (p1.X - p0.X);
-                cutList[idx].push_back(y);
-            }
-            p1 = p0;
-        }
-    }
-    
-    int idx = 0;
-    for(int64_t x = boundary.min.X + lineSpacing / 2; x < boundary.max.X; x += lineSpacing)
-    {
-        qsort(cutList[idx].data(), cutList[idx].size(), sizeof(int64_t), compare_int64_t);
-        for(unsigned int i = 0; i + 1 < cutList[idx].size(); i+=2)
-        {
-            if (cutList[idx][i+1] - cutList[idx][i] < extrusionWidth / 5)
-                continue;
-            PolygonRef p = result.newPoly();
-            p.add(matrix.unapply(Point(x, cutList[idx][i])));
-            p.add(matrix.unapply(Point(x, cutList[idx][i+1])));
-        }
-        idx += 1;
-    }
-}
 void generateLineInfill(const Polygons& in_outline, Polygons& result, int extrusionWidth, int lineSpacing, int infillOverlap, double rotation)
 {
     Polygons outline = in_outline.offset(extrusionWidth * infillOverlap / 100);
@@ -130,8 +60,6 @@ void generateLineInfill(const Polygons& in_outline, Polygons& result, int extrus
     AABB boundary(outline);
     
     boundary.min.X = ((boundary.min.X / lineSpacing) - 1) * lineSpacing;
-    boundary.min.X -= lineSpacing/2;
-
     int lineCount = (boundary.max.X - boundary.min.X + (lineSpacing - 1)) / lineSpacing;
     vector<vector<int64_t> > cutList;
     for(int n=0; n<lineCount; n++)

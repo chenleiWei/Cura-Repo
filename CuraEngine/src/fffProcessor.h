@@ -604,7 +604,7 @@ private:
                 gcodeLayer.setAlwaysRetract(false);
             }
 
-            int fillAngle = 0;
+            int fillAngle = 45;
             if (layerNr & 1)
                 fillAngle += 90;
             int extrusionWidth = config.extrusionWidth;
@@ -614,12 +614,12 @@ private:
             // Add either infill or perimeter first depending on option
             if (!config.perimeterBeforeInfill) 
             {
-                addInfillToGCode(part, gcodeLayer, layerNr, extrusionWidth, fillAngle, storage);
+                addInfillToGCode(part, gcodeLayer, layerNr, extrusionWidth, fillAngle);
                 addInsetToGCode(part, gcodeLayer, layerNr);
             }else
             {
                 addInsetToGCode(part, gcodeLayer, layerNr);
-                addInfillToGCode(part, gcodeLayer, layerNr, extrusionWidth, fillAngle, storage);
+                addInfillToGCode(part, gcodeLayer, layerNr, extrusionWidth, fillAngle);
             }
             
             Polygons skinPolygons;
@@ -645,7 +645,7 @@ private:
         gcodeLayer.setCombBoundary(nullptr);
     }
 
-    void addInfillToGCode(SliceLayerPart* part, GCodePlanner& gcodeLayer, int layerNr, int extrusionWidth, int fillAngle, SliceDataStorage& storage)
+    void addInfillToGCode(SliceLayerPart* part, GCodePlanner& gcodeLayer, int layerNr, int extrusionWidth, int fillAngle)
     {
         Polygons infillPolygons;
         if (config.sparseInfillLineDistance > 0)
@@ -655,19 +655,10 @@ private:
                 case INFILL_AUTOMATIC:
                     generateAutomaticInfill(
                         part->sparseOutline, infillPolygons, extrusionWidth,
-                        config.sparseInfillLineDistance ,
+                        config.sparseInfillLineDistance,
                         config.infillOverlap, fillAngle);
                     break;
 
-                case INFILL_LINES:
-                    generateLineInfill(part->sparseOutline, infillPolygons,
-                                       extrusionWidth,
-                                       config.sparseInfillLineDistance,
-                                       config.infillOverlap, fillAngle);
-
-                    break;
-
-                
                 case INFILL_GRID:
                     generateGridInfill(part->sparseOutline, infillPolygons,
                                        extrusionWidth,
@@ -675,54 +666,18 @@ private:
                                        config.infillOverlap, fillAngle);
                     break;
 
-                case INFILL_CUBE:
-                    float sild2;
-                    sild2 = config.sparseInfillLineDistance;
-                    float mod;
-                    int currentHeight;
-                    float unitStep3;
-                    currentHeight = config.layerThickness * (layerNr+1);
-                    unitStep3 = int(config.sparseInfillLineDistance) / int(config.layerThickness);
-                    mod = int(layerNr+1) % int(unitStep3);
-                    //if (mod==0) {sild2 = 400;}
-                    fillAngle = 0;
-                    generateCubeInfill(part->sparseOutline, infillPolygons,
+                case INFILL_LINES:
+                    generateLineInfill(part->sparseOutline, infillPolygons,
                                        extrusionWidth,
-                                       sild2,
-                                       config.infillOverlap, fillAngle,currentHeight);
+                                       config.sparseInfillLineDistance,
+                                       config.infillOverlap, fillAngle);
                     break;
-
 
                 case INFILL_CONCENTRIC:
                     generateConcentricInfill(
                         part->sparseOutline, infillPolygons,
                         config.sparseInfillLineDistance);
                     break;
-             
-                case INFILL_AUTOMATIC_GRADIENT:
-                    float unitStep;
-                    unitStep = float ((layerNr+1)) / float(storage.volumes[0].layers.size()) ;
-                    float sild;
-                    sild = (((float(config.sparseInfillLineDistance)-400)*unitStep+400));
-                    if (sild < 400) {sild = 400;}
-                    if (sild > 2*config.sparseInfillLineDistance) {sild = 2*config.sparseInfillLineDistance;}
-                    generateAutomaticInfill(
-                        part->sparseOutline, infillPolygons, extrusionWidth,
-                        sild,
-                        config.infillOverlap, fillAngle);
-                    break;             
-
-                case INFILL_CONCENTRIC_GRADIENT:
-                    unitStep = float ((layerNr+1)) / float(storage.volumes[0].layers.size()) ;
-                    sild = (((float(config.sparseInfillLineDistance)-400)*unitStep+400));
-                    if (sild < 400) {sild = 400;}
-                    if (sild > 2*config.sparseInfillLineDistance) {sild = 2*config.sparseInfillLineDistance;}
-                    generateConcentricInfill(
-                        part->sparseOutline, infillPolygons,
-                        sild);
-                    break;             
-                
-
             }
         }
 
