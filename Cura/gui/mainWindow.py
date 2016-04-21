@@ -790,7 +790,8 @@ class normalSettingsPanel(configBase.configPanelBase):
 	"Main user interface window"
 	def __init__(self, parent, callback = None):
 		super(normalSettingsPanel, self).__init__(parent, callback)
-
+		self.parent = parent
+		self.callback = callback
 		#Main tabs
 		self.nb = wx.Notebook(self)
 		self.SetSizer(wx.BoxSizer(wx.HORIZONTAL))

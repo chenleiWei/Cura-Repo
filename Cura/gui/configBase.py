@@ -254,6 +254,9 @@ class SettingRow(object):
 			self.ctrl.SetBackgroundColour('white')
 			self.ctrl.Bind(wx.EVT_COMBOBOX, self.OnSettingChange)
 			self.ctrl.Bind(wx.EVT_LEFT_DOWN, self.OnMouseExit)
+			self.ctrl.Bind(wx.EVT_LEFT_UP, self.OnMouseUp)
+
+
 			flag = wx.EXPAND
 		elif str(self.setting.getLabel())[0] == '*':#"Equivalent percentage":
 			self.ctrl = wx.TextCtrl(panel, -1, str(self.setting.getValue()), style=wx.TE_READONLY)
@@ -292,6 +295,12 @@ class SettingRow(object):
 	def OnMouseExit(self, e):
 		self.panel.main.OnPopupHide(self)
 		e.Skip()
+
+	def OnMouseUp(self, e):
+		pass
+		#Uncommenting this will enable the dropdown to work when the engine is on. But the dropdown will only work as long as the mouse is down.
+		#self.panel.main.callback()
+		#e.Skip()
 
 	def OnSettingChange(self, e):
 		self.setting.setValue(self.GetValue(), self.settingIndex)
