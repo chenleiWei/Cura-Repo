@@ -421,17 +421,11 @@ class MachineSelectPage(InfoPage):
 		self.Series1_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1)
 		self.Series1_Pro_Radio.Bind(wx.EVT_RADIOBUTTON, self.OnSeries1Pro)
 
-
-		if self.Series1_Pro_Radio.GetValue():
-			print "Series 1 Pro chosen."
-
 	def OnSeries1(self, e):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_select_options)
-		self.StoreData()
 		
 	def OnSeries1Pro(self, e):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
-		self.StoreData()
 		
 	def StoreData(self):
 		allMachineProfiles = resources.getDefaultMachineProfiles()
@@ -1393,10 +1387,10 @@ class ConfigWizard(wx.wizard.Wizard):
 	def __init__(self, addNew = False):
 		super(ConfigWizard, self).__init__(None, -1, _("Configuration Wizard"))
 		
-		
+		self.addNew = addNew
 		# Get the number of the current machine and label it as the old index
 		self._old_machine_index = int(profile.getPreferenceFloat('active_machine'))
-		if addNew:
+		if self.addNew:
 			profile.setActiveMachine(profile.getMachineCount())
 
 		self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGED, self.OnPageChanged)
@@ -1459,8 +1453,9 @@ class ConfigWizard(wx.wizard.Wizard):
 			self.FindWindowById(wx.ID_BACKWARD).Disable()
 
 	def OnCancel(self, e):
-		profile.setActiveMachine(self._old_machine_index)
-
+		if self.addNew == True:
+			profile.setActiveMachine(self._old_machine_index)
+			
 	def disableNext(self):
 		self.FindWindowById(wx.ID_FORWARD).Disable()
 
