@@ -339,7 +339,7 @@ class SceneView(openglGui.glGuiPanel):
 		try: 
 			self.win.OpenPrinterSelector()
 		except Exception as e:
-			print "Attempted to open printerSelector\n error: %s" % e
+			raise e
 
 	def SendToPrinter(self, serial):
 		import re
@@ -1842,8 +1842,9 @@ class middleMan(SceneView):
 		self.sceneObjects = sceneObjects		
 			
 	def OpenPrinterSelector(self):
-		analytics.featureAnalytics('','','1','','direct_upload') #featureAnalytics(MS,,DU,,featureName)
-
+		# Send analytic data
+		analytics.featureAnalytics('','','1','','direct_upload')
+		
 		if self.printButtonStatus.isDisabled():
 			self.enableUpload = False
 		else:

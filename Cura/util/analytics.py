@@ -6,6 +6,15 @@ import platform
 from Cura.util import version
 
 
+def submitFeatureAnalytics(MS,BS,DU,DSV,featureName):
+	import sys, traceback, threading
+	try:
+		threading.Thread(target=featureAnalytics,args=(MS,BS,DU,DSV,featureName)).start()
+	except Exception, err:
+		seperator = '-' * 60
+		print seperator, "submitFeatureAnalytics Error", seperator
+		traceback.print_exc(file=sys.stdout)
+		print seperator
 
 def featureAnalytics(MS,BS,DU,DSV,featureName):
 	# featureName = material_selector , direct_upload , batch_slice , design_space_visualization
@@ -35,9 +44,23 @@ def featureAnalytics(MS,BS,DU,DSV,featureName):
 #	print formData
 	URL = requestURL + formData
 	resp = urllib2.urlopen(URL)
-	print 'feature analytics uploaded' , resp
+	seperator = '\n' + '-' * 120 + '\n'
+	print seperator, "featureAnalytics Success: ", resp, seperator
+
+def submitAnalyticsOnSave(urls):
+	import sys, traceback, threading
+	seperator = '\n' + '-' * 120 + '\n'
+	for url in urls:
+		try:
+			resp = urllib2.urlopen(url)
+			print seperator, "submitAnalyticsOnSave Success: ", resp, seperator
+		except Exception, err:
+			print seperator, "submitAnalyticsOnSave Error", seperator
+			traceback.print_exc(file=sys.stdout)
+			print seperator
 
 def analyticsOnSave(self):
+	urls = []
 	size_x = str(round(float(self._scene.objects()[0].getSize()[0]),2))
 	size_y = str(round(float(self._scene.objects()[0].getSize()[1]),2))
 	size_z = str(round(float(self._scene.objects()[0].getSize()[2]),2))
@@ -54,7 +77,9 @@ def analyticsOnSave(self):
 	cura_profile_string = str(self._profileString)
 	#try :
 	url = 'https://docs.google.com/forms/d/1ZYnwO7qUprv9OxEROPqVxJYxiwoD-FDryECB8E1d9nI/formResponse?ifq&entry.521154058='+size_x+'&entry.671353976='+size_y+'&entry.13086712='+size_z+'&entry.1978610599='+print_time+'&entry.41743500='+layer_height+'&entry.1372370450='+infill_type+'&entry.1122747225='+sparse_infill_line_distance+'&entry.1165297693='+wall_thickness+'&entry.1389723193='+cura_profile_string
-	resp = urllib2.urlopen(url)
-	print 'SUBMITTED' , resp
+	urls.append(url)
+
 	url = 'https://docs.google.com/forms/d/10oPd6RVwbucO7MkM3JYgxWO4lykjTeeAE0523b9XCjk/formResponse?ifq&entry.934083010='+platform.processor()+'&entry.273325052='+platform.machine()+'&entry.170849433='+platform.platform()+'&entry.1350805925='+version.getVersion()
-	resp = urllib2.urlopen(url)
+	urls.append(url)
+	
+	submitAnalyticsOnSave(urls)
