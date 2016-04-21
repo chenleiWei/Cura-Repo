@@ -291,6 +291,7 @@ class SettingRow(object):
 
 	def OnMouseExit(self, e):
 		self.panel.main.OnPopupHide(self)
+		print 'hi'
 		e.Skip()
 
 	def OnSettingChange(self, e):
