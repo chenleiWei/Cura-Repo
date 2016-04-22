@@ -794,7 +794,8 @@ class normalSettingsPanel(configBase.configPanelBase):
 	"Main user interface window"
 	def __init__(self, parent, callback = None):
 		super(normalSettingsPanel, self).__init__(parent, callback)
-
+		self.parent = parent
+		self.callback = callback
 		#Main tabs
 		self.nb = wx.Notebook(self)
 		self.SetSizer(wx.BoxSizer(wx.HORIZONTAL))
@@ -859,6 +860,7 @@ class normalSettingsPanel(configBase.configPanelBase):
 		self.setLabelColumnWidth(left, maxWidth)
 		self.setLabelColumnWidth(right, maxWidth)
 
+
 	def OnSize(self, e):
 		# Make the size of the Notebook control the same size as this control
 		self.nb.SetSize(self.GetSize())
@@ -895,6 +897,8 @@ class normalSettingsPanel(configBase.configPanelBase):
 			if (colSize1[0] <= colBestSize1[0]) or (colSize2[0] <= colBestSize2[0]):
 				configPanel.Freeze()
 				sizer = wx.BoxSizer(wx.VERTICAL)
+#				sizer.Add(configPanel.leftPanel, flag=wx.ALIGN_CENTER)
+#				sizer.Add(configPanel.rightPanel, flag=wx.ALIGN_CENTER)
 				sizer.Add(configPanel.leftPanel, flag=wx.EXPAND)
 				sizer.Add(configPanel.rightPanel, flag=wx.EXPAND)
 				configPanel.SetSizer(sizer)

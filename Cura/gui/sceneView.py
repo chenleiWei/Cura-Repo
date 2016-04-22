@@ -836,8 +836,13 @@ class SceneView(openglGui.glGuiPanel):
 
 		if profile.getProfileSettingFloat('fill_distance') > 0:
 			equivalent_percentage = round(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_distance')),2)
-			if profile.getProfileSettingFloat('infill_percentage') != equivalent_percentage:
+			if profile.getProfileSettingFloat('infill_percentage') != equivalent_percentage: #Only update if a change was made
 				profile.putProfileSetting('infill_percentage',equivalent_percentage)
+				self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
+		if profile.getProfileSettingFloat('extrusion_width') != profile.calculateEdgeWidth(): #Only update if a change was made
+				profile.putProfileSetting('extrusion_width',profile.calculateEdgeWidth())
+		if profile.getProfileSettingFloat('shell_numbers') != profile.calculateLineCount(): #Only update if a change was made
+				profile.putProfileSetting('shell_numbers',profile.calculateLineCount())
 				self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
 		if self._isSimpleMode:
 			self._engine.runEngine(self._scene, self.GetTopLevelParent().simpleSettingsPanel.getSettingOverrides())

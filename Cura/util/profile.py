@@ -125,6 +125,9 @@ class setting(object):
 	def getType(self):
 		return self._type
 
+	def getReadOnly(self):
+		return self._readonly
+
 	def getValue(self, index = None):
 		if index is None:
 			index = self.getValueIndex()
@@ -202,12 +205,9 @@ setting('support_dual_extrusion',  'Both', [_('Both'), _('First extruder'), _('S
 setting('wipe_tower',              False, bool,  'basic',    _('Dual extrusion')).setLabel(_("Wipe & Prime Tower"), _("The wipe-tower is a tower printed on every layer when switching between nozzles.\nThe old nozzle is wiped off on the tower before the new nozzle is used to print the 2nd color."))
 setting('wipe_tower_volume',          15, float, 'expert',   _('Dual extrusion')).setLabel(_("Wipe & Prime Tower Volume Per Layer (mm3)"), _("The amount of material put in the wipe/prime tower.\nThis is done in volume because in general you want to extrude a\ncertain amount of volume to get the extruder going, independent on the layer height.\nThis means that with thinner layers, your tower gets bigger."))
 setting('ooze_shield',             False, bool,  'basic',    _('Dual extrusion')).setLabel(_("Ooze Shield"), _("The ooze shield is a 1 line thick shell around the object which stands a few mm from the object.\nThis shield catches any oozing from the unused nozzle in dual-extrusion."))
-setting('filament_diameter',        1.75, float, 'basic',    _('Filament')).setRange(1).setLabel(_("Diameter (mm)"), _("Diameter of your filament, as accurately as possible.\nIf you cannot measure this value you will have to calibrate it, a higher number means less extrusion, a smaller number generates more extrusion."))
-setting('filament_diameter2',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter2 (mm)"), _("Diameter of your filament for the 2nd nozzle. Use 0 to use the same diameter as for nozzle 1."))
-setting('filament_diameter3',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter3 (mm)"), _("Diameter of your filament for the 3th nozzle. Use 0 to use the same diameter as for nozzle 1."))
-setting('filament_diameter4',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter4 (mm)"), _("Diameter of your filament for the 4th nozzle. Use 0 to use the same diameter as for nozzle 1."))
-setting('filament_diameter5',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter5 (mm)"), _("Diameter of your filament for the 5th nozzle. Use 0 to use the same diameter as for nozzle 1."))
-setting('filament_flow',            100., float, 'basic',    _('Filament')).setRange(5,300).setLabel(_("Flow (%)"), _("Flow compensation, the amount of material extruded is multiplied by this value"))
+setting('extrusion_width',            0.8, float, 'basic',    _('Information')).setRange(0.0).setLabel(_("*Extrusion Width (mm)"), _("Thickness of the bead that is deposited in one pass"))
+setting('shell_numbers',            0.8, float, 'basic',    _('Information')).setRange(0.0).setLabel(_("*Number Of Shells"), _("Number of shells is a function of extrusion width and shell thickness"))
+setting('infill_percentage',               12, float, 'basic',    _('Information')).setRange(0, 100).setLabel(_("*Infill Percentage"), _("This is not a user editable field. \nTo change infill change infill distance."))
 setting('retraction_speed',         40.0, float, 'advanced', _('Retraction')).setRange(0.1).setLabel(_("Speed (mm/s)"), _("Speed at which the filament is retracted, a higher retraction speed works better. But a very high retraction speed can lead to filament grinding."))
 setting('retraction_amount',         0.4, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Distance (mm)"), _("Distance of retraction. Set to 0 for no retraction. A setting of 0.4 is recommended for standard PLA. Retraction settings for specific materials are provided in the included Materials Profiles."))
 setting('retraction_dual_amount',   16.5, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Dual extrusion switch amount (mm)"), _("Amount of retraction when switching nozzle with dual-extrusion, set at 0 for no retraction at all. A value of 16.0mm seems to generate good results."))
@@ -228,6 +228,12 @@ setting('inset0_speed',              0.0, float, 'advanced', _('Speed')).setRang
 setting('insetx_speed',              0.0, float, 'advanced', _('Speed')).setRange(0.0).setLabel(_("Inner Shell Speed (mm/s)"), _("Speed at which inner shells are printed. If set to 0 then the print speed is used. Printing the inner shell faster then the outer shell will reduce printing time. It is good to set this somewhere in between the outer shell speed and the infill/printing speed."))
 setting('cool_min_layer_time',         8, float, 'advanced', _('Cool')).setRange(0).setLabel(_("Minimal Layer Time (sec)"), _("Minimum time spent in a layer, gives the layer time to cool down before the next layer is put on top. If the layer will be placed down too fast the printer will slow down to make sure it has spent at least this amount of seconds printing this layer."))
 setting('fan_enabled',              True, bool,  'advanced', _('Cool')).setExpertSubCategory(_('Cool')).setLabel(_("Enable Fan"), _("Enable the cooling fan during the print. The extra cooling from the cooling fan is essential during faster prints."))
+setting('filament_diameter',        1.75, float, 'advanced',    _('Filament')).setRange(1).setLabel(_("Diameter (mm)"), _("Diameter of your filament, as accurately as possible.\nIf you cannot measure this value you will have to calibrate it, a higher number means less extrusion, a smaller number generates more extrusion."))
+setting('filament_diameter2',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter2 (mm)"), _("Diameter of your filament for the 2nd nozzle. Use 0 to use the same diameter as for nozzle 1."))
+setting('filament_diameter3',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter3 (mm)"), _("Diameter of your filament for the 3th nozzle. Use 0 to use the same diameter as for nozzle 1."))
+setting('filament_diameter4',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter4 (mm)"), _("Diameter of your filament for the 4th nozzle. Use 0 to use the same diameter as for nozzle 1."))
+setting('filament_diameter5',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter5 (mm)"), _("Diameter of your filament for the 5th nozzle. Use 0 to use the same diameter as for nozzle 1."))
+setting('filament_flow',            100., float, 'advanced',    _('Filament')).setRange(5,300).setLabel(_("Flow (%)"), _("Flow compensation, the amount of material extruded is multiplied by this value"))
 
 setting('skirt_line_count',            1, int,   'expert', _('Skirt')).setRange(0).setLabel(_("Line Count"), _("The skirt is a line drawn around the object at the first layer. This helps to prime your extruder, and to see if the object fits on your platform.\nSetting this to 0 will disable the skirt. Multiple skirt lines can help priming your extruder better for small objects."))
 setting('skirt_gap',                 3.0, float, 'expert', _('Skirt')).setRange(0).setLabel(_("Start Distance (mm)"), _("The distance between the skirt and the first layer.\nThis is the minimal distance, multiple skirt lines will be put outwards from this distance."))
