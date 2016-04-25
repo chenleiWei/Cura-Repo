@@ -492,6 +492,7 @@ def _getMyDocumentsFolder():
 		path = ''
 	return path
 
+setting('configured', 'False', bool, 'preference', 'hidden')
 setting('serialNumber', '', str, 'preference', 'hidden')
 setting('startMode', 'Simple', ['Simple', 'Normal'], 'preference', 'hidden')
 setting('simpleModeProfile', '2_normal', str, 'preference', 'hidden')

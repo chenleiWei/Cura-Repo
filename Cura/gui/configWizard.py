@@ -18,7 +18,6 @@ except ImportError:
 
 from Cura.gui import firmwareInstall
 from Cura.gui import printWindow
-from Cura.gui import sceneView
 from Cura.util import machineCom
 from Cura.util import profile
 from Cura.util import gcodeGenerator
@@ -387,8 +386,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 class FirstInfoPage(InfoPage):
 	def __init__(self, parent, addNew):
 		if addNew:
-			super(FirstInfoPage, self).__init__(parent, _("Printer Selection"))
-			
+			super(FirstInfoPage, self).__init__(parent, _("Printer Selection"))	
 		else:
 			super(FirstInfoPage, self).__init__(parent, _("Welcome"))
 			
@@ -1392,10 +1390,12 @@ class ConfigWizard(wx.wizard.Wizard):
 		self._old_machine_index = int(profile.getPreferenceFloat('active_machine'))
 		if self.addNew:
 			profile.setActiveMachine(profile.getMachineCount())
-
+		
+		self.dataToSaveList = []
 		self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGED, self.OnPageChanged)
 		self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGING, self.OnPageChanging)
 		self.Bind(wx.wizard.EVT_WIZARD_CANCEL, self.OnCancel)
+		self.Bind(wx.wizard.EVT_WIZARD_FINISHED, self.OnFinished)
 
 		self.firstInfoPage = FirstInfoPage(self, addNew)
 		self.machineSelectPage = MachineSelectPage(self)
@@ -1440,7 +1440,7 @@ class ConfigWizard(wx.wizard.Wizard):
 		self.Destroy()
 
 	def OnPageChanging(self, e):
-		e.GetPage().StoreData()
+		self.dataToSaveList.append(e.GetPage().StoreData())
 
 	def OnPageChanged(self, e):
 		if e.GetPage().AllowNext():
@@ -1453,9 +1453,20 @@ class ConfigWizard(wx.wizard.Wizard):
 			self.FindWindowById(wx.ID_BACKWARD).Disable()
 
 	def OnCancel(self, e):
+		print e
 		if self.addNew == True:
 			profile.setActiveMachine(self._old_machine_index)
-			
+		else:
+			profile.putPreference('configured', 'False')
+			preferences = profile.getPreferencePath()
+			with open(preferences, "w+"):
+				pass
+				
+	def OnFinished(self, e):
+		for x in self.dataToSaveList:
+			x
+		profile.putPreference('configured', 'True')
+				
 	def disableNext(self):
 		self.FindWindowById(wx.ID_FORWARD).Disable()
 
