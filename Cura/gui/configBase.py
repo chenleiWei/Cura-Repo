@@ -253,9 +253,9 @@ class SettingRow(object):
 			self.ctrl = wx.ComboBox(panel, -1, value, choices=choices, style=wx.CB_DROPDOWN | wx.CB_READONLY)
 			self.ctrl.SetBackgroundColour('white')
 			self.ctrl.Bind(wx.EVT_COMBOBOX, self.OnSettingChange)
-			self.ctrl.Bind(wx.EVT_COMBOBOX_DROPDOWN, self.OnMouseDn)
+			#self.ctrl.Bind(wx.EVT_COMBOBOX_DROPDOWN, self.OnMouseDn)
 			self.ctrl.Bind(wx.EVT_LEFT_DOWN, self.OnMouseExit)
-#			self.ctrl.Bind(wx.EVT_LEFT_UP, self.OnMouseUp)
+			#self.ctrl.Bind(wx.EVT_LEFT_UP, self.OnMouseDn)
 
 
 			flag = wx.EXPAND
@@ -300,7 +300,8 @@ class SettingRow(object):
 	def OnMouseDn(self, e):
 		#Uncommenting this will enable the dropdown to work when the engine is on. But the dropdown will only work as long as the mouse is down.
 		self.panel.main.callback()
-		#e.Skip()
+		print self.panel.main.callback()
+		e.Skip()
 
 	def OnSettingChange(self, e):
 		self.setting.setValue(self.GetValue(), self.settingIndex)
