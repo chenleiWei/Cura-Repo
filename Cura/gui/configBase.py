@@ -300,7 +300,7 @@ class SettingRow(object):
 	def OnMouseDn(self, e):
 		#Uncommenting this will enable the dropdown to work when the engine is on. But the dropdown will only work as long as the mouse is down.
 		self.panel.main.callback()
-		e.Skip()
+		#e.Skip()
 
 	def OnSettingChange(self, e):
 		self.setting.setValue(self.GetValue(), self.settingIndex)
