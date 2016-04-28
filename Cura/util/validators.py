@@ -32,12 +32,14 @@ class validFloat(object):
 	
 	def validate(self):
 		try:
-			f = float(eval(self.setting.getValue().replace(',','.'), {}, {}))
-			if self.minValue is not None and f < self.minValue:
-				return ERROR, 'This setting should not be below ' + str(round(self.minValue, 3))
-			if self.maxValue is not None and f > self.maxValue:
-				return ERROR, 'This setting should not be above ' + str(self.maxValue)
-			return SUCCESS, ''
+			if str(self.setting.getLabel())[0] != '*':
+				f = float(eval(self.setting.getValue().replace(',','.'), {}, {}))
+				if self.minValue is not None and f < self.minValue:
+					return ERROR, 'This setting should not be below ' + str(round(self.minValue, 3))
+				if self.maxValue is not None and f > self.maxValue:
+					return ERROR, 'This setting should not be above ' + str(self.maxValue)
+				return SUCCESS, ''
+			return DISABLED, 'Non-Editable Field'
 		except (ValueError, SyntaxError, TypeError, NameError):
 			return ERROR, '"' + str(self.setting.getValue()) + '" is not a valid number or expression'
 
