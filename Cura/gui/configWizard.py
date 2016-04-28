@@ -584,8 +584,6 @@ class TAMOctoPrintInfo(InfoPage):
 			self.errorMessageln1.SetLabel("")
 			self.configurePrinterButton.Enable()
 		else:
-			self.errorMessageln1.SetForegroundColour('Red')
-			self.errorMessageln1.SetLabel("Serial number consists of 4-6 digits")
 			self.configurePrinterButton.Disable()
 
 	def unSavePrinter(self):
@@ -597,7 +595,6 @@ class TAMOctoPrintInfo(InfoPage):
 		keyLength = len(key)
 		
 		validityCheck = self.inputCheck.verifyKey(key)
-		
 		if validityCheck == 0:
 			self.validKey = True
 			self.errorMessageln1.SetLabel("")
