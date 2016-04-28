@@ -526,7 +526,7 @@ setting('window_pos_x', '-1', float, 'preference', 'hidden')
 setting('window_pos_y', '-1', float, 'preference', 'hidden')
 setting('window_width', '-1', float, 'preference', 'hidden')
 setting('window_height', '-1', float, 'preference', 'hidden')
-setting('window_normal_sash', '320', float, 'preference', 'hidden')
+setting('window_normal_sash', '425', float, 'preference', 'hidden')
 setting('last_run_version', '', str, 'preference', 'hidden')
 
 
