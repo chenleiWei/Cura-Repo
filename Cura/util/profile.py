@@ -492,7 +492,7 @@ def _getMyDocumentsFolder():
 
 setting('configured', 'False', bool, 'preference', 'hidden')
 setting('serialNumber', '', str, 'preference', 'hidden')
-setting('startMode', 'Simple', ['Simple', 'Normal'], 'preference', 'hidden')
+setting('startMode', 'Normal', ['Simple', 'Normal'], 'preference', 'hidden')
 setting('simpleModeProfile', '2_normal', str, 'preference', 'hidden')
 setting('material_supplier', 'Generic', str, 'preference', 'hidden')
 setting('material_name', 'PLA', str, 'preference', 'hidden')
