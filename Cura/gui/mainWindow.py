@@ -752,7 +752,8 @@ class mainWindow(wx.Frame):
 					# Users will still be able to see the update dialog from the
 					# help menu
 			else:
-				wx.MessageBox(_("You are running the latest version of Cura!"), style=wx.ICON_INFORMATION)
+				if e: 
+					wx.MessageBox(_("You are running the latest version of Cura!"), style=wx.ICON_INFORMATION)
 		else:
 			if e:
 				wx.MessageBox(_("Please check your internet connection or try again later."), _("Error"), wx.OK | wx.ICON_INFORMATION)				
