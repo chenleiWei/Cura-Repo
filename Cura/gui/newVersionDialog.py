@@ -41,7 +41,7 @@ class newVersionDialog(wx.Dialog):
 		s.Add(newHere, flag=wx.TOP, border=10)
 
 		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Introducing cubic and concentric infill types"),
+			wx.StaticText(p, -1, "* Introducing cubic and concentric infill types (bug has been fixed!)"),
 			wx.StaticText(p, -1, "* New infill visualizer"),
 			wx.StaticText(p, -1, "* Added user analytics"),
 			wx.StaticText(p, -1, "* Fill density setting is now fill distance"),

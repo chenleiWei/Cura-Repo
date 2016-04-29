@@ -40,19 +40,22 @@ def getEngineFilename():
 			return 'C:/Software/Cura_SteamEngine/_bin/Release/Cura_SteamEngine.exe'
 		else:
 			return 'CuraEngine.exe'
-	for n in xrange(0, 10):
-		full_filename = os.path.abspath(os.path.join(base_search_path, '/'.join(['..'] * n), search_filename))
-		if os.path.isfile(full_filename):
-			return full_filename
-		full_filename = os.path.abspath(os.path.join(base_search_path, '/'.join(['..'] * n), 'CuraEngine', search_filename))
-		if os.path.isfile(full_filename):
-			return full_filename
-	if os.path.isfile('/usr/bin/CuraEngine'):
-		return '/usr/bin/CuraEngine'
-	if os.path.isfile('/usr/local/bin/CuraEngine'):
-		return '/usr/local/bin/CuraEngine'
-	return ''
-
+	else:
+		for n in xrange(0, 10):
+			full_filename = os.path.abspath(os.path.join(base_search_path, '/'.join(['..'] * n), search_filename))
+			if os.path.isfile(full_filename):
+				return full_filename
+			full_filename = os.path.abspath(os.path.join(base_search_path, '/'.join(['..'] * n), 'CuraEngine', search_filename))
+			if os.path.isfile(full_filename):
+				return full_filename
+		if os.path.isfile('/usr/bin/CuraEngine'):
+			return '/usr/bin/CuraEngine'
+		elif os.path.isfile('/usr/local/bin/CuraEngine'):
+			return '/usr/local/bin/CuraEngine'
+		elif (os.path.isfile(os.path.join(os.path.abspath('.'), 'CuraEngine/build/CuraEngine'))):
+			return os.path.join(os.path.abspath('.'), 'CuraEngine/build/CuraEngine')
+		else:
+			return ''
 class EngineResult(object):
 	"""
 	Result from running the CuraEngine.
