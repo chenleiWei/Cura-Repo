@@ -835,7 +835,7 @@ class SceneView(openglGui.glGuiPanel):
 	def flowrateFix(self):
 #		extrusionWidth = float (profile.getProfileSetting('nozzle_size'))
 		extrusionWidth = float (profile.calculateEdgeWidth())
-		layerHeight = float(profile.getProfileSetting('layer_height'))
+		layerHeight = float(profile.getProfileSettingFloat('layer_height'))
 		rectangularArea = extrusionWidth * layerHeight
 		circularArea    = math.pi * layerHeight * layerHeight/4
 		diffArea = (rectangularArea + circularArea - (layerHeight*layerHeight))
@@ -1472,7 +1472,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self._drawMachine()
 	
-		sparseInfillLineDistance = float(profile.getProfileSettingFloat('fill_distance'))
+		sparseInfillLineDistance = profile.getProfileSettingFloat('fill_distance')
 		sparseInfillLineDistance = sparseInfillLineDistance
 		if profile.getProfileSetting('infill_type') == 'Cube':
 			sparseInfillLineDistance = sparseInfillLineDistance  / 0.816138	
