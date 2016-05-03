@@ -202,7 +202,7 @@ class mainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, lambda e: self.OnReleaseNotes(e), i)
 		i = helpMenu.Append(-1, _("Report a Problem..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://typeamachines.com/cura-beta'), i)
-		i = helpMenu.Append(-1, _("Check for update..."))
+		i = helpMenu.Append(-1, _("Check for Update..."))
 		self.Bind(wx.EVT_MENU, self.OnCheckForUpdate, i)
 	#	i = helpMenu.Append(-1, _("Check for Update..."))
 	#	self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://www.typeamachines.com/pages/downloads'), i)
@@ -302,7 +302,7 @@ class mainWindow(wx.Frame):
 
 		if pluginCount > 1:
 			self.scene.notification.message("Warning: %i plugins from the previous session are still active." % pluginCount)
-			
+						
 	def OnReleaseNotes(self, e):
 		newVersion = newVersionDialog.newVersionDialog()
 		newVersion.Show()
@@ -719,14 +719,44 @@ class mainWindow(wx.Frame):
 		except:
 			print "Could not write to clipboard, unable to get ownership. Another program is using the clipboard."
 
+	# Version update checker
 	def OnCheckForUpdate(self, e):
-		shouldUpdateVersion = version.checkForNewerVersion()
-		print shouldUpdateVersion
-		if shouldUpdateVersion is True:
-			if wx.MessageBox(_("A new version of Cura is available, would you like to download?"), _("New version available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
-				webbrowser.open('http://www.typeamachines.com/downloads')
+
+		needsUpdate = False
+		downloadLink = ''
+		updateVersion = ''
+		
+		versionStatus = version.checkForNewerVersion()
+		
+		# Corresponding keys for versionStatus:
+		#		"needsUpdate"
+		#		"downloadLink"
+		# 	"updateVersion"
+		#
+		# If download is not needed, then the value returned will be: ''
+		if versionStatus: 
+			for x, y in versionStatus.items():
+				if x == 'needsUpdate' and y != '':
+					needsUpdate = y
+				elif x == 'downloadLink' and y != '':
+					downloadLink = y
+				elif x == 'updateVersion' and y != '':
+					updateVersion = y
+
+			if needsUpdate is True and updateVersion != '':
+				if wx.MessageBox(_("Cura Type A v%s, would you like to download?" % updateVersion), _("New Version Available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
+					webbrowser.open(downloadLink)
+				else:
+					profile.putPreference('check_for_updates', False)
+					# If the user says no, then set check_for_updates to False
+					# Users will still be able to see the update dialog from the
+					# help menu
+			else:
+				if e: 
+					wx.MessageBox(_("You are running the latest version of Cura!"), style=wx.ICON_INFORMATION)
 		else:
-			wx.MessageBox(_("You are running the latest version of Cura!"), _("Awesome!"), wx.ICON_INFORMATION)
+			if e:
+				wx.MessageBox(_("Please check your internet connection or try again later."), _("Error"), wx.OK | wx.ICON_INFORMATION)				
 
 	def OnAbout(self, e):
 		aboutBox = aboutWindow.aboutWindow()
@@ -765,7 +795,8 @@ class normalSettingsPanel(configBase.configPanelBase):
 	"Main user interface window"
 	def __init__(self, parent, callback = None):
 		super(normalSettingsPanel, self).__init__(parent, callback)
-
+		self.parent = parent
+		self.callback = callback
 		#Main tabs
 		self.nb = wx.Notebook(self)
 		self.SetSizer(wx.BoxSizer(wx.HORIZONTAL))
@@ -830,6 +861,7 @@ class normalSettingsPanel(configBase.configPanelBase):
 		self.setLabelColumnWidth(left, maxWidth)
 		self.setLabelColumnWidth(right, maxWidth)
 
+
 	def OnSize(self, e):
 		# Make the size of the Notebook control the same size as this control
 		self.nb.SetSize(self.GetSize())
@@ -866,6 +898,8 @@ class normalSettingsPanel(configBase.configPanelBase):
 			if (colSize1[0] <= colBestSize1[0]) or (colSize2[0] <= colBestSize2[0]):
 				configPanel.Freeze()
 				sizer = wx.BoxSizer(wx.VERTICAL)
+#				sizer.Add(configPanel.leftPanel, flag=wx.ALIGN_CENTER)
+#				sizer.Add(configPanel.rightPanel, flag=wx.ALIGN_CENTER)
 				sizer.Add(configPanel.leftPanel, flag=wx.EXPAND)
 				sizer.Add(configPanel.rightPanel, flag=wx.EXPAND)
 				configPanel.SetSizer(sizer)

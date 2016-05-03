@@ -16,6 +16,7 @@ import math
 SUCCESS = 0
 WARNING = 1
 ERROR   = 2
+DISABLED = 3
 
 class validFloat(object):
 	"""
@@ -31,12 +32,14 @@ class validFloat(object):
 	
 	def validate(self):
 		try:
-			f = float(eval(self.setting.getValue().replace(',','.'), {}, {}))
-			if self.minValue is not None and f < self.minValue:
-				return ERROR, 'This setting should not be below ' + str(round(self.minValue, 3))
-			if self.maxValue is not None and f > self.maxValue:
-				return ERROR, 'This setting should not be above ' + str(self.maxValue)
-			return SUCCESS, ''
+			if str(self.setting.getLabel())[0] != '*':
+				f = float(eval(self.setting.getValue().replace(',','.'), {}, {}))
+				if self.minValue is not None and f < self.minValue:
+					return ERROR, 'This setting should not be below ' + str(round(self.minValue, 3))
+				if self.maxValue is not None and f > self.maxValue:
+					return ERROR, 'This setting should not be above ' + str(self.maxValue)
+				return SUCCESS, ''
+			return DISABLED, 'Non-Editable Field'
 		except (ValueError, SyntaxError, TypeError, NameError):
 			return ERROR, '"' + str(self.setting.getValue()) + '" is not a valid number or expression'
 
@@ -144,6 +147,32 @@ class wallThicknessValidator(object):
 				return WARNING, 'Current selected shell thickness results in a line thickness of ' + str(lineWidthAlt) + 'mm which is not recommended with your nozzle of ' + str(nozzleSize) + 'mm'
 			if abs((lineCount * nozzleSize) - wallThickness) > 0.01 and abs(((lineCount + 1) * nozzleSize) - wallThickness) > 0.01:
 				return WARNING, 'Currently selected shell thickness is not a multiple of the nozzle size. While this prints fine, it does not give optimal results.'
+			return SUCCESS, ''
+		except ValueError:
+			#We already have an error by the int/float validator in this case.
+			return SUCCESS, ''
+
+class infillValidator(object):
+	"""
+	Validate if the infill pattern is not set to None.
+	"""
+	def __init__(self, setting):
+		self.setting = setting
+		self.setting._validators.append(self)
+
+	def validate(self):
+		from Cura.util import profile
+		try:
+			fill_distance = profile.getProfileSettingFloat('fill_distance')
+			infill_type = profile.getProfileSetting('infill_type')
+		#	print infill_type
+			if infill_type == 'None':
+				return 	DISABLED, 'Infill has been disabled'
+			else :
+				if profile.getProfileSettingFloat('fill_distance') < profile.calculateEdgeWidth() :
+					return 	ERROR, 'Distance between infill cannot be less than extrusion width : '+str(profile.calculateEdgeWidth())	+'mm'
+				#elif profile.getProfileSettingFloat('fill_distance') > 0:
+				#	return 	SUCCESS
 			return SUCCESS, ''
 		except ValueError:
 			#We already have an error by the int/float validator in this case.

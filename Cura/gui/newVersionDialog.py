@@ -1,4 +1,4 @@
-__copyright__ = "Copyright (C) 2013 David Braam and Cat Casuat (Cura Type A)- Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2016 David Braam and Cat Casuat (Cura Type A)- Released under terms of the AGPLv3 License"
 
 import wx
 import wx.lib.agw.hyperlink as hl
@@ -20,9 +20,9 @@ class newVersionDialog(wx.Dialog):
 		p.SetSizer(s)
 		
 		# Fonts
-		titleFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+		titleFont = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 		headerFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-		textFont = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+		textFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 
 		# Title text
 		title = wx.StaticText(p, -1, 'Cura Type A - ' + version.getVersion())
@@ -39,14 +39,13 @@ class newVersionDialog(wx.Dialog):
 		newHere.SetFont(titleFont)
 		degree_sign = u'\N{DEGREE SIGN}'
 		s.Add(newHere, flag=wx.TOP, border=10)
-		
+
 		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Updated print head size values"),
-			wx.StaticText(p, -1, "* Processes involving printer communication improved"),
-			wx.StaticText(p, -1, "* The Fill Amount setting updated from 25mm to 30mm"),
-			wx.StaticText(p, -1, "* Airgap (Distance Z) setting updated from 0.15mm to 0.3mm"),
-			wx.StaticText(p, -1, "* Name of the material profile used included in start gcode"),
-			wx.StaticText(p, -1, "* GUI text is now in black"),
+			wx.StaticText(p, -1, "* Introducing cubic and concentric infill types (bug has been fixed!)"),
+			wx.StaticText(p, -1, "* New infill visualizer"),
+			wx.StaticText(p, -1, "* Added user analytics"),
+			wx.StaticText(p, -1, "* Fill density setting is now fill distance"),
+			wx.StaticText(p, -1, "* Added a new version update notification"),
 			wx.StaticText(p, -1, "")
 		]
 		
@@ -56,63 +55,25 @@ class newVersionDialog(wx.Dialog):
 			s.Add(item, flag=wx.TOP, border=5)
 		
 		# Materials
-		materialsLabel = wx.StaticText(p, -1, "Material Profile Updates")
+		materialsLabel = wx.StaticText(p, -1, "New Material Profiles")
 		materialsLabel.SetFont(titleFont)
-		s.Add(materialsLabel)
+		s.Add(materialsLabel, flag=wx.BOTTOM, border=10)
 		
-		# --- ProMatte --- #
-		material = wx.StaticText(p, -1, "Type A Machines ProMatte")
-		materialUpdates = [
-			wx.StaticText(p, -1, "* Print bed temperature decreased from 75%sC to 60%sC" % (degree_sign, degree_sign)),
-			wx.StaticText(p, -1, "* Print head temperature increase from 180%sC to 220%sC" % (degree_sign, degree_sign)),
-			wx.StaticText(p, -1, "* Retraction disabled"),
-		]
-		self.addMaterial(s, material, materialUpdates)	
-	
-		# --- Polymaker PC-Plus --- #
-		material = wx.StaticText(p, -1, "Polymaker PC-Plus")
-		materialUpdates = [
-			wx.StaticText(p, -1, "* Fan disabled")
-		]
-		self.addMaterial(s, material, materialUpdates)	
+		newMaterialsDict = {}
+		newMaterialsDict['3DElements'] = ['FireResist Nylon']
+		newMaterialsDict['3DXTech'] = ['ABSCF', 'ABSCNT', 'CFPETG']
+		newMaterialsDict['3Dom'] = ['CoffeePLA', 'GlassPLA']
+		newMaterialsDict['Biome'] = ['Linen', 'Silk']
+		newMaterialsDict['Generic'] = ['BPet', 'WoodfilledPLA']
+		newMaterialsDict['Proto-pasta'] = ['AromaticCoffee HTPLA', 'Brass PLA','Bronze PLA', 'Carbon Fiber HTPLA', 'Copper PLA', 'IridescantIce HTPLA', 'SolidSmoke HTPLA', 'SSPLA']
+		newMaterialsDict['RigidInk'] = ['PLA']
+		newMaterialsDict['TonerPlastics'] = ['PLA']
+		newMaterialsDict['Colorfabb'] = ['XT Copolyester']
 		
-		# -- PET Profiles (All) -- #
-		material = wx.StaticText(p, -1, "All PET Profiles")	
-		materialUpdates = [
-			wx.StaticText(p, -1, "* Retraction speeds have been decreased from ~90mm/s to 35mm/s"),
-			wx.StaticText(p, -1, "* Retraction amounts have decreased from 9.5mm to 0.5mm")
-		]
-		self.addMaterial(s, material, materialUpdates)			
+		self.addMaterialList(newMaterialsDict, p, s)
+		
 
-		# -- Generic PLA -- #
-		material = wx.StaticText(p, -1, "Generic PLA")	
-		materialUpdates = [
-			wx.StaticText(p, -1, "* Print speed reduced from 100mm/s to 60mm/s")
-		]
-		self.addMaterial(s, material, materialUpdates)	
-		
-		"""
-		# Recent Additions
-		recentAdditions = wx.StaticText(p, -1, "Recent Additions")
-		recentAdditions.SetFont(titleFont)
-		s.Add(recentAdditions)
-				
-		recentAdditionsList = [
-			wx.StaticText(p, -1, "* Optimized material profiles: PolyMaker PC-Plus, 3DOM PLA"),
-			wx.StaticText(p, -1, "* Send Gcode from Cura Type A directly to your Series 1 and start printing"),
-			wx.StaticText(p, -1, "* Material profiles now also available in Expert mode via the Expert menu"),
-			wx.StaticText(p, -1, "* Selecting a heated bed no longer requires application relaunching"),
-			wx.StaticText(p, -1, "")
-		]
-		
-		for item in recentAdditionsList:
-			item.Wrap(600)
-			item.SetFont(textFont)
-			s.Add(item, flag=wx.TOP, border=5)
-		
-		self.hasUltimaker = None
-		self.hasUltimaker2 = None
-		"""
+
 		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
 		button = wx.Button(p, -1, 'OK')
 		button.Bind(wx.EVT_BUTTON, self.OnOk)
@@ -120,6 +81,42 @@ class newVersionDialog(wx.Dialog):
 
 		self.Fit()
 		self.Centre()
+	
+	def addMaterialList(self, list, p, s):
+	
+		leftBoxSizer = wx.BoxSizer(wx.VERTICAL)
+		rightBoxSizer = wx.BoxSizer(wx.VERTICAL)
+		
+		gs = wx.GridBagSizer(5, 5)
+		row = 0
+		column = 0
+
+		# Fonts
+		titleFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+		headerFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+		textFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+		addCount = 0
+
+		for label, materials in list.items():
+			if len(materials) > 3 and column > 0:
+				column += 1
+				row = 0
+			materialLabel = wx.StaticText(p, -1, str(label))
+			materialLabel.SetFont(titleFont)
+			gs.Add(materialLabel, pos=(row, column), flag=wx.RIGHT, border=5)
+			row += 1
+			addCount += 1
+			for material in materials:
+				material = wx.StaticText(p, -1, str(material))
+				gs.Add(material, pos=(row, column), flag=wx.RIGHT, border=5)
+				row += 1
+			row += 1
+			if addCount == 3:
+				column += 1
+				row = 0
+				addCount = 0
+
+		s.Add(gs)
 
 	def addMaterial(self, s, material, materialUpdates):
 		# Fonts

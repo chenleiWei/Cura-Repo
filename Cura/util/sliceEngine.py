@@ -24,6 +24,8 @@ from Cura.util import profile
 from Cura.util import pluginInfo
 from Cura.util import version
 from Cura.util import gcodeInterpreter
+from Cura.util import analytics
+
 
 def getEngineFilename():
 	"""
@@ -38,25 +40,28 @@ def getEngineFilename():
 			return 'C:/Software/Cura_SteamEngine/_bin/Release/Cura_SteamEngine.exe'
 		else:
 			return 'CuraEngine.exe'
-	for n in xrange(0, 10):
-		full_filename = os.path.abspath(os.path.join(base_search_path, '/'.join(['..'] * n), search_filename))
-		if os.path.isfile(full_filename):
-			return full_filename
-		full_filename = os.path.abspath(os.path.join(base_search_path, '/'.join(['..'] * n), 'CuraEngine', search_filename))
-		if os.path.isfile(full_filename):
-			return full_filename
-	if os.path.isfile('/usr/bin/CuraEngine'):
-		return '/usr/bin/CuraEngine'
-	if os.path.isfile('/usr/local/bin/CuraEngine'):
-		return '/usr/local/bin/CuraEngine'
-	return ''
-
+	else:
+		for n in xrange(0, 10):
+			full_filename = os.path.abspath(os.path.join(base_search_path, '/'.join(['..'] * n), search_filename))
+			if os.path.isfile(full_filename):
+				return full_filename
+			full_filename = os.path.abspath(os.path.join(base_search_path, '/'.join(['..'] * n), 'CuraEngine', search_filename))
+			if os.path.isfile(full_filename):
+				return full_filename
+		if os.path.isfile('/usr/bin/CuraEngine'):
+			return '/usr/bin/CuraEngine'
+		elif os.path.isfile('/usr/local/bin/CuraEngine'):
+			return '/usr/local/bin/CuraEngine'
+		elif (os.path.isfile(os.path.join(os.path.abspath('.'), 'CuraEngine/build/CuraEngine'))):
+			return os.path.join(os.path.abspath('.'), 'CuraEngine/build/CuraEngine')
+		else:
+			return ''
 class EngineResult(object):
 	"""
 	Result from running the CuraEngine.
 	Contains the engine log, polygons retrieved from the engine, the GCode and some meta-data.
 	"""
-	def __init__(self):
+	def __init__(self,scene):
 		self._engineLog = []
 		self._gcodeData = BigDataStorage()
 		self._polygons = []
@@ -70,6 +75,7 @@ class EngineResult(object):
 		self._gcodeInterpreter = gcodeInterpreter.gcode()
 		self._gcodeLoadThread = None
 		self._finished = False
+		self._scene = scene
 
 	def getFilamentWeight(self, e=0):
 		#Calculates the weight of the filament in kg
@@ -80,7 +86,6 @@ class EngineResult(object):
 	def getFilamentCost(self, e=0):
 		cost_kg = profile.getPreferenceFloat('filament_cost_kg')
 		cost_meter = profile.getPreferenceFloat('filament_cost_meter')
-
 		if cost_kg > 0.0 and cost_meter > 0.0:
 			return "%.2f / %.2f" % (self.getFilamentWeight(e) * cost_kg, self._filamentMM[e] / 1000.0 * cost_meter)
 		elif cost_kg > 0.0:
@@ -98,13 +103,13 @@ class EngineResult(object):
 			return _('%d hour %d minutes') % (int(self._printTimeSeconds / 60 / 60), int(self._printTimeSeconds / 60) % 60)
 		return _('%d hours %d minutes') % (int(self._printTimeSeconds / 60 / 60), int(self._printTimeSeconds / 60) % 60)
 
+	def getMaterialProfile(self):
+		return profile.getPreference('material_profile')
+
 	def getFilamentAmount(self, e=0):
 		if self._filamentMM[e] == 0.0:
 			return None
 		return _('%0.2f meter %0.0f gram') % (float(self._filamentMM[e]) / 1000.0, self.getFilamentWeight(e) * 1000.0)
-
-	def getMaterialProfile(self):
-		return profile.getPreference('material_profile')
 
 	def getFilamentAmountMeters(self, e=0):
 		return float(self._filamentMM[e]) / 1000.0
@@ -158,19 +163,20 @@ class EngineResult(object):
 	def submitInfoOnline(self):
 		if profile.getPreference('submit_slice_information') != 'True':
 			return
-		if version.isDevVersion():
-			return
+		#if version.isDevVersion():
+	#		return
 		data = {
 			'processor': platform.processor(),
 			'machine': platform.machine(),
 			'platform': platform.platform(),
-			'profile': self._profileString,
-			'preferences': self._preferencesString,
-			'modelhash': self._modelHash,
+#			'profile': self._profileString,
+#			'preferences': self._preferencesString,
+#			'modelhash': self._modelHash,
 			'version': version.getVersion(),
-			'printtime': self._printTimeSeconds,
-			'filament': ','.join(map(str, self._filamentMM)),
+#			'printtime': self._printTimeSeconds,
+#			'filament': ','.join(map(str, self._filamentMM)),
 		}
+		analytics.analyticsOnSave(self)
 
 class Engine(object):
 	"""
@@ -392,7 +398,7 @@ class Engine(object):
 			traceback.print_exc()
 			return
 
-		self._result = EngineResult()
+		self._result = EngineResult(scene)
 		self._result.addLog('Running: %s' % (' '.join(commandList)))
 		self._result.setHash(modelHash)
 		self._callback(0.0)
@@ -415,8 +421,7 @@ class Engine(object):
 				self._result.addReplaceTag('#P_TIME#', self._result.getPrintTime())
 				self._result.addReplaceTag('#F_AMNT#', self._result.getFilamentAmountMeters(0))
 				self._result.addReplaceTag('#F_WGHT#', math.floor(self._result.getFilamentWeight(0) * 1000.0))
-	#			self._result.addReplaceTag('#F_COST#', self._result.getFilamentCost(0))
-				#CGC
+		#		self._result.addReplaceTag('#F_COST#', self._result.getFilamentCost(0))
 				self._result.addReplaceTag('#M_PROF#', self._result.getMaterialProfile())
 				self._result.applyReplaceTags()
 				plugin_error = pluginInfo.runPostProcessingPlugins(self._result)
@@ -426,8 +431,6 @@ class Engine(object):
 				self._result.setFinished(True)
 				self._callback(1.0)
 			else:
-				for line in self._result.getLog():
-					print line
 				self._callback(-1.0)
 			self._process = None
 		except MemoryError:
@@ -500,7 +503,7 @@ class Engine(object):
 			'fanSpeedMax': int(profile.getProfileSettingFloat('fan_speed_max')) if profile.getProfileSetting('fan_enabled') == 'True' else 0,
 			'supportAngle': int(-1) if profile.getProfileSetting('support') == 'None' else int(profile.getProfileSettingFloat('support_angle')),
 			'supportEverywhere': int(1) if profile.getProfileSetting('support') == 'Everywhere' else int(0),
-			'supportLineDistance': int(100 * profile.calculateEdgeWidth() * 1000 / profile.getProfileSettingFloat('support_fill_rate')) if profile.getProfileSettingFloat('support_fill_rate') > 0 else -1,
+			#'supportLineDistance': int(100 * profile.calculateEdgeWidth() * 1000 / profile.getProfileSettingFloat('support_fill_rate')) if profile.getProfileSettingFloat('support_fill_rate') > 0 else -1,
 			'supportXYDistance': int(1000 * profile.getProfileSettingFloat('support_xy_distance')),
 			'supportZDistance': int(1000 * profile.getProfileSettingFloat('support_z_distance')),
 			'supportExtruder': 0 if profile.getProfileSetting('support_dual_extrusion') == 'First extruder' else (1 if profile.getProfileSetting('support_dual_extrusion') == 'Second extruder' and profile.minimalExtruderCount() > 1 else -1),
@@ -541,16 +544,39 @@ class Engine(object):
 		if profile.getProfileSetting('support_type') == 'Lines':
 			settings['supportType'] = 1
 
-		if profile.getProfileSettingFloat('fill_density') == 0:
+		if profile.getProfileSetting('infill_type') == 'Line':
+			settings['infillPattern'] = 0
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Grid':
+			settings['infillPattern'] = 1
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Cube':
+			settings['infillPattern'] = 2
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Concentric':
+			settings['infillPattern'] = 3
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Gradient grid':
+			settings['infillPattern'] = 4
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'Gradient concentric':
+			settings['infillPattern'] = 5
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == 'None':
 			settings['sparseInfillLineDistance'] = -1
-		elif profile.getProfileSettingFloat('fill_density') == 100:
-			settings['sparseInfillLineDistance'] = settings['extrusionWidth']
-			#Set the up/down skins height to 10000 if we want a 100% filled object.
-			# This gives better results then normal 100% infill as the sparse and up/down skin have some overlap.
-			settings['downSkinCount'] = 10000
-			settings['upSkinCount'] = 10000
-		else:
-			settings['sparseInfillLineDistance'] = int(100 * profile.calculateEdgeWidth() * 1000 / profile.getProfileSettingFloat('fill_density'))
+			makeInfill = False
+
+		if makeInfill  == True:	
+			sparseInfillLineDistance = profile.getProfileSettingFloat('fill_distance') * 1000
+			if sparseInfillLineDistance<400:
+				sparseInfillLineDistance = 400
+			settings['sparseInfillLineDistance'] = sparseInfillLineDistance 
+
+		supportLineDistance = profile.getProfileSettingFloat('support_fill_rate') * 1000
+		if supportLineDistance<400:
+			supportLineDistance = 400
+		settings['supportLineDistance'] = supportLineDistance 
+
 		if profile.getProfileSetting('platform_adhesion') == 'Brim':
 			settings['skirtDistance'] = 0
 			settings['skirtLineCount'] = int(profile.getProfileSettingFloat('brim_line_count'))

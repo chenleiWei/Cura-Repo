@@ -125,6 +125,9 @@ class setting(object):
 	def getType(self):
 		return self._type
 
+	def getReadOnly(self):
+		return self._readonly
+
 	def getValue(self, index = None):
 		if index is None:
 			index = self.getValueIndex()
@@ -155,7 +158,9 @@ class setting(object):
 			res, err = validator.validate()
 			if res == validators.ERROR:
 				result = res
-			elif res == validators.WARNING and result != validators.ERROR:
+			elif res == validators.WARNING and result != validators.ERROR and result != validators.DISABLED:
+				result = res
+			elif res == validators.DISABLED and result != validators.WARNING and result != validators.ERROR:
 				result = res
 			if len(err) > 0:
 				msgs.append(err)
@@ -180,10 +185,11 @@ def _(n):
 
 setting('layer_height',              0.15, float, 'basic',    _('Quality')).setRange(0.0001).setLabel(_("Layer Height (mm)"), _("Layer height in millimeters. This setting determines the quality of your print."))
 setting('wall_thickness',            0.8, float, 'basic',    _('Quality')).setRange(0.0).setLabel(_("Shell Thickness (mm)"), _("Thickness of the outside shell in the horizontal direction.\n\nThis is used in combination with the nozzle size to define the number of perimeter lines and the thickness of those perimeter lines."))
-setting('retraction_enable',        True, bool,  'basic',    _('Quality')).setExpertSubCategory(_('Retraction')).setLabel(_("Enable Retraction"), _("Retract the filament when the nozzle is moving over a none-printed area. Details about the retraction can be configured in the advanced tab."))
+setting('retraction_enable',        True, bool,  'basic',    _('Quality')).setExpertSubCategory(_('Retraction')).setLabel(_("Enable Retraction"), _("Retract the filament when the nozzle is moving over a non-printed area. Details about the retraction can be configured in the advanced tab."))
 setting('solid_layer_thickness',     0.8, float, 'basic',    _('Fill')).setRange(0).setLabel(_("Bottom/Top Thickness (mm)"), _("This controls the thickness of the bottom and top layers. The amount of solid layers put down is calculated by this value and the layer thickness.\n\nHaving this value a multiple of the layer thickness makes sense. Keep it near your wall thickness to make an evenly strong part."))
-setting('fill_density',               12, float, 'basic',    _('Fill')).setExpertSubCategory(_('Infill')).setRange(0, 100).setLabel(_("Fill Density (%)"), _("This controls how densely filled the insides of your print will be. For a solid part use 100%, for an empty part use 0%. A value around 20% is usually enough.\n\nThis won't affect the outside of the print and only adjusts how strong the part becomes."))
-setting('nozzle_size',               0.4, float, 'advanced', _('Machine')).setRange(0.1,10).setLabel(_("Nozzle Size (mm)"), _("The nozzle size is very important, this is used to calculate the line width of the infill, and used to calculate the amount of outside wall lines and thickness for the wall thickness you entered in the print settings."))
+setting('infill_type',      'Grid',  [_('None'),_('Line'),_('Grid'),_('Cube'),_('Concentric'),_('Gradient grid'),_('Gradient concentric')], 'basic', _('Fill')).setLabel(_("Infill type"), _("Infill is used to add internal geometries.\n Line alternates grid segments per layer. \n Grid generates a grid pattern on each layer. \n Cube generates 3d infill. \n Gradient infills generate a gradient from 100% at the bottom and infill distace on topmost layer"))
+setting('fill_distance',               12, float, 'basic',    _('Fill')).setExpertSubCategory(_('Infill')).setRange(0, 305).setLabel(_("Infill distance (mm)"), _("This controls the distance between each line of infill"))
+setting('nozzle_size',               0.4, float, 'advanced', _('Machine')).setRange(0.1,10).setLabel(_("Nozzle size (mm)"), _("The nozzle size is very important, this is used to calculate the line width of the infill, and used to calculate the amount of outside wall lines and thickness for the wall thickness you entered in the print settings."))
 setting('print_speed',                100, float, 'basic',    _('Speed and Temperature')).setRange(1).setLabel(_("Print Speed (mm/s)"), _("Speed at which printing happens. Printing speed depends on a lot of factors. So you will be experimenting with optimal settings for this."))
 setting('print_temperature',         220, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("Printing Temperature (C)"), _("Temperature used for printing. Set at 0 to pre-heat yourself."))
 setting('print_temperature2',          0, int,   'basic',    _('Speed and Temperature')).setRange(0,340).setLabel(_("2nd Nozzle Temperature (C)"), _("Temperature used for printing with a second nozzle. Set at 0 to pre-heat yourself."))
@@ -197,13 +203,10 @@ setting('support_dual_extrusion',  'Both', [_('Both'), _('First extruder'), _('S
 setting('wipe_tower',              False, bool,  'basic',    _('Dual extrusion')).setLabel(_("Wipe & Prime Tower"), _("The wipe-tower is a tower printed on every layer when switching between nozzles.\nThe old nozzle is wiped off on the tower before the new nozzle is used to print the 2nd color."))
 setting('wipe_tower_volume',          15, float, 'expert',   _('Dual extrusion')).setLabel(_("Wipe & Prime Tower Volume Per Layer (mm3)"), _("The amount of material put in the wipe/prime tower.\nThis is done in volume because in general you want to extrude a\ncertain amount of volume to get the extruder going, independent on the layer height.\nThis means that with thinner layers, your tower gets bigger."))
 setting('ooze_shield',             False, bool,  'basic',    _('Dual extrusion')).setLabel(_("Ooze Shield"), _("The ooze shield is a 1 line thick shell around the object which stands a few mm from the object.\nThis shield catches any oozing from the unused nozzle in dual-extrusion."))
-setting('filament_diameter',        1.75, float, 'basic',    _('Filament')).setRange(1).setLabel(_("Diameter (mm)"), _("Diameter of your filament, as accurately as possible.\nIf you cannot measure this value you will have to calibrate it, a higher number means less extrusion, a smaller number generates more extrusion."))
-setting('filament_diameter2',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter2 (mm)"), _("Diameter of your filament for the 2nd nozzle. Use 0 to use the same diameter as for nozzle 1."))
-setting('filament_diameter3',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter3 (mm)"), _("Diameter of your filament for the 3th nozzle. Use 0 to use the same diameter as for nozzle 1."))
-setting('filament_diameter4',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter4 (mm)"), _("Diameter of your filament for the 4th nozzle. Use 0 to use the same diameter as for nozzle 1."))
-setting('filament_diameter5',          0, float, 'basic',    _('Filament')).setRange(0).setLabel(_("Diameter5 (mm)"), _("Diameter of your filament for the 5th nozzle. Use 0 to use the same diameter as for nozzle 1."))
-setting('filament_flow',            100., float, 'basic',    _('Filament')).setRange(5,300).setLabel(_("Flow (%)"), _("Flow compensation, the amount of material extruded is multiplied by this value"))
-setting('retraction_speed',         40.0, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Speed (mm/s)"), _("Speed at which the filament is retracted, a higher retraction speed works better. But a very high retraction speed can lead to filament grinding."))
+setting('extrusion_width',            0.8, float, 'basic',    _('Information')).setRange(0.0).setLabel(_("*Extrusion Width (mm)"), _("Thickness of the bead that is deposited in one pass"))
+setting('shell_numbers',            0.8, float, 'basic',    _('Information')).setRange(0.0).setLabel(_("*Number Of Shells"), _("Number of shells is a function of extrusion width and shell thickness"))
+setting('infill_percentage',               12, float, 'basic',    _('Information')).setRange(0, 100).setLabel(_("*Infill Percentage"), _("To change infill change infill distance."))
+setting('retraction_speed',         40.0, float, 'advanced', _('Retraction')).setRange(0.1).setLabel(_("Speed (mm/s)"), _("Speed at which the filament is retracted, a higher retraction speed works better. But a very high retraction speed can lead to filament grinding."))
 setting('retraction_amount',         0.4, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Distance (mm)"), _("Distance of retraction. Set to 0 for no retraction. A setting of 0.4 is recommended for standard PLA. Retraction settings for specific materials are provided in the included Materials Profiles."))
 setting('retraction_dual_amount',   16.5, float, 'advanced', _('Retraction')).setRange(0).setLabel(_("Dual extrusion switch amount (mm)"), _("Amount of retraction when switching nozzle with dual-extrusion, set at 0 for no retraction at all. A value of 16.0mm seems to generate good results."))
 setting('retraction_min_travel',     1.5, float, 'expert',   _('Retraction')).setRange(0).setLabel(_("Minimum Travel (mm)"), _("Minimum amount of travel needed for a retraction to happen at all. To make sure you do not get a lot of retractions in a small area."))
@@ -223,6 +226,12 @@ setting('inset0_speed',              0.0, float, 'advanced', _('Speed')).setRang
 setting('insetx_speed',              0.0, float, 'advanced', _('Speed')).setRange(0.0).setLabel(_("Inner Shell Speed (mm/s)"), _("Speed at which inner shells are printed. If set to 0 then the print speed is used. Printing the inner shell faster then the outer shell will reduce printing time. It is good to set this somewhere in between the outer shell speed and the infill/printing speed."))
 setting('cool_min_layer_time',         8, float, 'advanced', _('Cool')).setRange(0).setLabel(_("Minimal Layer Time (sec)"), _("Minimum time spent in a layer, gives the layer time to cool down before the next layer is put on top. If the layer will be placed down too fast the printer will slow down to make sure it has spent at least this amount of seconds printing this layer."))
 setting('fan_enabled',              True, bool,  'advanced', _('Cool')).setExpertSubCategory(_('Cool')).setLabel(_("Enable Fan"), _("Enable the cooling fan during the print. The extra cooling from the cooling fan is essential during faster prints."))
+setting('filament_diameter',        1.75, float, 'advanced',    _('Filament')).setRange(1).setLabel(_("Diameter (mm)"), _("Diameter of your filament, as accurately as possible.\nIf you cannot measure this value you will have to calibrate it, a higher number means less extrusion, a smaller number generates more extrusion."))
+setting('filament_diameter2',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter2 (mm)"), _("Diameter of your filament for the 2nd nozzle. Use 0 to use the same diameter as for nozzle 1."))
+setting('filament_diameter3',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter3 (mm)"), _("Diameter of your filament for the 3th nozzle. Use 0 to use the same diameter as for nozzle 1."))
+setting('filament_diameter4',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter4 (mm)"), _("Diameter of your filament for the 4th nozzle. Use 0 to use the same diameter as for nozzle 1."))
+setting('filament_diameter5',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter5 (mm)"), _("Diameter of your filament for the 5th nozzle. Use 0 to use the same diameter as for nozzle 1."))
+setting('filament_flow',            100., float, 'advanced',    _('Filament')).setRange(5,300).setLabel(_("Flow (%)"), _("Flow compensation, the amount of material extruded is multiplied by this value"))
 
 setting('skirt_line_count',            1, int,   'expert', _('Skirt')).setRange(0).setLabel(_("Line Count"), _("The skirt is a line drawn around the object at the first layer. This helps to prime your extruder, and to see if the object fits on your platform.\nSetting this to 0 will disable the skirt. Multiple skirt lines can help priming your extruder better for small objects."))
 setting('skirt_gap',                 3.0, float, 'expert', _('Skirt')).setRange(0).setLabel(_("Start Distance (mm)"), _("The distance between the skirt and the first layer.\nThis is the minimal distance, multiple skirt lines will be put outwards from this distance."))
@@ -238,7 +247,7 @@ setting('fill_overlap', 15, int, 'expert', _('Infill')).setRange(0,100).setLabel
 setting('perimeter_before_infill', False, bool, 'expert', _('Infill')).setLabel(_("Infill prints after perimeters"), _("Print infill after perimeter lines. This can reduce infill from showing through the surface. If not checked, infill will print before perimeter lines."))
 setting('support_type', 'Lines', ['Grid', 'Lines'], 'expert', _('Support')).setLabel(_("Structure Type"), _("The type of support structure.\nGrid is very strong and can come off in 1 piece, however, sometimes it is too strong.\nLines are single walled lines that break off one at a time. Which is more work to remove, but as it is less strong it does work better on tricky prints."))
 setting('support_angle', 30, float, 'expert', _('Support')).setRange(0,90).setLabel(_("Overhang Angle for Support (deg)"), _("The minimal angle that overhangs need to have to get support. With 90 degree being horizontal and 0 degree being vertical."))
-setting('support_fill_rate', 30, int, 'expert', _('Support')).setRange(0,100).setLabel(_("Fill Amount (%)"), _("Amount of infill structure in the support material, less material gives weaker support which is easier to remove. 15% seems to be a good average."))
+setting('support_fill_rate', 3, int, 'expert', _('Support')).setRange(0,100).setLabel(_("Fill Amount (mm)"), _("Amount of infill structure in the support material."))
 setting('support_xy_distance', 0.7, float, 'expert', _('Support')).setRange(0,10).setLabel(_("Distance X/Y (mm)"), _("Distance of the support material from the print, in the X/Y directions.\n0.7mm gives a nice distance from the print so the support does not stick to the print."))
 setting('support_z_distance', 0.3, float, 'expert', _('Support')).setRange(0,10).setLabel(_("Airgap (mm)"), _("Distance from the top/bottom of the support to the print. A small gap here makes it easier to remove the support but makes the print a bit uglier.\n0.15mm gives a good seperation of the support material."))
 setting('spiralize', False, bool, 'expert', _('Black Magic')).setLabel(_("Spiralize The Outer Contour"), _("Spiralize is smoothing out the Z move of the outer edge. This will create a steady Z increase over the whole print. This feature turns a solid object into a single walled print with a solid bottom.\nThis feature used to be called Joris in older versions."))
@@ -268,7 +277,7 @@ setting('object_center_y', -1, float, 'hidden', 'hidden')
 setting('start.gcode', """;-- START GCODE --
 ;Sliced for Type A Machines Series 1
 ;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 ;Print Speed: {print_speed} Support: {support}
 ;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 ;Print time: {print_time}
@@ -307,7 +316,7 @@ G90           ;absolute positioning
 setting('start2.gcode', """;-- START GCODE --
 				;Sliced for Type A Machines Series 1
 				;Sliced at: {day} {date} {time}
-				;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+				;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 				;Print Speed: {print_speed} Support: {support}
 				;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
 				;Print time: {print_time}
@@ -339,7 +348,7 @@ setting('end2.gcode',  """;-- END GCODE --
 """, str, 'alteration', 'alteration')	
 #######################################################################################
 setting('start3.gcode', """;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
@@ -393,7 +402,7 @@ G90                         ;absolute positioning
 ;{profile_string}
 """, str, 'alteration', 'alteration')
 setting('start4.gcode', """;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
@@ -481,8 +490,9 @@ def _getMyDocumentsFolder():
 		path = ''
 	return path
 
+setting('configured', 'False', bool, 'preference', 'hidden')
 setting('serialNumber', '', str, 'preference', 'hidden')
-setting('startMode', 'Simple', ['Simple', 'Normal'], 'preference', 'hidden')
+setting('startMode', 'Normal', ['Simple', 'Normal'], 'preference', 'hidden')
 setting('simpleModeProfile', '2_normal', str, 'preference', 'hidden')
 setting('material_supplier', 'Generic', str, 'preference', 'hidden')
 setting('material_name', 'PLA', str, 'preference', 'hidden')
@@ -498,7 +508,7 @@ setting('filament_cost_meter', '0', float, 'preference', 'hidden').setLabel(_("C
 #setting('auto_detect_sd', 'True', bool, 'preference', 'hidden').setLabel(_("Auto detect SD card drive"), _("Auto detect the SD card. You can disable this because on some systems external hard-drives or USB sticks are detected as SD card."))
 #setting('sdcard_rootfolder', _getMyDocumentsFolder(), str, 'preference', 'hidden').setLabel(_("Base folder to replicate on SD card"), _("The specified folder will be used as a base path. Any gcode generated from object coming from within that folder will be automatically saved on the SD card at the same sub-folder. Any object coming from outside of this path will save the gcode on the root folder of the card."))
 setting('check_for_updates', 'True', bool, 'preference', 'hidden').setLabel(_("Check for updates"), _("Check for newer versions of Cura on startup"))
-setting('submit_slice_information', 'False', bool, 'preference', 'hidden').setLabel(_("Send usage statistics"), _("Submit anonymous usage information to improve future versions of Cura"))
+setting('submit_slice_information', 'True', bool, 'preference', 'hidden').setLabel(_("Send usage statistics"), _("Submit anonymous usage information to improve future versions of Cura"))
 setting('filament_physical_density', '1240', float, 'preference', 'hidden').setRange(500.0, 3000.0).setLabel(_("Density (kg/m3)"), _("Weight of the filament per m3. Around 1240 for PLA. And around 1040 for ABS. This value is used to estimate the weight if the filament used for the print."))
 setting('language', 'English', str, 'preference', 'hidden').setLabel(_('Language'), _('Change the language in which Cura runs. Switching language requires a restart of Cura'))
 setting('active_machine', '0', int, 'preference', 'hidden')
@@ -514,11 +524,15 @@ setting('window_pos_x', '-1', float, 'preference', 'hidden')
 setting('window_pos_y', '-1', float, 'preference', 'hidden')
 setting('window_width', '-1', float, 'preference', 'hidden')
 setting('window_height', '-1', float, 'preference', 'hidden')
-setting('window_normal_sash', '320', float, 'preference', 'hidden')
+setting('window_normal_sash', '425', float, 'preference', 'hidden')
 setting('last_run_version', '', str, 'preference', 'hidden')
 
+
+setting('show_infill', 'False', bool, 'preference', 'hidden')
+
+
 setting('machine_name', '', str, 'machine', 'hidden')
-setting('machine_type', 'unknown', str, 'machine', 'hidden') #Ultimaker, Ultimaker2, RepRap
+setting('machine_type', 'unknown', str, 'machine', 'hidden')
 setting('machine_width', '305', float, 'machine', 'hidden').setLabel(_("Maximum width (mm)"), _("Size of the machine in mm"))
 setting('machine_depth', '305', float, 'machine', 'hidden').setLabel(_("Maximum depth (mm)"), _("Size of the machine in mm"))
 setting('machine_height', '305', float, 'machine', 'hidden').setLabel(_("Maximum height (mm)"), _("Size of the machine in mm"))
@@ -548,6 +562,9 @@ setting('extruder_head_size_max_x', '55', float, 'machine', 'hidden').setLabel(_
 setting('extruder_head_size_max_y', '65', float, 'machine', 'hidden').setLabel(_("Head size towards Y max (mm)"), _("The distance between the nozzle and the back-end (farthest from you) of the print head."))
 setting('extruder_head_size_height', '35', float, 'machine', 'hidden').setLabel(_("Printer gantry height (mm)"), _("The height of the gantry holding up the printer head. If an object is higher then this then you cannot print multiple objects one for one."))
 
+
+#validators.warningBelow(settingsDictionary['fill_distance'], 0.4, _("The minimum distance between infill is Nozzle Size(mm)"))
+validators.infillValidator(settingsDictionary['fill_distance'])
 validators.warningAbove(settingsDictionary['filament_flow'], 150, _("More flow than 150% is rare and usually not recommended."))
 validators.warningBelow(settingsDictionary['filament_flow'], 50, _("Less flow than 50% is rare and usually not recommended."))
 validators.warningAbove(settingsDictionary['layer_height'], lambda : (float(getProfileSetting('nozzle_size')) * 80.0 / 100.0), _("Thicker layers then %.2fmm (80%% nozzle size) usually give bad results and are not recommended."))
@@ -686,7 +703,6 @@ def getAlternativeBasePaths():
 			paths = extra_list + paths
 	except:
 		import traceback
-		print traceback.print_exc()
 
 	return paths
 
@@ -719,11 +735,6 @@ def initializeOctoPrintAPIConfig(s,k):
 
 	
 def getHeatedBedAlterationPath():
-		if tempOverride:
-			print tempOverride
-		else:
-			print "No temp override"
-		
 		alterationFileOptions = resources.getAlterationFiles()
 		altFile = None
 		startGCode = None
@@ -748,7 +759,7 @@ def setHeatedBedGCode():
 		
 	try:
 		cp.read(path)
-	except ConfigParser.ParsingError as e:
+	except Exception as e:
 		print e
 			
 	setAlterationFileFromFilePath(path)
@@ -758,7 +769,7 @@ def getStartGCode():
 	cp = ConfigParser.ConfigParser()
 	try:
 		cp.read(path)
-	except ConfigParser.ParsingError as e:
+	except Exception as e:
 		print e
 		
 	startGCode = cp.get('alterations', 'start.gcode')
@@ -1391,8 +1402,6 @@ def replaceTagMatch(m):
 	
 	if tag == 'profile_string':
 		return pre + 'CURA_PROFILE_STRING:%s' % (getProfileString())
-		
-		
 	if pre == 'F' and tag == 'max_z_speed':
 		f = getProfileSettingFloat('travel_speed') * 60
 	if pre == 'F' and tag in ['print_speed', 'retraction_speed', 'travel_speed', 'bottom_layer_speed', 'cool_min_feedrate']:
@@ -1474,7 +1483,6 @@ def getAlterationFileContents(filename, extruderCount = 1):
 
 		if bedTemp > 0 and not isTagIn('{print_bed_temperature}', alterationContents):
 			prefix += 'M190 %s%f\n' % (gcode_parameter_key, bedTemp)
-	
 		if temp > 0 and not isTagIn('{print_temperature}', alterationContents):
 			if extruderCount > 1:
 				for n in xrange(1, extruderCount):

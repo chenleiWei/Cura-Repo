@@ -26,14 +26,14 @@ class InputValidation():
 		
 	def verifySerial(self, serial):
 		serialLength = len(serial)
-		if (serialLength < 4 or serialLength > 6) or not serial.isdigit() or int(serial) < 1:						
+		if (serialLength ==0):
 			return -1					
 		else:
 			return 0								
 				
 	def verifyKey(self, key):
 		keyLength = len(key)
-		if not keyLength == 32:						
+		if keyLength == 0:
 			self.validKey = False
 			if keyLength > 0 and keyLength < 32:
 				return -1

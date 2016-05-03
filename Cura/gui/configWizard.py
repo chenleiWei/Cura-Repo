@@ -18,7 +18,6 @@ except ImportError:
 
 from Cura.gui import firmwareInstall
 from Cura.gui import printWindow
-from Cura.gui import sceneView
 from Cura.util import machineCom
 from Cura.util import profile
 from Cura.util import gcodeGenerator
@@ -129,7 +128,8 @@ class InfoPage(wx.wizard.WizardPageSimple):
 	def AddLogo(self):
 		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
 		self.AddImage(curaTAMLogo)
-		self.AddTextTagLine(version.getVersion())
+		thisVersion = version.getVersion()
+		self.AddTextTagLine(thisVersion)
 
 	def AddHyperlink(self, text, url):
 		hyper1 = hl.HyperLinkCtrl(self, -1, text, URL=url)
@@ -386,8 +386,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 class FirstInfoPage(InfoPage):
 	def __init__(self, parent, addNew):
 		if addNew:
-			super(FirstInfoPage, self).__init__(parent, _("Printer Selection"))
-			
+			super(FirstInfoPage, self).__init__(parent, _("Printer Selection"))	
 		else:
 			super(FirstInfoPage, self).__init__(parent, _("Welcome"))
 			
@@ -422,41 +421,8 @@ class MachineSelectPage(InfoPage):
 
 	def OnSeries1(self, e):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_select_options)
-	
+		
 	def OnSeries1Pro(self, e):
-		profile.putMachineSetting('has_print_bed', "True")
-		profile.setAlterationFile('start.gcode',  """;-- START GCODE --
-	;Sliced for Type A Machines Series 1
-	;Sliced at: {day} {date} {time}
-	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-	;Print Speed: {print_speed} Support: {support}
-	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
-	;Print time: {print_time}
-	;Filament used: {filament_amount}m {filament_weight}g
-	;Filament cost: {filament_cost}
-	G21        ;metric values
-	G90        ;absolute positioning
-	G28     ;move to endstops
-	G29		;allows for auto-levelling
-	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
-	M140 S{print_bed_temperature} ;Prep Heat Bed
-	M109 S{print_temperature} ;Heat To temp
-	M190 S{print_bed_temperature} ;Heat Bed to temp
-	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
-	G92 E0 ;zero the extruded length
-	G1 F200 X250 E30 ;extrude 30mm of feed stock
-	G92 E0 ;zero the extruded length again
-	G1 X150 Y150  Z25 F12000 ;recenter and begin
-	G1 F{travel_speed}""")
-		profile.setAlterationFile('end.gcode', """;-- END GCODE --
-	M104 S0     ;extruder heater off
-	G91         ;relative positioning
-	M109 S0			;heated bed off
-	G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-	G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
-	G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
-	M84           ;steppers off
-	G90           ;absolute positioning""")
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().tamReadyPage)
 		
 	def StoreData(self):
@@ -470,7 +436,7 @@ class MachineSelectPage(InfoPage):
 				n = re.search(r'Series1\.ini', machineProfile)
 			elif self.Series1_Pro_Radio.GetValue():
 				n = re.search(r'Series1Pro', machineProfile)
-			
+
 			if n is not None:
 				machProfile = machineProfile
 				cp = configparser.ConfigParser()
@@ -480,17 +446,22 @@ class MachineSelectPage(InfoPage):
 						machSettingsToStore[setting] = value
 		
 		# if Series 1 Pro, load the appropriate alteration file
+		alterationDirectoryList = resources.getAlterationFiles()
 		if self.Series1_Pro_Radio.GetValue():
-			alterationDirectoryList = resources.getAlterationFiles()		
+			# start/end gcode
 			for filename in alterationDirectoryList:
 				alterationFileExists = re.search(r'series1_hasBed', filename)
 				if alterationFileExists:
 					profile.setAlterationFileFromFilePath(filename)
-		
-		if machSettingsToStore:	
+		else:
+			for filename in alterationDirectoryList:
+				alterationFileExists = re.search(r'series1_noBed', filename)
+				if alterationFileExists:
+					profile.setAlterationFileFromFilePath(filename)
+			
+		if machSettingsToStore:
 			for setting, value in machSettingsToStore.items():
 				profile.putMachineSetting(setting, value)
-				
 
 class TAMSelectOptions(InfoPage):
 	def __init__(self, parent):
@@ -528,71 +499,8 @@ class TAMSelectOptions(InfoPage):
 		# Heated bed item population
 		if self.HeatedBedCheckBox.GetValue():
 			profile.putMachineSetting("has_heated_bed", "True")
-			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
-	;Sliced for Type A Machines Series 1
-	;Sliced at: {day} {date} {time}
-	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-	;Print Speed: {print_speed} Support: {support}
-	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
-	;Print time: {print_time}
-	;Filament used: {filament_amount}m {filament_weight}g
-	;Filament cost: {filament_cost}
-	G21        ;metric values
-	G90        ;absolute positioning
-	G28     ;move to endstops
-	G29		;allows for auto-levelling
-	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
-	M140 S{print_bed_temperature} ;Prep Heat Bed
-	M109 S{print_temperature} ;Heat To temp
-	M190 S{print_bed_temperature} ;Heat Bed to temp
-	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
-	G92 E0 ;zero the extruded length
-	G1 F200 X250 E30 ;extrude 30mm of feed stock
-	G92 E0 ;zero the extruded length again
-	G1 X150 Y150  Z25 F12000 ;recenter and begin
-	G1 F{travel_speed}""")
-			profile.setAlterationFile('end.gcode', """;-- END GCODE --
-	M104 S0     ;extruder heater off
-	G91         ;relative positioning
-	M109 S0			;heated bed off
-	G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-	G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
-	G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
-	M84           ;steppers off
-	G90           ;absolute positioning""")
 		else:
-			print("No heated bed")
 			profile.putMachineSetting("has_heated_bed", "False")
-			profile.setAlterationFile('start.gcode',  """;-- START GCODE --
-	;Sliced for Type A Machines Series 1
-	;Sliced at: {day} {date} {time}
-	;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
-	;Print Speed: {print_speed} Support: {support}
-	;Retraction Speed: {retraction_speed} Retraction Distance: {retraction_amount}
-	;Print time: {print_time}
-	;Filament used: {filament_amount}m {filament_weight}g
-	;Filament cost: {filament_cost}
-	G21        ;metric values
-	G90        ;absolute positioning
-	G28     ;move to endstops
-	G29		;allows for auto-levelling
-	G1 X150 Y5  Z15.0 F{travel_speed} ;center and move the platform down 15mm
-	M109 S{print_temperature} ;Heat To temp
-	G1 X150 Y5 Z0.3 ;move the platform to purge extrusion
-	G92 E0 ;zero the extruded length
-	G1 F200 X250 E30 ;extrude 30mm of feed stock
-	G92 E0 ;zero the extruded length again
-	G1 X150 Y150  Z25 F12000 ;recenter and begin
-	G1 F{travel_speed}""")
-		profile.setAlterationFile('end.gcode', """;-- END GCODE --
-M104 S0     ;extruder heater off
-G91         ;relative positioning
-G1 E-1 F300   ;retract the filament a bit before lifting the nozzle, to release some of the pressure
-G1 Z+0.5 E-5 X-20 Y-20 F9000 ;move Z up a bit and retract filament even more
-G28 X0 Y0     ;move X/Y to min endstops, so the head is out of the way
-M84           ;steppers off
-G90           ;absolute positioning""")
-
 
 class TAMReadyPage(InfoPage):
 	def __init__(self, parent):
@@ -609,7 +517,6 @@ class TAMReadyPage(InfoPage):
 		self.skipTut.Bind(wx.EVT_CHECKBOX, self.skipTutorial)
 
 	def skipTutorial(self, e):
-		print "Skip Tour %s" % e.IsChecked()
 		if e.IsChecked():
 			wx.wizard.WizardPageSimple.Chain(self, self.GetParent().TAM_first_print)
 		else:
@@ -671,14 +578,12 @@ class TAMOctoPrintInfo(InfoPage):
 	def checkSerialValidity(self, e):
 		id = self.serialNumber.GetValue()
 		validityCheck =  self.inputCheck.verifySerial(id)
-		print "Validity check: %s" % validityCheck
+		
 		if validityCheck == 0:
 			self.validSerial = True
 			self.errorMessageln1.SetLabel("")
 			self.configurePrinterButton.Enable()
 		else:
-			self.errorMessageln1.SetForegroundColour('Red')
-			self.errorMessageln1.SetLabel("Serial number consists of 4-6 digits")
 			self.configurePrinterButton.Disable()
 
 	def unSavePrinter(self):
@@ -690,7 +595,6 @@ class TAMOctoPrintInfo(InfoPage):
 		keyLength = len(key)
 		
 		validityCheck = self.inputCheck.verifyKey(key)
-		
 		if validityCheck == 0:
 			self.validKey = True
 			self.errorMessageln1.SetLabel("")
@@ -753,7 +657,7 @@ class TAMSelectStrength(InfoPage):
 	# General informative text
 	def addText(self):
 		self.AddTextTitle("Strength")
-		self.AddText("The Strength setting specifies Wall Thickness and Fill Density. The High setting will use more filament and result in longer print times, but can produce much stronger objects.")
+		self.AddText("The Strength setting specifies Wall Thickness and Fill Distance. The High setting will use more filament and result in longer print times, but can produce much stronger objects.")
 
 class TAMSelectQuality(InfoPage):
 	def __init__(self, parent):
@@ -793,6 +697,7 @@ class TAMFirstPrint(InfoPage):
 		self.AddCenteredText("For more information, visit our Getting Started page:")
 		self.AddHyperlink("typeamachines.com/gettingstarted", "http://www.typeamachines.com/gettingstarted")
 		
+# No longer an option, but keeping here in case
 class NonTAM(InfoPage):
 	def __init__(self, parent):
 		super(NonTAM, self).__init__(parent, _("Select Machine"))
@@ -838,8 +743,8 @@ class NonTAM(InfoPage):
 	def OnLulzbotSelect(self, e):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().lulzbotReadyPage)
 
-	def OnOtherSelect(self, e):
-		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().otherMachineSelectPage)
+#	def OnOtherSelect(self, e):
+#		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().otherMachineSelectPage)
 
 	def AllowNext(self):
 		wx.wizard.WizardPageSimple.Chain(self, self.GetParent().ultimaker2ReadyPage)
@@ -847,103 +752,7 @@ class NonTAM(InfoPage):
 
 	def StoreData(self):
 		profile.putProfileSetting('retraction_enable', 'True')
-		if self.Ultimaker2Radio.GetValue() or self.Ultimaker2GoRadio.GetValue() or self.Ultimaker2ExtRadio.GetValue():
-			if self.Ultimaker2Radio.GetValue():
-				profile.putMachineSetting('machine_width', '230')
-				profile.putMachineSetting('machine_depth', '225')
-				profile.putMachineSetting('machine_height', '205')
-				profile.putMachineSetting('machine_name', 'ultimaker2')
-				profile.putMachineSetting('machine_type', 'ultimaker2')
-				profile.putMachineSetting('has_heated_bed', 'True')
-			if self.Ultimaker2GoRadio.GetValue():
-				profile.putMachineSetting('machine_width', '120')
-				profile.putMachineSetting('machine_depth', '120')
-				profile.putMachineSetting('machine_height', '115')
-				profile.putMachineSetting('machine_name', 'ultimaker2go')
-				profile.putMachineSetting('machine_type', 'ultimaker2go')
-				profile.putMachineSetting('has_heated_bed', 'False')
-			if self.Ultimaker2ExtRadio.GetValue():
-				profile.putMachineSetting('machine_width', '230')
-				profile.putMachineSetting('machine_depth', '225')
-				profile.putMachineSetting('machine_height', '315')
-				profile.putMachineSetting('machine_name', 'ultimaker2extended')
-				profile.putMachineSetting('machine_type', 'ultimaker2extended')
-				profile.putMachineSetting('has_heated_bed', 'False')
-			profile.putMachineSetting('machine_center_is_zero', 'False')
-			profile.putMachineSetting('gcode_flavor', 'UltiGCode')
-			profile.putMachineSetting('extruder_head_size_min_x', '40.0')
-			profile.putMachineSetting('extruder_head_size_min_y', '10.0')
-			profile.putMachineSetting('extruder_head_size_max_x', '60.0')
-			profile.putMachineSetting('extruder_head_size_max_y', '30.0')
-			profile.putMachineSetting('extruder_head_size_height', '48.0')
-			profile.putProfileSetting('nozzle_size', '0.4')
-			profile.putProfileSetting('fan_full_height', '5.0')
-			profile.putMachineSetting('extruder_offset_x1', '18.0')
-			profile.putMachineSetting('extruder_offset_y1', '0.0')
-		elif self.UltimakerRadio.GetValue():
-			profile.putMachineSetting('machine_width', '205')
-			profile.putMachineSetting('machine_depth', '205')
-			profile.putMachineSetting('machine_height', '200')
-			profile.putMachineSetting('machine_name', 'ultimaker original')
-			profile.putMachineSetting('machine_type', 'ultimaker')
-			profile.putMachineSetting('machine_center_is_zero', 'False')
-			profile.putMachineSetting('gcode_flavor', 'RepRap (Marlin/Sprinter)')
-			profile.putProfileSetting('nozzle_size', '0.4')
-			profile.putMachineSetting('extruder_head_size_min_x', '75.0')
-			profile.putMachineSetting('extruder_head_size_min_y', '18.0')
-			profile.putMachineSetting('extruder_head_size_max_x', '18.0')
-			profile.putMachineSetting('extruder_head_size_max_y', '35.0')
-			profile.putMachineSetting('extruder_head_size_height', '55.0')
-		elif self.UltimakerOPRadio.GetValue():
-			profile.putMachineSetting('machine_width', '205')
-			profile.putMachineSetting('machine_depth', '205')
-			profile.putMachineSetting('machine_height', '200')
-			profile.putMachineSetting('machine_name', 'ultimaker original+')
-			profile.putMachineSetting('machine_type', 'ultimaker_plus')
-			profile.putMachineSetting('machine_center_is_zero', 'False')
-			profile.putMachineSetting('gcode_flavor', 'RepRap (Marlin/Sprinter)')
-			profile.putProfileSetting('nozzle_size', '0.4')
-			profile.putMachineSetting('extruder_head_size_min_x', '75.0')
-			profile.putMachineSetting('extruder_head_size_min_y', '18.0')
-			profile.putMachineSetting('extruder_head_size_max_x', '18.0')
-			profile.putMachineSetting('extruder_head_size_max_y', '35.0')
-			profile.putMachineSetting('extruder_head_size_height', '55.0')
-			profile.putMachineSetting('has_heated_bed', 'True')
-			profile.putMachineSetting('extruder_amount', '1')
-			profile.putProfileSetting('retraction_enable', 'True')
-		elif self.LulzbotTazRadio.GetValue() or self.LulzbotMiniRadio.GetValue():
-			if self.LulzbotTazRadio.GetValue():
-				profile.putMachineSetting('machine_width', '298')
-				profile.putMachineSetting('machine_depth', '275')
-				profile.putMachineSetting('machine_height', '250')
-				profile.putProfileSetting('nozzle_size', '0.35')
-				profile.putMachineSetting('machine_name', 'Lulzbot TAZ')
-			else:
-				profile.putMachineSetting('machine_width', '160')
-				profile.putMachineSetting('machine_depth', '160')
-				profile.putMachineSetting('machine_height', '160')
-				profile.putProfileSetting('nozzle_size', '0.5')
-				profile.putMachineSetting('machine_name', 'Lulzbot Mini')
-			profile.putMachineSetting('machine_type', 'Aleph Objects')
-			profile.putMachineSetting('machine_center_is_zero', 'False')
-			profile.putMachineSetting('gcode_flavor', 'RepRap (Marlin/Sprinter)')
-			profile.putMachineSetting('has_heated_bed', 'True')
-			profile.putMachineSetting('extruder_head_size_min_x', '0.0')
-			profile.putMachineSetting('extruder_head_size_min_y', '0.0')
-			profile.putMachineSetting('extruder_head_size_max_x', '0.0')
-			profile.putMachineSetting('extruder_head_size_max_y', '0.0')
-			profile.putMachineSetting('extruder_head_size_height', '0.0')
-		else:
-			profile.putMachineSetting('machine_width', '305')
-			profile.putMachineSetting('machine_depth', '305')
-			profile.putMachineSetting('machine_height', '305')
-			profile.putMachineSetting('machine_name', 'reprap')
-			profile.putMachineSetting('machine_type', 'reprap')
-			profile.putMachineSetting('gcode_flavor', 'RepRap (Marlin/Sprinter)')
-			profile.putPreference('startMode', 'Normal')
-			profile.putProfileSetting('nozzle_size', '0.4')
-		profile.checkAndUpdateMachineName()
-		profile.putProfileSetting('wall_thickness', float(profile.getProfileSetting('nozzle_size')) * 2)
+		
 		if self.SubmitUserStats.GetValue():
 			profile.putPreference('submit_slice_information', 'True')
 		else:
@@ -1011,7 +820,7 @@ class PrintrbotPage(InfoPage):
 				profile.putMachineSetting('extruder_head_size_height', '0')
 				if data[10]:
 					profile.setAlterationFile('start.gcode', """;Sliced at: {day} {date} {time}
-;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_density}
+;Basic settings: Layer height: {layer_height} Walls: {wall_thickness} Fill: {fill_distance}
 ;Print time: {print_time}
 ;Filament used: {filament_amount}m {filament_weight}g
 ;Filament cost: {filament_cost}
@@ -1573,15 +1382,17 @@ class ConfigWizard(wx.wizard.Wizard):
 	def __init__(self, addNew = False):
 		super(ConfigWizard, self).__init__(None, -1, _("Configuration Wizard"))
 		
-		
+		self.addNew = addNew
 		# Get the number of the current machine and label it as the old index
 		self._old_machine_index = int(profile.getPreferenceFloat('active_machine'))
-		if addNew:
+		if self.addNew:
 			profile.setActiveMachine(profile.getMachineCount())
-
+		
+		self.dataToSaveList = []
 		self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGED, self.OnPageChanged)
 		self.Bind(wx.wizard.EVT_WIZARD_PAGE_CHANGING, self.OnPageChanging)
 		self.Bind(wx.wizard.EVT_WIZARD_CANCEL, self.OnCancel)
+		self.Bind(wx.wizard.EVT_WIZARD_FINISHED, self.OnFinished)
 
 		self.firstInfoPage = FirstInfoPage(self, addNew)
 		self.machineSelectPage = MachineSelectPage(self)
@@ -1602,7 +1413,7 @@ class ConfigWizard(wx.wizard.Wizard):
 		self.bedLevelPage = bedLevelWizardMain(self)
 		self.headOffsetCalibration = headOffsetCalibrationPage(self)
 		self.printrbotSelectType = PrintrbotPage(self)
-		self.otherMachineSelectPage = OtherMachineSelectPage(self)
+#		self.otherMachineSelectPage = OtherMachineSelectPage(self)
 		self.customRepRapInfoPage = CustomRepRapInfoPage(self)
 		self.otherMachineInfoPage = OtherMachineInfoPage(self)
 		self.ultimaker2ReadyPage = Ultimaker2ReadyPage(self)
@@ -1617,7 +1428,7 @@ class ConfigWizard(wx.wizard.Wizard):
 		wx.wizard.WizardPageSimple.Chain(self.TAM_select_strength, self.TAM_select_support)
 		wx.wizard.WizardPageSimple.Chain(self.TAM_select_support, self.TAM_first_print)
 		wx.wizard.WizardPageSimple.Chain(self.printrbotSelectType, self.otherMachineInfoPage)
-		wx.wizard.WizardPageSimple.Chain(self.otherMachineSelectPage, self.customRepRapInfoPage)
+#		wx.wizard.WizardPageSimple.Chain(self.otherMachineSelectPage, self.customRepRapInfoPage)
 
 		self.FitToPage(self.TAM_select_materials)
 		self.GetPageAreaSizer().Add(self.firstInfoPage)
@@ -1626,7 +1437,7 @@ class ConfigWizard(wx.wizard.Wizard):
 		self.Destroy()
 
 	def OnPageChanging(self, e):
-		e.GetPage().StoreData()
+		self.dataToSaveList.append(e.GetPage().StoreData())
 
 	def OnPageChanged(self, e):
 		if e.GetPage().AllowNext():
@@ -1639,8 +1450,20 @@ class ConfigWizard(wx.wizard.Wizard):
 			self.FindWindowById(wx.ID_BACKWARD).Disable()
 
 	def OnCancel(self, e):
-		profile.setActiveMachine(self._old_machine_index)
-
+		print e
+		if self.addNew == True:
+			profile.setActiveMachine(self._old_machine_index)
+		else:
+			profile.putPreference('configured', 'False')
+			preferences = profile.getPreferencePath()
+			with open(preferences, "w+"):
+				pass
+				
+	def OnFinished(self, e):
+		for x in self.dataToSaveList:
+			x
+		profile.putPreference('configured', 'True')
+				
 	def disableNext(self):
 		self.FindWindowById(wx.ID_FORWARD).Disable()
 

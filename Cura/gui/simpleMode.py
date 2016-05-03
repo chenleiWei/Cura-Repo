@@ -80,6 +80,7 @@ class simpleModePanel(wx.Panel):
 		boxsizer.Add(self.currentFileName)
 		currentFilePanel.GetSizer().Add(boxsizer, flag=wx.EXPAND)
 		sizer.Add(currentFilePanel, (0,0), flag=wx.EXPAND)
+
 		
 		# Panel 1: Material Profile Select
 		sb = wx.StaticBox(materialSelectorPanel, label=_("Material Profile"))
@@ -149,7 +150,7 @@ class simpleModePanel(wx.Panel):
 		sizer.Add(supportSelectionPanel, (5,0), flag=wx.EXPAND)
 
 		self.platformAdhesionOptions = {'Raft': support_raft, 'Brim': support_brim, 'None':support_disabled}
-		settingOrder = ["Layer Height", "Print Temperature", "Print Bed Temperature", "Wall Thickness", "Fill Density"]
+		settingOrder = ["Layer Height", "Print Temperature", "Print Bed Temperature", "Wall Thickness", "Fill Distance"]
 		if profile.getMachineSetting('has_heated_bed') == "False":
 			settingOrder.remove("Print Bed Temperature")
 			
@@ -255,7 +256,7 @@ class simpleModePanel(wx.Panel):
 	def InitializeInfoPanelList(self, infoPanel):
 		mainWindow = self.GetParent().GetParent().GetParent()
 		settingsToDisplay = {}
-		settingNames = ['layer_height', 'print_temperature', 'print_bed_temperature', 'fill_density', 'wall_thickness']
+		settingNames = ['layer_height', 'print_temperature', 'print_bed_temperature', 'fill_distance', 'wall_thickness']
 		newValue = None
 		degree_sign= u'\N{DEGREE SIGN}'
 		# Check to see if heated bed and retraction are enabled; if not, remove them from display list
@@ -264,9 +265,9 @@ class simpleModePanel(wx.Panel):
 		# dictionary key is set to setting name, dictionary value is set to static text object with label specific to what is set in profile at that point;
 		# quality and strength panels need to override this
 		for setting in settingNames:
-			if setting == "fill_density":
-				fill_density_display = str(profile.getProfileSetting(setting) + "%")
-				settingsToDisplay[setting] = wx.StaticText(infoPanel, -1, label=fill_density_display)
+			if setting == "fill_distance":
+				fill_distance_display = str(profile.getProfileSetting(setting) + "mm")
+				settingsToDisplay[setting] = wx.StaticText(infoPanel, -1, label=fill_distance_display)
 			elif setting == "print_temperature": 
 				print_temperature_display = str(profile.getProfileSetting(setting)) + degree_sign + "C"
 				settingsToDisplay[setting] =  wx.StaticText(infoPanel, -1, label=print_temperature_display)
@@ -321,7 +322,7 @@ class simpleModePanel(wx.Panel):
 	def infoPanelValueCheck(self, data):
 		degree_sign= u'\N{DEGREE SIGN}'
 		temperatureUnit = degree_sign + "C" 
-		infoPanelSettingsList = {"layer_height": "mm", "print_temperature": temperatureUnit, "print_bed_temperature": temperatureUnit, "wall_thickness": "mm", "fill_density":"%"}
+		infoPanelSettingsList = {"layer_height": "mm", "print_temperature": temperatureUnit, "print_bed_temperature": temperatureUnit, "wall_thickness": "mm", "fill_distance":"mm"}
 		if profile.getMachineSetting('has_heated_bed') == "False": 
 			del infoPanelSettingsList['print_bed_temperature']
 		for setting, unit in infoPanelSettingsList.items():

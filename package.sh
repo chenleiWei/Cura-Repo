@@ -22,7 +22,7 @@ BUILD_TARGET=${1:-none}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME="1.4.2"
+export BUILD_NAME="1.5.0a2"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -44,7 +44,7 @@ if [ -z ${MATERIALS_REPO:-} ]; then
 fi
 
 if [ -z ${MATERIALS_BRANCH:-} ]; then
-	MATERIALS_BRANCH="master"
+	MATERIALS_BRANCH="replace/fillDensityToPercent"
 fi
 
 JOBS=${JOBS:-3}

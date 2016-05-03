@@ -9,11 +9,15 @@ import re
 
 from Cura.util import profile
 from Cura.util import resources
+from Cura.util import analytics
+
 
 
 class MaterialProfileSelector(wx.Frame):
 	def __init__(self):
-		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(500,450), style=wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
+		wx.Frame.__init__(self, None, wx.ID_ANY, "Materials Selection", size=(500,400), style=wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP)
+		
+		analytics.submitFeatureAnalytics('1','','','','material_selector')
 		
 		# boxsizer initializations 
 		mainBox = wx.BoxSizer(wx.VERTICAL)

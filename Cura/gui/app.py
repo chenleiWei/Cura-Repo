@@ -147,14 +147,13 @@ class CuraApp(wx.App):
 				print traceback.print_exc()
 		"""
 		#If we haven't run it before, run the configuration wizard.
-		if profile.getMachineSetting('machine_type') == 'unknown':
-			configWizard.ConfigWizard()
-
-			
+		if profile.getMachineSetting('machine_type') == 'unknown' or profile.getPreference('configured') == 'False':
+			configWizard.ConfigWizard(False)
 			#Check if we need to copy our examples
 			exampleFile = os.path.normpath(os.path.join(resources.resourceBasePath, 'example', 'FirstPrintCone.stl'))
-
 			self.loadFiles = [exampleFile]
+
+		if profile.getPreference('configured') == 'True':
 	#		if self.splash is not None:
 	#			self.splash.Show(False)
 			
@@ -185,31 +184,40 @@ class CuraApp(wx.App):
 #					except Exception as e:
 #						print e
 
-	#	if profile.getMachineSetting('machine_name') == '':
-	#		return
-		try:
-			self.mainWindow = mainWindow.mainWindow()
-		except Exception as e:
-			print e
-	#	if self.splash is not None:
-	#		self.splash.Show(False)
-	#		"print line 179 in app.py"
-		self.SetTopWindow(self.mainWindow)
-		self.mainWindow.Show()
-		self.mainWindow.OnDropFiles(self.loadFiles)
+			try:
+				self.mainWindow = mainWindow.mainWindow()
+			except Exception as e:
+				print e
+		#	if self.splash is not None:
+		#		self.splash.Show(False)
+		#		"print line 179 in app.py"
+			self.SetTopWindow(self.mainWindow)
+			self.mainWindow.Show()
+			self.mainWindow.OnDropFiles(self.loadFiles)
 		
-		if profile.getPreference('last_run_version') != version.getVersion(False):
-			profile.putPreference('last_run_version', version.getVersion(False))
-			newVersion = newVersionDialog.newVersionDialog()
-			newVersion.Show()
-			if newVersion.ShowModal() == wx.ID_OK:
-				print 'closed'
-			newVersion.Destroy()
+			if profile.getPreference('last_run_version') != version.getVersion(False):
+				profile.putPreference('last_run_version', version.getVersion(False))
+				newVersion = newVersionDialog.newVersionDialog()
+				newVersion.Show()
+				if newVersion.ShowModal() == wx.ID_OK:
+					print 'closed'
+				newVersion.Destroy()
 			
-		setFullScreenCapable(self.mainWindow)
-
-		if sys.platform.startswith('darwin'):
-			wx.CallAfter(self.StupidMacOSWorkaround)
+			setFullScreenCapable(self.mainWindow)
+			
+			if sys.platform.startswith('darwin'):
+				wx.CallAfter(self.StupidMacOSWorkaround)
+			# Version check	
+		
+			if profile.getPreference('check_for_updates') == 'True':
+				self.newVersionCheck()
+		
+	def newVersionCheck(self):
+		try:
+			self.mainWindow.OnCheckForUpdate(False)
+		except Exception as e:
+			print "Attempted to check for newer version, got error:\n", e
+	
 
 	def StupidMacOSWorkaround(self):
 		"""

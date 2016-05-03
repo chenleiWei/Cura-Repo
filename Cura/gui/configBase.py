@@ -69,7 +69,7 @@ class configPanelBase(wx.Panel):
 		configPanel.SetSizer(sizer)
 
 		configPanel.SetAutoLayout(1)
-		configPanel.SetupScrolling(scroll_x=False, scroll_y=True)
+		configPanel.SetupScrolling(scroll_x=True, scroll_y=True)
 
 		leftConfigPanel.main = self
 		rightConfigPanel.main = self
@@ -145,7 +145,7 @@ class TitleRow(object):
 
 class BlankRow(object):
 	def __init__(self, panel, name=None):
-		"Add a title row to the configuration panel"
+		"Add a blank row to the configuration panel"
 		sizer = panel.GetSizer()
 		x = sizer.GetRows()
 		self.title = wx.StaticText(panel, -1, " ")
@@ -210,11 +210,16 @@ class SettingRow(object):
 		has_expert_settings = False
 
 		self.setting = profile.settingsDictionary[configName]
+
 		self.settingIndex = index
 		self.validationMsg = ''
 		self.panel = panel
 
-		self.label = wx.lib.stattext.GenStaticText(panel, -1, self.setting.getLabel())
+		#If a setting's label starts with an * , then treat it as a non-usereditable field.
+		if self.setting.getLabel()[0]=='*':
+			self.label = wx.lib.stattext.GenStaticText(panel, -1, self.setting.getLabel()[1:])
+		else:
+			self.label = wx.lib.stattext.GenStaticText(panel, -1, self.setting.getLabel())
 		self.label.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
 		self.label.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseExit)
 
@@ -245,9 +250,19 @@ class SettingRow(object):
 			for n in xrange(0, len(choices)):
 				choices[n] = _(choices[n])
 			value = _(value)
-			self.ctrl = wx.ComboBox(panel, -1, value, choices=choices, style=wx.CB_DROPDOWN|wx.CB_READONLY)
+			self.ctrl = wx.ComboBox(panel, -1, value, choices=choices, style=wx.CB_DROPDOWN | wx.CB_READONLY)
+			self.ctrl.SetBackgroundColour('white')
 			self.ctrl.Bind(wx.EVT_COMBOBOX, self.OnSettingChange)
+			#self.ctrl.Bind(wx.EVT_COMBOBOX_DROPDOWN, self.OnMouseDn)
 			self.ctrl.Bind(wx.EVT_LEFT_DOWN, self.OnMouseExit)
+			#self.ctrl.Bind(wx.EVT_LEFT_UP, self.OnMouseDn)
+
+
+			flag = wx.EXPAND
+		elif str(self.setting.getLabel())[0] == '*':#"Equivalent percentage":
+			self.ctrl = wx.TextCtrl(panel, -1, str(self.setting.getValue()), style=wx.TE_READONLY)
+			#Background color is not controlled from Validators
+			self.ctrl.Bind(wx.EVT_TEXT, self.OnSettingChange)
 			flag = wx.EXPAND
 		else:
 			self.ctrl = wx.TextCtrl(panel, -1, self.setting.getValue(self.settingIndex))
@@ -256,6 +271,7 @@ class SettingRow(object):
 
 		sizer.Add(self.label, (x,y), flag=wx.ALIGN_CENTER_VERTICAL|wx.LEFT,border=10)
 		sizer.Add(self.ctrl, (x,y+1), flag=wx.ALIGN_CENTER_VERTICAL|flag)
+		sizer.AddGrowableCol(1)
 		if self.setting.getExpertSubCategory() is not None:
 			self._expert_button = wx.Button(panel, -1, '...', style=wx.BU_EXACTFIT)
 			self._expert_button.SetFont(wx.Font(wx.SystemSettings.GetFont(wx.SYS_ANSI_VAR_FONT).GetPointSize() * 0.8, wx.FONTFAMILY_DEFAULT, wx.NORMAL, wx.FONTWEIGHT_NORMAL))
@@ -279,6 +295,12 @@ class SettingRow(object):
 
 	def OnMouseExit(self, e):
 		self.panel.main.OnPopupHide(self)
+		e.Skip()
+
+	def OnMouseDn(self, e):
+		#Uncommenting this will enable the dropdown to work when the engine is on. But the dropdown will only work as long as the mouse is down.
+		self.panel.main.callback()
+		print self.panel.main.callback()
 		e.Skip()
 
 	def OnSettingChange(self, e):
@@ -305,6 +327,12 @@ class SettingRow(object):
 			ctrl = ctrl.GetTextCtrl()
 		if result == validators.ERROR:
 			ctrl.SetBackgroundColour('Red')
+		elif result == validators.DISABLED:
+			ctrl.SetBackgroundColour('#e2e2e2')
+			ctrl.Disable()
+		elif result == validators.SUCCESS:
+			ctrl.SetBackgroundColour('White')
+			ctrl.Enable()
 		elif result == validators.WARNING:
 			ctrl.SetBackgroundColour('Yellow')
 		else:
