@@ -97,6 +97,8 @@ class machineSettingsDialog(wx.Dialog):
 			configBase.SettingRow(left, 'machine_center_is_zero', index=idx)
 			configBase.SettingRow(left, 'machine_shape', index=idx)
 			configBase.SettingRow(left, 'gcode_flavor', index=idx)
+			configBase.SettingRow(left, 'flowrate_correction', index=idx)
+
 
 			configBase.TitleRow(right, _("Printer head size"))
 			configBase.SettingRow(right, 'extruder_head_size_min_x', index=idx)

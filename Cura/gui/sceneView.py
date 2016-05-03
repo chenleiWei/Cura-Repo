@@ -832,7 +832,21 @@ class SceneView(openglGui.glGuiPanel):
 		self._scene.updateSizeOffsets()
 		self.QueueRefresh()
 
+	def flowrateFix(self):
+#		extrusionWidth = float (profile.getProfileSetting('nozzle_size'))
+		extrusionWidth = float (profile.calculateEdgeWidth())
+		layerHeight = float(profile.getProfileSetting('layer_height'))
+		rectangularArea = extrusionWidth * layerHeight
+		circularArea    = math.pi * layerHeight * layerHeight/4
+		diffArea = (rectangularArea + circularArea - (layerHeight*layerHeight))
+		flowReduction = round(100 - ((rectangularArea - diffArea) / diffArea * 100),2) 
+		if float(profile.getProfileSetting('filament_flow')) != float(flowReduction) and profile.getMachineSetting('flowrate_correction') == 'True':
+			profile.putProfileSetting('filament_flow', flowReduction)
+			self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()		
+
 	def _onRunEngine(self, e):
+
+		self.flowrateFix()
 
 		if profile.getProfileSettingFloat('fill_distance') > 0:
 			equivalent_percentage = round(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_distance')),2)

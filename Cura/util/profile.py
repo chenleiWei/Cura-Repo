@@ -555,6 +555,8 @@ setting('serial_port', 'AUTO', str, 'machine', 'hidden').setLabel(_("Serial port
 setting('serial_port_auto', '', str, 'machine', 'hidden')
 setting('serial_baud', 'AUTO', str, 'machine', 'hidden').setLabel(_("Baudrate"), _("Speed of the serial port communication\nNeeds to match your firmware settings\nCommon values are 250000, 115200, 57600"))
 setting('serial_baud_auto', '', int, 'machine', 'hidden')
+setting('flowrate_correction', 'True', bool, 'machine', 'hidden').setLabel(_("Flow rate correction"), _("Flow rate correction enables you to maintain tighter tolerances between mating parts.\n The correction factor converts the rectangular cross-section of the bead to a rectangle with rounded edges."))
+
 
 setting('extruder_head_size_min_x', '35', float, 'machine', 'hidden').setLabel(_("Head size towards X min (mm)"), _("The distance between left side of the print head to the nozzle."))
 setting('extruder_head_size_min_y', '55', float, 'machine', 'hidden').setLabel(_("Head size towards Y min (mm)"), _("The distance between the nozzle and right-most part of the print head."))
