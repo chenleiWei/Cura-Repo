@@ -337,7 +337,7 @@ class SceneView(openglGui.glGuiPanel):
 		meshLoader.saveMeshes(filename, self._scene.objects())
 
 	def OnOctoPrintButton(self, callback):
-		try: 
+		try:
 			infoTransfer = middleMan(self.printButton)
 			infoTransfer.OpenPrinterSelector()
 			filenames = []
@@ -347,21 +347,24 @@ class SceneView(openglGui.glGuiPanel):
 		except Exception as e:
 			raise e
 
-	def SendToPrinter(self, serial):
+	def SendToPrinter(self, job):
 		import re
-		#Temporary file handling
-		resourceBasePath = resources.resourceBasePath
-		file = self._scene._objectList[0].getName()
-		# Make a directory called 'temp' in ./resources
-		resourceBasePath = resources.resourceBasePath
-		suffix = '.gcode'
-		filename = file + suffix
-		# Path to temporary file
-		key = profile.OctoPrintConfigAPI(serial)
-		tempFilePath = os.path.join(profile.getBasePath(), '.temp', filename)
-		self._createTempFiles(tempFilePath)
-		self._uploadToOctoPrint(key, serial, tempFilePath)
-		
+		print "Send to printer function called."
+		if job != None:
+			serial = job['serial']
+			filename = job['filename']
+
+			#Temporary file handling
+			resourceBasePath = resources.resourceBasePath
+			file = self._scene._objectList[0].getName()
+			# Make a directory called 'temp' in ./resources
+			resourceBasePath = resources.resourceBasePath
+			# Path to temporary file
+			key = profile.OctoPrintConfigAPI(serial)
+			tempFilePath = os.path.join(profile.getBasePath(), '.temp', filename)
+			self._createTempFiles(tempFilePath)
+			self._uploadToOctoPrint(key, serial, tempFilePath)
+	
 	def _createTempFiles(self, gcodeFile):
 		# gets gcode from the engine
 		gcode = self._engine.getResult().getGCode()
@@ -1897,14 +1900,12 @@ class printerSelector(wx.Frame):
 	def __init__(self, enableUpload):
 		wx.Frame.__init__(self, None, wx.ID_ANY, "Printer Select", wx.DefaultPosition, style=wx.DEFAULT_DIALOG_STYLE |  wx.STAY_ON_TOP)
 
-		self.gcodeFilename = None
-	
 		# Text Related
 		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 		bigFont = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 		# OctoPrint API Config Path
 		printerListPath = os.path.join(profile.getBasePath(), 'octoprint_api_config.ini')
-		
+
 		# Add-New-Printer Event-listener
 		pub.subscribe(self.AddToPrinterList,'printer.add')
 		# Enable-Upload Event-Listener
@@ -1912,23 +1913,21 @@ class printerSelector(wx.Frame):
 		# File Load Status Event-Listener
 		pub.subscribe(self.initializeOpenFileObject, 'file.isopen')
 		
-		contentBox = wx.BoxSizer(wx.VERTICAL)
-		layoutGrid = wx.GridBagSizer(vgap=10, hgap=10)
-		
+
 		# Reads and parses the OctoPrintAPIConfig file for:
 		#	- printers
 		#	- api keys
 		printerList = []
+			
+		contentBox = wx.BoxSizer(wx.VERTICAL)
+		layoutGrid = wx.GridBagSizer(vgap=10, hgap=10)
 		cp = configparser.ConfigParser()
-		
-	#	self.openOctoPrintInBrowser = False
-		self.startPrintOnUpload = "false"
 		
 		if os.path.lexists(printerListPath):
 			cp.read(printerListPath)
 			listSections = cp.sections()
 			for item in listSections:
-				printerList.append("Series 1 %s" % item)		
+				printerList.append("Series 1 %s" % item)
 				
 		# Text labels
 		filenameLabel = wx.StaticText(self, -1, "Filename")
@@ -1940,10 +1939,13 @@ class printerSelector(wx.Frame):
 
 		# Option checkboxes
 		openInterfaceOption = wx.CheckBox(self, 1, "Open Interface")
+		openInterfaceOption.Bind(wx.EVT_CHECKBOX, self.OnOpenInterfaceChecked)
 		startPrintAfterUploadOption =  wx.CheckBox(self, 2, "Start Print")
+		startPrintAfterUploadOption.Bind(wx.EVT_CHECKBOX, self.StartPrint)
 
 		# Send to printer button
 		self.sendToPrinterButton = wx.Button(self, -1, "Send To Printer")
+		self.sendToPrinterButton.Bind(wx.EVT_BUTTON, self.OnUpload)
 		self.sendToPrinterButton.Enable(enableUpload)
 
 		# filename text ctrl
@@ -1958,7 +1960,7 @@ class printerSelector(wx.Frame):
 		layoutGrid.Add(printerLabel, pos=(2,2), flag=wx.ALIGN_CENTRE_VERTICAL)
 		layoutGrid.Add(self.availPrinters, pos=(2,3), span=(0,7), flag=wx.EXPAND)
 		
-		# option checkboxes
+		# add all elements to layout grid
 		layoutGrid.Add(openInterfaceOption, pos=(4,7), flag=wx.EXPAND)
 		layoutGrid.Add(startPrintAfterUploadOption, pos=(5,7), flag=wx.EXPAND)
 		layoutGrid.Add(addPrinterButton, pos=(7,2))
@@ -1971,8 +1973,9 @@ class printerSelector(wx.Frame):
 		self.SetSizerAndFit(newBox)
 		
 		self.filenameTextCtrl.Bind(wx.EVT_TEXT, self.onEditFilename)
-		
 		startPrintAfterUploadOption.Bind(wx.EVT_CHECKBOX, self.StartPrint)
+		self.startPrintOnUpload = "false"
+		
 		if startPrintAfterUploadOption.IsChecked():
 			pub.sendMessage('print.gcode', printGcode='true')
 		else:
@@ -1982,7 +1985,7 @@ class printerSelector(wx.Frame):
 		#Checkboxes
 		openInBrowser = 
 		openInBrowser.SetFont(bigFont)
-		openInBrowser.Bind(wx.EVT_CHECKBOX, self.OnChecked)		
+		openInBrowser.Bind(wx.EVT_CHECKBOX, self.OnOpenBrowserChecked)		
 		printAfterUpload = wx.CheckBox(self, -1, "Start Print")
 		printAfterUpload.SetFont(bigFont)
 		startPrintAfterUploadOption.Bind(wx.EVT_CHECKBOX, self.StartPrint)
@@ -2013,25 +2016,14 @@ class printerSelector(wx.Frame):
 	def onEditFilename(self, e):
 		if self.filenameTextCtrl.GetValue() == "":
 			self.sendToPrinterButton.Enable(False)
-		self.gcodeFilename = self.filenameTextCtrl.GetValue()
-		print self.gcodeFilename
 	
 	def initializeOpenFileObject(self, filenames):
 		if filenames:
-			print "Filename total: ", len(filenames)
-			print "\nstart list\n", "-"*60
-			for file in filenames:
-				print file
-		
-			print "filenames[-1]: "	
-			print filenames[-1]
 			gcodeFilename = str(filenames[-1]) + '.gcode'
 			cursorInsertionPoint = len(filenames[-1])
 			self.filenameTextCtrl.SetValue(gcodeFilename)
 			self.filenameTextCtrl.SetInsertionPoint(cursorInsertionPoint)
-			print "-"*60
 		else:
-			print "No filename data."
 			self.filenameTextCtrl.SetValue("")
 			self.sendToPrinterButton.Enable(False)
 
@@ -2064,11 +2056,82 @@ class printerSelector(wx.Frame):
 		index = self.availPrinters.GetSelection()
 		printerString = self.availPrinters.GetString(index)
 		series, one, serial = printerString.split()
-		# this sends the selected serial number to the octoPrint setup
-		pub.sendMessage('gcode.update', serial=serial)
-
-		self.Destroy()
+		validFilename = self.isFilenameValid(serial) # needs thread
+		filename = str(self.filenameTextCtrl.GetValue())
+	
+		dictToSend = {}
 		
+		dictToSend['serial'] = serial
+		
+		if not validFilename:
+			appendedFilename = self.getAppendedFilename(serial)
+			dictToSend['filename'] = appendedFilename
+		else:
+			if '.gcode' not in filename:
+				dictToSend['filename'] = filename + '.gcode'
+			else:
+				dictToSend['filename'] = filename
+		
+	# this sends the selected serial number to the octoPrint setup
+		pub.sendMessage('gcode.update', job=dictToSend)
+	
+		self.Destroy()
+	
+	def isFilenameValid(self, serial):
+		printer = printerConnect
+
+		if serial != None: 
+			
+			allFiles = printer.GetAllFilesOnPrinter(serial)
+			fileToUpload = self.filenameTextCtrl.GetValue()
+			filename, ext = fileToUpload.split('.')
+			isValid = True
+
+			if allFiles != None:
+				for x in allFiles:
+					# verbatim matches the entire filename
+					# e.g., firstPrintCone.gcode
+					if fileToUpload in x:
+						isValid = False
+	
+			return isValid
+		else:
+			print "No printer selected."
+		
+	def getAppendedFilename(self, serial):	
+		copyNumbers = []
+		fileCopyList = []
+		copyFileMatch = False
+		
+		import re
+		printer = printerConnect
+	
+		allFiles = printer.GetAllFilesOnPrinter(serial)
+		fileToUpload = self.filenameTextCtrl.GetValue()
+		filename, ext = fileToUpload.split('.')
+		
+		# are there copies?
+		newFilename = filename + "_copy"
+		for x in allFiles:
+			if newFilename in x:
+				fileCopyList.append(x)
+				copyFileMatch = True
+		
+		if copyFileMatch == True and len(fileCopyList) > 0:
+			for copy in fileCopyList:
+				# searches up to 1000; unnecessarily high, but gives some assurance for 
+				# not getting numbers mixed up
+				match = re.search('([1-9][0-9]{0,2}|1000)', copy)
+				if match:
+					copyNumbers.append(match.group().encode('utf-8'))
+			
+			newFileCopyNumber = int(max(copyNumbers)) + 1
+			newName = newFilename + str(newFileCopyNumber) + ".gcode"	
+		else:
+			newName = newFilename + "1" + ".gcode"
+	
+		return newName	
+
 	def OnAddNew(self, e):
 		print("Adding new printer")
 		newPrinter = AddNewPrinter(self)
@@ -2093,9 +2156,7 @@ class printerSelector(wx.Frame):
 			printerIndex = self.availPrinters.FindString(printer)
 			self.availPrinters.SetSelection(printerIndex)
 				
-		if profile.printerExists(serial) is True:
-			pass
-		else:
+		if profile.printerExists(serial) is False:
 			key = profile.OctoPrintConfigAPI(serial)
 			profile.initializeOctoPrintAPIConfig(serial, key)
 			
@@ -2112,7 +2173,7 @@ class printerSelector(wx.Frame):
 			profile.OctoPrintAPIRemoveSerial(serial)
 			self.availPrinters.Delete(index)
 		
-	def OnChecked(self, e):
+	def OnOpenInterfaceChecked(self, e):
 		if e.IsChecked():
 			openBrowser = True
 		else:
