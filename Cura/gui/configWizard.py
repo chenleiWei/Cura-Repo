@@ -126,8 +126,13 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		self.sizer.AddGrowableCol(0)
 		
 	def AddLogo(self):
-		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
-		self.AddImage(curaTAMLogo)
+		curaIcon =  wx.Bitmap(resources.getPathForImage('CuraTAMIcon.png'))
+		curaIcon.SetHeight(125)
+		curaIcon.SetWidth(125)
+		curaIconBitmap = self.AddLogoBitmap(curaIcon)
+
+	#	curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
+	#	self.AddImage(curaTAMLogo)
 		thisVersion = version.getVersion()
 		self.AddTextTagLine(thisVersion)
 
@@ -136,18 +141,9 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=11, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		hyper1.SetFont(font)
-		self.GetSizer().Add(hyper1, pos=(self.rowNr,0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.GetSizer().Add(hyper1, pos=(self.rowNr,0), span=(1, 3), flag=wx.ALIGN_CENTER_HORIZONTAL)
 		self.rowNr += 1
 		return hyper1
-
-	def GuidedTourLogo(self):
-		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
-		self.AddImage(curaTAMLogo)
-		self.AddTextTagLine('Guided Tour')
-		
-	def JustIconLogo(self):
-		curaTAMLogo = resources.getPathForImage('TAMLogoAndText.png')
-		self.AddImage(curaTAMLogo)
 		
 	# Left-aligned text
 	def AddText(self, info):
@@ -155,9 +151,10 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=11, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(360)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTRE_HORIZONTAL)
 		self.rowNr += 1
 		return text
+		
 		
 	# Center-aligned text
 	def AddCenteredText(self, info):
@@ -165,7 +162,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=11, family = wx.DEFAULT, style=wx.NORMAL, weight=wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(340)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTER_HORIZONTAL)
 		self.rowNr += 1
 		return text
 	
@@ -184,7 +181,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(340)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.BOTTOM, border=10)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTER_HORIZONTAL)
 		self.rowNr += 1
 		return text
 		
@@ -194,7 +191,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(300)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT, border=160)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTRE_HORIZONTAL)
 		self.rowNr += 1
 		return text
 		
@@ -209,12 +206,12 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		return text
 
 	def AddTextLarge(self, info):
-		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER)
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTER_HORIZONTAL)
 		font = wx.Font(pointSize=11, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
 		text.Wrap(400)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.BOTTOM, border=7)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTER_HORIZONTAL)
 		self.rowNr += 1
 		return text
 
@@ -223,12 +220,12 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=13, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
 		text.Wrap(340)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.BOTTOM, border=7)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTRE_HORIZONTAL | wx.TOP, border=20)
 		self.rowNr += 1
 		return text
 		
 	def AddErrorText(self, info, red=False):
-		text = wx.StaticText(self, -1, info, style=wx.ALIGN_LEFT)
+		text = wx.StaticText(self, -1, info, style=wx.ALIGN_CENTRE_HORIZONTAL)
 		font = wx.Font(pointSize=11, family = wx.DEFAULT,
                style = wx.NORMAL, weight = wx.NORMAL)
 		text.SetFont(font)
@@ -237,13 +234,14 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		else:
 			text.SetForegroundColour('Blue')
 			
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag= wx.ALIGN_CENTER | wx.LEFT | wx.EXPAND, border=148)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1,2), flag=wx.ALIGN_CENTRE_HORIZONTAL)
+
 		self.rowNr += 1
 		return text
 		
 	def AddImage(self, imagePath):
 		image = wx.Image(imagePath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
-		self.GetSizer().Add(wx.StaticBitmap(self, -1, image), pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT| wx.RIGHT | wx.ALIGN_CENTER, border=30)
+		self.GetSizer().Add(wx.StaticBitmap(self, -1, image), pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTRE_HORIZONTAL)
 		self.rowNr += 1
 		return image
 		
@@ -287,7 +285,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		radio = wx.RadioButton(self, -1, label, style=wx.ALIGN_LEFT)
 		font = wx.Font(pointSize=11, family = wx.DEFAULT, style = wx.NORMAL | wx.LEFT, weight=wx.NORMAL)
 		radio.SetFont(font)
-		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.ALIGN_LEFT, border=130)
+		self.GetSizer().Add(radio, pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTRE_HORIZONTAL)
 		self.rowNr += 1
 		return radio
 		
@@ -296,7 +294,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=11, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		check.SetFont(font)
 		check.SetValue(checked)
-		self.GetSizer().Add(check, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER)
+		self.GetSizer().Add(check, pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTRE_HORIZONTAL)
 		self.rowNr += 1
 		return check
 
@@ -313,7 +311,7 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		button = wx.Button(self, -1, str(label))
 		font = wx.Font(pointSize=11, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.NORMAL)
 		button.SetFont(font)
-		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 2), flag=wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, border = 5)
+		self.GetSizer().Add(button, pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTRE_HORIZONTAL)
 		self.rowNr += 1
 		return button
 
@@ -339,8 +337,8 @@ class InfoPage(wx.wizard.WizardPageSimple):
 		font = wx.Font(pointSize=11, family = wx.DEFAULT,
 		style = wx.NORMAL, weight = wx.LIGHT)
 		text.SetFont(font)
-		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 1), flag=wx.ALIGN_RIGHT | wx.LEFT, border=75)
-		self.GetSizer().Add(ret, pos=(self.rowNr, 1), span=(1, 1), flag=wx.CENTER)
+		self.GetSizer().Add(text, pos=(self.rowNr, 0), span=(1, 0), flag=wx.ALIGN_RIGHT | wx.LEFT, border=75)
+		self.GetSizer().Add(ret, pos=(self.rowNr, 1), span=(0, 3), flag=wx.CENTER)
 		self.rowNr += 1
 		return ret
 
@@ -354,11 +352,16 @@ class InfoPage(wx.wizard.WizardPageSimple):
 
 	def AddBitmap(self, bitmap):
 		bitmap = wx.StaticBitmap(self, -1, bitmap)
-		self.GetSizer().Add(bitmap, pos=(self.rowNr, 0), span=(1, 2), flag=wx.LEFT | wx.RIGHT)
+		self.GetSizer().Add(bitmap, pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTRE_HORIZONTAL | wx.TOP, border=10)
 		self.rowNr += 1
 		return bitmap
 		
-
+	def AddLogoBitmap(self, bitmap):
+		bitmap = wx.StaticBitmap(self, -1, bitmap)
+		self.GetSizer().Add(bitmap, pos=(self.rowNr, 0), span=(1, 3), flag=wx.ALIGN_CENTRE_HORIZONTAL)
+		self.rowNr += 1
+		return bitmap
+		
 	def AddCheckmark(self, label, bitmap):
 		check = wx.StaticBitmap(self, -1, bitmap)
 		text = wx.StaticText(self, -1, label)
@@ -506,8 +509,9 @@ class TAMReadyPage(InfoPage):
 	def __init__(self, parent):
 		super(TAMReadyPage, self).__init__(parent, _("Configuration Complete"))
 		self.AddLogo()
-		typeALogo = resources.getPathForImage('configScreen.png')	
-		self.AddImage(typeALogo)
+		tutorialConfigScreenImgPath = resources.getPathForImage('configScreen.png')	
+		tutorialConfigScreenBitmap = wx.Bitmap(tutorialConfigScreenImgPath)
+		self.AddBitmap(tutorialConfigScreenBitmap)
 		self.AddHiddenSeperator(1)
 		self.AddTextTitle(_("Configuration Complete"))
 		self.AddCenteredText(_("Click 'Next' for a guided tour of\nCura Type A features."))
@@ -547,7 +551,7 @@ class TAMOctoPrintInfo(InfoPage):
 		self.AddHiddenSeperator(1)
 		self.configurePrinterButton = self.AddButton("Configure")
 		self.skipConfig = self.AddCheckbox("Skip Configuration", checked=False)
-		self.errorMessageln1 = self.AddErrorText('\n\n')
+		self.errorMessageln1 = self.AddErrorText('')
 		self.configurePrinterButton.Bind(wx.EVT_BUTTON, self.attemptConfiguration)
 		self.skipConfig.Bind(wx.EVT_CHECKBOX, self.skipPage)
 		self.configurePrinterButton.Disable()
@@ -640,18 +644,23 @@ class TAMOctoPrintInfo(InfoPage):
 class TAMSelectMaterials(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectMaterials, self).__init__(parent, _("Material Selection"))
-		self.GuidedTourLogo()
-		materialProfileImage = resources.getPathForImage('0mp.png')
-		self.AddImage(materialProfileImage)
+		self.AddLogo()
+		# mps - material profile selector
+		mpsImagePath = resources.getPathForImage('0mp.png')
+		mpsBitmap = wx.Bitmap(mpsImagePath)
+		mpsBitmap.SetHeight(265)
+		mpsBitmap.SetWidth(320)
+		self.AddBitmap(mpsBitmap)
 		self.AddTextTitle("Optimized Material Profiles")
 		self.AddText("Select from over 40 material profiles from our rapidly growing portfolio of material profiles.\n\nEvery material profile is tested and optimized for the Series 1, eliminating the time and effort necessary to determine optimal settings from scratch.")
 
 class TAMSelectStrength(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectStrength, self).__init__(parent, _("Strength Selection"))
-		self.GuidedTourLogo()
-		typeALogo = resources.getPathForImage('2st.png')
-		self.AddImage(typeALogo)
+		self.AddLogo()
+		tutorialStrengthImgPath = resources.getPathForImage('2st.png')
+		tutorialStrengthBitmap = wx.Bitmap(tutorialStrengthImgPath)
+		self.AddBitmap(tutorialStrengthBitmap)
 		self.addText()
 	
 	# General informative text
@@ -663,9 +672,11 @@ class TAMSelectQuality(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectQuality, self).__init__(parent, _("Quality Selection"))
 		
-		self.GuidedTourLogo()
-		typeALogo = resources.getPathForImage('1qu.png')
-		self.AddImage(typeALogo)
+		self.AddLogo()
+		tutorialQualityImgPath = resources.getPathForImage('1qu.png')
+		tutorialQualityBitmap = wx.Bitmap(tutorialQualityImgPath)
+		self.AddBitmap(tutorialQualityBitmap)
+
 		self.addText()
 	
 	# General informative text
@@ -676,7 +687,7 @@ class TAMSelectQuality(InfoPage):
 class TAMSelectSupport(InfoPage):
 	def __init__(self, parent):
 		super(TAMSelectSupport, self).__init__(parent, _("Support Selection"))
-		self.GuidedTourLogo()
+		self.AddLogo()
 		typeALogo = resources.getPathForImage('3sa.png')
 		self.AddImage(typeALogo)
 		self.AddTextTitle("Support, Brims, and Rafts")
@@ -685,7 +696,7 @@ class TAMSelectSupport(InfoPage):
 class TAMFirstPrint(InfoPage):
 	def __init__(self, parent):
 		super(TAMFirstPrint, self).__init__(parent, _("Your First Print"))
-		self.JustIconLogo()
+		self.AddLogo()
 		self.AddText("Click 'Finish' and Cura Type A will open and open an example model which you can use to become more familiar with the application.")
 		self.AddHiddenSeperator(1)
 		saveAndUploadImage = resources.getPathForImage('readyToGoPage.png')
@@ -701,7 +712,7 @@ class TAMFirstPrint(InfoPage):
 class NonTAM(InfoPage):
 	def __init__(self, parent):
 		super(NonTAM, self).__init__(parent, _("Select Machine"))
-		self.GuidedTourLogo()
+		self.AddLogo()
 		self.Ultimaker2Radio = self.AddRadioButton("Ultimaker2", style=wx.RB_GROUP)
 		self.Ultimaker2Radio.SetValue(True)
 		self.Ultimaker2Radio.Bind(wx.EVT_RADIOBUTTON, self.OnUltimaker2Select)

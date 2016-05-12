@@ -64,7 +64,7 @@ class ConfirmCredentials(threading.Thread):
 		url = 'http://series1-%s.local:5000/api/files/local' % self.serial
 
 		try:
-			r = requests.post(url, headers=header, files=files, timeout=10)
+			r = requests.post(url, headers=header, files=files, timeout=3)
 		except requests.exceptions.RequestException as e:
 			print e
 			self.conveyError("Connection could not be made. Please try again later.")
@@ -194,7 +194,7 @@ class GcodeUpload(threading.Thread):
 		data = {'select': 'true', 'print': self.printOnUpload}
 		
 		try:
-			r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files, timeout=10)
+			r = requests.post('http://series1-%s.local:5000/api/files/local' % self.serial, headers=header, data=data, files=files, timeout=3)
 		except requests.exceptions.RequestException as e:
 			self.notification.message("Upload failed, please check your network connection or try again later.")
 
@@ -228,7 +228,7 @@ def GetAllFilesOnPrinter(serial):
 	header = {'X-Api-Key': 'pod'}
 	requestData = None
 	try:
-		r = requests.get(url, headers=header, timeout=10)
+		r = requests.get(url, headers=header, timeout=3)
 	except requests.exceptions.RequestException as e:
 		print e
 		return

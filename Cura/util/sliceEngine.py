@@ -568,7 +568,7 @@ class Engine(object):
 			settings['sparseInfillLineDistance'] = -1
 			makeInfill = False
 
-		if makeInfill  == True:	
+		if makeInfill != None and makeFill == True:
 			sparseInfillLineDistance = profile.getProfileSettingFloat('fill_distance') * 1000
 			if sparseInfillLineDistance<400:
 				sparseInfillLineDistance = 400
