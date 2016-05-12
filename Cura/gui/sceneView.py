@@ -404,7 +404,7 @@ class SceneView(openglGui.glGuiPanel):
 					
 	def OnPrintButton(self, button):
 		mainWindow = self.GetParent().GetParent().GetParent()
-		
+		directUpload = mainWindow.OnDirectUploadSettings(True)
 		if button == 1:
 			connectionGroup = self._printerConnectionManager.getAvailableGroup()
 			"""
