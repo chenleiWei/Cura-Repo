@@ -744,7 +744,7 @@ class mainWindow(wx.Frame):
 					updateVersion = y
 
 			if needsUpdate is True and updateVersion != '':
-				if wx.MessageBox(_("Cura Type A v%s, would you like to download?" % updateVersion), _("New Version Available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
+				if wx.MessageBox(_("Cura Type A v%s is now available. Would you like to download it?" % updateVersion), _("New Version Available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
 					webbrowser.open(downloadLink)
 				else:
 					pass
@@ -757,7 +757,7 @@ class mainWindow(wx.Frame):
 					wx.MessageBox(_("You are running the latest version of Cura!"), style=wx.ICON_INFORMATION)
 		else:
 			if e:
-				wx.MessageBox(_("Please check your internet connection or try again later."), _("Error"), wx.OK | wx.ICON_INFORMATION)				
+				wx.MessageBox(_("Please check your internet connection or try again later."), _("Error"), wx.OK | wx.ICON_INFORMATION)
 
 	def OnAbout(self, e):
 		aboutBox = aboutWindow.aboutWindow()
