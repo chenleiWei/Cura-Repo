@@ -138,7 +138,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self.infillGridButton = openglGui.glButton(self, 2, _("Infill"), (-1,-1), self.OninfillGridButton)
 		
-		if profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid':
+		if profile.getProfileSetting('infill_type') == '2D':
 			self.infillGridButton.setHidden(False)
 		else:
 			self.infillGridButton.setHidden(True)
