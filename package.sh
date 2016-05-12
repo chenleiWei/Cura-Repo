@@ -44,7 +44,7 @@ if [ -z ${MATERIALS_REPO:-} ]; then
 fi
 
 if [ -z ${MATERIALS_BRANCH:-} ]; then
-	MATERIALS_BRANCH="replace/fillDensityToPercent"
+	MATERIALS_BRANCH="devel"
 fi
 
 JOBS=${JOBS:-3}
