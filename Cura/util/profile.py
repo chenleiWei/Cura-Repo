@@ -232,6 +232,7 @@ setting('filament_diameter2',          0, float, 'advanced',    _('Filament')).s
 setting('filament_diameter3',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter3 (mm)"), _("Diameter of your filament for the 3th nozzle. Use 0 to use the same diameter as for nozzle 1."))
 setting('filament_diameter4',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter4 (mm)"), _("Diameter of your filament for the 4th nozzle. Use 0 to use the same diameter as for nozzle 1."))
 setting('filament_diameter5',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter5 (mm)"), _("Diameter of your filament for the 5th nozzle. Use 0 to use the same diameter as for nozzle 1."))
+setting('filament_flow_user_editable',            100., float, 'advanced',    _('Filament')).setRange(5,300).setLabel(_("Flow (%)"), _("Flow compensation, the amount of material extruded is multiplied by this value"))
 setting('skirt_line_count',            1, int,   'expert', _('Skirt')).setRange(0).setLabel(_("Line Count"), _("The skirt is a line drawn around the object at the first layer. This helps to prime your extruder, and to see if the object fits on your platform.\nSetting this to 0 will disable the skirt. Multiple skirt lines can help priming your extruder better for small objects."))
 setting('skirt_gap',                 3.0, float, 'expert', _('Skirt')).setRange(0).setLabel(_("Start Distance (mm)"), _("The distance between the skirt and the first layer.\nThis is the minimal distance, multiple skirt lines will be put outwards from this distance."))
 setting('skirt_minimal_length',    150.0, float, 'expert', _('Skirt')).setRange(0).setLabel(_("Minimal Length (mm)"), _("The minimal length of the skirt, if this minimal length is not reached it will add more skirt lines to reach this minimal lenght.\nNote: If the line count is set to 0 this is ignored."))
@@ -606,6 +607,9 @@ settingsDictionary['wipe_tower_volume'].addCondition(lambda : int(getMachineSett
 settingsDictionary['ooze_shield'].addCondition(lambda : int(getMachineSetting('extruder_amount')) > 1)
 #Heated bed
 settingsDictionary['print_bed_temperature'].addCondition(lambda : getMachineSetting('has_heated_bed') == 'True')
+#Condition for filament flow
+settingsDictionary['filament_flow'].addCondition(lambda : getMachineSetting('flowrate_correction') == 'True')
+settingsDictionary['filament_flow_user_editable'].addCondition(lambda : getMachineSetting('flowrate_correction') == 'False')
 
 #UltiGCode uses less settings, as these settings are located inside the machine instead of gcode.
 settingsDictionary['print_temperature'].addCondition(lambda : getMachineSetting('gcode_flavor') != 'UltiGCode')

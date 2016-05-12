@@ -859,7 +859,11 @@ class SceneView(openglGui.glGuiPanel):
 		flowReduction = round(100 - ((rectangularArea - diffArea) / diffArea * 100),2) 
 		if float(profile.getProfileSetting('filament_flow')) != float(flowReduction) and profile.getMachineSetting('flowrate_correction') == 'True':
 			profile.putProfileSetting('filament_flow', flowReduction)
-			self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()		
+			self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
+		elif float(profile.getProfileSetting('filament_flow')) != float(profile.getProfileSetting('filament_flow_user_editable')) and profile.getMachineSetting('flowrate_correction') == 'False' :
+			profile.putProfileSetting('filament_flow', profile.getProfileSetting('filament_flow_user_editable'))
+			self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
+				
 
 	def _onRunEngine(self, e):
 
