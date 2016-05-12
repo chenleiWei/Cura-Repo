@@ -1879,7 +1879,10 @@ class middleMan(SceneView):
 
 	def OpenPrinterSelector(self):
 		# Send analytic data
-		analytics.featureAnalytics('','','1','','direct_upload')
+		try:
+			analytics.featureAnalytics('','','1','','direct_upload')
+		except Exception as e:
+			print e
 		if self.printButtonStatus.isDisabled():
 			self.enableUpload = False
 		else:
@@ -1980,38 +1983,6 @@ class printerSelector(wx.Frame):
 			pub.sendMessage('print.gcode', printGcode='true')
 		else:
 			pub.sendMessage('print.gcode', printGcode='false')
-		"""
-		# ------------
-		#Checkboxes
-		openInBrowser = 
-		openInBrowser.SetFont(bigFont)
-		openInBrowser.Bind(wx.EVT_CHECKBOX, self.OnOpenBrowserChecked)		
-		printAfterUpload = wx.CheckBox(self, -1, "Start Print")
-		printAfterUpload.SetFont(bigFont)
-		startPrintAfterUploadOption.Bind(wx.EVT_CHECKBOX, self.StartPrint)
-		#--------------
-	#	filenameLabel = wx.StaticText(self, -1, "Filename: ")
-	#	self.filenameInput = wx.TextCtrl(self, -1, " ")
-
-		layoutGrid.Add(openInBrowser, pos=(3,4))
-		self.SetSizerAndFit(layoutGrid)
-
-		# --- Cancel and upload buttons --- #
-		self.cancel = wx.Button(self, 1, "Cancel")
-		self.sendToPrinterButton = wx.Button(self, 10, "Upload")
-		self.sendToPrinterButton.Enable(enableUpload)
-		
-		#Font-size
-		self.cancel.SetFont(bigFont)
-		self.sendToPrinterButton.SetFont(bigFont)
-		
-
-		
-		if printAfterUpload.IsChecked():
-			pub.sendMessage('print.gcode', printGcode='true')
-		else:
-			pub.sendMessage('print.gcode', printGcode='false')
-	"""			
 	
 	def onEditFilename(self, e):
 		if self.filenameTextCtrl.GetValue() == "":
@@ -2049,39 +2020,36 @@ class printerSelector(wx.Frame):
 	
 		editPrinter = EditPrinter(serial)
 		editPrinter.Show()
-		
-	#	pub.sendMessage('load.serial', serial=serialNum)
 
 	def OnUpload(self, e):
+		dictToSend = {}	
 		index = self.availPrinters.GetSelection()
 		printerString = self.availPrinters.GetString(index)
 		series, one, serial = printerString.split()
 		validFilename = self.isFilenameValid(serial) # needs thread
 		filename = str(self.filenameTextCtrl.GetValue())
-	
-		dictToSend = {}
 		
 		dictToSend['serial'] = serial
 		
-		if not validFilename:
-			appendedFilename = self.getAppendedFilename(serial)
-			dictToSend['filename'] = appendedFilename
-		else:
-			if '.gcode' not in filename:
-				dictToSend['filename'] = filename + '.gcode'
+		if validFilename is not None: 
+			if validFilename == False:
+				appendedFilename = self.getAppendedFilename(serial)
+				dictToSend['filename'] = appendedFilename
 			else:
-				dictToSend['filename'] = filename
+				if '.gcode' not in filename:
+					dictToSend['filename'] = filename + '.gcode'
+				else:
+					dictToSend['filename'] = filename
+				
 		
-	# this sends the selected serial number to the octoPrint setup
-		pub.sendMessage('gcode.update', job=dictToSend)
-	
+			# this sends the selected serial number to the OctoPrint setup
+			pub.sendMessage('gcode.update', job=dictToSend)
 		self.Destroy()
 	
 	def isFilenameValid(self, serial):
 		printer = printerConnect
-
+		
 		if serial != None: 
-			
 			allFiles = printer.GetAllFilesOnPrinter(serial)
 			fileToUpload = self.filenameTextCtrl.GetValue()
 			filename, ext = fileToUpload.split('.')
@@ -2097,6 +2065,7 @@ class printerSelector(wx.Frame):
 			return isValid
 		else:
 			print "No printer selected."
+			return
 		
 	def getAppendedFilename(self, serial):	
 		copyNumbers = []
