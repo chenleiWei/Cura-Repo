@@ -21,7 +21,7 @@ class alterationPanel(wx.Panel):
 		if int(profile.getMachineSetting('extruder_amount')) > 4:
 			self.alterationFileList += ['start5.gcode', 'end5.gcode']
 		self.currentFile = None
-		
+		self.selected = None
 		self.textArea = gcodeTextArea.GcodeTextArea(self)
 		self.list = wx.ListBox(self, choices=self.alterationFileList, style=wx.LB_SINGLE)
 		self.list.SetSelection(0)
@@ -48,6 +48,8 @@ class alterationPanel(wx.Panel):
 		self.currentFile = self.list.GetSelection()
 		
 	def OnRefresh(self, e):
+		if self.selected != None:	
+			profile.setAlterationFile(self.selected, self.textArea.GetValue())		
 		try:
 			self.GetParent().GetParent().GetParent().GetParent().GetParent().scene.sceneUpdated()
 		except Exception as e:
@@ -57,12 +59,7 @@ class alterationPanel(wx.Panel):
 
 	def OnFocusLost(self, e):
 		if self.currentFile == self.list.GetSelection():
-			selected = self.alterationFileList[self.list.GetSelection()]
-			try:
-				profile.setAlterationFile(selected, self.textArea.GetValue())
-		
-			except Exception as e:
-				raise e
+			self.selected = self.alterationFileList[self.list.GetSelection()]
 				
 	def updateProfileToControls(self):
 		self.OnSelect(None)
