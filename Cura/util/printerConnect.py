@@ -4,6 +4,7 @@ import os
 import wx
 import webbrowser
 import sys
+import json
 
 from Cura.util import profile
 import json
@@ -131,7 +132,6 @@ class ConfirmCredentials(threading.Thread):
 				self.parent.configurePrinterButton.Enable()
 			self.errorMessage1.Wrap(200)
 
-	
 	# For removing the dummy file used in configuring connection to printer
 	def removeFile(self):
 		r = requests.Session()
@@ -141,9 +141,8 @@ class ConfirmCredentials(threading.Thread):
 		print r.text
 		status = r.status_code
 		print status
-
-
-class  GcodeUpload(threading.Thread):
+			
+class GcodeUpload(threading.Thread):
 	def __init__(self, key, serial, tempFilePath, openBrowser, notification, printOnUpload):
 		threading.Thread.__init__(self)
 		
@@ -218,7 +217,27 @@ class  GcodeUpload(threading.Thread):
 		if status == 201: 
 			if self.openBrowser:
 				webbrowser.open_new('http://series1-%s.local:5000' % self.serial)
-			self.notification.message("Successfully uploaded as %s!" % self.filename, lambda : webbrowser.open_new('http://series1-%s.local:5000' % self.serial), 6, 'Open In Browser')
+			self.notification.message("Successfully uploaded to Series 1 " + str(self.serial) + " as %s!" % self.filename, lambda : webbrowser.open_new('http://series1-%s.local:5000' % self.serial), 6, 'Open In Browser')
 		else:
 			self.notification.message("Error: Please check that your Series 1 is connected to the internet")
 			
+
+def GetAllFilesOnPrinter(serial):
+	print "Getting all files..."
+	url = 'http://series1-'+ str(serial) + '.local:5000/api/files'
+	header = {'X-Api-Key': 'pod'}
+	requestData = None
+	try:
+		r = requests.get(url, headers=header, timeout=10)
+	except requests.exceptions.RequestException as e:
+		print e
+		return
+
+	try:
+		allFilenames = []		
+		for x in r.json()['files']:
+			allFilenames.append(x['name'])
+		return allFilenames
+	except Exception as e:
+		print e
+		return

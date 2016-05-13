@@ -806,10 +806,12 @@ class normalSettingsPanel(configBase.configPanelBase):
 		
 
 		self._addSettingsToPanels('basic', left, right)
+		self._addSettingsToPanels('informational', left, right)
 		self.SizeLabelWidths(left, right)
 
 		(left, right, self.advancedPanel) = self.CreateDynamicConfigTab(self.nb, _('Advanced'))
 		self._addSettingsToPanels('advanced', left, right)
+		self._addSettingsToPanels('informational', left, right)
 		self.SizeLabelWidths(left, right)
 
 		#Plugin page
