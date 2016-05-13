@@ -747,7 +747,8 @@ class mainWindow(wx.Frame):
 				if wx.MessageBox(_("Cura Type A v%s, would you like to download?" % updateVersion), _("New Version Available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
 					webbrowser.open(downloadLink)
 				else:
-					profile.putPreference('check_for_updates', False)
+					pass
+					# profile.putPreference('check_for_updates', False)
 					# If the user says no, then set check_for_updates to False
 					# Users will still be able to see the update dialog from the
 					# help menu

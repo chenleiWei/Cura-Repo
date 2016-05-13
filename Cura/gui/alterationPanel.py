@@ -29,7 +29,7 @@ class alterationPanel(wx.Panel):
 		self.textArea.Bind(wx.EVT_KILL_FOCUS, self.OnFocusLost, self.textArea)
 		self.textArea.Bind(wx.stc.EVT_STC_CHANGE, self.OnFocusLost, self.textArea)
 
-		refreshButton = wx.Button(self, -1, "Save Changes")
+		refreshButton = wx.Button(self, -1, "Save Start/End GCode Changes")
 		refreshButton.Bind(wx.EVT_BUTTON, self.OnRefresh)
 
 		sizer = wx.GridBagSizer(5,5)

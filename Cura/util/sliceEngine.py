@@ -543,10 +543,13 @@ class Engine(object):
 		if profile.getProfileSetting('support_type') == 'Lines':
 			settings['supportType'] = 1
 
-		if profile.getProfileSetting('infill_type') == 'Line':
+		if profile.getProfileSetting('infill_type') == '2D' and profile.getProfileSetting('2d_infill_type') == 'Automatic':
+			settings['infillPattern'] = 7
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == '2D' and profile.getProfileSetting('2d_infill_type') == 'Lines':
 			settings['infillPattern'] = 0
 			makeInfill = True
-		elif profile.getProfileSetting('infill_type') == 'Grid':
+		elif profile.getProfileSetting('infill_type') == '2D' and profile.getProfileSetting('2d_infill_type') == 'Grid':
 			settings['infillPattern'] = 1
 			makeInfill = True
 		elif profile.getProfileSetting('infill_type') == 'Cube':
@@ -565,7 +568,7 @@ class Engine(object):
 			settings['sparseInfillLineDistance'] = -1
 			makeInfill = False
 
-		if makeInfill  == True:	
+		if makeInfill != None and makeFill == True:
 			sparseInfillLineDistance = profile.getProfileSettingFloat('fill_distance') * 1000
 			if sparseInfillLineDistance<400:
 				sparseInfillLineDistance = 400
