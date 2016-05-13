@@ -33,7 +33,6 @@ class newVersionDialog(wx.Dialog):
 		s.Add(versionForked)
 		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=5)
 	
-	
 		# New in this version
 		newHere = wx.StaticText(p, -1, "New in Cura " + version.getVersion())
 		newHere.SetFont(titleFont)
@@ -49,15 +48,21 @@ class newVersionDialog(wx.Dialog):
 			wx.StaticText(p, -1, "")
 		]
 		
+		# Bug fixes
+		newHere = wx.StaticText(p, -1, "New in Cura " + version.getVersion())
+		newHere.SetFont(titleFont)
+		degree_sign = u'\N{DEGREE SIGN}'
+		s.Add(newHere, flag=wx.TOP, border=10)		
+		
 		for item in changesAndAdditions:
 			item.Wrap(600)
 			item.SetFont(textFont)
 			s.Add(item, flag=wx.TOP, border=5)
 		
 		# Materials
-		materialsLabel = wx.StaticText(p, -1, "New Material Profiles")
-		materialsLabel.SetFont(titleFont)
-		s.Add(materialsLabel, flag=wx.BOTTOM, border=10)
+#		materialsLabel = wx.StaticText(p, -1, "New Material Profiles")
+#		materialsLabel.SetFont(titleFont)
+#		s.Add(materialsLabel, flag=wx.BOTTOM, border=10)
 		
 		newMaterialsDict = {}
 		newMaterialsDict['3DElements'] = ['FireResist Nylon']
@@ -70,7 +75,7 @@ class newVersionDialog(wx.Dialog):
 		newMaterialsDict['TonerPlastics'] = ['PLA']
 		newMaterialsDict['Colorfabb'] = ['XT Copolyester']
 		
-		self.addMaterialList(newMaterialsDict, p, s)
+	#	self.addMaterialList(newMaterialsDict, p, s)
 		
 
 
