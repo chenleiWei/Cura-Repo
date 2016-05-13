@@ -79,7 +79,7 @@ class mainWindow(wx.Frame):
 
 		self.fileMenu.AppendSeparator()
 		i = self.fileMenu.Append(-1, _("Print...\tCTRL+P"))
-		self.Bind(wx.EVT_MENU, lambda e: self.scene.OnPrintButton(1), i)
+		self.Bind(wx.EVT_MENU, lambda e: self.scene.OnPrintButton(2), i)
 		i = self.fileMenu.Append(-1, _("Save GCode...\tCTRL+G"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.showSaveGCode(), i)
 		i = self.fileMenu.Append(-1, _("Show Slice Engine Log..."))
@@ -747,8 +747,8 @@ class mainWindow(wx.Frame):
 				if wx.MessageBox(_("Cura Type A v%s is now available. Would you like to download it?" % updateVersion), _("New Version Available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
 					webbrowser.open(downloadLink)
 				else:
-					pass
-					# profile.putPreference('check_for_updates', False)
+
+					profile.putPreference('check_for_updates', False)
 					# If the user says no, then set check_for_updates to False
 					# Users will still be able to see the update dialog from the
 					# help menu
@@ -758,7 +758,7 @@ class mainWindow(wx.Frame):
 		else:
 			if e:
 				wx.MessageBox(_("Please check your internet connection or try again later."), _("Error"), wx.OK | wx.ICON_INFORMATION)
-
+				
 	def OnAbout(self, e):
 		aboutBox = aboutWindow.aboutWindow()
 		aboutBox.Centre()

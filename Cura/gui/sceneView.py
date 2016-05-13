@@ -404,7 +404,7 @@ class SceneView(openglGui.glGuiPanel):
 					
 	def OnPrintButton(self, button):
 		mainWindow = self.GetParent().GetParent().GetParent()
-		directUpload = mainWindow.OnDirectUploadSettings(True)
+	
 		if button == 1:
 			connectionGroup = self._printerConnectionManager.getAvailableGroup()
 			"""
@@ -453,9 +453,9 @@ class SceneView(openglGui.glGuiPanel):
 			else:
 			"""
 			self.showSaveGCode()
+		if button == 2:
+			self.OnOctoPrintButton(True)
 		if button == 3:
-			directUpload = mainWindow.OnDirectUploadSettings(True)
-
 			menu = wx.Menu()
 			connections = self._printerConnectionManager.getAvailableConnections()
 			menu.connectionMap = {}
@@ -1894,7 +1894,10 @@ class middleMan(SceneView):
 		
 	#	print "scene object quantity: %s" % self.sceneObjectQuantity
 		win = printerSelector(self.enableUpload)
-		win.Show(True)
+		win.Show()
+		win.Raise()
+		win.Iconize(False)
+		win.Centre()
 
 	def uploadStatus(self, enable):
 		# Sends message to printerSelector window to enable the upload button
@@ -1905,7 +1908,7 @@ class middleMan(SceneView):
 
 class printerSelector(wx.Frame):
 	def __init__(self, enableUpload):
-		wx.Frame.__init__(self, None, wx.ID_ANY, "Printer Select", wx.DefaultPosition, style=wx.DEFAULT_DIALOG_STYLE |  wx.STAY_ON_TOP)
+		super(printerSelector, self).__init__(None, style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
 
 		# Text Related
 		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
@@ -1924,7 +1927,7 @@ class printerSelector(wx.Frame):
 		# Reads and parses the OctoPrintAPIConfig file for:
 		#	- printers
 		#	- api keys
-		printerList = []
+		printerList = ["No Printers Added"]
 			
 		contentBox = wx.BoxSizer(wx.VERTICAL)
 		layoutGrid = wx.GridBagSizer(vgap=10, hgap=10)
@@ -1934,7 +1937,9 @@ class printerSelector(wx.Frame):
 			cp.read(printerListPath)
 			listSections = cp.sections()
 			for item in listSections:
-				printerList.append("Series 1 %s" % item)
+				printerList.remove("No Printers Added")
+				printerList.append("Series 1 %s" % item)	
+				
 				
 		# Text labels
 		filenameLabel = wx.StaticText(self, -1, "Filename")
@@ -2113,7 +2118,7 @@ class printerSelector(wx.Frame):
 	def AddToPrinterList(self, serial):
 		printerList = []
 		total = self.availPrinters.GetCount()
-		
+				
 		# put items in a list if there is more than 1 printer
 		if total >= 0:
 			for x in range(0,total):
@@ -2124,10 +2129,13 @@ class printerSelector(wx.Frame):
 
 		# if there are no items in the list or the serial isn't already in the list
 		# add it and save it
-		if len(printerList) == 0 or not printer in printerList:
+		
+		if printer not in printerList:
 			self.availPrinters.Append(printer)
 			printerIndex = self.availPrinters.FindString(printer)
 			self.availPrinters.SetSelection(printerIndex)
+			if self.availPrinters.GetString(0) == "No Printers Added":
+				self.availPrinters.Delete(0)
 				
 		if profile.printerExists(serial) is False:
 			key = profile.OctoPrintConfigAPI(serial)
