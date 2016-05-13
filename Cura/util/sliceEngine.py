@@ -543,6 +543,8 @@ class Engine(object):
 		if profile.getProfileSetting('support_type') == 'Lines':
 			settings['supportType'] = 1
 
+		makeInfill = None
+
 		if profile.getProfileSetting('infill_type') == '2D' and profile.getProfileSetting('2d_infill_type') == 'Automatic':
 			settings['infillPattern'] = 7
 			makeInfill = True
@@ -568,7 +570,7 @@ class Engine(object):
 			settings['sparseInfillLineDistance'] = -1
 			makeInfill = False
 
-		if makeInfill != None and makeFill == True:
+		if makeInfill != None and makeInfill == True:
 			sparseInfillLineDistance = profile.getProfileSettingFloat('fill_distance') * 1000
 			if sparseInfillLineDistance<400:
 				sparseInfillLineDistance = 400
