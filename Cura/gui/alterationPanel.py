@@ -33,9 +33,9 @@ class alterationPanel(wx.Panel):
 		refreshButton.Bind(wx.EVT_BUTTON, self.OnRefresh)
 
 		sizer = wx.GridBagSizer(5,5)
-		sizer.Add(self.list, (0,0), span=(2,0), flag=wx.EXPAND)
-		sizer.Add(refreshButton, (3,0), span=(1,0), flag=wx.EXPAND)
-		sizer.Add(self.textArea, (4,0), span=(3,0), flag=wx.EXPAND)
+		sizer.Add(self.list, (0,0), span=(2,1), flag=wx.EXPAND)
+		sizer.Add(refreshButton, (3,0), span=(1,1), flag=wx.EXPAND)
+		sizer.Add(self.textArea, (4,0), span=(3,1), flag=wx.EXPAND)
 		sizer.AddGrowableCol(0)
 		sizer.AddGrowableRow(4)
 		self.SetSizer(sizer)
