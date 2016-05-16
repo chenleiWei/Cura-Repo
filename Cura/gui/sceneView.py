@@ -341,9 +341,12 @@ class SceneView(openglGui.glGuiPanel):
 			infoTransfer = middleMan(self.printButton)
 			infoTransfer.OpenPrinterSelector()
 			filenames = []
-			for count in range(0, len(self._scene._objectList)):
-				filenames.append(self._scene._objectList[count].getName())
-			pub.sendMessage('file.isopen', filenames=filenames)
+			
+			if self._scene._objectList != None:
+				for count in range(0, len(self._scene._objectList)):
+					filenames.append(self._scene._objectList[count].getName())
+				pub.sendMessage('file.isopen', filenames=filenames)
+				
 		except Exception as e:
 			raise e
 
