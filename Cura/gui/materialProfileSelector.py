@@ -94,11 +94,10 @@ class MaterialProfileSelector(wx.Frame):
 		self.selectButton = wx.Button(listBoxPanel, -1, 'Select')
 		
 		# load topBox
-		logoPath = resources.getPathForImage('CuraTAMIcon.png')
-		logoBitmap = wx.Bitmap(logoPath)
-		logoBitmap.SetHeight(125)
-		logoBitmap.SetWidth(125)
-		logo = wx.StaticBitmap(listBoxPanel, -1, logoBitmap)
+		logoPath = resources.getPathForImage('logoOutlineOrange.png')
+		logoBitmap = wx.Image(logoPath)
+		logoBitmap = logoBitmap.Scale(125, 125)
+		logo = wx.StaticBitmap(listBoxPanel, -1, wx.BitmapFromImage(logoBitmap))
 		titleText = wx.StaticText(listBoxPanel, -1, "Material Profile Selector")
 		font = wx.Font(20, family=wx.SWISS, style=wx.NORMAL, weight=wx.NORMAL)
 		titleText.SetFont(font)
