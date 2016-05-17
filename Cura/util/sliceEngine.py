@@ -554,7 +554,7 @@ class Engine(object):
 		elif profile.getProfileSetting('infill_type') == '2D' and profile.getProfileSetting('2d_infill_type') == 'Grid':
 			settings['infillPattern'] = 1
 			makeInfill = True
-		elif profile.getProfileSetting('infill_type') == 'Cube':
+		elif profile.getProfileSetting('infill_type') == '3D':
 			settings['infillPattern'] = 2
 			makeInfill = True
 		elif profile.getProfileSetting('infill_type') == 'Concentric':

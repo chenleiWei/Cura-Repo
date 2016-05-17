@@ -1499,7 +1499,7 @@ class SceneView(openglGui.glGuiPanel):
 	
 		sparseInfillLineDistance = profile.getProfileSettingFloat('fill_distance')
 		sparseInfillLineDistance = sparseInfillLineDistance
-		if profile.getProfileSetting('infill_type') == 'Cube':
+		if profile.getProfileSetting('infill_type') == '3D':
 			sparseInfillLineDistance = sparseInfillLineDistance  / 0.816138	
 
 		
@@ -1548,7 +1548,7 @@ class SceneView(openglGui.glGuiPanel):
 						glVertex3f(value  , homeY  , self.layerSelect.getValue())
 						glVertex3f(value  , -homeY , self.layerSelect.getValue())
 
-					elif profile.getProfileSetting('infill_type') == 'Cube':						
+					elif profile.getProfileSetting('infill_type') == '3D':						
 						#glRotatef(45, 0,0, 0.00)
 						#glRotatef(45, 0,1, 0.00)
 						#glColor3f(1, 0,0)
