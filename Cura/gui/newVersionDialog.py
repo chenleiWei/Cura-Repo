@@ -7,9 +7,13 @@ from Cura.util import version
 from Cura.util import profile
 
 
+
+
+
+
 class newVersionDialog(wx.Dialog):
 	def __init__(self):
-		super(newVersionDialog, self).__init__(None, title="Welcome to the new version!", style=wx.STAY_ON_TOP)
+		super(newVersionDialog, self).__init__(None, title="Welcome to the New Version!", style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
 
 		p = wx.Panel(self)
 		self.panel = p
@@ -23,7 +27,7 @@ class newVersionDialog(wx.Dialog):
 		titleFont = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 		headerFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
 		textFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-
+		
 		# Title text
 		title = wx.StaticText(p, -1, 'Cura Type A - ' + version.getVersion())
 		title.SetFont(titleFont)
@@ -34,51 +38,46 @@ class newVersionDialog(wx.Dialog):
 		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=5)
 	
 		# New in this version
-		newHere = wx.StaticText(p, -1, "New in Cura " + version.getVersion())
+		newHere = wx.StaticText(p, -1, "New Features and Enhancements")
 		newHere.SetFont(titleFont)
 		degree_sign = u'\N{DEGREE SIGN}'
 		s.Add(newHere, flag=wx.TOP, border=10)
 
-		changesAndAdditions = [
-			wx.StaticText(p, -1, "* Introducing cubic and concentric infill types (bug has been fixed!)"),
-			wx.StaticText(p, -1, "* New infill visualizer"),
-			wx.StaticText(p, -1, "* Added user analytics"),
-			wx.StaticText(p, -1, "* Fill density setting is now fill distance"),
-			wx.StaticText(p, -1, "* Added a new version update notification"),
-			wx.StaticText(p, -1, "")
+		featuresAndEnhancements = [
+			wx.StaticText(p, -1, "* Absolute Dimensions\n\t- Specifying infill by millimeter rather than percentage"),
+			wx.StaticText(p, -1, "* 3D Cubic Structure\n\t- Delivering axis-independent interior structure"),
+			wx.StaticText(p, -1, "* Flow rate corrections\n\t- Providing more accurate results and improved tolerances"),
+			wx.StaticText(p, -1, "* New Concentric Infill pattern introduced"),
+			wx.StaticText(p, -1, "Infill Visualizer\n\t - Toggles the display of infill in-place"),
+			wx.StaticText(p, -1, "* Expert Mode side panel now displays:\n\t- Extrusion Width, Number of Shells, Infill and Flow Percentage"),
+			wx.StaticText(p, -1, "* Cmd/Ctrl-P now brings up the \"Send to Printer\" dialog"),
+			wx.StaticText(p, -1, "* Tag added to GCode files including which profile was used to generate the GCode"),
+			wx.StaticText(p, -1, "* User Notification for available Software Updates is now included"),
 		]
 		
-		# Bug fixes
-		newHere = wx.StaticText(p, -1, "New in Cura " + version.getVersion())
-		newHere.SetFont(titleFont)
-		degree_sign = u'\N{DEGREE SIGN}'
-		s.Add(newHere, flag=wx.TOP, border=10)		
-		
-		for item in changesAndAdditions:
-			item.Wrap(600)
+		for item in featuresAndEnhancements:
 			item.SetFont(textFont)
-			s.Add(item, flag=wx.TOP, border=5)
+			s.Add(item, flag=wx.BOTTOM | wx.EXPAND, border=10)
 		
-		# Materials
-#		materialsLabel = wx.StaticText(p, -1, "New Material Profiles")
-#		materialsLabel.SetFont(titleFont)
-#		s.Add(materialsLabel, flag=wx.BOTTOM, border=10)
+		# Bug fixes
+		issuesAddressed = wx.StaticText(p, -1, "Issues Addressed")
+		issuesAddressed.SetFont(titleFont)
+		degree_sign = u'\N{DEGREE SIGN}'
+		s.Add(issuesAddressed, flag=wx.TOP, border=10)
+		issues = wx.StaticText(p, -1, "* Custom start/end GCode no longer ignored under some conditions")
+		issues.SetFont(textFont)
+		s.Add(issues, flag=wx.BOTTOM, border=20)
 		
-		newMaterialsDict = {}
-		newMaterialsDict['3DElements'] = ['FireResist Nylon']
-		newMaterialsDict['3DXTech'] = ['ABSCF', 'ABSCNT', 'CFPETG']
-		newMaterialsDict['3Dom'] = ['CoffeePLA', 'GlassPLA']
-		newMaterialsDict['Biome'] = ['Linen', 'Silk']
-		newMaterialsDict['Generic'] = ['BPet', 'WoodfilledPLA']
-		newMaterialsDict['Proto-pasta'] = ['AromaticCoffee HTPLA', 'Brass PLA','Bronze PLA', 'Carbon Fiber HTPLA', 'Copper PLA', 'IridescantIce HTPLA', 'SolidSmoke HTPLA', 'SSPLA']
-		newMaterialsDict['RigidInk'] = ['PLA']
-		newMaterialsDict['TonerPlastics'] = ['PLA']
-		newMaterialsDict['Colorfabb'] = ['XT Copolyester']
+		newMaterialProfiles = wx.StaticText(p, -1, "New Material Profiles")
+		newMaterialProfiles.SetFont(titleFont)
+		s.Add(newMaterialProfiles, flag=wx.BOTTOM)
+		materials = wx.StaticText(p, -1, "* Over 75 total")
+		materials.SetFont(textFont)
+		s.Add(materials, flag=wx.BOTTOM, border=10)
+		hyperlink = hl.HyperLinkCtrl(p, -1, "* Complete list here", URL='https://docs.google.com/document/d/1jeOaJq3sqIv2bwnXVx3CSOUpI3yewPhzjAgBPw7mYaA')
+		hyperlink.SetFont(textFont)
+		s.Add(hyperlink)
 		
-	#	self.addMaterialList(newMaterialsDict, p, s)
-		
-
-
 		s.Add(wx.StaticLine(p), flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
 		button = wx.Button(p, -1, 'OK')
 		button.Bind(wx.EVT_BUTTON, self.OnOk)
@@ -86,6 +85,7 @@ class newVersionDialog(wx.Dialog):
 
 		self.Fit()
 		self.Centre()
+	
 	
 	def addMaterialList(self, list, p, s):
 	

@@ -96,7 +96,7 @@ def checkForNewerVersion():
 			
 			# "arbitrary" version number
 			if thisVersion == 'dev':
-				thisVersion = '1.4.2'
+				thisVersion = '1.5.0b0'
 				
 			updateStatusDict = {"needsUpdate" : '',
 													"downloadLink" : '',
@@ -138,13 +138,19 @@ def compareLocalToLatest(thisVersionDict, latestReleaseDict):
 				if latestReleaseDict[label] == "":
 					updateVersion = True
 				else:
-					# unicode comparison of 'a' to 'b' or vice versa
+					sameReleaseType = False
+					
 					if label == "preReleaseType":
-						if localValue < latestReleaseDict[label]:
+						if latestReleaseDict[label] == 'b' and str(localValue) == 'a':
 							updateVersion = True
-					elif label == "preReleaseVersion":
-						if int(localValue) < int(latestReleaseDict[label]):
-							updateVersion = True
+					
+						if latestReleaseDict[label] == str(localValue):
+							sameReleaseType = True
+
+					if label == "preReleaseVersion":
+						if sameReleaseType == True:
+							if int(localValue) < int(latestReleaseDict[label]):
+								updateVersion = True
 					
 	return updateVersion
 

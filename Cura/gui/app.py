@@ -198,9 +198,9 @@ class CuraApp(wx.App):
 			if profile.getPreference('last_run_version') != version.getVersion(False):
 				profile.putPreference('last_run_version', version.getVersion(False))
 				newVersion = newVersionDialog.newVersionDialog()
-	#			newVersion.Show()
-	#			if newVersion.ShowModal() == wx.ID_OK:
-	#				print 'closed'
+				newVersion.Show()
+				if newVersion.ShowModal() == wx.ID_OK:
+					print 'closed'
 				newVersion.Destroy()
 			
 			setFullScreenCapable(self.mainWindow)
