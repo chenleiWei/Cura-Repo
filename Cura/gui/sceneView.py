@@ -1952,7 +1952,7 @@ class printerSelector(wx.Frame):
 		# Consequent text controls
 		self.filenameTextCtrl = wx.TextCtrl(self)
 		self.availPrinters = wx.ComboBox(self, choices=printerList, style=wx.CB_READONLY)
-
+		self.availPrinters.SetSelection(0)
 		# Option checkboxes
 		openInterfaceOption = wx.CheckBox(self, 1, "Open Interface")
 		openInterfaceOption.Bind(wx.EVT_CHECKBOX, self.OnOpenInterfaceChecked)
