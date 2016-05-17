@@ -853,26 +853,7 @@ class SceneView(openglGui.glGuiPanel):
 			filenames.append(self._scene._objectList[count].getName())
 		pub.sendMessage('file.isopen', filenames=filenames)
 
-	def flowrateFix(self):
-#		extrusionWidth = float (profile.getProfileSetting('nozzle_size'))
-		extrusionWidth = float (profile.calculateEdgeWidth())
-		layerHeight = float(profile.getProfileSettingFloat('layer_height'))
-		rectangularArea = extrusionWidth * layerHeight
-		circularArea    = math.pi * layerHeight * layerHeight/4
-		diffArea = (rectangularArea + circularArea - (layerHeight*layerHeight))
-		flowReduction = round(100 - ((rectangularArea - diffArea) / diffArea * 100),2) 
-		if float(profile.getProfileSetting('filament_flow')) != float(flowReduction) and profile.getMachineSetting('flowrate_correction') == 'True':
-			profile.putProfileSetting('filament_flow', flowReduction)
-			self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
-		elif float(profile.getProfileSetting('filament_flow')) != float(profile.getProfileSetting('filament_flow_user_editable')) and profile.getMachineSetting('flowrate_correction') == 'False' :
-			profile.putProfileSetting('filament_flow', profile.getProfileSetting('filament_flow_user_editable'))
-			self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
-				
-
 	def _onRunEngine(self, e):
-
-		self.flowrateFix()
-
 		if profile.getProfileSettingFloat('fill_distance') > 0:
 			equivalent_percentage = round(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_distance')),2)
 			if profile.getProfileSettingFloat('infill_percentage') != equivalent_percentage: #Only update if a change was made
