@@ -349,6 +349,7 @@ class SceneView(openglGui.glGuiPanel):
 				
 		except Exception as e:
 			raise e
+			pass
 
 	def SendToPrinter(self, job):
 		import re
@@ -829,7 +830,7 @@ class SceneView(openglGui.glGuiPanel):
 		self.sceneUpdated()
 
 	def sceneUpdated(self):
-		if profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid':
+		if profile.getProfileSetting('infill_type') == '2D':
 			self.infillGridButton.setHidden(False)
 		else:
 			self.infillGridButton.setHidden(True)
@@ -1504,7 +1505,7 @@ class SceneView(openglGui.glGuiPanel):
 		
 		self.layerSelect.setHidden(True)
 		#self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
-		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getPreference('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
+		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getPreference('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == '2D'))
 #		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and profile.getProfileSetting('infill_type') != 'None' and profile.getProfileSetting('infill_type') != 'Concentric' and profile.getProfileSetting('infill_type') != 'Gradient concentric')
 		for i in range(0,2):
 			if self.layerSelectCondition:
@@ -1526,7 +1527,7 @@ class SceneView(openglGui.glGuiPanel):
 #				print subdivisions
 
 				for index,value in enumerate(subdivisions):
-					if profile.getProfileSetting('infill_type') == 'Line':
+					if profile.getProfileSetting('infill_type') == '2D':
 #						A = [-homeX, value, self.layerSelect.getValue()],[-homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()]
 #						color = [0.5, 0.5, 0.5],[0.5,0.5,0.5],[0.5,0.5,0.5],[0.5,0.5,0.5]
 
@@ -1541,7 +1542,7 @@ class SceneView(openglGui.glGuiPanel):
 							glVertex3f(value , homeY , self.layerSelect.getValue())
 							glVertex3f(value ,-homeY , self.layerSelect.getValue())
 
-					elif profile.getProfileSetting('infill_type') == 'Grid':
+					elif profile.getProfileSetting('infill_type') == '2D':
 						glVertex3f(homeX  , value  , self.layerSelect.getValue())
 						glVertex3f(-homeX , value  , self.layerSelect.getValue())
 						glVertex3f(value  , homeY  , self.layerSelect.getValue())
@@ -1965,7 +1966,7 @@ class printerSelector(wx.Frame):
 
 		# filename text ctrl
 		layoutGrid.Add(filenameLabel, pos=(1,2), flag=wx.ALIGN_CENTRE_VERTICAL)
-		layoutGrid.Add(self.filenameTextCtrl, pos=(1,3), span=(0,7), flag=wx.EXPAND)
+		layoutGrid.Add(self.filenameTextCtrl, pos=(1,3), span=(1,7), flag=wx.EXPAND)
 		
 		# add new printer button
 		addPrinterButton = wx.Button(self, -1, "Add Printer")
@@ -1973,7 +1974,7 @@ class printerSelector(wx.Frame):
 		
 		# printer combobox
 		layoutGrid.Add(printerLabel, pos=(2,2), flag=wx.ALIGN_CENTRE_VERTICAL)
-		layoutGrid.Add(self.availPrinters, pos=(2,3), span=(0,7), flag=wx.EXPAND)
+		layoutGrid.Add(self.availPrinters, pos=(2,3), span=(1,7), flag=wx.EXPAND)
 		
 		# add all elements to layout grid
 		layoutGrid.Add(openInterfaceOption, pos=(4,7), flag=wx.EXPAND)
