@@ -1,4 +1,4 @@
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2016 David Braam and Cat Casuat - Released under terms of the AGPLv3 License"
 
 import wx
 import platform
@@ -25,8 +25,8 @@ class aboutWindow(wx.Frame):
 		s.Add(wx.StaticText(p, -1, 'This version of Cura is currently developed and maintained by Type A Machines.'))
 
 		s.Add(wx.StaticText(p, -1, 'Cura is build with the following components:'), flag=wx.TOP, border=10)
-		self.addComponent('Cura', 'Graphical user interface', 'AGPLv3', 'https://bitbucket.org/Catrodigious/cura')
-		self.addComponent('CuraEngine', 'GCode Generator', 'AGPLv3', 'https://bitbucket.org/Catrodigious/curaengine')
+		self.addComponent('Cura', 'Graphical user interface', 'AGPLv3', 'https://bitbucket.org/typeamachines/cura')
+		self.addComponent('CuraEngine', 'GCode Generator', 'AGPLv3', 'https://bitbucket.org/typeamachines/curaengine')
 		self.addComponent('Clipper', 'Polygon clipping library', 'Boost', 'http://www.angusj.com/delphi/clipper.php')
 		self.addComponent('OctoPrint', 'Host Software', 'APGL', 'http://octoprint.org')
 		self.addComponent('Requests', 'HTTP requests', 'Apache2', 'http://docs.python-requests.org/')
