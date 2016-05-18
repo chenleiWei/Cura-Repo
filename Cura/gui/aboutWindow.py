@@ -20,23 +20,16 @@ class aboutWindow(wx.Frame):
 		title = wx.StaticText(p, -1, 'Cura Type A')
 		title.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.BOLD))
 		s.Add(title, flag=wx.ALIGN_CENTRE|wx.EXPAND|wx.BOTTOM, border=5)
-		
-		title = wx.StaticText(p, -1, 'Version 1.0')
-		title.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-		s.Add(title, flag=wx.ALIGN_CENTRE|wx.EXPAND|wx.BOTTOM, border=5)
 
-		s.Add(wx.StaticText(p, -1, 'Cura Type A version 1.0.0 has been optimized for the Type A Machines Series 1 3D Printer.'))
-		s.Add(wx.StaticText(p, -1, 'This version is for use with the late-2014 Series 1 print head only.'))
-		s.Add(wx.StaticText(p, -1, 'Cura Type A is based on Cura 14.07.'))
-		s.Add(wx.StaticText(p, -1, 'Cura is a solution for Open Source Fused Filament Fabrication 3D printing.'))
-		s.Add(wx.StaticText(p, -1, 'Cura is currently developed and maintained by Type A Machines, Daid, and Ultimaker.'))
+		s.Add(wx.StaticText(p, -1, 'End solution for Open Source Fused Filament Fabrication 3D printing.'))
+		s.Add(wx.StaticText(p, -1, 'This version of Cura is currently developed and maintained by Type A Machines.'))
 
-		s.Add(wx.StaticText(p, -1, 'Cura is built with the following components:'), flag=wx.TOP, border=10)
-		self.addComponent('Cura Type A', 'Graphical user interface for Series 1', 'AGPLv3', 'https://bitbucket.org/typeamachines/cura')
-		self.addComponent('Cura', 'Original graphical user interface', 'AGPLv3', 'https://github.com/daid/Cura')
-		self.addComponent('CuraEngine', 'GCode Generator', 'AGPLv3', 'https://github.com/Ultimaker/CuraEngine')
+		s.Add(wx.StaticText(p, -1, 'Cura is build with the following components:'), flag=wx.TOP, border=10)
+		self.addComponent('Cura', 'Graphical user interface', 'AGPLv3', 'https://bitbucket.org/Catrodigious/cura')
+		self.addComponent('CuraEngine', 'GCode Generator', 'AGPLv3', 'https://bitbucket.org/Catrodigious/curaengine')
 		self.addComponent('Clipper', 'Polygon clipping library', 'Boost', 'http://www.angusj.com/delphi/clipper.php')
-
+		self.addComponent('OctoPrint', 'Host Software', 'APGL', 'http://octoprint.org')
+		self.addComponent('Requests', 'HTTP requests', 'Apache2', 'http://docs.python-requests.org/')
 		self.addComponent('Python 2.7', 'Framework', 'Python', 'http://python.org/')
 		self.addComponent('wxPython', 'GUI Framework', 'wxWindows', 'http://www.wxpython.org/')
 		self.addComponent('PyOpenGL', '3D Rendering Framework', 'BSD', 'http://pyopengl.sourceforge.net/')
@@ -44,9 +37,9 @@ class aboutWindow(wx.Frame):
 		self.addComponent('NumPy', 'Support library for faster math', 'BSD', 'http://www.numpy.org/')
 		if platform.system() == "Windows":
 			self.addComponent('VideoCapture', 'Library for WebCam capture on windows', 'LGPLv2.1', 'http://videocapture.sourceforge.net/')
-			#self.addComponent('ffmpeg', 'Support for making timelapse video files', 'GPL', 'http://www.ffmpeg.org/')
+			#self.addComponent('ffmpeg', 'Support for making timelaps video files', 'GPL', 'http://www.ffmpeg.org/')
 			self.addComponent('comtypes', 'Library to help with windows taskbar features on Windows 7', 'MIT', 'http://starship.python.net/crew/theller/comtypes/')
-			self.addComponent('EjectMedia', 'Utility to safely remove SD cards', 'Freeware', 'http://www.uwe-sieber.de/english.html')
+			self.addComponent('EjectMedia', 'Utility to safe-remove SD cards', 'Freeware', 'http://www.uwe-sieber.de/english.html')
 		self.addComponent('Pymclevel', 'Python library for reading Minecraft levels.', 'ISC', 'https://github.com/mcedit/pymclevel')
 
 		#Translations done by:

@@ -1,4 +1,4 @@
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2016 David Braam and Cat Casuat - Released under terms of the AGPLv3 License"
 
 import sys
 import os
@@ -8,18 +8,27 @@ import glob
 import warnings
 
 try:
-    #Only try to import the _core to save import time
-    import wx._core
+	#Only try to import the _core to save import time
+	import wx._core
 except ImportError:
-    import wx
+	import wx
 
 
 class CuraApp(wx.App):
 	def __init__(self, files):
 		if platform.system() == "Windows" and not 'PYCHARM_HOSTED' in os.environ:
-			super(CuraApp, self).__init__(redirect=True, filename='output.txt')
+	
+			try:
+				from Cura.util import profile
+			except Exception as e:
+				print e
+			try:	
+				super(CuraApp, self).__init__(redirect=True, filename=os.path.join(profile.getBasePath(), 'output_log.txt'))
+			except Exception as e:
+				print e
 		else:
 			super(CuraApp, self).__init__(redirect=False)
+
 
 		self.mainWindow = None
 		self.splash = None
@@ -52,12 +61,23 @@ class CuraApp(wx.App):
 			socketListener.daemon = True
 			socketListener.start()
 
+
+
 		if sys.platform.startswith('darwin'):
 			#Do not show a splashscreen on OSX, as by Apple guidelines
 			self.afterSplashCallback()
 		else:
-			from Cura.gui import splashScreen
-			self.splash = splashScreen.splashScreen(self.afterSplashCallback)
+			from Cura.util.resources import getPathForImage
+	#		from Cura.gui import splashScreen
+	#		self.splash = splashScreen.splashScreen(self.afterSplashCallback)
+			splashBitmap = wx.Image(getPathForImage('splash.png')).ConvertToBitmap()
+			splashStyle = wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_TIMEOUT
+			splashDuration = 500
+
+			splash = wx.SplashScreen(splashBitmap, splashStyle, splashDuration, None)
+			splash.Show()
+
+			self.afterSplashCallback()
 
 	def MacOpenFile(self, path):
 		try:
@@ -89,7 +109,10 @@ class CuraApp(wx.App):
 			sock.bind(("127.0.0.1", port))
 			while True:
 				data, addr = sock.recvfrom(2048)
-				self.mainWindow.OnDropFiles(data.split('\0'))
+				try:
+					wx.CallAfter(self.mainWindow.OnDropFiles, data.split('\0'))
+				except Exception as e:
+					warnings.warn("File at {p} cannot be read: {e}".format(p=data, e=str(e)))
 		except:
 			pass
 
@@ -98,61 +121,103 @@ class CuraApp(wx.App):
 		import webbrowser
 		from Cura.gui import mainWindow
 		from Cura.gui import configWizard
-		#from Cura.gui import newVersionDialog
+		from Cura.gui import newVersionDialog
 		from Cura.util import profile
 		from Cura.util import resources
 		from Cura.util import version
 
 		resources.setupLocalization(profile.getPreference('language'))  # it's important to set up localization at very beginning to install _
 
+		"""
 		#If we do not have preferences yet, try to load it from a previous Cura install
 		if profile.getMachineSetting('machine_type') == 'unknown':
 			try:
 				otherCuraInstalls = profile.getAlternativeBasePaths()
-				otherCuraInstalls.sort()
-				if len(otherCuraInstalls) > 0:
-					profile.loadPreferences(os.path.join(otherCuraInstalls[-1], 'preferences.ini'))
-					profile.loadProfile(os.path.join(otherCuraInstalls[-1], 'current_profile.ini'))
+				for path in otherCuraInstalls[::-1]:
+					try:
+						print 'Loading old settings from %s' % (path)
+						profile.loadPreferences(os.path.join(path, 'preferences.ini'))
+						profile.loadProfile(os.path.join(path, 'current_profile.ini'))
+						break
+					except:
+						import traceback
+						print traceback.print_exc()
 			except:
 				import traceback
 				print traceback.print_exc()
-
+		"""
 		#If we haven't run it before, run the configuration wizard.
-		if profile.getMachineSetting('machine_type') == 'unknown':
-			if platform.system() == "Windows":
-				exampleFile = os.path.normpath(os.path.join(resources.resourceBasePath, 'example', 'FirstPrintCone.stl'))
-			else:
-				#Check if we need to copy our examples
-				exampleFile = os.path.expanduser('~/CuraExamples/FirstPrintCone.stl')
-				if not os.path.isfile(exampleFile):
-					try:
-						os.makedirs(os.path.dirname(exampleFile))
-					except:
-						pass
-					for filename in glob.glob(os.path.normpath(os.path.join(resources.resourceBasePath, 'example', '*.*'))):
-						shutil.copy(filename, os.path.join(os.path.dirname(exampleFile), os.path.basename(filename)))
+		if profile.getMachineSetting('machine_type') == 'unknown' or profile.getPreference('configured') == 'False':
+			configWizard.ConfigWizard(False)
+			#Check if we need to copy our examples
+			exampleFile = os.path.normpath(os.path.join(resources.resourceBasePath, 'example', 'FirstPrintCone.stl'))
 			self.loadFiles = [exampleFile]
+
+		if profile.getPreference('configured') == 'True':
+	#		if self.splash is not None:
+	#			self.splash.Show(False)
+			
+
 			if self.splash is not None:
-				self.splash.Show(False)
-			configWizard.configWizard()
+				try:
+					self.splash.Show(False)
+				except Exception as e:
+					print e
 
-		if profile.getMachineSetting('machine_name') == '':
-			return
-		self.mainWindow = mainWindow.mainWindow()
-		if self.splash is not None:
-			self.splash.Show(False)
-		self.SetTopWindow(self.mainWindow)
-		self.mainWindow.Show()
-		self.mainWindow.OnDropFiles(self.loadFiles)
-		
-		#if profile.getPreference('last_run_version') != version.getVersion(False):
-		#	profile.putPreference('last_run_version', version.getVersion(False))
-		#	newVersionDialog.newVersionDialog().Show()
-		
-		setFullScreenCapable(self.mainWindow)
+			
+	#		if self.splash is not None:
+	#			print "Splash is none"
+	#			try:
+	#				from Cura.gui import splashScreen
+	#			#	self.splash()
+	#				self.splash = splashScreen.splashScreen(self.afterSplashCallback)
+	#				self.splash(self.afterSplashCallback)
+				#	self.splash.Show(False)
+	#			except Exception as e:
+	#				print e
 
-		if sys.platform.startswith('darwin'):
-			wx.CallAfter(self.StupidMacOSWorkaround)
+
+#					try:
+#						from Cura.gui import splashScreen
+#						self.splash = splashScreen.splashScreen(self.afterSplashCallback)
+#						self.splash.Show(False)
+#					except Exception as e:
+#						print e
+
+			try:
+				self.mainWindow = mainWindow.mainWindow()
+			except Exception as e:
+				print e
+		#	if self.splash is not None:
+		#		self.splash.Show(False)
+		#		"print line 179 in app.py"
+			self.SetTopWindow(self.mainWindow)
+			self.mainWindow.Show()
+			self.mainWindow.OnDropFiles(self.loadFiles)
+		
+			if profile.getPreference('last_run_version') != version.getVersion(False):
+				profile.putPreference('last_run_version', version.getVersion(False))
+				newVersion = newVersionDialog.newVersionDialog()
+				newVersion.Show()
+				if newVersion.ShowModal() == wx.ID_OK:
+					print 'closed'
+				newVersion.Destroy()
+			
+			setFullScreenCapable(self.mainWindow)
+			
+			if sys.platform.startswith('darwin'):
+				wx.CallAfter(self.StupidMacOSWorkaround)
+			# Version check	
+		
+			if profile.getPreference('check_for_updates') == 'True':
+				self.newVersionCheck()
+		
+	def newVersionCheck(self):
+		try:
+			self.mainWindow.OnCheckForUpdate(False)
+		except Exception as e:
+			print "Attempted to check for newer version, got error:\n", e
+	
 
 	def StupidMacOSWorkaround(self):
 		"""

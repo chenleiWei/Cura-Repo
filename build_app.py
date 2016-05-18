@@ -8,12 +8,12 @@ if sys.platform.startswith('darwin'):
     version = os.environ['BUILD_NAME']
 
     APP = ['Cura/cura.py']
-    DATA_FILES = ['Cura/LICENSE', 'resources/images', 'resources/meshes', 'resources/example', 'resources/firmware', 'resources/locale', 'resources/machine_profiles', 'plugins']
+    DATA_FILES = ['Cura/LICENSE', 'resources/alterations', 'resources/images', 'resources/meshes', 'resources/example', 'resources/firmware', 'resources/locale', 'resources/machineProfiles', 'resources/quickprint', 'plugins']
     PLIST = {
-        u'CFBundleName': u'Cura',
+        u'CFBundleName': u'Cura Type A',
         u'CFBundleShortVersionString': version,
         u'CFBundleVersion': version,
-        u'CFBundleIdentifier': u'com.typeamachines.cura',
+        u'CFBundleIdentifier': u'com.typeamachines.Cura-'+version,
         u'LSMinimumSystemVersion': u'10.6',
         u'LSApplicationCategoryType': u'public.app-category.graphics-design',
         u'CFBundleDocumentTypes': [
@@ -50,14 +50,14 @@ if sys.platform.startswith('darwin'):
                 u'UTTypeTagSpecification': {u'public.filename-extension': [u'dae'], u'public.mime-type': [u'model/vnd.collada+xml']}
             },
             {
-                u'UTTypeIdentifier': u'com.ultimaker.obj',
+                u'UTTypeIdentifier': u'com.typeamachines.obj',
                 u'UTTypeConformsTo': [u'public.data'],
                 u'UTTypeDescription': u'Wavefront OBJ',
                 u'UTTypeReferenceURL': u'https://en.wikipedia.org/wiki/Wavefront_.obj_file',
                 u'UTTypeTagSpecification': {u'public.filename-extension': [u'obj'], u'public.mime-type': [u'text/plain']}
             },
             {
-                u'UTTypeIdentifier': u'com.ultimaker.amf',
+                u'UTTypeIdentifier': u'com.typeamachines.amf',
                 u'UTTypeConformsTo': [u'public.data'],
                 u'UTTypeDescription': u'Additive Manufacturing File',
                 u'UTTypeReferenceURL': u'https://en.wikipedia.org/wiki/Additive_Manufacturing_File_Format',
@@ -77,7 +77,7 @@ if sys.platform.startswith('darwin'):
     }
 
     setup(
-        name="Cura",
+        name="Cura Type A",
         app=APP,
         data_files=DATA_FILES,
         options={'py2app': OPTIONS},

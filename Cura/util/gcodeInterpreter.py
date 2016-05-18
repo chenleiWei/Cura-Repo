@@ -51,9 +51,9 @@ class gcode(object):
 		elif type(data) is list:
 			self._load(data)
 		else:
-			data = data.getvalue()
 			self._fileSize = len(data)
-			self._load(StringIO.StringIO(data))
+			data.seekStart()
+			self._load(data)
 
 	def calculateWeight(self):
 		#Calculates the weight of the filament in kg
@@ -124,16 +124,7 @@ class gcode(object):
 							return
 					currentLayer = [currentPath]
 				line = line[0:line.find(';')]
-			T = getCodeInt(line, 'T')
-			if T is not None:
-				if currentExtruder > 0:
-					posOffset[0] -= profile.getMachineSettingFloat('extruder_offset_x%d' % (currentExtruder))
-					posOffset[1] -= profile.getMachineSettingFloat('extruder_offset_y%d' % (currentExtruder))
-				currentExtruder = T
-				if currentExtruder > 0:
-					posOffset[0] += profile.getMachineSettingFloat('extruder_offset_x%d' % (currentExtruder))
-					posOffset[1] += profile.getMachineSettingFloat('extruder_offset_y%d' % (currentExtruder))
-			
+
 			G = getCodeInt(line, 'G')
 			if G is not None:
 				if G == 0 or G == 1:	#Move
@@ -160,7 +151,7 @@ class gcode(object):
 							pos[2] += z * scale
 					moveType = 'move'
 					if e is not None:
-						if absoluteE:
+						if absoluteE and posAbs:
 							e -= currentE
 						if e > 0.0:
 							moveType = 'extrude'
@@ -282,6 +273,17 @@ class gcode(object):
 							extrudeAmountMultiply = s / 100.0
 					else:
 						print "Unknown M code:" + str(M)
+				else:
+					T = getCodeInt(line, 'T')
+					if T is not None:
+						if currentExtruder > 0:
+							posOffset[0] -= profile.getMachineSettingFloat('extruder_offset_x%d' % (currentExtruder))
+							posOffset[1] -= profile.getMachineSettingFloat('extruder_offset_y%d' % (currentExtruder))
+						currentExtruder = T
+						if currentExtruder > 0:
+							posOffset[0] += profile.getMachineSettingFloat('extruder_offset_x%d' % (currentExtruder))
+							posOffset[1] += profile.getMachineSettingFloat('extruder_offset_y%d' % (currentExtruder))
+
 		for path in currentLayer:
 			path['points'] = numpy.array(path['points'], numpy.float32)
 			path['extrusion'] = numpy.array(path['extrusion'], numpy.float32)

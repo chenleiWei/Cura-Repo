@@ -1,3 +1,4 @@
+#coding:utf8
 """
 Helper module to get easy access to the path where resources are stored.
 This is because the resource location is depended on the packaging method and OS
@@ -8,8 +9,6 @@ import os
 import sys
 import glob
 
-#Cura/util classes should not depend on wx...
-import wx
 import gettext
 
 if sys.platform.startswith('darwin'):
@@ -28,12 +27,13 @@ if sys.platform.startswith('darwin'):
 	else:
 		resourceBasePath = os.path.join(os.path.dirname(__file__), "../../resources")
 else:
-	resourceBasePath = os.path.join(os.path.dirname(__file__), "../../resources")
+	resourceBasePath = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../resources"))
 
 def getPathForResource(dir, subdir, resource_name):
 	assert os.path.isdir(dir), "{p} is not a directory".format(p=dir)
 	path = os.path.normpath(os.path.join(dir, subdir, resource_name))
-	assert os.path.isfile(path), "{p} is not a file.".format(p=path)
+	if not os.path.isfile(path):
+		return None
 	return path
 
 def getPathForImage(name):
@@ -46,8 +46,56 @@ def getPathForFirmware(name):
 	return getPathForResource(resourceBasePath, 'firmware', name)
 
 def getDefaultMachineProfiles():
-	path = os.path.normpath(os.path.join(resourceBasePath, 'machine_profiles', '*.ini'))
+	path = os.path.normpath(os.path.join(resourceBasePath, 'machineProfiles', '*.ini'))
 	return glob.glob(path)
+	
+def getSimpleModeMaterialsProfiles():
+	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'Materials', '*.ini'))
+	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'quickprint', 'materials')))
+	if os.path.isdir(user_path):
+		files = sorted(glob.glob(os.path.join(user_path, '*.ini')))
+		if len(files) > 0:
+			return files
+	return sorted(glob.glob(path))
+
+def getAlterationFiles():
+	path = os.path.normpath(os.path.join(resourceBasePath, 'alterations', '*.ini'))
+	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'alterations')))
+	if os.path.isdir(user_path):
+		files = sorted(glob.glob(os.path.join(user_path, '*.ini')))
+		if len(files) > 0:
+			return files
+	return sorted(glob.glob(path))
+
+def getSimpleModeQualityProfiles():
+	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'Quality', '*.ini'))
+	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'quickprint', 'Quality')))
+	if os.path.isdir(user_path):
+		files = sorted(glob.glob(os.path.join(user_path, '*.ini')))
+		if len(files) > 0:
+			return files
+	return sorted(glob.glob(path))
+	
+def getSimpleModeStrengthProfiles():
+	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'Strength', '*.ini'))
+	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'quickprint', 'Strength')))
+	if os.path.isdir(user_path):
+		files = sorted(glob.glob(os.path.join(user_path, '*.ini')))
+		if len(files) > 0:
+			return files
+	return sorted(glob.glob(path))
+	
+def getSimpleModeAdvancedProfiles():
+	path = os.path.normpath(os.path.join(resourceBasePath, 'quickprint', 'Advanced', '*.ini'))
+	user_path = os.path.normpath(os.path.expanduser(os.path.join('~', '.Cura', 'quickprint', 'Advanced')))
+	if os.path.isdir(user_path):
+		files = sorted(glob.glob(os.path.join(user_path, '*.ini')))
+		if len(files) > 0:
+			return files
+	return sorted(glob.glob(path))
+
+
+
 
 def setupLocalization(selectedLanguage = None):
 	#Default to english
@@ -60,14 +108,20 @@ def setupLocalization(selectedLanguage = None):
 
 	locale_path = os.path.normpath(os.path.join(resourceBasePath, 'locale'))
 	translation = gettext.translation('Cura', locale_path, languages, fallback=True)
+	#translation.ugettext = lambda message: u'#' + message
 	translation.install(unicode=True)
 
 def getLanguageOptions():
 	return [
 		['en', 'English'],
-		# ['de', 'Deutsch'],
-		# ['fr', 'French'],
+		['de', 'Deutsch'],
+		['fr', 'French'],
+		['tr', 'Turkish'],
+		['ru', 'Russian'],
+		# ['it', 'Italian'],
+		# ['ko', 'Korean'],
+		# ['zh', 'Chinese'],
 		# ['nl', 'Nederlands'],
 		# ['es', 'Spanish'],
-		# ['po', 'Polish']
+		# ['po', 'Polish'],
 	]

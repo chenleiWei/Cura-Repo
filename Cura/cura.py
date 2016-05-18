@@ -11,6 +11,7 @@ __copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AG
 from optparse import OptionParser
 
 from Cura.util import profile
+from Cura.util import version
 
 def main():
 	"""
@@ -38,9 +39,11 @@ def main():
 		serialCommunication.startMonitor(port, baud)
 		return
 
-	print "load preferences from " + profile.getPreferencePath()
-	profile.loadPreferences(profile.getPreferencePath())
-
+	try:
+		profile.loadPreferences(profile.getPreferencePath())
+	except Exception as e:
+		print e
+		
 	if options.profile is not None:
 		profile.setProfileFromString(options.profile)
 	elif options.profileini is not None:
@@ -72,7 +75,12 @@ def main():
 		if not options.output:
 			options.output = args[0] + profile.getGCodeExtension()
 		with open(options.output, "wb") as f:
-			f.write(engine.getResult().getGCode())
+			gcode = engine.getResult().getGCode()
+			while True:
+				data = gcode.read()
+				if len(data) == 0:
+					break
+				f.write(data)
 		print 'GCode file saved : %s' % options.output
 
 		engine.cleanup()
