@@ -478,7 +478,6 @@ class Engine(object):
 			
 
 	def _engineSettings(self, extruderCount):
-		profile.setHeatedBedGCode()
 		settings = {
 			'layerThickness': int(profile.getProfileSettingFloat('layer_height') * 1000),
 			'initialLayerThickness': int(profile.getProfileSettingFloat('bottom_thickness') * 1000) if profile.getProfileSettingFloat('bottom_thickness') > 0.0 else int(profile.getProfileSettingFloat('layer_height') * 1000),
@@ -544,13 +543,18 @@ class Engine(object):
 		if profile.getProfileSetting('support_type') == 'Lines':
 			settings['supportType'] = 1
 
-		if profile.getProfileSetting('infill_type') == 'Line':
+		makeInfill = None
+
+		if profile.getProfileSetting('infill_type') == '2D' and profile.getProfileSetting('2d_infill_type') == 'Automatic':
+			settings['infillPattern'] = 7
+			makeInfill = True
+		elif profile.getProfileSetting('infill_type') == '2D' and profile.getProfileSetting('2d_infill_type') == 'Lines':
 			settings['infillPattern'] = 0
 			makeInfill = True
-		elif profile.getProfileSetting('infill_type') == 'Grid':
+		elif profile.getProfileSetting('infill_type') == '2D' and profile.getProfileSetting('2d_infill_type') == 'Grid':
 			settings['infillPattern'] = 1
 			makeInfill = True
-		elif profile.getProfileSetting('infill_type') == 'Cube':
+		elif profile.getProfileSetting('infill_type') == '3D':
 			settings['infillPattern'] = 2
 			makeInfill = True
 		elif profile.getProfileSetting('infill_type') == 'Concentric':
@@ -566,7 +570,7 @@ class Engine(object):
 			settings['sparseInfillLineDistance'] = -1
 			makeInfill = False
 
-		if makeInfill  == True:	
+		if makeInfill != None and makeInfill == True:
 			sparseInfillLineDistance = profile.getProfileSettingFloat('fill_distance') * 1000
 			if sparseInfillLineDistance<400:
 				sparseInfillLineDistance = 400

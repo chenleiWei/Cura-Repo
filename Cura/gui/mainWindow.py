@@ -79,7 +79,7 @@ class mainWindow(wx.Frame):
 
 		self.fileMenu.AppendSeparator()
 		i = self.fileMenu.Append(-1, _("Print...\tCTRL+P"))
-		self.Bind(wx.EVT_MENU, lambda e: self.scene.OnPrintButton(1), i)
+		self.Bind(wx.EVT_MENU, lambda e: self.scene.OnPrintButton(2), i)
 		i = self.fileMenu.Append(-1, _("Save GCode...\tCTRL+G"))
 		self.Bind(wx.EVT_MENU, lambda e: self.scene.showSaveGCode(), i)
 		i = self.fileMenu.Append(-1, _("Show Slice Engine Log..."))
@@ -198,8 +198,8 @@ class mainWindow(wx.Frame):
 		helpMenu = wx.Menu()
 		i = helpMenu.Append(-1, _("Online Documentation..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://support.typeamachines.com/hc/en-us'), i)
-		i = helpMenu.Append(-1, _("Release Notes..."))
-		self.Bind(wx.EVT_MENU, lambda e: self.OnReleaseNotes(e), i)
+#		i = helpMenu.Append(-1, _("Release Notes..."))
+#		self.Bind(wx.EVT_MENU, lambda e: self.OnReleaseNotes(e), i)
 		i = helpMenu.Append(-1, _("Report a Problem..."))
 		self.Bind(wx.EVT_MENU, lambda e: webbrowser.open('http://typeamachines.com/cura-beta'), i)
 		i = helpMenu.Append(-1, _("Check for Update..."))
@@ -744,9 +744,10 @@ class mainWindow(wx.Frame):
 					updateVersion = y
 
 			if needsUpdate is True and updateVersion != '':
-				if wx.MessageBox(_("Cura Type A v%s, would you like to download?" % updateVersion), _("New Version Available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
+				if wx.MessageBox(_("Cura Type A v%s is now available. Would you like to download it?" % updateVersion), _("New Version Available"), wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
 					webbrowser.open(downloadLink)
 				else:
+
 					profile.putPreference('check_for_updates', False)
 					# If the user says no, then set check_for_updates to False
 					# Users will still be able to see the update dialog from the
@@ -756,8 +757,8 @@ class mainWindow(wx.Frame):
 					wx.MessageBox(_("You are running the latest version of Cura!"), style=wx.ICON_INFORMATION)
 		else:
 			if e:
-				wx.MessageBox(_("Please check your internet connection or try again later."), _("Error"), wx.OK | wx.ICON_INFORMATION)				
-
+				wx.MessageBox(_("Please check your internet connection or try again later."), _("Error"), wx.OK | wx.ICON_INFORMATION)
+				
 	def OnAbout(self, e):
 		aboutBox = aboutWindow.aboutWindow()
 		aboutBox.Centre()
@@ -806,10 +807,12 @@ class normalSettingsPanel(configBase.configPanelBase):
 		
 
 		self._addSettingsToPanels('basic', left, right)
+		self._addSettingsToPanels('informational', left, right)
 		self.SizeLabelWidths(left, right)
 
 		(left, right, self.advancedPanel) = self.CreateDynamicConfigTab(self.nb, _('Advanced'))
 		self._addSettingsToPanels('advanced', left, right)
+		self._addSettingsToPanels('informational', left, right)
 		self.SizeLabelWidths(left, right)
 
 		#Plugin page

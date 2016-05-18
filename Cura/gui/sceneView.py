@@ -94,7 +94,7 @@ class SceneView(openglGui.glGuiPanel):
 		self.printButton           = openglGui.glButton(self, 6, _("Print"), (1,0), self.OnPrintButton)
 		self.octoPrintButton	   = openglGui.glButton(self, 6, _("Send to Series 1"), (2,0), self.OnOctoPrintButton)
 		self.printButton.setDisabled(True)
-		self.win = middleMan(self.printButton, self._scene.objects())
+		self.win = middleMan
 
 		group = []
 		self.rotateToolButton = openglGui.glRadioButton(self, 8, _("Rotate"), (0,-1), group, self.OnToolSelect)
@@ -138,7 +138,7 @@ class SceneView(openglGui.glGuiPanel):
 
 		self.infillGridButton = openglGui.glButton(self, 2, _("Infill"), (-1,-1), self.OninfillGridButton)
 		
-		if profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid':
+		if profile.getProfileSetting('infill_type') == '2D':
 			self.infillGridButton.setHidden(False)
 		else:
 			self.infillGridButton.setHidden(True)
@@ -163,7 +163,6 @@ class SceneView(openglGui.glGuiPanel):
 		else:
 			self.printGcode = "false"
 		
-
 	def browserOpenOption(self, openBrowser):
 		self.openBrowser = openBrowser
 #		if b == True:
@@ -173,8 +172,10 @@ class SceneView(openglGui.glGuiPanel):
 		
 	def UploadButtonStatus(self, enable):
 		print "Upload Enabled event caller activated."
+		print enable
 		pub.sendMessage('transfer.response', enable=enable)
-
+		pub.sendMessage('enable.upload', enable=enable)
+		
 	def loadGCodeFile(self, filename):
 		self.OnDeleteAll(None)
 		#Cheat the engine results to load a GCode file into it.
@@ -336,26 +337,38 @@ class SceneView(openglGui.glGuiPanel):
 		meshLoader.saveMeshes(filename, self._scene.objects())
 
 	def OnOctoPrintButton(self, callback):
-		try: 
-			self.win.OpenPrinterSelector()
+		try:
+			infoTransfer = middleMan(self.printButton)
+			infoTransfer.OpenPrinterSelector()
+			filenames = []
+			
+			if self._scene._objectList != None:
+				for count in range(0, len(self._scene._objectList)):
+					filenames.append(self._scene._objectList[count].getName())
+				pub.sendMessage('file.isopen', filenames=filenames)
+				
 		except Exception as e:
 			raise e
+			pass
 
-	def SendToPrinter(self, serial):
+	def SendToPrinter(self, job):
 		import re
-		#Temporary file handling
-		resourceBasePath = resources.resourceBasePath
-		file = self._scene._objectList[0].getName()
-		# Make a directory called 'temp' in ./resources
-		resourceBasePath = resources.resourceBasePath
-		suffix = '.gcode'
-		filename = file + suffix
-		# Path to temporary file
-		key = profile.OctoPrintConfigAPI(serial)
-		tempFilePath = os.path.join(profile.getBasePath(), '.temp', filename)
-		self._createTempFiles(tempFilePath)
-		self._uploadToOctoPrint(key, serial, tempFilePath)
-		
+		print "Send to printer function called."
+		if job != None:
+			serial = job['serial']
+			filename = job['filename']
+
+			#Temporary file handling
+			resourceBasePath = resources.resourceBasePath
+			file = self._scene._objectList[0].getName()
+			# Make a directory called 'temp' in ./resources
+			resourceBasePath = resources.resourceBasePath
+			# Path to temporary file
+			key = profile.OctoPrintConfigAPI(serial)
+			tempFilePath = os.path.join(profile.getBasePath(), '.temp', filename)
+			self._createTempFiles(tempFilePath)
+			self._uploadToOctoPrint(key, serial, tempFilePath)
+	
 	def _createTempFiles(self, gcodeFile):
 		# gets gcode from the engine
 		gcode = self._engine.getResult().getGCode()
@@ -395,7 +408,7 @@ class SceneView(openglGui.glGuiPanel):
 					
 	def OnPrintButton(self, button):
 		mainWindow = self.GetParent().GetParent().GetParent()
-		
+	
 		if button == 1:
 			connectionGroup = self._printerConnectionManager.getAvailableGroup()
 			"""
@@ -444,9 +457,9 @@ class SceneView(openglGui.glGuiPanel):
 			else:
 			"""
 			self.showSaveGCode()
+		if button == 2:
+			self.OnOctoPrintButton(True)
 		if button == 3:
-			directUpload = mainWindow.OnDirectUploadSettings(True)
-
 			menu = wx.Menu()
 			connections = self._printerConnectionManager.getAvailableConnections()
 			menu.connectionMap = {}
@@ -817,7 +830,7 @@ class SceneView(openglGui.glGuiPanel):
 		self.sceneUpdated()
 
 	def sceneUpdated(self):
-		if profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid':
+		if profile.getProfileSetting('infill_type') == '2D':
 			self.infillGridButton.setHidden(False)
 		else:
 			self.infillGridButton.setHidden(True)
@@ -830,9 +843,35 @@ class SceneView(openglGui.glGuiPanel):
 		wx.CallAfter(self._sceneUpdateTimer.Start, 500, True)
 		self._engine.abortEngine()
 		self._scene.updateSizeOffsets()
+		self.updatePrinterSelectorControls()
 		self.QueueRefresh()
+		
+		
+	def updatePrinterSelectorControls(self):
+		filenames = []		
+		for count in range(0, len(self._scene._objectList)):
+			filenames.append(self._scene._objectList[count].getName())
+		pub.sendMessage('file.isopen', filenames=filenames)
+
+	def flowrateFix(self):
+#		extrusionWidth = float (profile.getProfileSetting('nozzle_size'))
+		extrusionWidth = float (profile.calculateEdgeWidth())
+		layerHeight = float(profile.getProfileSettingFloat('layer_height'))
+		rectangularArea = extrusionWidth * layerHeight
+		circularArea    = math.pi * layerHeight * layerHeight/4
+		diffArea = (rectangularArea + circularArea - (layerHeight*layerHeight))
+		flowReduction = round(100 - ((rectangularArea - diffArea) / diffArea * 100),2) 
+		if float(profile.getProfileSetting('filament_flow')) != float(flowReduction) and profile.getMachineSetting('flowrate_correction') == 'True':
+			profile.putProfileSetting('filament_flow', flowReduction)
+			self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
+		elif float(profile.getProfileSetting('filament_flow')) != float(profile.getProfileSetting('filament_flow_user_editable')) and profile.getMachineSetting('flowrate_correction') == 'False' :
+			profile.putProfileSetting('filament_flow', profile.getProfileSetting('filament_flow_user_editable'))
+			self.GetParent().GetParent().GetParent().normalSettingsPanel.updateProfileToControls()
+				
 
 	def _onRunEngine(self, e):
+
+		self.flowrateFix()
 
 		if profile.getProfileSettingFloat('fill_distance') > 0:
 			equivalent_percentage = round(float(profile.calculateEdgeWidth() * 100 / profile.getProfileSettingFloat('fill_distance')),2)
@@ -1458,15 +1497,15 @@ class SceneView(openglGui.glGuiPanel):
 
 		self._drawMachine()
 	
-		sparseInfillLineDistance = float(profile.getProfileSettingFloat('fill_distance'))
+		sparseInfillLineDistance = profile.getProfileSettingFloat('fill_distance')
 		sparseInfillLineDistance = sparseInfillLineDistance
-		if profile.getProfileSetting('infill_type') == 'Cube':
+		if profile.getProfileSetting('infill_type') == '3D':
 			sparseInfillLineDistance = sparseInfillLineDistance  / 0.816138	
 
 		
 		self.layerSelect.setHidden(True)
 		#self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
-		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getPreference('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == 'Line' or profile.getProfileSetting('infill_type') == 'Grid'))
+		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getPreference('show_infill') == 'True' and (profile.getProfileSetting('infill_type') == '2D'))
 #		self.layerSelectCondition = (self.viewMode != 'gcode' and sparseInfillLineDistance != 0 and profile.getProfileSetting('show_infill') == 'True' and profile.getProfileSetting('infill_type') != 'None' and profile.getProfileSetting('infill_type') != 'Concentric' and profile.getProfileSetting('infill_type') != 'Gradient concentric')
 		for i in range(0,2):
 			if self.layerSelectCondition:
@@ -1488,7 +1527,7 @@ class SceneView(openglGui.glGuiPanel):
 #				print subdivisions
 
 				for index,value in enumerate(subdivisions):
-					if profile.getProfileSetting('infill_type') == 'Line':
+					if profile.getProfileSetting('infill_type') == '2D':
 #						A = [-homeX, value, self.layerSelect.getValue()],[-homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()],[homeX,value,self.layerSelect.getValue()]
 #						color = [0.5, 0.5, 0.5],[0.5,0.5,0.5],[0.5,0.5,0.5],[0.5,0.5,0.5]
 
@@ -1503,13 +1542,13 @@ class SceneView(openglGui.glGuiPanel):
 							glVertex3f(value , homeY , self.layerSelect.getValue())
 							glVertex3f(value ,-homeY , self.layerSelect.getValue())
 
-					elif profile.getProfileSetting('infill_type') == 'Grid':
+					elif profile.getProfileSetting('infill_type') == '2D':
 						glVertex3f(homeX  , value  , self.layerSelect.getValue())
 						glVertex3f(-homeX , value  , self.layerSelect.getValue())
 						glVertex3f(value  , homeY  , self.layerSelect.getValue())
 						glVertex3f(value  , -homeY , self.layerSelect.getValue())
 
-					elif profile.getProfileSetting('infill_type') == 'Cube':						
+					elif profile.getProfileSetting('infill_type') == '3D':						
 						#glRotatef(45, 0,0, 0.00)
 						#glRotatef(45, 0,1, 0.00)
 						#glColor3f(1, 0,0)
@@ -1810,7 +1849,7 @@ class SceneView(openglGui.glGuiPanel):
 #TODO: Remove this or put it in a seperate file
 class shaderEditor(wx.Frame):
 	def __init__(self, parent, callback, v, f):
-		super(shaderEditor, self).__init__(parent, title="Shader editor", style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+		super(shaderEditor, self).__init__(parent, title="Shader editor", style=wx.DefaultPosition)
 		self._callback = callback
 		s = wx.BoxSizer(wx.VERTICAL)
 		self.SetSizer(s)
@@ -1834,41 +1873,52 @@ class shaderEditor(wx.Frame):
 # Then initialize printerSelector with that variable as one of its parameters
 
 class middleMan(SceneView):
-	def __init__(self, printButton, sceneObjects):
+	def __init__(self, printButton):
 		#--gcode upload--#
 		# Second part of data handoff: listens to and then sends response acquired from sceneView and sends it to printerSelector
 		try:
 			pub.subscribe(self.uploadStatus, 'transfer.response')
+			pub.subscribe(self.updateFilename, 'file.name')
 		except Exception as e:
 			print e
-	#	pub.subscribe(self.updateFilename, 'update.filename')
+	
 		self.enableUpload = True
 		self.printButtonStatus = printButton
-		self.sceneObjects = sceneObjects		
-			
+
 	def OpenPrinterSelector(self):
 		# Send analytic data
-		analytics.featureAnalytics('','','1','','direct_upload')
-		
+		try:
+			analytics.featureAnalytics('','','1','','direct_upload')
+		except Exception as e:
+			print e
 		if self.printButtonStatus.isDisabled():
 			self.enableUpload = False
 		else:
 			self.enableUpload = True
+		
 	#	print "scene object quantity: %s" % self.sceneObjectQuantity
 		win = printerSelector(self.enableUpload)
-		win.Show(True)
+		win.Show()
+		win.Raise()
+		win.Iconize(False)
+		win.Centre()
 
 	def uploadStatus(self, enable):
 		# Sends message to printerSelector window to enable the upload button
 		pub.sendMessage('enable.upload', enable=enable)		
-		
-	def updateFilename(self, filename):
-		pub.sendMessage('file.isopen', fileStatus=filename)
-		
+
+	def updateFilename(self, filenames):
+		pub.sendMessage('file.isopen', filenames=filenames)
 
 class printerSelector(wx.Frame):
 	def __init__(self, enableUpload):
-		wx.Frame.__init__(self, None, wx.ID_ANY, "Printer Select", size=(475,350), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
+		super(printerSelector, self).__init__(None, style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
+
+		# Text Related
+		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+		bigFont = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+		# OctoPrint API Config Path
+		printerListPath = os.path.join(profile.getBasePath(), 'octoprint_api_config.ini')
 
 		# Add-New-Printer Event-listener
 		pub.subscribe(self.AddToPrinterList,'printer.add')
@@ -1876,142 +1926,91 @@ class printerSelector(wx.Frame):
 		pub.subscribe(self.enableUploadButton, 'enable.upload')
 		# File Load Status Event-Listener
 		pub.subscribe(self.initializeOpenFileObject, 'file.isopen')
-		# wxPython container widget
-		panel = wx.Panel(self, -1)
-		# Text Related
-		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-		bigFont = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-		# OctoPrint API Config Path
-		printerListPath = os.path.join(profile.getBasePath(), 'octoprint_api_config.ini')
 		
+
 		# Reads and parses the OctoPrintAPIConfig file for:
 		#	- printers
 		#	- api keys
-		printerList = []
+		printerList = ["No Printers Added"]
+			
+		contentBox = wx.BoxSizer(wx.VERTICAL)
+		layoutGrid = wx.GridBagSizer(vgap=10, hgap=10)
 		cp = configparser.ConfigParser()
-		
-	#	self.openOctoPrintInBrowser = False
-		self.startPrintOnUpload = "false"
 		
 		if os.path.lexists(printerListPath):
 			cp.read(printerListPath)
 			listSections = cp.sections()
 			for item in listSections:
-				printerList.append("Series 1 %s" % item)
+				printerList.remove("No Printers Added")
+				printerList.append("Series 1 %s" % item)	
+				
+				
+		# Text labels
+		filenameLabel = wx.StaticText(self, -1, "Filename")
+		printerLabel = wx.StaticText(self, -1, "Printer")
 		
-		#--wxPython Text Widgets--#
-		text = wx.StaticText(panel, 26, "Upload to")
-		text.SetFont(font)
+		# Consequent text controls
+		self.filenameTextCtrl = wx.TextCtrl(self)
+		self.availPrinters = wx.ComboBox(self, choices=printerList, style=wx.CB_READONLY)
+		self.availPrinters.SetSelection(0)
+		# Option checkboxes
+		openInterfaceOption = wx.CheckBox(self, 1, "Open Interface")
+		openInterfaceOption.Bind(wx.EVT_CHECKBOX, self.OnOpenInterfaceChecked)
+		startPrintAfterUploadOption =  wx.CheckBox(self, 2, "Start Print")
+		startPrintAfterUploadOption.Bind(wx.EVT_CHECKBOX, self.StartPrint)
 
-		#--wxPython Container Widgets--#
-		self.availPrinters = wx.ListBox(panel, 10, wx.DefaultPosition, size=(200, 65), choices=printerList)
-	#	print self.availPrinters.GetCount()	
-		if self.availPrinters.GetCount() >= 1:
-			self.availPrinters.SetSelection(0)
-		self.availPrinters.SetFont(font)
-		
-		#--wxPython Image/Media Widgets--#
-		# Upload Icon
-		uploadIconPath = resources.getPathForImage('uploadIcon.png')
-		uploadIconConvert = wx.Image(uploadIconPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
-		uploadIcon = wx.StaticBitmap(panel, -1, uploadIconConvert)
+		# Send to printer button
+		self.sendToPrinterButton = wx.Button(self, -1, "Send To Printer")
+		self.sendToPrinterButton.Bind(wx.EVT_BUTTON, self.OnUpload)
+		self.sendToPrinterButton.Enable(enableUpload)
 
-		# Plus 
-		plusButtonPath = resources.getPathForImage('plus.png')
-		plusButtonImage = wx.Image(plusButtonPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
-		# Minus
-		minusButtonPath = resources.getPathForImage('minus.png')
-		minusButtonImage = wx.Image(minusButtonPath, wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+		# filename text ctrl
+		layoutGrid.Add(filenameLabel, pos=(1,2), flag=wx.ALIGN_CENTRE_VERTICAL)
+		layoutGrid.Add(self.filenameTextCtrl, pos=(1,3), span=(1,7), flag=wx.EXPAND)
 		
+		# add new printer button
+		addPrinterButton = wx.Button(self, -1, "Add Printer")
+		addPrinterButton.Bind(wx.EVT_BUTTON, lambda e: self.OnAddNew(e))
 		
-		#--wxPython Buttons--#
-		# Edit
-#		editButton = wx.BitmapButton(panel, -1, editButtonImage)
-		# Plus
-		plusButton = wx.BitmapButton(panel, -1, bitmap=plusButtonImage)
-		# Minus
-		minusButton = wx.BitmapButton(panel, -1, bitmap=minusButtonImage)
-
+		# printer combobox
+		layoutGrid.Add(printerLabel, pos=(2,2), flag=wx.ALIGN_CENTRE_VERTICAL)
+		layoutGrid.Add(self.availPrinters, pos=(2,3), span=(1,7), flag=wx.EXPAND)
 		
-		#--wxPython Button Bindings--#
-		# Edit
-#		editButton.Bind(wx.EVT_BUTTON, self.OnEdit)
-		# Plus
-		plusButton.Bind(wx.EVT_BUTTON, self.OnAddNew)
-		# Minus
-		minusButton.Bind(wx.EVT_BUTTON, self.OnRemove)
-
-		#Checkbox
+		# add all elements to layout grid
+		layoutGrid.Add(openInterfaceOption, pos=(4,7), flag=wx.EXPAND)
+		layoutGrid.Add(startPrintAfterUploadOption, pos=(5,7), flag=wx.EXPAND)
+		layoutGrid.Add(addPrinterButton, pos=(7,2))
+		layoutGrid.Add(self.sendToPrinterButton, pos=(7,8), span=(1,1), flag=wx.EXPAND)
+		layoutGrid.AddGrowableRow(7)
+		layoutGrid.AddGrowableCol(3)
 		
-		openInBrowser = wx.CheckBox(panel, -1, "Open Interface")
-		openInBrowser.SetFont(bigFont)
-		openInBrowser.Bind(wx.EVT_CHECKBOX, self.OnChecked)		
-		printAfterUpload = wx.CheckBox(panel, -1, "Start Print")
-		printAfterUpload.SetFont(bigFont)
-		printAfterUpload.Bind(wx.EVT_CHECKBOX, self.StartPrint)
+		newBox = wx.BoxSizer(wx.VERTICAL)
+		newBox.Add(layoutGrid, flag=wx.RIGHT|wx.BOTTOM, border=30)
+		self.SetSizerAndFit(newBox)
 		
-	#	filenameLabel = wx.StaticText(panel, -1, "Filename: ")
-	#	self.filenameInput = wx.TextCtrl(panel, -1, " ")
-
-		# --- Cancel and upload buttons --- #
-		self.cancel = wx.Button(panel, 1, "Cancel")
-		self.upload = wx.Button(panel, 10, "Upload")
-		self.upload.Enable(enableUpload)
+		self.filenameTextCtrl.Bind(wx.EVT_TEXT, self.onEditFilename)
+		startPrintAfterUploadOption.Bind(wx.EVT_CHECKBOX, self.StartPrint)
+		self.startPrintOnUpload = "false"
 		
-		#Font-size
-		self.cancel.SetFont(bigFont)
-		self.upload.SetFont(bigFont)
-		
-		#Binding
-		self.cancel.Bind(wx.EVT_BUTTON, self.OnCancel)
-		self.upload.Bind(wx.EVT_BUTTON, self.OnUpload)
-		wx.EVT_CLOSE(self, self.OnClose)
-		
-		#Boxes
-		mainBox = wx.BoxSizer(wx.VERTICAL)
-		topMainHBox = wx.BoxSizer(wx.HORIZONTAL)
-		iconBox = wx.BoxSizer(wx.VERTICAL)
-		printerListBox = wx.BoxSizer(wx.VERTICAL)
-		addRemoveBox = wx.BoxSizer(wx.HORIZONTAL)
-		openBrowserBox = wx.BoxSizer(wx.VERTICAL)
-		self.optionsBox = wx.BoxSizer(wx.HORIZONTAL)
-		
-		# topMainHBox - innards
-		iconBox.Add(uploadIcon)		
-		printerListBox.Add(text)
-		printerListBox.Add(self.availPrinters, flag=wx.EXPAND)
-		
-		#topMainHBox
-		topMainHBox.Add(iconBox, flag=wx.ALIGN_CENTER_VERTICAL|wx.RIGHT, border=50)
-		topMainHBox.Add(printerListBox, flag=wx.ALIGN_CENTER)
-		
-		#addRemoveBox
-		addRemoveBox.Add(minusButton)
-		addRemoveBox.Add(plusButton)
-		openBrowserBox.Add(openInBrowser, flag=wx.TOP, border=15)
-		openBrowserBox.Add(printAfterUpload, flag=wx.TOP, border=5)
-
-		#optionsBox
-		self.optionsBox.Add(self.cancel, flag=wx.RIGHT, border=50)
-		self.optionsBox.Add(self.upload, flag=wx.LEFT, border=50)
-		
-		#mainBox
-		mainBox.Add(topMainHBox, flag=wx.TOP|wx.LEFT, border=30)
-		mainBox.Add(addRemoveBox, flag=wx.ALIGN_RIGHT | wx.RIGHT, border=115)
-		mainBox.Add(openBrowserBox, flag=wx.ALIGN_CENTRE | wx.RIGHT, border=35)
-		mainBox.Add(self.optionsBox, flag=wx.ALIGN_CENTER|wx.TOP, border=30)
-		panel.SetSizer(mainBox)
-		
-		if printAfterUpload.IsChecked():
+		if startPrintAfterUploadOption.IsChecked():
 			pub.sendMessage('print.gcode', printGcode='true')
 		else:
 			pub.sendMessage('print.gcode', printGcode='false')
-		
-	def initializeOpenFileObject(self, fileStatus):
-		print "FILE STATUS: %s" % fileStatus
-		filename = fileStatus
-		self.filenameInput.AppendText(fileStatus)
-		
+	
+	def onEditFilename(self, e):
+		if self.filenameTextCtrl.GetValue() == "":
+			self.sendToPrinterButton.Enable(False)
+	
+	def initializeOpenFileObject(self, filenames):
+		if filenames:
+			gcodeFilename = str(filenames[-1]) + '.gcode'
+			cursorInsertionPoint = len(filenames[-1])
+			self.filenameTextCtrl.SetValue(gcodeFilename)
+			self.filenameTextCtrl.SetInsertionPoint(cursorInsertionPoint)
+		else:
+			self.filenameTextCtrl.SetValue("")
+			self.sendToPrinterButton.Enable(False)
+
 	def StartPrint(self, e):
 		if e.IsChecked():
 			self.startPrintOnUpload = "true"
@@ -2022,9 +2021,10 @@ class printerSelector(wx.Frame):
 			pub.sendMessage('print.gcode', printGcode="false")
 			print "Start print not checked."
 			
+
 	def enableUploadButton(self, enable):
 		print "enableUpload Function; enable: %s" % enable
-		self.upload.Enable(enable)
+		self.sendToPrinterButton.Enable(True)
 		
 	def OnEdit(self, e):
 		index = self.availPrinters.GetSelection()
@@ -2033,19 +2033,87 @@ class printerSelector(wx.Frame):
 	
 		editPrinter = EditPrinter(serial)
 		editPrinter.Show()
-		
-	#	pub.sendMessage('load.serial', serial=serialNum)
 
 	def OnUpload(self, e):
+		dictToSend = {}	
 		index = self.availPrinters.GetSelection()
 		printerString = self.availPrinters.GetString(index)
 		series, one, serial = printerString.split()
-		# this sends the selected serial number to the octoPrint setup
-		pub.sendMessage('gcode.update', serial=serial)
-
-			
-		self.Destroy()
+		validFilename = self.isFilenameValid(serial) # needs thread
+		filename = str(self.filenameTextCtrl.GetValue())
 		
+		dictToSend['serial'] = serial
+		
+		if validFilename is not None: 
+			if validFilename == False:
+				appendedFilename = self.getAppendedFilename(serial)
+				dictToSend['filename'] = appendedFilename
+			else:
+				if '.gcode' not in filename:
+					dictToSend['filename'] = filename + '.gcode'
+				else:
+					dictToSend['filename'] = filename
+				
+		
+			# this sends the selected serial number to the OctoPrint setup
+			pub.sendMessage('gcode.update', job=dictToSend)
+		self.Destroy()
+	
+	def isFilenameValid(self, serial):
+		printer = printerConnect
+		
+		if serial != None: 
+			allFiles = printer.GetAllFilesOnPrinter(serial)
+			fileToUpload = self.filenameTextCtrl.GetValue()
+			filename, ext = fileToUpload.split('.')
+			isValid = True
+
+			if allFiles != None:
+				for x in allFiles:
+					# verbatim matches the entire filename
+					# e.g., firstPrintCone.gcode
+					if fileToUpload in x:
+						isValid = False
+	
+			return isValid
+		else:
+			print "No printer selected."
+			return
+		
+	def getAppendedFilename(self, serial):	
+		copyNumbers = []
+		fileCopyList = []
+		copyFileMatch = False
+		
+		import re
+		printer = printerConnect
+	
+		allFiles = printer.GetAllFilesOnPrinter(serial)
+		fileToUpload = self.filenameTextCtrl.GetValue()
+		filename, ext = fileToUpload.split('.')
+		
+		# are there copies?
+		newFilename = filename + "_copy"
+		for x in allFiles:
+			if newFilename in x:
+				fileCopyList.append(x)
+				copyFileMatch = True
+		
+		if copyFileMatch == True and len(fileCopyList) > 0:
+			for copy in fileCopyList:
+				# searches up to 1000; unnecessarily high, but gives some assurance for 
+				# not getting numbers mixed up
+				match = re.search('([1-9][0-9]{0,2}|1000)', copy)
+				if match:
+					copyNumbers.append(match.group().encode('utf-8'))
+			
+			newFileCopyNumber = int(max(copyNumbers)) + 1
+			newName = newFilename + str(newFileCopyNumber) + ".gcode"	
+		else:
+			newName = newFilename + "1" + ".gcode"
+	
+		return newName	
+
 	def OnAddNew(self, e):
 		print("Adding new printer")
 		newPrinter = AddNewPrinter(self)
@@ -2054,29 +2122,26 @@ class printerSelector(wx.Frame):
 	def AddToPrinterList(self, serial):
 		printerList = []
 		total = self.availPrinters.GetCount()
-		
+				
 		# put items in a list if there is more than 1 printer
 		if total >= 0:
 			for x in range(0,total):
 				printerList.append(self.availPrinters.GetString(x))
-
 		printer = "Series 1 " + str(serial)
-
 		if printer in printerList:
 			return
 
-		
-
 		# if there are no items in the list or the serial isn't already in the list
 		# add it and save it
-		if len(printerList) == 0 or not printer in printerList:
+		
+		if printer not in printerList:
 			self.availPrinters.Append(printer)
 			printerIndex = self.availPrinters.FindString(printer)
 			self.availPrinters.SetSelection(printerIndex)
+			if self.availPrinters.GetString(0) == "No Printers Added":
+				self.availPrinters.Delete(0)
 				
-		if profile.printerExists(serial) is True:
-			pass
-		else:
+		if profile.printerExists(serial) is False:
 			key = profile.OctoPrintConfigAPI(serial)
 			profile.initializeOctoPrintAPIConfig(serial, key)
 			
@@ -2093,7 +2158,7 @@ class printerSelector(wx.Frame):
 			profile.OctoPrintAPIRemoveSerial(serial)
 			self.availPrinters.Delete(index)
 		
-	def OnChecked(self, e):
+	def OnOpenInterfaceChecked(self, e):
 		if e.IsChecked():
 			openBrowser = True
 		else:

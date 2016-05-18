@@ -43,9 +43,14 @@ def featureAnalytics(MS,BS,DU,DSV,featureName):
 	formData = 'entry.1519716307='+date_MS+'&entry.289194511='+date_DU+'&entry.27522520='+date_BS+'&entry.525119059='+date_DSV+'&entry.1922183683='+featureName+'&entry.534228141='+MS+'&entry.1274829210='+BS+'&entry.1268483657='+DU+'&entry.59616272='+DSV
 #	print formData
 	URL = requestURL + formData
-	resp = urllib2.urlopen(URL)
-	seperator = '\n' + '-' * 120 + '\n'
-	print seperator, "featureAnalytics Success: ", resp, seperator
+	try: 
+		resp = urllib2.urlopen(URL)
+		seperator = '\n' + '-' * 120 + '\n'
+		print seperator, "featureAnalytics Success: ", resp, seperator
+	except Exception as e:
+		print "Could not access analytics URL."
+		
+
 
 def submitAnalyticsOnSave(urls):
 	import sys, traceback, threading
