@@ -186,7 +186,6 @@ def _(n):
 setting('extrusion_width',            0.8, float, 'informational',    _('Information')).setRange(0.0).setLabel(_("*Extrusion Width (mm)"), _("Thickness of the bead that is deposited in one pass"))
 setting('shell_numbers',            0.8, float, 'informational',    _('Information')).setRange(0.0).setLabel(_("*Number Of Shells"), _("Number of shells is a function of extrusion width and shell thickness"))
 setting('infill_percentage',               12, float, 'informational',    _('Information')).setRange(0, 100).setLabel(_("*Infill (%)"), _("To change infill change infill distance."))
-setting('filament_flow',            100., float, 'informational',    _('Information')).setRange(5,300).setLabel(_("*Flow (%)"), _("Flow compensation, the amount of material extruded is multiplied by this value"))
 setting('layer_height',              0.15, float, 'basic',    _('Quality')).setRange(0.0001).setLabel(_("Layer Height (mm)"), _("Layer height in millimeters. This setting determines the quality of your print."))
 setting('wall_thickness',            0.8, float, 'basic',    _('Quality')).setRange(0.0).setLabel(_("Shell Thickness (mm)"), _("Thickness of the outside shell in the horizontal direction.\n\nThis is used in combination with the nozzle size to define the number of perimeter lines and the thickness of those perimeter lines."))
 setting('retraction_enable',        True, bool,  'basic',    _('Quality')).setExpertSubCategory(_('Retraction')).setLabel(_("Enable Retraction"), _("Retract the filament when the nozzle is moving over a non-printed area. Details about the retraction can be configured in the advanced tab."))
@@ -232,7 +231,7 @@ setting('filament_diameter2',          0, float, 'advanced',    _('Filament')).s
 setting('filament_diameter3',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter3 (mm)"), _("Diameter of your filament for the 3th nozzle. Use 0 to use the same diameter as for nozzle 1."))
 setting('filament_diameter4',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter4 (mm)"), _("Diameter of your filament for the 4th nozzle. Use 0 to use the same diameter as for nozzle 1."))
 setting('filament_diameter5',          0, float, 'advanced',    _('Filament')).setRange(0).setLabel(_("Diameter5 (mm)"), _("Diameter of your filament for the 5th nozzle. Use 0 to use the same diameter as for nozzle 1."))
-setting('filament_flow_user_editable',            100., float, 'advanced',    _('Filament')).setRange(5,300).setLabel(_("Flow (%)"), _("Flow compensation, the amount of material extruded is multiplied by this value"))
+setting('filament_flow',            100.0, float, 'advanced',    _('Filament')).setRange(5,300).setLabel(_("Flow (%)"), _("Flow compensation, the amount of material extruded is multiplied by this value"))
 setting('skirt_line_count',            1, int,   'expert', _('Skirt')).setRange(0).setLabel(_("Line Count"), _("The skirt is a line drawn around the object at the first layer. This helps to prime your extruder, and to see if the object fits on your platform.\nSetting this to 0 will disable the skirt. Multiple skirt lines can help priming your extruder better for small objects."))
 setting('skirt_gap',                 3.0, float, 'expert', _('Skirt')).setRange(0).setLabel(_("Start Distance (mm)"), _("The distance between the skirt and the first layer.\nThis is the minimal distance, multiple skirt lines will be put outwards from this distance."))
 setting('skirt_minimal_length',    150.0, float, 'expert', _('Skirt')).setRange(0).setLabel(_("Minimal Length (mm)"), _("The minimal length of the skirt, if this minimal length is not reached it will add more skirt lines to reach this minimal lenght.\nNote: If the line count is set to 0 this is ignored."))
@@ -558,8 +557,6 @@ setting('serial_port', 'AUTO', str, 'machine', 'hidden').setLabel(_("Serial port
 setting('serial_port_auto', '', str, 'machine', 'hidden')
 setting('serial_baud', 'AUTO', str, 'machine', 'hidden').setLabel(_("Baudrate"), _("Speed of the serial port communication\nNeeds to match your firmware settings\nCommon values are 250000, 115200, 57600"))
 setting('serial_baud_auto', '', int, 'machine', 'hidden')
-setting('flowrate_correction', 'True', bool, 'machine', 'hidden').setLabel(_("Flow rate correction"), _("Flow rate correction enables you to maintain tighter tolerances between mating parts.\n The correction factor converts the rectangular cross-section of the bead to a rectangle with rounded edges."))
-
 
 setting('extruder_head_size_min_x', '35', float, 'machine', 'hidden').setLabel(_("Head size towards X min (mm)"), _("The distance between left side of the print head to the nozzle."))
 setting('extruder_head_size_min_y', '55', float, 'machine', 'hidden').setLabel(_("Head size towards Y min (mm)"), _("The distance between the nozzle and right-most part of the print head."))
@@ -611,9 +608,6 @@ settingsDictionary['ooze_shield'].addCondition(lambda : int(getMachineSetting('e
 settingsDictionary['2d_infill_type'].addCondition(lambda : getProfileSetting('infill_type') == '2D')
 #Heated bed
 settingsDictionary['print_bed_temperature'].addCondition(lambda : getMachineSetting('has_heated_bed') == 'True')
-#Condition for filament flow
-settingsDictionary['filament_flow'].addCondition(lambda : getMachineSetting('flowrate_correction') == 'True')
-settingsDictionary['filament_flow_user_editable'].addCondition(lambda : getMachineSetting('flowrate_correction') == 'False')
 
 #UltiGCode uses less settings, as these settings are located inside the machine instead of gcode.
 settingsDictionary['print_temperature'].addCondition(lambda : getMachineSetting('gcode_flavor') != 'UltiGCode')

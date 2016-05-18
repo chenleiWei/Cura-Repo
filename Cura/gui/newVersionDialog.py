@@ -46,7 +46,6 @@ class newVersionDialog(wx.Dialog):
 		featuresAndEnhancements = [
 			wx.StaticText(p, -1, "* Absolute Dimensions\n\t- Specifying infill by millimeter rather than percentage"),
 			wx.StaticText(p, -1, "* 3D Cubic Structure\n\t- Delivering axis-independent interior structure"),
-			wx.StaticText(p, -1, "* Flow rate corrections\n\t- Providing more accurate results and improved tolerances"),
 			wx.StaticText(p, -1, "* New Concentric Infill pattern introduced"),
 			wx.StaticText(p, -1, "Infill Visualizer\n\t - Toggles the display of infill in-place"),
 			wx.StaticText(p, -1, "* Expert Mode side panel now displays:\n\t- Extrusion Width, Number of Shells, Infill and Flow Percentage"),
