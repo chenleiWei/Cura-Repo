@@ -16,6 +16,7 @@ import math
 SUCCESS = 0
 WARNING = 1
 ERROR   = 2
+DISABLED = 3
 
 class validFloat(object):
 	"""
@@ -31,12 +32,14 @@ class validFloat(object):
 	
 	def validate(self):
 		try:
-			f = float(eval(self.setting.getValue().replace(',','.'), {}, {}))
-			if self.minValue is not None and f < self.minValue:
-				return ERROR, 'This setting should not be below ' + str(round(self.minValue, 3))
-			if self.maxValue is not None and f > self.maxValue:
-				return ERROR, 'This setting should not be above ' + str(self.maxValue)
-			return SUCCESS, ''
+			if str(self.setting.getLabel())[0] != '*':
+				f = float(eval(self.setting.getValue().replace(',','.'), {}, {}))
+				if self.minValue is not None and f < self.minValue:
+					return ERROR, 'This setting should not be below ' + str(round(self.minValue, 3))
+				if self.maxValue is not None and f > self.maxValue:
+					return ERROR, 'This setting should not be above ' + str(self.maxValue)
+				return SUCCESS, ''
+			return DISABLED, 'Non-Editable Field'
 		except (ValueError, SyntaxError, TypeError, NameError):
 			return ERROR, '"' + str(self.setting.getValue()) + '" is not a valid number or expression'
 
@@ -141,7 +144,35 @@ class wallThicknessValidator(object):
 			lineWidth = wallThickness / lineCount
 			lineWidthAlt = wallThickness / (lineCount + 1)
 			if lineWidth >= nozzleSize * 1.5 and lineWidthAlt <= nozzleSize * 0.85:
-				return WARNING, 'Current selected wall thickness results in a line thickness of ' + str(lineWidthAlt) + 'mm which is not recommended with your nozzle of ' + str(nozzleSize) + 'mm'
+				return WARNING, 'Current selected shell thickness results in a line thickness of ' + str(lineWidthAlt) + 'mm which is not recommended with your nozzle of ' + str(nozzleSize) + 'mm'
+#			if abs((lineCount * nozzleSize) - wallThickness) > 0.01 and abs(((lineCount + 1) * nozzleSize) - wallThickness) > 0.01:
+#				return WARNING, 'Currently selected shell thickness is not a multiple of the nozzle size. While this prints fine, it does not give optimal results.'
+			return SUCCESS, ''
+		except ValueError:
+			#We already have an error by the int/float validator in this case.
+			return SUCCESS, ''
+
+class infillValidator(object):
+	"""
+	Validate if the infill pattern is not set to None.
+	"""
+	def __init__(self, setting):
+		self.setting = setting
+		self.setting._validators.append(self)
+
+	def validate(self):
+		from Cura.util import profile
+		try:
+			fill_distance = profile.getProfileSettingFloat('fill_distance')
+			infill_type = profile.getProfileSetting('infill_type')
+		#	print infill_type
+			if infill_type == 'None':
+				return 	DISABLED, 'Infill has been disabled'
+			else :
+				if profile.getProfileSettingFloat('fill_distance') < profile.calculateEdgeWidth() :
+					return 	ERROR, 'Distance between infill cannot be less than extrusion width : '+str(profile.calculateEdgeWidth())	+'mm'
+				#elif profile.getProfileSettingFloat('fill_distance') > 0:
+				#	return 	SUCCESS
 			return SUCCESS, ''
 		except ValueError:
 			#We already have an error by the int/float validator in this case.
@@ -162,17 +193,19 @@ class printSpeedValidator(object):
 		try:
 			nozzleSize = profile.getProfileSettingFloat('nozzle_size')
 			layerHeight = profile.getProfileSettingFloat('layer_height')
-			printSpeed = profile.getProfileSettingFloat('print_speed')
+			printSpeed = float(eval(self.setting.getValue().replace(',','.'), {}, {}))
+			if printSpeed == 0.0:
+				printSpeed = profile.getProfileSettingFloat('print_speed')
 			
 			printVolumePerMM = layerHeight * nozzleSize
 			printVolumePerSecond = printVolumePerMM * printSpeed
-			#Using 10mm3 per second with a 0.4mm nozzle (normal max according to Joergen Geerds)
-			maxPrintVolumePerSecond = 10 / (math.pi*(0.2*0.2)) * (math.pi*(nozzleSize/2*nozzleSize/2))
+			#Using 8mm3 per second with a 0.4mm nozzle
+			maxPrintVolumePerSecond = 8 / (math.pi*(0.2*0.2)) * (math.pi*(nozzleSize/2*nozzleSize/2))
 			
 			if printVolumePerSecond > maxPrintVolumePerSecond:
 				return WARNING, 'You are trying to print more then %.1fmm^3 of filament per second. This might cause filament slipping. (You are printing at %0.1fmm^3 per second)' % (maxPrintVolumePerSecond, printVolumePerSecond)
 			
-			return SUCCESS, ''
+			return SUCCESS, 'You are printing at %0.1fmm^3 per second' % (printVolumePerSecond)
 		except ValueError:
 			#We already have an error by the int/float validator in this case.
 			return SUCCESS, ''

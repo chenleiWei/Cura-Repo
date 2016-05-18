@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -e
+set -u
+
 # This script is to package the Cura package for Windows/Linux and Mac OS X
 # This script should run under Linux and Mac OS X, as well as Windows with Cygwin.
 
@@ -13,21 +16,38 @@ BUILD_TARGET=${1:-none}
 #BUILD_TARGET=darwin
 #BUILD_TARGET=debian_i386
 #BUILD_TARGET=debian_amd64
+#BUILD_TARGET=debian_armhf
 #BUILD_TARGET=freebsd
 
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-export BUILD_NAME=1.0.0a12
+export BUILD_NAME="1.5.0b1"
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
-WIN_PORTABLE_PY_VERSION=2.7.2.1
+WIN_PORTABLE_PY_VERSION=2.7.3.2
 
 ##Which CuraEngine to use
-if [ -z ${CURA_ENGINE_REPO} ] ; then
-	CURA_ENGINE_REPO="https://bitbucket.org/typeamachines/CuraEngine.git"
+if [ -z ${CURA_ENGINE_REPO:-} ]; then
+	CURA_ENGINE_REPO="https://Catrodigious@bitbucket.org/Catrodigious/curaengine.git"
 fi
+if [ -z ${CURA_ENGINE_REPO_PUSHURL:-} ]; then
+	CURA_ENGINE_REPO_PUSHURL="git@bitbucket.org:Catrodigious/curaengine.git"
+fi
+if [ -z ${CURA_ENGINE_BRANCH:-} ]; then
+	CURA_ENGINE_BRANCH="legacy"
+fi
+
+if [ -z ${MATERIALS_REPO:-} ]; then
+	MATERIALS_REPO="https://Catrodigious@bitbucket.org/typeamachines/material-profiles.git"
+fi
+
+if [ -z ${MATERIALS_BRANCH:-} ]; then
+	MATERIALS_BRANCH="devel"
+fi
+
+JOBS=${JOBS:-3}
 
 #############################
 # Support functions
@@ -66,30 +86,60 @@ function extract
 	fi
 }
 
+function gitClone
+{
+	echo "Cloning $1 into $3"
+	echo "  with push URL $2"
+	if [ -d $3 ]; then
+		cd $3
+		git clean -dfx
+		git reset --hard
+		git pull
+		cd -
+	else
+		if [ ! -z "${4-}" ]; then
+			git clone $1 $3 --branch $4
+		else
+			git clone $1 $3
+		fi
+		git config remote.origin.pushurl "$2"
+	fi
+}
+
 #############################
 # Actual build script
 #############################
 if [ "$BUILD_TARGET" = "none" ]; then
 	echo "You need to specify a build target with:"
 	echo "$0 win32"
-	echo "$0 debian_i368"
+	echo "$0 debian_i386"
 	echo "$0 debian_amd64"
+	echo "$0 debian_armhf"
 	echo "$0 darwin"
 	echo "$0 freebsd"
+	echo "$0 fedora                         # current   system"
+	echo "$0 fedora \"mock_config_file\" ...  # different system(s)"
 	exit 0
+fi
+
+if [ -z `which make` ]; then
+	MAKE=mingw32-make
+else
+	MAKE=make
 fi
 
 # Change working directory to the directory the script is in
 # http://stackoverflow.com/a/246128
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $SCRIPT_DIR
+cd "$SCRIPT_DIR"
 
 checkTool git "git: http://git-scm.com/"
 checkTool curl "curl: http://curl.haxx.se/"
 if [ $BUILD_TARGET = "win32" ]; then
+	checkTool avr-gcc "avr-gcc: http://winavr.sourceforge.net/ "
 	#Check if we have 7zip, needed to extract and packup a bunch of packages for windows.
 	checkTool 7z "7zip: http://www.7-zip.org/"
-	checkTool mingw32-make "mingw: http://www.mingw.org/"
+	checkTool $MAKE "mingw: http://www.mingw.org/"
 fi
 #For building under MacOS we need gnutar instead of tar
 if [ -z `which gnutar` ]; then
@@ -102,6 +152,9 @@ fi
 #############################
 # Darwin
 #############################
+function pause(){
+   read -p "$*"
+}
 
 if [ "$BUILD_TARGET" = "darwin" ]; then
     TARGET_DIR=Cura-${BUILD_NAME}-MacOS
@@ -115,35 +168,68 @@ if [ "$BUILD_TARGET" = "darwin" ]; then
 		echo "Cannot build app."
 		exit 1
 	fi
-
+	
+	# Install Python-OCC
+#	cd pythonocc-core-0.16.0
+	
+#	if [ -d "./cmake-build" ]; then
+#		cd cmake-build
+#	else
+#		mkdir cmake-build
+#		cd cmake-build
+#	fi 
+	
+#	cmake ..
+#	make
+#	make install
+#	cd ..
+	
     #Add cura version file (should read the version from the bundle with pyobjc, but will figure that out later)
-    echo $BUILD_NAME > scripts/darwin/dist/Cura.app/Contents/Resources/version
+    echo $BUILD_NAME > scripts/darwin/dist/Cura\ Type\ A.app/Contents/Resources/version
+    
+    # Add materials profiles
+	if test -d resources/quickprint/Materials; then
+		echo "resources/quickprint/Materials exist"
+		rm -rf resources/quickprint/Materials
+	fi
+	
+	mkdir resources/quickprint/Materials
+	git clone -b ${MATERIALS_BRANCH} ${MATERIALS_REPO} resources/quickprint/Materials/
+	ls resources/quickprint/Materials/
+
 	rm -rf CuraEngine
-	git clone ${CURA_ENGINE_REPO}
+	gitClone \
+	  ${CURA_ENGINE_REPO} \
+	  ${CURA_ENGINE_REPO_PUSHURL} \
+	  CuraEngine \
+	  ${CURA_ENGINE_BRANCH}
     if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
-	make -C CuraEngine VERSION=${BUILD_NAME}
+	$MAKE -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
-	cp CuraEngine/build/CuraEngine scripts/darwin/dist/Cura.app/Contents/Resources/CuraEngine
+    
+	cp CuraEngine/build/CuraEngine scripts/darwin/dist/Cura\ Type\ A.app/Contents/Resources/CuraEngine
 
 	cd scripts/darwin
 
 	# Install QuickLook plugin
-	mkdir -p dist/Cura.app/Contents/Library/QuickLook
-	cp -a STLQuickLook.qlgenerator dist/Cura.app/Contents/Library/QuickLook/
+	mkdir -p dist/Cura\ Type\ A.app/Contents/Library/QuickLook
+	cp -a STLQuickLook.qlgenerator dist/Cura\ Type\ A.app/Contents/Library/QuickLook/
 
 	# Archive app
 	cd dist
-	$TAR cfp - Cura.app | gzip --best -c > ../../../${TARGET_DIR}.tar.gz
+	$TAR cfp - Cura\ Type\ A.app | gzip --best -c > ../../../${TARGET_DIR}.tar.gz
 	cd ..
 
 	# Create sparse image for distribution
-	hdiutil detach /Volumes/Cura\ -\ Ultimaker/
+	hdiutil detach /Volumes/Cura\ Type\ A/ || true
 	rm -rf Cura.dmg.sparseimage
 	hdiutil convert DmgTemplateCompressed.dmg -format UDSP -o Cura.dmg
 	hdiutil resize -size 500m Cura.dmg.sparseimage
 	hdiutil attach Cura.dmg.sparseimage
-	cp -a dist/Cura.app /Volumes/Cura\ -\ Ultimaker/Cura/
-	hdiutil detach /Volumes/Cura\ -\ Ultimaker
+	cp -a dist/Cura\ Type\ A.app /Volumes/Cura\ Type\ A
+	open /Volumes/Cura\ Type\ A
+	pause 'Position disk image, and then press enter to continue'
+	hdiutil detach /Volumes/Cura\ Type\ A
 	hdiutil convert Cura.dmg.sparseimage -format UDZO -imagekey zlib-level=9 -ov -o ../../${TARGET_DIR}.dmg
 	exit
 fi
@@ -154,16 +240,15 @@ fi
 
 if [ "$BUILD_TARGET" = "freebsd" ]; then
 	export CXX="c++"
-	rm -rf Power
-	if [ ! -d "Power" ]; then
-		git clone https://github.com/GreatFruitOmsk/Power
-	else
-		cd Power
-		git pull
-		cd ..
-	fi
-	rm -rf CuraEngine
-	git clone ${CURA_ENGINE_REPO}
+	gitClone \
+	  https://github.com/GreatFruitOmsk/Power \
+	  git@github.com:GreatFruitOmsk/Power \
+	  Power
+	gitClone \
+	  ${CURA_ENGINE_REPO} \
+	  ${CURA_ENGINE_REPO_PUSHURL} \
+	  CuraEngine \
+	  ${CURA_ENGINE_BRANCH}
     if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
 	gmake -j4 -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
@@ -208,18 +293,19 @@ fi
 
 if [ "$BUILD_TARGET" = "debian_i386" ]; then
     export CXX="g++ -m32"
-	if [ ! -d "Power" ]; then
-		git clone https://github.com/GreatFruitOmsk/Power
-	else
-		cd Power
-		git pull
-		cd ..
-	fi
-	rm -rf CuraEngine
-	git clone ${CURA_ENGINE_REPO}
+	gitClone \
+	  https://github.com/GreatFruitOmsk/Power \
+	  git@github.com:GreatFruitOmsk/Power \
+	  Power
+	gitClone \
+	  ${CURA_ENGINE_REPO} \
+	  ${CURA_ENGINE_REPO_PUSHURL} \
+	  CuraEngine \
+	  ${CURA_ENGINE_BRANCH}
     if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
-	make -C CuraEngine VERSION=${BUILD_NAME}
+	$MAKE -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
+	sudo chown `whoami`:`whoami` scripts/linux/${BUILD_TARGET} -R
 	rm -rf scripts/linux/${BUILD_TARGET}/usr/share/cura
 	mkdir -p scripts/linux/${BUILD_TARGET}/usr/share/cura
 	cp -a Cura scripts/linux/${BUILD_TARGET}/usr/share/cura/
@@ -229,6 +315,7 @@ if [ "$BUILD_TARGET" = "debian_i386" ]; then
 	cp scripts/linux/cura.py scripts/linux/${BUILD_TARGET}/usr/share/cura/
 	cp -a Power/power scripts/linux/${BUILD_TARGET}/usr/share/cura/
 	echo $BUILD_NAME > scripts/linux/${BUILD_TARGET}/usr/share/cura/Cura/version
+	cat scripts/linux/debian_control | sed "s/\[BUILD_NAME\]/${BUILD_NAME}/" | sed 's/\[ARCH\]/i386/' > scripts/linux/${BUILD_TARGET}/DEBIAN/control
 	sudo chown root:root scripts/linux/${BUILD_TARGET} -R
 	sudo chmod 755 scripts/linux/${BUILD_TARGET}/usr -R
 	sudo chmod 755 scripts/linux/${BUILD_TARGET}/DEBIAN -R
@@ -244,18 +331,19 @@ fi
 
 if [ "$BUILD_TARGET" = "debian_amd64" ]; then
     export CXX="g++ -m64"
-	if [ ! -d "Power" ]; then
-		git clone https://github.com/GreatFruitOmsk/Power
-	else
-		cd Power
-		git pull
-		cd ..
-	fi
-	rm -rf CuraEngine
-	git clone ${CURA_ENGINE_REPO}
+	gitClone \
+	  https://github.com/GreatFruitOmsk/Power \
+	  git@github.com:GreatFruitOmsk/Power \
+	  Power
+	gitClone \
+	  ${CURA_ENGINE_REPO} \
+	  ${CURA_ENGINE_REPO_PUSHURL} \
+	  CuraEngine \
+	  ${CURA_ENGINE_BRANCH}
     if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
-	make -C CuraEngine
+	$MAKE -C CuraEngine VERSION=${BUILD_NAME}
     if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
+	sudo chown `whoami`:`whoami` scripts/linux/${BUILD_TARGET} -R
 	rm -rf scripts/linux/${BUILD_TARGET}/usr/share/cura
 	mkdir -p scripts/linux/${BUILD_TARGET}/usr/share/cura
 	cp -a Cura scripts/linux/${BUILD_TARGET}/usr/share/cura/
@@ -265,6 +353,7 @@ if [ "$BUILD_TARGET" = "debian_amd64" ]; then
 	cp scripts/linux/cura.py scripts/linux/${BUILD_TARGET}/usr/share/cura/
 	cp -a Power/power scripts/linux/${BUILD_TARGET}/usr/share/cura/
 	echo $BUILD_NAME > scripts/linux/${BUILD_TARGET}/usr/share/cura/Cura/version
+	cat scripts/linux/debian_control | sed "s/\[BUILD_NAME\]/${BUILD_NAME}/" | sed 's/\[ARCH\]/amd64/' > scripts/linux/${BUILD_TARGET}/DEBIAN/control
 	sudo chown root:root scripts/linux/${BUILD_TARGET} -R
 	sudo chmod 755 scripts/linux/${BUILD_TARGET}/usr -R
 	sudo chmod 755 scripts/linux/${BUILD_TARGET}/DEBIAN -R
@@ -272,6 +361,177 @@ if [ "$BUILD_TARGET" = "debian_amd64" ]; then
 	dpkg-deb --build ${BUILD_TARGET} $(dirname ${TARGET_DIR})/cura_${BUILD_NAME}-${BUILD_TARGET}.deb
 	sudo chown `id -un`:`id -gn` ${BUILD_TARGET} -R
 	exit
+fi
+
+#############################
+# Debian armhf .deb
+#############################
+
+if [ "$BUILD_TARGET" = "debian_armhf" ]; then
+    export CXX="g++"
+	gitClone \
+	  https://github.com/GreatFruitOmsk/Power \
+	  git@github.com:GreatFruitOmsk/Power \
+	  Power
+	gitClone \
+	  ${CURA_ENGINE_REPO} \
+	  ${CURA_ENGINE_REPO_PUSHURL} \
+	  CuraEngine \
+	  ${CURA_ENGINE_BRANCH}
+    if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
+	$MAKE -C CuraEngine VERSION=${BUILD_NAME}
+    if [ $? != 0 ]; then echo "Failed to build CuraEngine"; exit 1; fi
+	sudo chown `whoami`:`whoami` scripts/linux/${BUILD_TARGET} -R
+	rm -rf scripts/linux/${BUILD_TARGET}/usr/share/cura
+	mkdir -p scripts/linux/${BUILD_TARGET}/usr/share/cura
+	cp -a Cura scripts/linux/${BUILD_TARGET}/usr/share/cura/
+	cp -a resources scripts/linux/${BUILD_TARGET}/usr/share/cura/
+	cp -a plugins scripts/linux/${BUILD_TARGET}/usr/share/cura/
+	cp -a CuraEngine/build/CuraEngine scripts/linux/${BUILD_TARGET}/usr/share/cura/
+	cp scripts/linux/cura.py scripts/linux/${BUILD_TARGET}/usr/share/cura/
+	cp -a Power/power scripts/linux/${BUILD_TARGET}/usr/share/cura/
+	echo $BUILD_NAME > scripts/linux/${BUILD_TARGET}/usr/share/cura/Cura/version
+	cat scripts/linux/debian_control | sed "s/\[BUILD_NAME\]/${BUILD_NAME}/" | sed 's/\[ARCH\]/armhf/' > scripts/linux/${BUILD_TARGET}/DEBIAN/control
+	sudo chown root:root scripts/linux/${BUILD_TARGET} -R
+	sudo chmod 755 scripts/linux/${BUILD_TARGET}/usr -R
+	sudo chmod 755 scripts/linux/${BUILD_TARGET}/DEBIAN -R
+	cd scripts/linux
+	dpkg-deb --build ${BUILD_TARGET} $(dirname ${TARGET_DIR})/cura_${BUILD_NAME}-${BUILD_TARGET}.deb
+	sudo chown `id -un`:`id -gn` ${BUILD_TARGET} -R
+	exit
+fi
+
+#############################
+# Fedora Generic
+#############################
+
+function sanitiseVersion() {
+  local _version="$1"
+  echo "${_version//-/.}"
+}
+
+function fedoraCreateSRPM() {
+  local _curaName="$1"
+  local _version="$(sanitiseVersion "$2")"
+  local _srcSpecFile="$3"
+  local _srcSpecFileRelease="$4"
+  local _dstSrpmDir="$5"
+
+  local _dstTarSources="$HOME/rpmbuild/SOURCES/$_curaName-$_version.tar.gz"
+  local _dstSpec="$HOME/rpmbuild/SPECS/$_curaName-$_version.spec"
+
+  local _namePower="Power"
+  local _nameCuraEngine="CuraEngine"
+
+  gitClone \
+    "https://github.com/GreatFruitOmsk/Power" \
+    "git@github.com:GreatFruitOmsk/Power" \
+    "$_namePower"
+  gitClone \
+    "$CURA_ENGINE_REPO" \
+    "$CURA_ENGINE_REPO_PUSHURL" \
+    "$_nameCuraEngine"
+
+  cd "$_namePower"
+  local _gitPower="$(git rev-list -1 HEAD)"
+  cd -
+
+  cd "$_nameCuraEngine"
+  local _gitCuraEngine="$(git rev-list -1 HEAD)"
+  cd -
+
+  local _gitCura="$(git rev-list -1 HEAD)"
+
+  rpmdev-setuptree
+
+  rm -fv "$_dstTarSources"
+  tar \
+    --exclude-vcs \
+    --transform "s#^#$_curaName-$_version/#" \
+    -zcvf "$_dstTarSources" \
+      "$_nameCuraEngine" \
+      "$_namePower" \
+      Cura \
+      resources \
+      plugins \
+      scripts/linux/cura.py \
+      scripts/linux/fedora/usr
+
+  sed \
+    -e "s#__curaName__#$_curaName#" \
+    -e "s#__version__#$_version#" \
+    -e "s#__gitCura__#$_gitCura#" \
+    -e "s#__gitCuraEngine__#$_gitCuraEngine#" \
+    -e "s#__gitPower__#$_gitPower#" \
+    -e "s#__basedir__#scripts/linux/fedora#" \
+    "$_srcSpecFile" \
+    > "$_dstSpec"
+
+  rpmbuild -bs "$_dstSpec"
+
+  mkdir -pv "$_dstSrpmDir"
+  cp -v \
+    "$HOME/rpmbuild/SRPMS/$_curaName-$_version-$_srcSpecFileRelease.src.rpm" \
+    "$_dstSrpmDir"
+}
+
+function buildFedora() {
+  local _nameForRpm="Cura"
+  local _versionForRpm="$(sanitiseVersion "$BUILD_NAME")"
+
+  #
+  # SRPM
+  #
+
+  local _srcSpecFile="scripts/linux/fedora/rpm.spec"
+  local _srcSpecFileRelease="$(rpmspec -P "$_srcSpecFile" | grep -E '^Release:'|awk '{print $NF}')"
+  local _dstSrpmDir="scripts/linux/fedora/SRPMS"
+
+  fedoraCreateSRPM \
+    "$_nameForRpm" \
+    "$_versionForRpm" \
+    "$_srcSpecFile" \
+    "$_srcSpecFileRelease" \
+    "$_dstSrpmDir"
+
+  #
+  # RPM
+  #
+
+  local _srpmFile="$_dstSrpmDir/$_nameForRpm-$_versionForRpm-$_srcSpecFileRelease.src.rpm"
+  local _dstRpmDir="scripts/linux/fedora/RPMS"
+
+  while [ $# -ne 0 ]; do
+    local _mockRelease="$(basename "${1%\.cfg}")"
+    local _mockReleaseArg=""
+    if [ -n "$_mockRelease" ]; then
+      _mockReleaseArg="-r $_mockRelease"
+    fi
+
+    mkdir -pv "$_dstRpmDir/$_mockRelease"
+    mock \
+      $_mockReleaseArg \
+      --resultdir="$_dstRpmDir/$_mockRelease" \
+      "$_srpmFile"
+
+    shift 1
+  done
+}
+
+#############################
+# Fedora RPMs
+#############################
+
+if [ "$BUILD_TARGET" = "fedora" ]; then
+  shift 1 # skip "fedora" arg
+
+  if [ $# -eq 0 ]; then
+    "$0" "$BUILD_TARGET" ""
+  else
+    buildFedora "${@}"
+  fi
+
+  exit
 fi
 
 #############################
@@ -286,17 +546,51 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#Get portable python for windows and extract it. (Linux and Mac need to install python themselfs)
 	downloadURL http://ftp.nluug.nl/languages/python/portablepython/v2.7/PortablePython_${WIN_PORTABLE_PY_VERSION}.exe
 	downloadURL http://sourceforge.net/projects/pyserial/files/pyserial/2.5/pyserial-2.5.win32.exe
+	downloadURL http://sourceforge.net/projects/pubsub/files/pubsub/3.3.0/PyPubSub-3.3.0.win32.exe
+	downloadURL http://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe
 	downloadURL http://sourceforge.net/projects/pyopengl/files/PyOpenGL/3.0.1/PyOpenGL-3.0.1.win32.exe
 	downloadURL http://sourceforge.net/projects/numpy/files/NumPy/1.6.2/numpy-1.6.2-win32-superpack-python2.7.exe
 	downloadURL http://videocapture.sourceforge.net/VideoCapture-0.9-5.zip
 	#downloadURL http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-20120927-git-13f0cd6-win32-static.7z
 	downloadURL http://sourceforge.net/projects/comtypes/files/comtypes/0.6.2/comtypes-0.6.2.win32.exe
 	downloadURL http://www.uwe-sieber.de/files/ejectmedia.zip
+	#Python OCC
+#	downloadURL https://github.com/tpaviot/pythonocc-core/releases/download/0.16.0/pythonOCC-0.16.0-win32-py27.exe
+
+	#Requests
+	if test -d requests; then 
+			echo "exist"
+			rm -rf requests
+	fi 
+	
+	git clone https://github.com/kennethreitz/requests.git
+	if [ $? != 0 ]; then 
+		echo "Failed to clone requests"; exit 1; 
+	fi
+
+	#urllib3
+#	git clone https://github.com/shazow/urllib3.git
+
+    # Add materials profiles
+	if test -d resources/quickprint/Materials; then
+		echo "resources/quickprint/Materials exist"
+		rm -rf resources/quickprint/Materials
+	fi
+	
+	git clone -b ${MATERIALS_BRANCH} ${MATERIALS_REPO} resources/quickprint/Materials/
+	ls resources/quickprint/Materials/
+
+
 	#Get the power module for python
-	rm -rf Power
-	git clone https://github.com/GreatFruitOmsk/Power
-	rm -rf CuraEngine
-	git clone ${CURA_ENGINE_REPO}
+	gitClone \
+		https://github.com/GreatFruitOmsk/Power \
+		https://github.com/GreatFruitOmsk/Power \
+		Power
+    if [ $? != 0 ]; then echo "Failed to clone Power"; exit 1; fi
+	gitClone \
+	  ${CURA_ENGINE_REPO} \
+	  ${CURA_ENGINE_REPO_PUSHURL} \
+	  CuraEngine
     if [ $? != 0 ]; then echo "Failed to clone CuraEngine"; exit 1; fi
 fi
 
@@ -313,6 +607,10 @@ if [ $BUILD_TARGET = "win32" ]; then
 	extract PortablePython_${WIN_PORTABLE_PY_VERSION}.exe \$_OUTDIR/Lib/site-packages
 	extract pyserial-2.5.win32.exe PURELIB
 	extract PyOpenGL-3.0.1.win32.exe PURELIB
+	extract PyPubSub-3.3.0.win32.exe PURELIB
+	extract py2exe-0.6.9.win32-py2.7.exe PURELIB
+	#pythonOCC
+#	extract pythonOCC-0.16.0-win32-py27.exe PURELIB	
 	extract numpy-1.6.2-win32-superpack-python2.7.exe numpy-1.6.2-sse2.exe
 	extract numpy-1.6.2-sse2.exe PLATLIB
 	extract VideoCapture-0.9-5.zip VideoCapture-0.9-5/Python27/DLLs/vidcap.pyd
@@ -320,21 +618,35 @@ if [ $BUILD_TARGET = "win32" ]; then
 	#extract ffmpeg-20120927-git-13f0cd6-win32-static.7z ffmpeg-20120927-git-13f0cd6-win32-static/licenses
 	extract comtypes-0.6.2.win32.exe
 	extract ejectmedia.zip Win32
+	
+	
+	
 
 	mkdir -p ${TARGET_DIR}/python
 	mkdir -p ${TARGET_DIR}/Cura/
 	mv \$_OUTDIR/App/* ${TARGET_DIR}/python
 	mv \$_OUTDIR/Lib/site-packages/wx* ${TARGET_DIR}/python/Lib/site-packages/
+
+
 	mv PURELIB/serial ${TARGET_DIR}/python/Lib
 	mv PURELIB/OpenGL ${TARGET_DIR}/python/Lib
+	mv PURELIB/PubSub ${TARGET_DIR}/python/Lib
+	#pythonOCC
+#	mv PURELIB/pythonOCC ${TARGET_DIR}/python/Lib
 	mv PURELIB/comtypes ${TARGET_DIR}/python/Lib
 	mv PLATLIB/numpy ${TARGET_DIR}/python/Lib
 	mv Power/power ${TARGET_DIR}/python/Lib
+	mv requests/requests ${TARGET_DIR}/python/Lib
+#	mv urllib3/urllib3 ${TARGET_DIR}/python/Lib
 	mv VideoCapture-0.9-5/Python27/DLLs/vidcap.pyd ${TARGET_DIR}/python/DLLs
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/bin/ffmpeg.exe ${TARGET_DIR}/Cura/
 	#mv ffmpeg-20120927-git-13f0cd6-win32-static/licenses ${TARGET_DIR}/Cura/ffmpeg-licenses/
 	mv Win32/EjectMedia.exe ${TARGET_DIR}/Cura/
 	
+	# replace email init
+	rm -rf ${TARGET_DIR}/python/Lib/email/__init__.py
+	cp __init__.py ${TARGET_DIR}/python/Lib/email/__init__.py
+
 	rm -rf Power/
 	rm -rf \$_OUTDIR
 	rm -rf PURELIB
@@ -375,6 +687,8 @@ if [ $BUILD_TARGET = "win32" ]; then
 else
     cp -a scripts/${BUILD_TARGET}/*.sh $TARGET_DIR/
 fi
+
+echo "location is: ", $TARGET_DIR
 
 #package the result
 if (( ${ARCHIVE_FOR_DISTRIBUTION} )); then

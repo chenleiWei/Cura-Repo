@@ -1,6 +1,7 @@
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2016 David Braam and Cat Casuat - Released under terms of the AGPLv3 License"
 
 import wx
+import os
 
 from Cura.gui import configWizard
 from Cura.gui import configBase
@@ -11,7 +12,7 @@ from Cura.util import resources
 
 class preferencesDialog(wx.Dialog):
 	def __init__(self, parent):
-		super(preferencesDialog, self).__init__(None, title="Preferences")
+		super(preferencesDialog, self).__init__(None, title=_("Preferences"))
 
 		wx.EVT_CLOSE(self, self.OnClose)
 
@@ -45,25 +46,32 @@ class preferencesDialog(wx.Dialog):
 		#configBase.TitleRow(right, 'Slicer settings')
 		#configBase.SettingRow(right, 'save_profile')
 
-		#configBase.TitleRow(right, 'SD Card settings')
+	#	configBase.TitleRow(right, 'SD Card settings')
+	#	configBase.SettingRow(right, 'auto_detect_sd')
+	#	configBase.SettingRow(right, 'sdcard_rootfolder')
+		#same as the expert settings button.
+#		self.browseButton = wx.Button(right, -1, '...', style=wx.BU_EXACTFIT)
+#		self.browseButton.SetFont(wx.Font(wx.SystemSettings.GetFont(wx.SYS_ANSI_VAR_FONT).GetPointSize() * 0.8, wx.FONTFAMILY_DEFAULT, wx.NORMAL, wx.FONTWEIGHT_NORMAL))
+#		self.browseButton.Bind(wx.EVT_BUTTON, self.OnBrowseSDRootFolder)
+#		right.GetSizer().Add(self.browseButton, (right.GetSizer().GetRows()-1, 2), flag=wx.ALIGN_CENTER_VERTICAL)
 
 		configBase.TitleRow(right, _("Cura settings"))
-		configBase.SettingRow(right, 'auto_detect_sd')
+		configBase.SettingRow(right, 'check_for_updates')
+		configBase.SettingRow(right, 'submit_slice_information')
 
-		self.okButton = wx.Button(right, -1, 'Ok')
+		self.okButton = wx.Button(right, -1, 'OK')
 		right.GetSizer().Add(self.okButton, (right.GetSizer().GetRows(), 0), flag=wx.BOTTOM, border=5)
-		self.okButton.Bind(wx.EVT_BUTTON, lambda e: self.Close())
+		self.okButton.Bind(wx.EVT_BUTTON, lambda e: self.OnClose(e))
 
 		main.Fit()
 		self.Fit()
 
 	def OnClose(self, e):
-		#self.parent.reloadSettingPanels()
 		self.Destroy()
 
 class machineSettingsDialog(wx.Dialog):
 	def __init__(self, parent):
-		super(machineSettingsDialog, self).__init__(None, title="Machine settings")
+		super(machineSettingsDialog, self).__init__(None, title=_("Machine settings"))
 
 		wx.EVT_CLOSE(self, self.OnClose)
 
@@ -114,19 +122,19 @@ class machineSettingsDialog(wx.Dialog):
 		self.panel.GetSizer().Add(self.buttonPanel)
 
 		self.buttonPanel.SetSizer(wx.BoxSizer(wx.HORIZONTAL))
-		self.okButton = wx.Button(self.buttonPanel, -1, 'Ok')
+		self.okButton = wx.Button(self.buttonPanel, -1, _('Ok'))
 		self.okButton.Bind(wx.EVT_BUTTON, lambda e: self.Close())
 		self.buttonPanel.GetSizer().Add(self.okButton, flag=wx.ALL, border=5)
 
-		self.addButton = wx.Button(self.buttonPanel, -1, 'Add new machine')
+		self.addButton = wx.Button(self.buttonPanel, -1, _('Add new machine'))
 		self.addButton.Bind(wx.EVT_BUTTON, self.OnAddMachine)
 		self.buttonPanel.GetSizer().Add(self.addButton, flag=wx.ALL, border=5)
 
-		self.remButton = wx.Button(self.buttonPanel, -1, 'Remove machine')
+		self.remButton = wx.Button(self.buttonPanel, -1, _('Remove machine'))
 		self.remButton.Bind(wx.EVT_BUTTON, self.OnRemoveMachine)
 		self.buttonPanel.GetSizer().Add(self.remButton, flag=wx.ALL, border=5)
 
-		self.renButton = wx.Button(self.buttonPanel, -1, 'Change machine name')
+		self.renButton = wx.Button(self.buttonPanel, -1, _('Change machine name'))
 		self.renButton.Bind(wx.EVT_BUTTON, self.OnRenameMachine)
 		self.buttonPanel.GetSizer().Add(self.renButton, flag=wx.ALL, border=5)
 
@@ -136,8 +144,7 @@ class machineSettingsDialog(wx.Dialog):
 	def OnAddMachine(self, e):
 		self.Hide()
 		self.parent.Hide()
-		profile.setActiveMachine(profile.getMachineCount())
-		configWizard.configWizard(True)
+		configWizard.ConfigWizard(True)
 		self.parent.Show()
 		self.parent.reloadSettingPanels()
 		self.parent.updateMachineMenu()
@@ -146,7 +153,7 @@ class machineSettingsDialog(wx.Dialog):
 		prefDialog.Centre()
 		prefDialog.Show()
 		wx.CallAfter(self.Close)
-
+		
 	def OnRemoveMachine(self, e):
 		if profile.getMachineCount() < 2:
 			wx.MessageBox(_("Cannot remove the last machine configuration in Cura"), _("Machine remove error"), wx.OK | wx.ICON_ERROR)
@@ -170,6 +177,11 @@ class machineSettingsDialog(wx.Dialog):
 		profile.putMachineSetting('machine_name', dialog.GetValue(), self.nb.GetSelection())
 		self.parent.updateMachineMenu()
 
-	def OnClose(self, e):
-		self.parent.reloadSettingPanels()
+	def OnClose(self, e):		
 		self.Destroy()
+		wx.CallAfter(self.updateProfile)
+
+	def updateProfile(self):
+		profile.setHeatedBedGCode()
+		self.parent.updateProfileToAllControls()
+		self.parent.reloadSettingPanels()

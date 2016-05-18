@@ -253,13 +253,13 @@ class glGuiPanel(glcanvas.GLCanvas):
 	def _drawGui(self):
 		if self._glButtonsTexture is None:
 			self._glButtonsTexture = openglHelpers.loadGLTexture('glButtons.png')
-			self._glRobotTexture = openglHelpers.loadGLTexture('UltimakerRobot.png')
+	#		self._glRobotTexture = openglHelpers.loadGLTexture('UltimakerRobot.png')
 
 		glDisable(GL_DEPTH_TEST)
 		glEnable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 		glDisable(GL_LIGHTING)
-		glColor4ub(255,255,255,255)
+		glColor4ub(0,0,0,0)
 
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
@@ -421,6 +421,10 @@ class glButton(glGuiControl):
 
 	def setHidden(self, value):
 		self._hidden = value
+		
+	def isDisabled(self):
+		print self._disabled
+		return self._disabled
 
 	def setDisabled(self, value):
 		self._disabled = value
@@ -441,6 +445,9 @@ class glButton(glGuiControl):
 		if self._hidden:
 			return 0, 0
 		if self._buttonSize is not None:
+			if self._buttonSize > 0 and self._buttonSize < 1:
+				return self._base._buttonSize * self._buttonSize, self._base._buttonSize * self._buttonSize
+
 			return self._buttonSize, self._buttonSize
 		return self._base._buttonSize, self._base._buttonSize
 
@@ -501,13 +508,14 @@ class glButton(glGuiControl):
 			openglHelpers.glDrawQuad(pos[0]-bs/2, pos[1]+bs/2, bs, bs / 4)
 			glColor4ub(255,255,255,255)
 			openglHelpers.glDrawQuad(pos[0]-bs/2+2, pos[1]+bs/2+2, (bs - 5) * progress + 1, bs / 4 - 4)
-		elif len(self._altTooltip) > 0:
+		if len(self._altTooltip) > 0:
 			glPushMatrix()
 			glTranslatef(pos[0], pos[1], 0)
 			glTranslatef(0, 0.6*bs, 0)
 			glTranslatef(0, 6, 0)
 			#glTranslatef(0.6*bs*scale, 0, 0)
-
+			if progress is not None:
+				glTranslatef(0, bs/4+4, 0) #shifts text to the bottom if progress bar is active
 			for line in self._altTooltip.split('\n'):
 				glPushMatrix()
 				glColor4ub(60,60,60,255)
@@ -711,8 +719,8 @@ class glNotification(glFrame):
 		super(glNotification, self).__init__(parent, pos)
 		glGuiLayoutGrid(self)._alignBottom = False
 		self._label = glLabel(self, "Notification", (0, 0))
-		self._buttonExtra = glButton(self, 31, "???", (1, 0), self.onExtraButton, 25)
-		self._button = glButton(self, 30, "", (2, 0), self.onClose, 25)
+		self._buttonExtra = glButton(self, 31, "???", (1, 0), self.onExtraButton, 40)
+		self._button = glButton(self, 30, "", (2, 0), self.onClose, 40)
 		self._padding = glLabel(self, "", (0, 1))
 		self.setHidden(True)
 
@@ -720,17 +728,16 @@ class glNotification(glFrame):
 		w, h = self._layout.getLayoutSize()
 		baseSize = self._base.GetSizeTuple()
 		if self._anim is not None:
-			super(glNotification, self).setSize(baseSize[0] / 2 - w / 2, baseSize[1] - self._anim.getPosition() - self._base._buttonSize * 0.2, 1, 1)
+			super(glNotification, self).setSize(baseSize[0] / 2 - w / 2, baseSize[1] - self._anim.getPosition() - self._base._buttonSize * 0.5, 1, 1)
 		else:
 			super(glNotification, self).setSize(baseSize[0] / 2 - w / 2, baseSize[1] - self._base._buttonSize * 0.2, 1, 1)
-
 	def draw(self):
 		self.setSize(0,0,0,0)
 		self.updateLayout()
 		super(glNotification, self).draw()
 
 	def message(self, text, extraButtonCallback = None, extraButtonIcon = None, extraButtonTooltip = None):
-		self._anim = animation(self._base, -20, 25, 1)
+		self._anim = animation(self._base, -20, 40, 1)
 		self.setHidden(False)
 		self._label.setLabel(text)
 		self._buttonExtra.setHidden(extraButtonCallback is None)
@@ -785,7 +792,7 @@ class glLabel(glGuiControl):
 #		glEnd()
 
 		glTranslate(5, h - 5, 0)
-		glColor4ub(255,255,255,255)
+		glColor4ub(0,0,0, 255)
 		openglHelpers.glDrawStringLeft(self._label)
 		glPopMatrix()
 
@@ -803,7 +810,7 @@ class glNumberCtrl(glGuiControl):
 		self._callback = callback
 		self._value = str(value)
 		self._selectPos = 0
-		self._maxLen = 6
+		self._maxLen = 7
 		self._inCallback = False
 		super(glNumberCtrl, self).__init__(parent, pos)
 
