@@ -28,7 +28,7 @@ from Cura.gui import materialProfileSelector
 
 class mainWindow(wx.Frame):
 	def __init__(self):
-		super(mainWindow, self).__init__(None, title='Cura - ' + version.getVersion())
+		super(mainWindow, self).__init__(None, title='Cura Type A - ' + version.getVersion())
 		wx.EVT_CLOSE(self, self.OnClose)
 		
 		# allow dropping any file, restrict later
