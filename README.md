@@ -1,25 +1,23 @@
-Cura
-====
+Cura Type A
+===========
 
-Read this, it's important!
-===========================
+This is the code for the fork of Cura specialized for the Series 1 3D printer from [Type A Machines](https://www.typeamachines.com/).
 
-If you are reading this, then you are looking at the *development* version of Cura. If you just want to use Cura, take a look at the following location: https://daid.github.com/Cura
+For the upstream project, see [https://github.com/daid/Cura/](https://github.com/daid/Cura/).
 
 Development
 ===========
 
 Cura is developed in Python with a C++ engine. The part you are looking at right now is the Python GUI.
-The C++ engine is responsible for generating the actual toolpath. For development of the engine check out https://github.com/Ultimaker/CuraEngine
+The C++ engine is responsible for generating the actual toolpath. There is a Type A fork of the [engine](https://bitbucket.org/typeamachines/curaengine). For upstream development of the engine check out https://github.com/Ultimaker/CuraEngine
 
 Issues
 ===========
 
-Before posting issues (either Bugs, Feature requests or Requests for information) please read our policies carefully. These will be regulary updated and can be found at https://github.com/daid/Cura/wiki/Issue-policies
-
+Type A Machines provides a Cura [community forum](http://forum.typeamachines.com/viewforum.php?f=16), [knowledge base](http://support.typeamachines.com/), and a [customer support](http://support.typeamachines.com/hc/en-us/requests/new) page. Please do not direct bug reports for this fork to the upstream project.
 
 Packaging
----------
+=========
 
 Cura development comes with a script "package.sh", this script has been designed to run under *nix OSes (Linux, MacOS, FreeBSD). For Windows the package.sh script can be run from bash using git.
 The "package.sh" script generates a final release package. You should not need it during development, unless you are changing the release process. If you want to distribute your own version of Cura, then the package.sh script will allow you to do that.
