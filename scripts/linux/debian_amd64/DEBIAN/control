@@ -1,0 +1,16 @@
+Package: cura-type-a
+Version: 1.5.0b0
+Section: misc
+Priority: optional
+Architecture: amd64
+Essential: no
+Depends: python-wxgtk2.8, python-opengl, python-serial, python-numpy
+Maintainer: Type A Machines <support@typeamachines.com>
+Provides: cura-type-a
+Installed-Size: 10000
+Description: Cura is a single software solution for 3D printing.
+ This version of Cura has been optimized to work with Type A Machines Series 1 3D printers. 
+ Cura was originally created by daid<daid303@gmail.com> for Ultimaker 3D printers.
+ .
+ Type A Machines documentation and downloads can be found at http://bitbucket.org/typeamachines/cura
+Homepage: <http://typeamachines.com>
