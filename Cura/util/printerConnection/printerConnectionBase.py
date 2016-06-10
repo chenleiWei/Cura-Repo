@@ -2,7 +2,7 @@
 Base of all printer connections. A printer connection is a way a connection can be made with a printer.
 The connections are based on a group, where each group can have 1 or more connections.
 """
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License”
 
 import traceback
 

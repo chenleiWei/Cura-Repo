@@ -5,7 +5,7 @@ The ISP AVR programmer can load firmware into AVR chips. Which are commonly used
  Needs to be subclassed to support different programmers.
  Currently only the stk500v2 subclass exists.
 """
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License”
 
 import chipDB
 

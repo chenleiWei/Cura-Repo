@@ -2,7 +2,7 @@
 The serial/USB printer connection. Uses a 2nd python process to connect to the printer so we never
 have locking problems where other threads in python can block the USB printing.
 """
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License”
 
 import threading
 import time

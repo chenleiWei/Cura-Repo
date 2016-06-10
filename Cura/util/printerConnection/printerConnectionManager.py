@@ -5,7 +5,7 @@ It sorts them by priority and gives easy access to the first available connectio
 This is used by the print/save button to give access to the first available print connection.
 As well as listing all printers under the right mouse button.
 """
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License”
 
 from Cura.util import profile
 from Cura.util import version

@@ -2,7 +2,7 @@
 The GCodeInterpreter module generates layer information from GCode.
 It does this by parsing the whole GCode file. On large files this can take a while and should be used from a thread.
 """
-__copyright__ = "Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License”
 
 import sys
 import math
