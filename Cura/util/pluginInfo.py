@@ -2,7 +2,7 @@
 The plugin module contains information about the plugins found for Cura.
 It keeps track of a list of installed plugins and the information contained within.
 """
-__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License”
+__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License"
 
 import os
 import sys

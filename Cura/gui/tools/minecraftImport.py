@@ -2,7 +2,7 @@
 Tool to import sections of minecraft levels into Cura.
 This makes use of the pymclevel module from David Rio Vierra
 """
-__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License”
+__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License"
 
 import wx
 import glob

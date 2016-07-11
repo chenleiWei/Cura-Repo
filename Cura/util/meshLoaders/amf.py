@@ -5,7 +5,7 @@ Many of the features found in AMF are currently not yet support in Cura. Most im
 
 http://en.wikipedia.org/wiki/Additive_Manufacturing_File_Format
 """
-__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License”
+__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License"
 
 import cStringIO as StringIO
 import zipfile

@@ -3,7 +3,7 @@ The profile module contains all the settings for Cura.
 These settings can be globally accessed and modified.
 """
 from __future__ import division
-__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License”
+__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License"
 
 import os
 import traceback

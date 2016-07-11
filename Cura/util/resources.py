@@ -3,7 +3,7 @@
 Helper module to get easy access to the path where resources are stored.
 This is because the resource location is depended on the packaging method and OS
 """
-__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License”
+__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License"
 
 import os
 import sys

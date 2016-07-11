@@ -5,7 +5,7 @@ Only vertex information is read from the OBJ file, information about textures an
 
 http://en.wikipedia.org/wiki/Wavefront_.obj_file
 """
-__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License”
+__copyright__ = "Copyright (C) 2013 David Braam Released under terms of the AGPLv3 License; additional contributions Copyright (C) 2016 Type A Machines released under terms of the AGPLv3 License"
 
 import os
 from Cura.util import printableObject
