@@ -18,7 +18,6 @@ from Cura.gui import simpleMode
 from Cura.gui import sceneView
 from Cura.gui import aboutWindow
 from Cura.gui.util import dropTarget
-from Cura.gui.tools import pidDebugger
 from Cura.gui.tools import minecraftImport
 from Cura.util import profile
 from Cura.util import version
@@ -137,9 +136,7 @@ class mainWindow(wx.Frame):
 			i = toolsMenu.Append(-1, _("Minecraft map import..."))
 			self.Bind(wx.EVT_MENU, self.OnMinecraftImport, i)
 
-		if version.isDevVersion():
-			i = toolsMenu.Append(-1, _("PID Debugger..."))
-			self.Bind(wx.EVT_MENU, self.OnPIDDebugger, i)
+#		if version.isDevVersion():
 #			i = toolsMenu.Append(-1, _("Auto Firmware Update..."))
 #			self.Bind(wx.EVT_MENU, self.OnAutoFirmwareUpdate, i)
 
@@ -689,11 +686,6 @@ class mainWindow(wx.Frame):
 		mi = minecraftImport.minecraftImportWindow(self)
 		mi.Centre()
 		mi.Show(True)
-
-	def OnPIDDebugger(self, e):
-		debugger = pidDebugger.debuggerWindow(self)
-		debugger.Centre()
-		debugger.Show(True)
 
 	def OnAutoFirmwareUpdate(self, e):
 		dlg=wx.FileDialog(self, _("Open Firmware to Upload"), os.path.split(profile.getPreference('lastFile'))[0], style=wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)

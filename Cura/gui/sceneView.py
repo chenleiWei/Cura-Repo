@@ -40,7 +40,6 @@ from Cura.util import sliceEngine
 from Cura.util import pluginInfo
 from Cura.util import removableStorage
 from Cura.util import explorer
-from Cura.util.printerConnection import printerConnectionManager
 from Cura.gui.util import previewTools
 from Cura.gui.util import openglHelpers
 from Cura.gui.util import openglGui
@@ -75,8 +74,7 @@ class SceneView(openglGui.glGuiPanel):
 		self.layerSelect = openglGui.glSlider(self, 1, 1, 305, (-1,-2), lambda : self.QueueRefresh())
 		self.layerSelectCondition = False
 		
-		self._printerConnectionManager = printerConnectionManager.PrinterConnectionManager()
-		
+
 		self.printGcode = "false"
 		self.openBrowser = False
 		self.gcodePath = None
@@ -410,65 +408,13 @@ class SceneView(openglGui.glGuiPanel):
 		mainWindow = self.GetParent().GetParent().GetParent()
 	
 		if button == 1:
-			connectionGroup = self._printerConnectionManager.getAvailableGroup()
-			"""
-			if len(removableStorage.getPossibleSDcardDrives()) > 0 and (connectionGroup is None or connectionGroup.getPriority() < 0):
-				drives = removableStorage.getPossibleSDcardDrives() 
-				if len(drives) > 1:
-					dlg = wx.SingleChoiceDialog(self, "Select SD drive", "Multiple removable drives have been found,\nplease select your SD card drive", map(lambda n: n[0], drives))
-					if dlg.ShowModal() != wx.ID_OK:
-						dlg.Destroy()
-						return
-					drive = drives[dlg.GetSelection()]
-					dlg.Destroy()
-				else:
-					drive = drives[0]
-				filename = self._scene._objectList[0].getName() + profile.getGCodeExtension()
-				
-				#check if the file is part of the root folder. If so, create folders on sd card to get the same folder hierarchy.
-				repDir = profile.getPreference("sdcard_rootfolder")
-				try:
-					if os.path.exists(repDir) and os.path.isdir(repDir):
-						repDir = os.path.abspath(repDir)
-						originFilename = os.path.abspath( self._scene._objectList[0].getOriginFilename() )
-						if os.path.dirname(originFilename).startswith(repDir):
-							new_filename = os.path.splitext(originFilename[len(repDir):])[0] + profile.getGCodeExtension()
-							sdPath = os.path.dirname(os.path.join(drive[1], new_filename))
-							if not os.path.exists(sdPath):
-								print "Creating replication directory:", sdPath
-								os.makedirs(sdPath)
-							filename = new_filename
-				except:
-					pass
-
-				threading.Thread(target=self._saveGCode,args=(drive[1] + filename, drive[1])).start()
-			elif connectionGroup is not None:
-				connections = connectionGroup.getAvailableConnections()
-				if len(connections) < 2:
-					connection = connections[0]
-				else:
-					dlg = wx.SingleChoiceDialog(self, "Select the %s connection to use" % (connectionGroup.getName()), "Multiple %s connections found" % (connectionGroup.getName()), map(lambda n: n.getName(), connections))
-					if dlg.ShowModal() != wx.ID_OK:
-						dlg.Destroy()
-						return
-					connection = connections[dlg.GetSelection()]
-					dlg.Destroy()
-				self._openPrintWindowForConnection(connection)
-			else:
-			"""
 			self.showSaveGCode()
 		if button == 2:
 			self.OnOctoPrintButton(True)
 		if button == 3:
 			menu = wx.Menu()
-			connections = self._printerConnectionManager.getAvailableConnections()
 			menu.connectionMap = {}
-			"""
-			for connection in connections:
-				i = menu.Append(-1, _("Print with %s") % (connection.getName()))
-				menu.connectionMap[i.GetId()] = connection
-				self.Bind(wx.EVT_MENU, lambda e: self._openPrintWindowForConnection(e.GetEventObject().connectionMap[e.GetId()]), i)
-			"""
+			
 			self.Bind(wx.EVT_MENU, lambda e: self.showSaveGCode(), menu.Append(-1, _("Save GCode...")))
 			self.Bind(wx.EVT_MENU, lambda e: self._showEngineLog(), menu.Append(-1, _("Slice engine log...")))
 			self.PopupMenu(menu)
@@ -1241,7 +1187,6 @@ class SceneView(openglGui.glGuiPanel):
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)
 
 	def OnPaint(self,e):
-		connectionGroup = self._printerConnectionManager.getAvailableGroup()
 		"""
 		if len(removableStorage.getPossibleSDcardDrives()) > 0 and (connectionGroup is None or connectionGroup.getPriority() < 0):
 			self.printButton._imageID = 2

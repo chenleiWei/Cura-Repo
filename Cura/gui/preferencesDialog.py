@@ -5,7 +5,6 @@ import os
 
 from Cura.gui import configWizard
 from Cura.gui import configBase
-from Cura.util import machineCom
 from Cura.util import profile
 from Cura.util import pluginInfo
 from Cura.util import resources
@@ -109,10 +108,6 @@ class machineSettingsDialog(wx.Dialog):
 				configBase.TitleRow(left, _("Extruder %d") % (i+1))
 				configBase.SettingRow(left, 'extruder_offset_x%d' % (i), index=idx)
 				configBase.SettingRow(left, 'extruder_offset_y%d' % (i), index=idx)
-
-			configBase.TitleRow(right, _("Communication settings"))
-			configBase.SettingRow(right, 'serial_port', ['AUTO'] + machineCom.serialList(), index=idx)
-			configBase.SettingRow(right, 'serial_baud', ['AUTO'] + map(str, machineCom.baudrateList()), index=idx)
 
 			self.nb.AddPage(main, profile.getMachineSetting('machine_name', idx).title())
 

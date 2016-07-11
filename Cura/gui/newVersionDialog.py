@@ -2,14 +2,8 @@ __copyright__ = "Copyright (C) 2016 David Braam and Cat Casuat (Cura Type A)- Re
 
 import wx
 import wx.lib.agw.hyperlink as hl
-from Cura.gui import firmwareInstall
 from Cura.util import version
 from Cura.util import profile
-
-
-
-
-
 
 class newVersionDialog(wx.Dialog):
 	def __init__(self):
@@ -133,12 +127,6 @@ class newVersionDialog(wx.Dialog):
 		for update in materialUpdates:
 			update.SetFont(textFont)
 			s.Add(update, flag=wx.TOP | wx.LEFT, border=5)
-		
-	def OnUltimakerFirmware(self, e):
-		firmwareInstall.InstallFirmware(machineIndex=self.hasUltimaker)
-
-	def OnUltimaker2Firmware(self, e):
-		firmwareInstall.InstallFirmware(machineIndex=self.hasUltimaker2)
 
 	def OnOk(self, e):
 		self.Close()

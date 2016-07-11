@@ -16,9 +16,7 @@ try:
 except ImportError:
     from StringIO import StringIO as BytesIO
 
-from Cura.gui import firmwareInstall
 from Cura.gui import printWindow
-from Cura.util import machineCom
 from Cura.util import profile
 from Cura.util import gcodeGenerator
 from Cura.util import resources
